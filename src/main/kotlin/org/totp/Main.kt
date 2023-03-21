@@ -12,6 +12,7 @@ import org.http4k.core.then
 import org.http4k.core.with
 import org.http4k.events.AutoMarshallingEvents
 import org.http4k.events.EventFilters
+import org.http4k.events.HttpEvent
 import org.http4k.events.then
 import org.http4k.filter.DebuggingFilters
 import org.http4k.filter.ResponseFilters
@@ -32,8 +33,8 @@ import org.http4k.template.viewModel
 import org.totp.pages.ConstituencyPageHandler
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.Http4kTransaction
-import org.totp.pages.IncomingHttpRequest
 import org.totp.pages.NoOp
+import org.totp.pages.ServerStartedEvent
 import org.totp.pages.SitemeshFilter
 import java.time.Clock
 
@@ -87,6 +88,7 @@ object InternalRoutes {
     }
 }
 
+
 fun main() {
     val clock = Clock.systemUTC()
     val debug = false
@@ -94,14 +96,12 @@ fun main() {
     val events =
         EventFilters.AddTimestamp(clock)
             .then(EventFilters.AddEventName())
-            .then(EventFilters.AddZipkinTraces())
-            .then(EventFilters.AddServiceName("service-name-here"))
             .then(AutoMarshallingEvents(Jackson))
 
     val inboundFilters = (if (debug) DebuggingFilters.PrintRequestAndResponse(debugStream = true) else NoOp())
         .then(ServerFilters.RequestTracing())
         .then(ResponseFilters.ReportHttpTransaction {
-            events(IncomingHttpRequest(it.request.uri, it.response.status.code, it.duration.toMillis()))
+            events(HttpEvent.Incoming(it))
         })
         .then(ServerFilters.CatchAll())
 
@@ -112,17 +112,19 @@ fun main() {
     )
 
     val server = Undertow().toServer(
-        inboundFilters.then(
-            routes(
-                "/constituency/{constituency}" bind sitemesh.then(ConstituencyPageHandler()),
-                "/assets" bind static(ResourceLoader.Directory("src/main/resources/assets"))
-            )
+        routes(
+            "" bind inboundFilters.then(sitemesh).then(
+                routes(
+                    "/constituency/{constituency}" bind ConstituencyPageHandler()
+                )
+            ),
+            "/assets" bind static(ResourceLoader.Directory("src/main/resources/assets"))
         )
     )
 
     server.start()
 
-    print("Server started at ${Uri.of("http://localhost:" + server.port())}")
+    events(ServerStartedEvent(Uri.of("http://localhost:" + server.port())))
 
     server.block()
 }
