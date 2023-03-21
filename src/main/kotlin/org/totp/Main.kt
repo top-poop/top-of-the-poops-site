@@ -16,13 +16,13 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.routing.static
 import org.http4k.server.Undertow
+import org.totp.model.data.csoSummaries
 import org.totp.pages.ConstituencyPageHandler
 import org.totp.pages.Decorators
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.NoOp
 import org.totp.pages.ServerStartedEvent
 import org.totp.pages.SitemeshFilter
-import org.totp.pages.csoSummaries
 import org.totp.pages.httpHandlerDecoratorSelector
 import java.nio.file.Path
 import java.time.Clock
