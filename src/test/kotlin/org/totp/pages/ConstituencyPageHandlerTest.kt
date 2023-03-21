@@ -1,9 +1,12 @@
 package org.totp.pages
 
+import com.github.jknack.handlebars.Handlebars
+import com.github.jknack.handlebars.io.StringTemplateSource
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
+import org.http4k.core.Uri
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.strikt.header
@@ -16,9 +19,11 @@ import org.totp.model.data.ConstituencyCSOs
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
+import strikt.api.expectCatching
 import strikt.api.expectThat
 import strikt.assertions.get
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFailure
 import strikt.assertions.size
 import java.time.Duration
 
@@ -99,5 +104,32 @@ class ConstituencyPageHandlerTest {
         val handler = routes("/aberavon.json" bind { _: Request -> Response(Status.OK).body("hi") })
         val boundaries = ConstituencyBoundaries(handler)
         expectThat(boundaries(ConstituencyName("Aberavon"))).isEqualTo(GeoJSON("hi"))
+    }
+
+
+    @Test
+    fun `handlebars functions`() {
+        val handlebars = Handlebars().let(handlebarsConfiguration())
+
+        expectThat(
+            handlebars
+                .compile(StringTemplateSource("blerg", "{{concat 'a' 'b' 'c'}}"))
+                .apply(Object())
+        )
+            .isEqualTo("abc")
+
+        expectThat(
+            handlebars
+                .compile(StringTemplateSource("blerg", "{{urlencode value}}"))
+                .apply(mapOf("value" to Uri.of("https://host?param1=value1&param2")))
+        )
+            .isEqualTo("https%3A%2F%2Fhost%3Fparam1%3Dvalue1%26param2")
+
+        expectCatching {
+            handlebars
+                .compile(StringTemplateSource("blerg", "{{ invalid }}"))
+                .apply(Object())
+        }.isFailure()
+
     }
 }

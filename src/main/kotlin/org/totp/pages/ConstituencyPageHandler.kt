@@ -44,10 +44,12 @@ fun handlebarsConfiguration(): (Handlebars) -> Handlebars = {
         }
         StringHelpers.register(it)
         it.registerHelper("urlencode") { context: Any, _: Options -> context.toString().urlEncoded() }
+        it.registerHelper("concat") { context: Any, options -> (listOf(context) + options.params).joinToString("")}
     }
 }
 
 data class ConstituencySummary(
+    val year: Int,
     val locationCount: Int,
     val companies: List<String>,
     val count: Int,
@@ -57,6 +59,7 @@ data class ConstituencySummary(
     companion object {
         fun from(csos: List<CSOTotals>): ConstituencySummary {
             return ConstituencySummary(
+                year = 2021,
                 locationCount = csos.size,
                 companies = csos.map { it.cso.company }.toSet().toList().sorted(),
                 count = csos.filter { it.duration > Duration.ZERO }.sumOf { it.count },

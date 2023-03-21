@@ -60,36 +60,4 @@ class SitemeshRenderingTest {
         val app = htmlFilter.then { Response(Status.OK).body("") }
         expectThat(app(Request(Method.GET, "/"))).bodyString.isEqualTo("")
     }
-
-    data class PageContext(val request: Request, val response: Response, val template: String) : ViewModel {
-        override fun template(): String {
-            return this.template
-        }
-    }
-
-//    fun handlebarsDecoratorSelector(): (Http4kTransaction) -> String {
-//
-//        val resolver = MissingValueResolver()
-//
-//        val renderer = HandlebarsTemplates.HotReload("src/main/resources/templates/page/org/totp/decorators")
-//
-//
-//        return { (req, res) ->
-//            renderer(PageContext(req, res, "main"))
-//        }
-//    }
-//
-//    @Test
-//    fun `rendering decorators that are handlebars documents`() {
-//
-//        val filter = SitemeshFilter(
-//            decoratorSelector = handlebarsDecoratorSelector()
-//        )
-//
-//        val app = filter.then { Response(Status.OK).body("hello") }
-//
-//        val response = app(Request(Method.GET, "/"))
-//
-//        print(response)
-//    }
 }
