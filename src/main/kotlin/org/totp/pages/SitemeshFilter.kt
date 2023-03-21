@@ -75,9 +75,6 @@ object SitemeshFilter {
                 response.body(StringBuilder().also { sb ->
                     decorator.data.writeValueTo(sb)
                 }.toString())
-
-
-
             } else {
                 response
             }

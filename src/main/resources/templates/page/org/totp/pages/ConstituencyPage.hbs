@@ -3,10 +3,52 @@
     <title>Constituency - {{ name.value }}</title>
 </head>
 <body>
-<div class="row">
-    <div class="col">
-        {{#> components/section title="Hello"}}Here is the content{{/components/section}}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col col-md-8">
+
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-header">Totals for {{ name.value }} in 2021</div>
+                <div class="card-body">
+                    <div class="card-title h5">2 Sites polluted by Thames Water</div>
+                    <div class="card-text">
+                        65 sewage dumps<br>
+                        <span class="spill-hours-huge spill-hours-large spill-hours">788 h (4.7 weeks)</span>duration<br>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">Take Action</div>
+                <div class="card-body">
+                    <div class="card-text">
+                        {{> components/share-facebook }}
+                        {{> components/share-twitter }}
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">Explore</div>
+                <div class="card-body">For information on pollution by <b>
+                    <a class="card-link" href="/">River</a></b>, <b>
+                    <a class="card-link" href="/">Beach</a></b> or see the worst pollution hot-spots see our
+                    <a class="card-link" href="/">Homepage</a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            {{#> components/section title="Pollution Summary"}}
+                Hello
+            {{/components/section}}
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

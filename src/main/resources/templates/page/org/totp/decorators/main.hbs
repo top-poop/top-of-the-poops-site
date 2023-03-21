@@ -29,6 +29,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
+{{> chunks/title }}
 <sitemesh:write property="body"/>
+<div class="container">
+    <div class="row"><div class="col">{{> chunks/data-sources }}</div></div>
+    <div class="row"><div class="col">{{> chunks/copyright }}</div></div>
+</div>
 </body>
 </html>

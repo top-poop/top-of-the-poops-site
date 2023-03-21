@@ -48,7 +48,7 @@ object Decorators {
 
     operator fun invoke(): HttpHandler {
         val renderer = HandlebarsTemplates().HotReload(
-            "src/main/resources/templates/page/org/totp/decorators",
+            "src/main/resources/templates/page/org/totp",
         )
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -56,7 +56,13 @@ object Decorators {
         val uri = Query.uri().required("uri")
 
         return {
-            Response(Status.OK).with(viewLens of Page(decoratorName = decoratorName(it), uri = uri(it)))
+            Response(Status.OK)
+                .with(
+                    viewLens of Page(
+                        decoratorName = decoratorName(it).let { name -> "decorators/$name" },
+                        uri = uri(it)
+                    )
+                )
         }
     }
 }
@@ -77,19 +83,6 @@ object InternalRoutes {
     operator fun invoke(): RoutingHttpHandler {
         return routes(
             "/decorator/{decorator}" bind Decorators()
-        )
-    }
-}
-
-object PublicRoutes {
-    operator fun invoke(internalRoutes: HttpHandler): RoutingHttpHandler {
-
-        val sitemesh = SitemeshFilter(
-            decoratorSelector = decoratorSelector(internalRoutes)
-        )
-
-        return routes(
-            "/constituency" bind sitemesh.then(ConstituencyPageHandler()),
         )
     }
 }
@@ -122,7 +115,6 @@ fun main() {
         inboundFilters.then(
             routes(
                 "/constituency/{constituency}" bind sitemesh.then(ConstituencyPageHandler()),
-                "/internal" bind InternalRoutes(),
                 "/assets" bind static(ResourceLoader.Directory("src/main/resources/assets"))
             )
         )
