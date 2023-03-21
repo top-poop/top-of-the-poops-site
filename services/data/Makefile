@@ -14,6 +14,8 @@ PYTHON=$(PYTHON_DIR)/python
 PIP=$(PYTHON_DIR)/pip
 GENERATE=generic.py
 
+DATAFILES=datafiles
+
 $(PYTHON): .python_uptodate
 
 .PHONY: python
@@ -27,15 +29,22 @@ python: $(PYTHON)
 
 
 DATA_2021_SQL=$(wildcard sql/v1/2021/*.sql)
-DATA_2021_GENERATED=$(foreach sql,$(DATA_2021_SQL),datafiles/v1/2021/$(basename $(notdir $(sql))).json)
+DATA_2021_GENERATED=$(foreach sql,$(DATA_2021_SQL),$(DATAFILES)/v1/2021/$(basename $(notdir $(sql))).json)
 
 generated-data: generated-2021
 
 generated-2021: $(DATA_2021_GENERATED)
 
-datafiles/v1/2021/%.json: sql/v1/2021/$(basename $(notdir %)).sql $(PYTHON) $(GENERATE)
+$(DATAFILES)/v1/2021/%.json: sql/v1/2021/$(basename $(notdir %)).sql $(PYTHON) $(GENERATE)
 	@mkdir -p $(dir $@)
 	$(PYTHON) $(GENERATE) $< $@
+
+
+.PHONY: constituencies
+constituencies: constituencies.py constituencies.sql
+	rm -rf $(DATAFILES)/constituencies
+	@mkdir $(DATAFILES)/constituencies
+	$(PYTHON) $< $(DATAFILES)/constituencies
 
 .PHONY: clean
 clean:

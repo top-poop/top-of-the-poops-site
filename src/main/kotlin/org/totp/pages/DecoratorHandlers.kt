@@ -52,11 +52,12 @@ fun httpHandlerDecoratorSelector(
     mapper: (Http4kTransaction) -> Uri
 ): (DecoratorContext) -> String {
     return { context ->
+        val tx = context.tx
         handler(
-            Request(Method.GET, mapper(context.tx))
+            Request(Method.GET, mapper(tx))
                 .query(
                     "uri",
-                    context.tx.first.uri.toString()
+                    tx.first.uri.toString()
                 )
                 .query("title", context.title)
         )

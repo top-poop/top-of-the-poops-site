@@ -1,6 +1,6 @@
 package org.totp.pages
 
-import PageViewModel
+import org.totp.model.PageViewModel
 import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.Options
 import com.github.jknack.handlebars.helper.StringHelpers
@@ -11,6 +11,7 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
+import org.http4k.core.Uri
 import org.http4k.core.with
 import org.http4k.lens.Header.LOCATION
 import org.http4k.lens.Path
@@ -66,12 +67,13 @@ data class ConstituencySummary(
     }
 }
 
-data class ConstituencyPage(
+class ConstituencyPage(
+    uri: Uri,
     val name: ConstituencyName,
     val summary: ConstituencySummary,
     val csos: List<CSOTotals>
 ) :
-    PageViewModel
+    PageViewModel(uri)
 
 object ConstituencyPageHandler {
     operator fun invoke(csos: (ConstituencyName) -> List<CSOTotals>): HttpHandler {
@@ -96,6 +98,7 @@ object ConstituencyPageHandler {
                     Response(Status.OK)
                         .with(
                             viewLens of ConstituencyPage(
+                                request.uri,
                                 name,
                                 ConstituencySummary.from(list),
                                 list.sortedByDescending { it.duration }
