@@ -10,8 +10,10 @@ import strikt.assertions.isEqualTo
 class ConstituencyRenderingTest {
 
     @org.junit.jupiter.api.Test
-    fun `renders a person`() {
+    fun `renders a constituency`() {
         val service = ConstituencyRendering()
-        expectThat(service(Request(Method.GET, "/"))).status.isEqualTo(Status.OK)
+        val response = service(Request(Method.GET, "/"))
+        println(response.body)
+        expectThat(response).status.isEqualTo(Status.OK)
     }
 }

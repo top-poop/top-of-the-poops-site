@@ -1,5 +1,6 @@
 package org.totp.pages
 
+import com.github.jknack.handlebars.ValueResolver
 import org.http4k.core.ContentType
 import org.http4k.core.Filter
 import org.http4k.core.Request
@@ -16,9 +17,26 @@ import java.nio.CharBuffer
 typealias Http4kTransaction = Pair<Request, Response>
 
 object SitemeshControls {
-    fun contentTypes(types: Set<ContentType>): (Http4kTransaction) -> Boolean = { types.contains(CONTENT_TYPE(it.second))}
+    fun contentTypes(types: Set<ContentType>): (Http4kTransaction) -> Boolean =
+        { types.contains(CONTENT_TYPE(it.second)) }
+
     fun onlyHtmlPages() = contentTypes(setOf(ContentType.TEXT_HTML))
 }
+
+class MissingValueResolver : ValueResolver {
+    override fun resolve(context: Any?, name: String?): Any {
+        throw IllegalStateException("Undefined ${name}")
+    }
+
+    override fun resolve(context: Any?): Any {
+        TODO()
+    }
+
+    override fun propertySet(context: Any?): MutableSet<MutableMap.MutableEntry<String, Any>> {
+        TODO()
+    }
+}
+
 
 object SitemeshFilter {
 

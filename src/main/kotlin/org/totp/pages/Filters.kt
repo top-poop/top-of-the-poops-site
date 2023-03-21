@@ -4,6 +4,8 @@ import org.http4k.core.*
 import org.http4k.template.HandlebarsTemplates
 import org.http4k.template.viewModel
 import org.totp.model.error.HttpError
+import java.io.IOException
+import java.lang.IllegalStateException
 
 fun NoOp() = Filter { next -> { next(it) } }
 
@@ -25,4 +27,14 @@ object HtmlPageErrorFilter {
             }
         }
     }
+}
+
+object EnsureSuccessfulResponse {
+    operator fun invoke(): Filter = Filter { next -> {
+        val response = next(it)
+        if ( response.status.successful ) {
+            response
+        }
+        else throw IOException("Upstream had error ${response.status} for ${it.uri}")
+    }}
 }
