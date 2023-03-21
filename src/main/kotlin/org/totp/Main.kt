@@ -29,7 +29,7 @@ import org.http4k.server.Undertow
 import org.http4k.template.HandlebarsTemplates
 import org.http4k.template.ViewModel
 import org.http4k.template.viewModel
-import org.totp.pages.ConstituencyRendering
+import org.totp.pages.ConstituencyPageHandler
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.Http4kTransaction
 import org.totp.pages.IncomingHttpRequest
@@ -89,7 +89,7 @@ object PublicRoutes {
         )
 
         return routes(
-            "/constituency" bind sitemesh.then(ConstituencyRendering()),
+            "/constituency" bind sitemesh.then(ConstituencyPageHandler()),
         )
     }
 }
@@ -121,7 +121,7 @@ fun main() {
     val server = Undertow().toServer(
         inboundFilters.then(
             routes(
-                "/constituency" bind sitemesh.then(ConstituencyRendering()),
+                "/constituency/{constituency}" bind sitemesh.then(ConstituencyPageHandler()),
                 "/internal" bind InternalRoutes(),
                 "/assets" bind static(ResourceLoader.Directory("src/main/resources/assets"))
             )
