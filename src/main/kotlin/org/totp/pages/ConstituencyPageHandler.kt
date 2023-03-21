@@ -1,7 +1,7 @@
 package org.totp.pages
 
-import com.github.jknack.handlebars.Helper
 import com.github.jknack.handlebars.Options
+import com.github.jknack.handlebars.helper.StringHelpers
 import dev.forkhandles.values.StringValue
 import dev.forkhandles.values.StringValueFactory
 import org.http4k.core.Body
@@ -17,6 +17,7 @@ import org.http4k.lens.value
 import org.http4k.template.HandlebarsTemplates
 import org.http4k.template.ViewModel
 import org.http4k.template.viewModel
+import org.http4k.urlEncoded
 import org.totp.extensions.kebabCase
 import org.totp.text.csv.readCSV
 
@@ -37,6 +38,8 @@ object ConstituencyPageHandler {
                     "Missing value for: " + options.helperName
                 )
             }
+            StringHelpers.register(it)
+            it.registerHelper("urlencode") { context: Any, options: Options -> context.toString().urlEncoded() }
         }.HotReload(
             "src/main/resources/templates/page/org/totp"
         )
