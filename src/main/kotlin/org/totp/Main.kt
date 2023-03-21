@@ -1,5 +1,6 @@
 package org.totp
 
+import com.github.jknack.handlebars.Handlebars
 import org.http4k.client.OkHttp
 import org.http4k.core.Uri
 import org.http4k.core.then
@@ -18,6 +19,8 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.routing.static
 import org.http4k.server.Undertow
+import org.http4k.template.HandlebarsTemplates
+import org.http4k.template.TemplateRenderer
 import org.totp.model.data.csoSummaries
 import org.totp.pages.ConstituencyPageHandler
 import org.totp.pages.Decorators
@@ -30,9 +33,9 @@ import java.time.Clock
 
 
 object InternalRoutes {
-    operator fun invoke(): RoutingHttpHandler {
+    operator fun invoke(renderer: TemplateRenderer): RoutingHttpHandler {
         return routes(
-            "/decorator/{decorator}" bind Decorators()
+            "/decorator/{decorator}" bind Decorators(renderer)
         )
     }
 }
@@ -54,7 +57,11 @@ fun main() {
         })
         .then(ServerFilters.CatchAll())
 
-    val internalRoutes = InternalRoutes()
+    val decoratorRenderer = HandlebarsTemplates().HotReload(
+        "src/main/resources/templates/page/org/totp",
+    )
+
+    val internalRoutes = InternalRoutes(decoratorRenderer)
 
     val sitemesh = SitemeshFilter(
         decoratorSelector = httpHandlerDecoratorSelector(

@@ -1,6 +1,5 @@
 package org.totp.pages
 
-import com.github.jknack.handlebars.ValueResolver
 import org.http4k.core.ContentType
 import org.http4k.core.Filter
 import org.http4k.core.Request
@@ -16,27 +15,14 @@ import java.nio.CharBuffer
 
 typealias Http4kTransaction = Pair<Request, Response>
 
+data class DecoratorContext(val tx: Http4kTransaction, val title: String)
+
 object SitemeshControls {
     fun contentTypes(types: Set<ContentType>): (Http4kTransaction) -> Boolean =
         { types.contains(CONTENT_TYPE(it.second)) }
 
     fun onlyHtmlPages() = contentTypes(setOf(ContentType.TEXT_HTML))
 }
-
-class MissingValueResolver : ValueResolver {
-    override fun resolve(context: Any?, name: String?): Any {
-        throw IllegalStateException("Undefined ${name}")
-    }
-
-    override fun resolve(context: Any?): Any {
-        TODO()
-    }
-
-    override fun propertySet(context: Any?): MutableSet<MutableMap.MutableEntry<String, Any>> {
-        TODO()
-    }
-}
-
 
 object SitemeshFilter {
 
@@ -59,7 +45,7 @@ object SitemeshFilter {
     }
 
     operator fun invoke(
-        decoratorSelector: (Http4kTransaction) -> String,
+        decoratorSelector: (DecoratorContext) -> String,
         shouldDecorate: (Http4kTransaction) -> Boolean = { true },
         contentProcessor: ContentProcessor = TagBasedContentProcessor(
             CoreHtmlTagRuleBundle(),
@@ -71,6 +57,7 @@ object SitemeshFilter {
             val tx = it to response
             if (shouldDecorate(tx)) {
                 val content = contentProcessor.build(CharBuffer.wrap(response.bodyString()), null)
+                val tx = DecoratorContext(tx, content.extractedProperties.getChild("title").toString())
                 val decorator = contentProcessor.build(CharBuffer.wrap(decoratorSelector(tx)), contentContext(content))
                 response.body(StringBuilder().also { sb ->
                     decorator.data.writeValueTo(sb)

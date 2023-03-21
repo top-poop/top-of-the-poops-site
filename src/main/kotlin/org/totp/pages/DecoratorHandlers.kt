@@ -11,34 +11,35 @@ import org.http4k.core.Uri
 import org.http4k.core.with
 import org.http4k.lens.Path
 import org.http4k.lens.Query
+import org.http4k.lens.string
 import org.http4k.lens.uri
-import org.http4k.template.HandlebarsTemplates
+import org.http4k.template.TemplateRenderer
 import org.http4k.template.ViewModel
 import org.http4k.template.viewModel
 
 object Decorators {
 
-    data class Page(val decoratorName: String, val uri: Uri) : ViewModel {
+    data class Page(val decoratorName: String, val uri: Uri, val title: String) : ViewModel {
         override fun template(): String {
             return decoratorName
         }
     }
 
-    operator fun invoke(): HttpHandler {
-        val renderer = HandlebarsTemplates().HotReload(
-            "src/main/resources/templates/page/org/totp",
-        )
+    // possibly a bit odd to render the decorator handlebars in this call, could be  just a data endpoint?
+    operator fun invoke(renderer: TemplateRenderer): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
         val decoratorName = Path.of("decorator")
         val uri = Query.uri().required("uri")
+        val title = Query.string().required("title")
 
         return {
             Response(Status.OK)
                 .with(
                     viewLens of Page(
                         decoratorName = decoratorName(it).let { name -> "decorators/$name" },
-                        uri = uri(it)
+                        uri = uri(it),
+                        title = title(it)
                     )
                 )
         }
@@ -49,13 +50,15 @@ object Decorators {
 fun httpHandlerDecoratorSelector(
     handler: HttpHandler,
     mapper: (Http4kTransaction) -> Uri
-): (Http4kTransaction) -> String {
-    return { tx ->
+): (DecoratorContext) -> String {
+    return { context ->
         handler(
-            Request(Method.GET, mapper(tx)).query(
-                "uri",
-                tx.first.uri.toString()
-            )
+            Request(Method.GET, mapper(context.tx))
+                .query(
+                    "uri",
+                    context.tx.first.uri.toString()
+                )
+                .query("title", context.title)
         )
             .bodyString()
     }
