@@ -15,6 +15,7 @@ import org.http4k.lens.Header.LOCATION
 import org.http4k.lens.Path
 import org.http4k.lens.value
 import org.http4k.template.HandlebarsTemplates
+import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.http4k.urlEncoded
 import org.totp.extensions.kebabCase
@@ -33,19 +34,6 @@ val rawConstituencyNames = readCSV(
 
 val kebabCaseConstituencyNames = rawConstituencyNames.associateBy {
     ConstituencyName(it.value.kebabCase())
-}
-
-fun handlebarsConfiguration(): (Handlebars) -> Handlebars = {
-    it.also {
-        it.registerHelperMissing { _: Any, options: Options ->
-            throw IllegalArgumentException(
-                "Missing value for: " + options.helperName
-            )
-        }
-        StringHelpers.register(it)
-        it.registerHelper("urlencode") { context: Any, _: Options -> context.toString().urlEncoded() }
-        it.registerHelper("concat") { context: Any, options -> (listOf(context) + options.params).joinToString("")}
-    }
 }
 
 data class ConstituencySummary(
@@ -80,11 +68,10 @@ class ConstituencyPage(
 
 object ConstituencyPageHandler {
     operator fun invoke(
+        renderer: TemplateRenderer,
         constituencySpills: (ConstituencyName) -> List<CSOTotals>,
         constituencyBoundary: (ConstituencyName) -> GeoJSON
     ): HttpHandler {
-        val renderer = HandlebarsTemplates(handlebarsConfiguration())
-            .HotReload("src/main/resources/templates/page/org/totp")
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
         val constituency = Path.value(ConstituencyName).of("constituency", "The constituency")

@@ -26,7 +26,6 @@ class ConstituencyName(value: String) : StringValue(value) {
     companion object : StringValueFactory<ConstituencyName>(::ConstituencyName)
 }
 
-
 val objectMapper = ObjectMapper()
 
 object ConstituencyBoundaries {
@@ -45,7 +44,8 @@ object ConstituencyCSOs {
             val response = handler(Request(Method.GET, "spills-all.json"))
 
             val list =
-                objectMapper.readerForListOf(HashMap::class.java).readValue<List<Map<String, Any>>>(response.bodyString())
+                objectMapper.readerForListOf(HashMap::class.java)
+                    .readValue<List<Map<String, Any>>>(response.bodyString())
                     .map {
                         CSOTotals(
                             constituency = ConstituencyName(it["constituency"].toString()),

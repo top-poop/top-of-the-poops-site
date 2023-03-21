@@ -19,8 +19,8 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.routing.static
 import org.http4k.server.Undertow
-import org.http4k.template.HandlebarsTemplates
 import org.http4k.template.TemplateRenderer
+import org.totp.model.TotpHandlebars
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyCSOs
 import org.totp.pages.ConstituencyPageHandler
@@ -58,7 +58,9 @@ fun main() {
         })
         .then(ServerFilters.CatchAll())
 
-    val decoratorRenderer = HandlebarsTemplates().HotReload(
+    val templates = TotpHandlebars.templates()
+
+    val decoratorRenderer = templates.HotReload(
         "src/main/resources/templates/page/org/totp",
     )
 
@@ -84,8 +86,13 @@ fun main() {
             "/" bind inboundFilters.then(sitemesh).then(
                 routes(
                     "/constituency/{constituency}" bind ConstituencyPageHandler(
-                        ConstituencyCSOs(SetBaseUriFrom(Uri.of("/v1/2021")).then(dataClient)),
-                        ConstituencyBoundaries(SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient))
+                        renderer = templates.HotReload("src/main/resources/templates/page/org/totp"),
+                        constituencySpills = ConstituencyCSOs(SetBaseUriFrom(Uri.of("/v1/2021")).then(dataClient)),
+                        constituencyBoundary = ConstituencyBoundaries(
+                            SetBaseUriFrom(Uri.of("/constituencies")).then(
+                                dataClient
+                            )
+                        )
                     )
                 )
             ),

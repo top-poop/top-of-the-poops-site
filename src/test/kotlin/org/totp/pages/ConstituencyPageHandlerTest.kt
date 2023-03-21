@@ -1,6 +1,5 @@
 package org.totp.pages
 
-import com.github.jknack.handlebars.Handlebars
 import com.github.jknack.handlebars.io.StringTemplateSource
 import org.http4k.core.Method
 import org.http4k.core.Request
@@ -12,6 +11,7 @@ import org.http4k.routing.routes
 import org.http4k.strikt.header
 import org.http4k.strikt.status
 import org.junit.jupiter.api.Test
+import org.totp.model.TotpHandlebars
 import org.totp.model.data.CSO
 import org.totp.model.data.CSOTotals
 import org.totp.model.data.ConstituencyBoundaries
@@ -46,6 +46,7 @@ class ConstituencyPageHandlerTest {
 
     val service = routes(
         "/{constituency}" bind Method.GET to ConstituencyPageHandler(
+            renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
             constituencySpills = { summaries },
             constituencyBoundary = { GeoJSON.of("some geojson") }
         )
@@ -106,10 +107,9 @@ class ConstituencyPageHandlerTest {
         expectThat(boundaries(ConstituencyName("Aberavon"))).isEqualTo(GeoJSON("hi"))
     }
 
-
     @Test
     fun `handlebars functions`() {
-        val handlebars = Handlebars().let(handlebarsConfiguration())
+        val handlebars = TotpHandlebars.handlebars()
 
         expectThat(
             handlebars

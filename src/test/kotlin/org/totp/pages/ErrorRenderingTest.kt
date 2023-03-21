@@ -3,6 +3,7 @@ package org.totp.pages
 import org.http4k.core.*
 import org.http4k.strikt.bodyString
 import org.http4k.strikt.contentType
+import org.http4k.template.HandlebarsTemplates
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
@@ -10,7 +11,8 @@ import strikt.assertions.isEqualTo
 
 class ErrorRenderingTest {
 
-    val filter = HtmlPageErrorFilter()
+    val renderer = HandlebarsTemplates().HotReload("src/main/resources/templates/page")
+    val filter = HtmlPageErrorFilter(renderer)
 
     @Test
     fun `renders an error page when there is an error`() {
