@@ -66,12 +66,12 @@ object ConstituencyPageHandler {
                         LOCATION of request.uri.path(redirect)
                     )
             } else {
-                kebabCaseConstituencyNames[constituencyName]?.let {
-                    val list = csos(it)
+                kebabCaseConstituencyNames[constituencyName]?.let { name ->
+                    val list = csos(name)
                     Response(Status.OK)
                         .with(
                             viewLens of ConstituencyPage(
-                                it,
+                                name,
                                 ConstituencySummary.from(list),
                                 list.sortedByDescending { it.duration }
                             )
@@ -127,9 +127,26 @@ fun csoSummaries(location: java.nio.file.Path): (ConstituencyName) -> List<CSOTo
     return { name -> list.filter { it.constituency == name } }
 }
 
+//data class OverflowDuration(val hours: String, val large: Boolean, val huge: Boolean) {
+//    companion object {
+//        private val hoursInMonth = 730
+//        fun from(duration: Duration): OverflowDuration {
+//            val hours = duration.toHours()
+//            return OverflowDuration(
+//                "%d:%02d".format(hours, duration.toMinutesPart() / 60),
+//                large = hours > 0.5 * hoursInMonth,
+//                huge = hours > hoursInMonth
+//            )
+//        }
+//    }
+//}
 
 data class CSOTotals(
-    val constituency: ConstituencyName, val cso: CSO, val count: Int, val duration: Duration, val reporting: Number
+    val constituency: ConstituencyName,
+    val cso: CSO,
+    val count: Int,
+    val duration: Duration,
+    val reporting: Number
 )
 
 data class CSO(val company: String, val sitename: String, val waterway: String, val location: Coordinates)
