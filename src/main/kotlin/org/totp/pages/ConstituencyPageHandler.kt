@@ -61,13 +61,21 @@ object ConstituencyPageHandler {
 
             if (rawConstituencyNames.contains(constituencyName)) {
                 val redirect = request.uri.path.replace(constituencyName.value, constituencyName.value.kebabCase())
-                Response(Status.TEMPORARY_REDIRECT).with(LOCATION of request.uri.path(redirect))
+                Response(Status.TEMPORARY_REDIRECT)
+                    .with(
+                        LOCATION of request.uri.path(redirect)
+                    )
             } else {
                 kebabCaseConstituencyNames[constituencyName]?.let {
                     val list = csos(it)
-                    val page =
-                        ConstituencyPage(it, ConstituencySummary.from(list), list.sortedByDescending { it.duration })
-                    Response(Status.OK).with(viewLens of page)
+                    Response(Status.OK)
+                        .with(
+                            viewLens of ConstituencyPage(
+                                it,
+                                ConstituencySummary.from(list),
+                                list.sortedByDescending { it.duration }
+                            )
+                        )
                 } ?: Response(Status.NOT_FOUND)
             }
         }
