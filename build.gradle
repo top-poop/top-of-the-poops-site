@@ -1,10 +1,14 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.8.0'
     id 'application'
+    id 'com.google.cloud.tools.jib' version '3.3.1'
 }
 
 group = 'org.totp'
 version = '1.0-SNAPSHOT'
+applicationName = 'pages'
+
+jib.to.image = "pages"
 
 repositories {
     mavenCentral()
