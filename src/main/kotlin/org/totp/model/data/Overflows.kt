@@ -3,8 +3,10 @@ package org.totp.model.data
 import com.fasterxml.jackson.databind.ObjectMapper
 import dev.forkhandles.values.StringValue
 import dev.forkhandles.values.StringValueFactory
+import org.http4k.core.HttpHandler
+import org.http4k.core.Method
+import org.http4k.core.Request
 import java.time.Duration
-import kotlin.io.path.bufferedReader
 
 data class CSOTotals(
     val constituency: ConstituencyName,
@@ -23,27 +25,33 @@ class ConstituencyName(value: String) : StringValue(value) {
 }
 
 
-fun csoSummaries(location: java.nio.file.Path): (ConstituencyName) -> List<CSOTotals> {
-    val objectMapper = ObjectMapper()
-    val list = location.bufferedReader().let {
-        objectMapper.readerForListOf(HashMap::class.java).readValue<List<Map<String, Any>>>(it)
-    }.map {
-        CSOTotals(
-            constituency = ConstituencyName(it["constituency"].toString()),
-            cso = CSO(
-                company = it["company_name"].toString(),
-                sitename = it["site_name"].toString(),
-                waterway = it["receiving_water"].toString(),
-                location = Coordinates(
-                    lat = it["lat"] as Double,
-                    lon = it["lon"] as Double
-                )
-            ),
-            count = (it["spill_count"] as Double).toInt(),
-            duration = Duration.ofHours((it["total_spill_hours"] as Double).toLong()),
-            reporting = it["reporting_percent"] as Double
-        )
-    }
+val objectMapper = ObjectMapper()
 
-    return { name -> list.filter { it.constituency == name } }
+fun csoSummaries(handler: HttpHandler): (ConstituencyName) -> List<CSOTotals> {
+    return { name ->
+
+        val response = handler(Request(Method.GET, "spills-all.json"))
+
+        val list =
+            objectMapper.readerForListOf(HashMap::class.java).readValue<List<Map<String, Any>>>(response.bodyString())
+                .map {
+                    CSOTotals(
+                        constituency = ConstituencyName(it["constituency"].toString()),
+                        cso = CSO(
+                            company = it["company_name"].toString(),
+                            sitename = it["site_name"].toString(),
+                            waterway = it["receiving_water"].toString(),
+                            location = Coordinates(
+                                lat = it["lat"] as Double,
+                                lon = it["lon"] as Double
+                            )
+                        ),
+                        count = (it["spill_count"] as Double).toInt(),
+                        duration = Duration.ofHours((it["total_spill_hours"] as Double).toLong()),
+                        reporting = it["reporting_percent"] as Double
+                    )
+                }
+
+        list.filter { it.constituency == name }
+    }
 }
