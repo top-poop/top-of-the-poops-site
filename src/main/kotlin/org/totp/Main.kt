@@ -1,7 +1,6 @@
-package org.totp.pages
+package org.totp
 
 import org.http4k.core.*
-import org.http4k.core.ContentType.Companion.TEXT_HTML
 import org.http4k.events.AutoMarshallingEvents
 import org.http4k.events.EventFilters
 import org.http4k.events.then
@@ -13,23 +12,10 @@ import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.server.Undertow
-import org.http4k.template.HandlebarsTemplates
-import org.http4k.template.ViewModel
-import org.http4k.template.viewModel
+import org.totp.pages.ConstituencyRendering
+import org.totp.pages.IncomingHttpRequest
+import org.totp.pages.NoOp
 import java.time.Clock
-
-data class Constituency(val name: String) : ViewModel
-
-object ConstituencyRendering {
-    operator fun invoke(): HttpHandler {
-        val renderer = HandlebarsTemplates().HotReload("src/main/resources/templates/page")
-        val viewLens = Body.viewModel(renderer, TEXT_HTML).toLens()
-
-        return { _: Request ->
-            Response(Status.OK).with(viewLens of Constituency("bob"))
-        }
-    }
-}
 
 object Main {
     operator fun invoke(): RoutingHttpHandler {
