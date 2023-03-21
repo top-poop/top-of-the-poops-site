@@ -1,8 +1,10 @@
 package org.totp.pages
 
+import org.http4k.core.ContentType
 import org.http4k.core.Filter
 import org.http4k.core.Request
 import org.http4k.core.Response
+import org.http4k.lens.Header.CONTENT_TYPE
 import org.sitemesh.SiteMeshContext
 import org.sitemesh.content.Content
 import org.sitemesh.content.ContentProcessor
@@ -12,6 +14,11 @@ import org.sitemesh.content.tagrules.html.CoreHtmlTagRuleBundle
 import java.nio.CharBuffer
 
 typealias Http4kTransaction = Pair<Request, Response>
+
+object SitemeshControls {
+    fun contentTypes(types: Set<ContentType>): (Http4kTransaction) -> Boolean = { types.contains(CONTENT_TYPE(it.second))}
+    fun onlyHtmlPages() = contentTypes(setOf(ContentType.TEXT_HTML))
+}
 
 object SitemeshFilter {
 
