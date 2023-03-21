@@ -60,11 +60,13 @@ fun main() {
 
     val templates = TotpHandlebars.templates()
 
-    val decoratorRenderer = templates.HotReload(
-        "src/main/resources/templates/page/org/totp",
-    )
+    val resourceBase = java.nio.file.Path.of("src/main/resources")
+    val templateDir = resourceBase.resolve("templates/page/org/totp").toString()
+    val staticAssets = ResourceLoader.Directory(resourceBase.resolve("assets").toString())
 
-    val internalRoutes = InternalRoutes(decoratorRenderer)
+    val renderer = templates.HotReload(templateDir)
+
+    val internalRoutes = InternalRoutes(renderer)
 
     val sitemesh = SitemeshFilter(
         decoratorSelector = httpHandlerDecoratorSelector(
@@ -81,12 +83,13 @@ fun main() {
         })
         .then(OkHttp())
 
+
     val server = Undertow().toServer(
         routes(
             "/" bind inboundFilters.then(sitemesh).then(
                 routes(
                     "/constituency/{constituency}" bind ConstituencyPageHandler(
-                        renderer = templates.HotReload("src/main/resources/templates/page/org/totp"),
+                        renderer = renderer,
                         constituencySpills = ConstituencyCSOs(SetBaseUriFrom(Uri.of("/v1/2021")).then(dataClient)),
                         constituencyBoundary = ConstituencyBoundaries(
                             SetBaseUriFrom(Uri.of("/constituencies")).then(
@@ -96,7 +99,7 @@ fun main() {
                     )
                 )
             ),
-            "/assets" bind static(ResourceLoader.Directory("src/main/resources/assets"))
+            "/assets" bind static(staticAssets)
         )
     )
 

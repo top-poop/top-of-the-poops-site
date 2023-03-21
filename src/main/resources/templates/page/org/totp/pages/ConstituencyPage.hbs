@@ -15,9 +15,7 @@
             <div class="card">
                 <div class="card-header">Totals for {{ name.value }} in {{summary.year}}</div>
                 <div class="card-body">
-                    <div class="card-title">
-                        <h5>{{summary.locationCount}} Sites polluted by {{join summary.companies ', '}}</h5>
-                    </div>
+                    <h5 class="card-title">{{summary.locationCount}} Sites polluted by {{join summary.companies ', '}}</h5>
                     <div class="card-text">
                         {{summary.count}} sewage dumps<br>
                         <span class="spill-hours">{{summary.duration.toHours}} h </span>duration<br>
