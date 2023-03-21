@@ -1,5 +1,7 @@
 package org.totp.pages
 
+import com.github.jknack.handlebars.Helper
+import com.github.jknack.handlebars.Options
 import dev.forkhandles.values.StringValue
 import dev.forkhandles.values.StringValueFactory
 import org.http4k.core.Body
@@ -29,7 +31,13 @@ val kebabCaseConstituencyNames = rawConstituencyNames.associateBy {
 
 object ConstituencyPageHandler {
     operator fun invoke(): HttpHandler {
-        val renderer = HandlebarsTemplates().HotReload(
+        val renderer = HandlebarsTemplates {
+            it.registerHelperMissing { _: Any, options: Options ->
+                throw IllegalArgumentException(
+                    "Missing value for: " + options.helperName
+                )
+            }
+        }.HotReload(
             "src/main/resources/templates/page/org/totp"
         )
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()

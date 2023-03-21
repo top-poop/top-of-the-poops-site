@@ -72,8 +72,6 @@ fun main() {
     )
 
     server.start()
-
     events(ServerStartedEvent(Uri.of("http://localhost:" + server.port())))
-
     server.block()
 }
