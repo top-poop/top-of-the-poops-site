@@ -22,7 +22,9 @@ import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.NoOp
 import org.totp.pages.ServerStartedEvent
 import org.totp.pages.SitemeshFilter
+import org.totp.pages.csoSummaries
 import org.totp.pages.httpHandlerDecoratorSelector
+import java.nio.file.Path
 import java.time.Clock
 
 
@@ -56,7 +58,7 @@ fun main() {
     val sitemesh = SitemeshFilter(
         decoratorSelector = httpHandlerDecoratorSelector(
             handler = EnsureSuccessfulResponse().then(internalRoutes),
-            mapper = { Uri.of("/decorator/main")}
+            mapper = { Uri.of("/decorator/main") }
         )
     )
 
@@ -64,7 +66,7 @@ fun main() {
         routes(
             "" bind inboundFilters.then(sitemesh).then(
                 routes(
-                    "/constituency/{constituency}" bind ConstituencyPageHandler()
+                    "/constituency/{constituency}" bind ConstituencyPageHandler(csoSummaries(Path.of("/home/richja/dev/gis/web/data/generated/spills-all.json")))
                 )
             ),
             "/assets" bind static(ResourceLoader.Directory("src/main/resources/assets"))

@@ -12,10 +12,10 @@
             <div class="card">
                 <div class="card-header">Totals for {{ name.value }} in 2021</div>
                 <div class="card-body">
-                    <div class="card-title h5">2 Sites polluted by Thames Water</div>
+                    <div class="card-title h5">{{summary.locationCount}} Sites polluted by {{join summary.companies ', '}}</div>
                     <div class="card-text">
-                        65 sewage dumps<br>
-                        <span class="spill-hours-huge spill-hours-large spill-hours">788 h (4.7 weeks)</span>duration<br>
+                        {{summary.count}} sewage dumps<br>
+                        <span class="spill-hours">{{summary.duration.toHours}} h </span>duration<br>
                     </div>
                 </div>
             </div>
@@ -44,7 +44,32 @@
     <div class="row">
         <div class="col">
             {{#> components/section title="Pollution Summary"}}
-                Hello
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Waterway</th>
+                            <th>Site</th>
+                            <th>Sewage Dumps</th>
+                            <th>Duration</th>
+                            <th>Reporting %</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {{#each csos}}
+                                <tr>
+                                    <td>{{this.cso.company}}</td>
+                                    <td>{{this.cso.waterway}}</td>
+                                    <td>{{this.cso.sitename}}</td>
+                                    <td>{{this.count}}</td>
+                                    <td>{{this.duration.toHours}}</td>
+                                    <td>{{this.reporting}}</td>
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
             {{/components/section}}
         </div>
     </div>
