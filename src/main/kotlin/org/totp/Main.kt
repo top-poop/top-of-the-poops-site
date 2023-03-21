@@ -1,6 +1,5 @@
 package org.totp
 
-import com.github.jknack.handlebars.Handlebars
 import org.http4k.client.OkHttp
 import org.http4k.core.Uri
 import org.http4k.core.then
@@ -9,6 +8,7 @@ import org.http4k.events.EventFilters
 import org.http4k.events.HttpEvent
 import org.http4k.events.then
 import org.http4k.filter.ClientFilters
+import org.http4k.filter.ClientFilters.SetBaseUriFrom
 import org.http4k.filter.DebuggingFilters
 import org.http4k.filter.ResponseFilters
 import org.http4k.filter.ServerFilters
@@ -21,7 +21,8 @@ import org.http4k.routing.static
 import org.http4k.server.Undertow
 import org.http4k.template.HandlebarsTemplates
 import org.http4k.template.TemplateRenderer
-import org.totp.model.data.csoSummaries
+import org.totp.model.data.ConstituencyBoundaries
+import org.totp.model.data.ConstituencyCSOs
 import org.totp.pages.ConstituencyPageHandler
 import org.totp.pages.Decorators
 import org.totp.pages.EnsureSuccessfulResponse
@@ -71,7 +72,7 @@ fun main() {
     )
 
     val dataClient = EnsureSuccessfulResponse()
-        .then(ClientFilters.SetBaseUriFrom(Uri.of("/data/v1/2021")))
+        .then(SetBaseUriFrom(Uri.of("/data")))
         .then(ClientFilters.SetHostFrom(Uri.of("http://localhost:8081")))
         .then(ResponseFilters.ReportHttpTransaction {
             events(HttpEvent.Outgoing(it))
@@ -82,7 +83,10 @@ fun main() {
         routes(
             "/" bind inboundFilters.then(sitemesh).then(
                 routes(
-                    "/constituency/{constituency}" bind ConstituencyPageHandler(csoSummaries(dataClient))
+                    "/constituency/{constituency}" bind ConstituencyPageHandler(
+                        ConstituencyCSOs(SetBaseUriFrom(Uri.of("/v1/2021")).then(dataClient)),
+                        ConstituencyBoundaries(SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient))
+                    )
                 )
             ),
             "/assets" bind static(ResourceLoader.Directory("src/main/resources/assets"))

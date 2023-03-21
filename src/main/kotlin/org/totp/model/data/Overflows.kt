@@ -6,6 +6,8 @@ import dev.forkhandles.values.StringValueFactory
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
+import org.http4k.core.Uri
+import org.totp.extensions.kebabCase
 import java.time.Duration
 
 data class CSOTotals(
@@ -27,31 +29,42 @@ class ConstituencyName(value: String) : StringValue(value) {
 
 val objectMapper = ObjectMapper()
 
-fun csoSummaries(handler: HttpHandler): (ConstituencyName) -> List<CSOTotals> {
-    return { name ->
+object ConstituencyBoundaries {
+    operator fun invoke(handler: HttpHandler): (ConstituencyName) -> GeoJSON {
+        return { name ->
+            val uri = Uri.of("${name.value.kebabCase()}.json")
+            GeoJSON(handler(Request(Method.GET, uri)).bodyString())
+        }
+    }
+}
 
-        val response = handler(Request(Method.GET, "spills-all.json"))
+object ConstituencyCSOs {
+    operator fun invoke(handler: HttpHandler): (ConstituencyName) -> List<CSOTotals> {
+        return { name ->
 
-        val list =
-            objectMapper.readerForListOf(HashMap::class.java).readValue<List<Map<String, Any>>>(response.bodyString())
-                .map {
-                    CSOTotals(
-                        constituency = ConstituencyName(it["constituency"].toString()),
-                        cso = CSO(
-                            company = it["company_name"].toString(),
-                            sitename = it["site_name"].toString(),
-                            waterway = it["receiving_water"].toString(),
-                            location = Coordinates(
-                                lat = it["lat"] as Double,
-                                lon = it["lon"] as Double
-                            )
-                        ),
-                        count = (it["spill_count"] as Double).toInt(),
-                        duration = Duration.ofHours((it["total_spill_hours"] as Double).toLong()),
-                        reporting = it["reporting_percent"] as Double
-                    )
-                }
+            val response = handler(Request(Method.GET, "spills-all.json"))
 
-        list.filter { it.constituency == name }
+            val list =
+                objectMapper.readerForListOf(HashMap::class.java).readValue<List<Map<String, Any>>>(response.bodyString())
+                    .map {
+                        CSOTotals(
+                            constituency = ConstituencyName(it["constituency"].toString()),
+                            cso = CSO(
+                                company = it["company_name"].toString(),
+                                sitename = it["site_name"].toString(),
+                                waterway = it["receiving_water"].toString(),
+                                location = Coordinates(
+                                    lat = it["lat"] as Double,
+                                    lon = it["lon"] as Double
+                                )
+                            ),
+                            count = (it["spill_count"] as Double).toInt(),
+                            duration = Duration.ofHours((it["total_spill_hours"] as Double).toLong()),
+                            reporting = it["reporting_percent"] as Double
+                        )
+                    }
+
+            list.filter { it.constituency == name }
+        }
     }
 }
