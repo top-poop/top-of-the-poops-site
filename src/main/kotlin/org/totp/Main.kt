@@ -72,7 +72,7 @@ fun main() {
     val dataServiceUri = EnvironmentKey.uri().required("DATA_SERVICE_URI", "URI for Data Service")
 
     val defaultConfig = Environment.defaults(
-        isDevelopment of true,
+        isDevelopment of false,
         dataServiceUri of Uri.of("http://data")
     )
 
@@ -116,7 +116,9 @@ fun main() {
             .then(OkHttp())
     }
 
-    val server = Undertow().toServer(
+    val server = Undertow(
+        if (isDevelopmentEnvironment) { 8000 } else { 80 }
+    ).toServer(
         routes(
             "/" bind inboundFilters.then(sitemesh).then(
                 routes(

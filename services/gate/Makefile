@@ -8,7 +8,7 @@ __check_defined = \
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 
 SERVICE=gate
-SERVICE_VERSION = 0.7
+SERVICE_VERSION = 0.8
 
 IMAGE_NAME=totp-$(SERVICE)
 
@@ -30,6 +30,7 @@ run: image
 
 .PHONY: push
 push: check-context
+	../../bin/docker-ensure-new-version.sh $(FULL_NAME)
 	docker push $(FULL_NAME)
 
 .PHONY: deploy

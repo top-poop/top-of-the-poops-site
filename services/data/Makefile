@@ -31,6 +31,7 @@ run: image
 
 .PHONY: push
 push: check-context
+	../../bin/docker-ensure-new-version.sh $(FULL_NAME)
 	docker push $(FULL_NAME)
 
 .PHONY: deploy

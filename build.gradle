@@ -6,8 +6,18 @@ plugins {
 
 group = 'org.totp'
 applicationName = 'pages'
+application.mainClassName = "org.totp.MainKt"
 
-jib.to.image = "pages"
+jib.from.image="eclipse-temurin:17-jre-alpine@sha256:f59c1acc26975859545eabb2051f4b9a41d5ef278aad9dfe42bdb0aff5611613"
+jib.to.image = "totp-pages"  // same as IMAGE in Makefile
+jib.container.jvmFlags = [
+        "-XX:+AlwaysActAsServerClassMachine",
+        "-XX:InitialRAMPercentage=15.0",
+        "-XX:MinRAMPercentage=60.0",
+        "-XX:MaxRAMPercentage=70.0",
+        "-XX:+ExitOnOutOfMemoryError",
+        "-XshowSettings:vm",
+]
 
 repositories {
     mavenCentral()
