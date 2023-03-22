@@ -12,31 +12,64 @@
             <div style="display: none" id="map-geojson">{{geojson}}</div>
         </div>
         <div class="col">
-            <div class="card">
-                <div class="card-header">Totals for {{ name.value }} in {{summary.year}}</div>
-                <div class="card-body">
-                    <h5 class="card-title">{{summary.locationCount}} Sites polluted by {{join summary.companies ', '}}</h5>
-                    <div class="card-text">
-                        {{summary.count}} sewage dumps<br>
-                        <span class="spill-hours">{{summary.duration.toHours}} h </span>duration<br>
+            <div class="row">
+                <div class="col">
+                    <div role="alert" class="fade alert alert-success show">Select the constituency from the drop-down - you can type in the box to search</div>
+                    <form>
+                        <div class="form-group">
+                            <label class="form-label">Constituency</label>
+                            <select class="custom-select custom-select-lg" name="constituency" id="constituency-select">
+                                {{#each constituencies}}
+                                    <option value="{{this.uri}}"{{#if this.current}}selected{{/if}}>{{this.name}}</option>
+                                {{/each}}
+                            </select>
+                            <script>
+                                document.getElementById("constituency-select")
+                                        .onchange=(e) => window.location = e.target.value;
+                            </script>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">Totals for {{ name.value }} in {{summary.year}}</div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{summary.locationCount}} Sites polluted by {{join summary.companies
+                                                                                                      ', '}}</h5>
+                            <div class="card-text">
+                                {{summary.count}} sewage dumps<br>
+                                <span class="spill-hours">{{summary.duration.toHours}} h </span>duration<br>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-header">Take Action</div>
-                <div class="card-body">
-                    <div class="card-text">
-                        {{> components/share-facebook uri=uri}}
-                        {{> components/share-twitter uri=uri text="Hello" tags=["sewage","blah"] via="sewageuk"}}
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">Take Action</div>
+                        <div class="card-body">
+                            <div class="card-text">
+                                {{> components/share-facebook uri=uri}}
+                                {{> components/share-twitter uri=uri text="Hello" tags=["sewage","blah"] via="sewageuk"}}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-header">Explore</div>
-                <div class="card-body">For information on pollution by <b>
-                    <a class="card-link" href="/">River</a></b>, <b>
-                    <a class="card-link" href="/">Beach</a></b> or see the worst pollution hot-spots see our
-                    <a class="card-link" href="/">Homepage</a>
+
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header">Explore</div>
+                        <div class="card-body">For information on pollution by <b>
+                            <a class="card-link" href="/">River</a></b>, <b>
+                            <a class="card-link" href="/">Beach</a></b> or see the worst pollution hot-spots see our
+                            <a class="card-link" href="/">Homepage</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -48,7 +81,8 @@
         <div class="col">
             {{#> components/section title=(concat "Pollution Summary " summary.year)}}
 
-                <p>Here are all the reported sewage overflow totals for {{ name.value }} in {{ summary.year }}. Sometimes sewage can be being dumped for <b>months</b> at a time.</p>
+                <p>Here are all the reported sewage overflow totals for {{ name.value }} in {{ summary.year }}.
+                    Sometimes sewage can be being dumped for <b>months</b> at a time.</p>
 
                 <div class="table-responsive">
                     <table id="table-csos" class="table">

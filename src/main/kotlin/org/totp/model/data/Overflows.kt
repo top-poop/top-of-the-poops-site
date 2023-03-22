@@ -8,6 +8,7 @@ import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Uri
 import org.totp.extensions.kebabCase
+import org.totp.pages.ConstituencySlug
 import java.time.Duration
 
 data class CSOTotals(
@@ -31,7 +32,8 @@ val objectMapper = ObjectMapper()
 object ConstituencyBoundaries {
     operator fun invoke(handler: HttpHandler): (ConstituencyName) -> GeoJSON {
         return { name ->
-            val uri = Uri.of("${name.value.kebabCase()}.json")
+            val slug = ConstituencySlug.from(name)
+            val uri = Uri.of("$slug.json")
             GeoJSON(handler(Request(Method.GET, uri)).bodyString())
         }
     }

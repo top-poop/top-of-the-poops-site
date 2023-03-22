@@ -29,7 +29,7 @@ import java.time.Duration
 
 class ConstituencyPageHandlerTest {
 
-    val summaries = listOf(
+    var summaries = listOf(
         CSOTotals(
             constituency = ConstituencyName("Your House"),
             cso = CSO(
@@ -54,6 +54,13 @@ class ConstituencyPageHandlerTest {
 
     @Test
     fun `renders a constituency`() {
+        expectThat(service(Request(Method.GET, "/aldershot"))).status.isEqualTo(Status.OK)
+    }
+
+    @Test
+    fun `renders a constituency with no overflows`() {
+        // surprisingly there are one or two
+        summaries = listOf()
         expectThat(service(Request(Method.GET, "/aldershot"))).status.isEqualTo(Status.OK)
     }
 

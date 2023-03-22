@@ -82,10 +82,8 @@ fun main() {
 
     val isDevelopmentEnvironment = isDevelopment(environment)
 
-    val clock = Clock.systemUTC()
-
     val events =
-        EventFilters.AddTimestamp(clock)
+        EventFilters.AddTimestamp(Clock.systemUTC())
             .then(EventFilters.AddEventName())
             .then(EventFilters.AddServiceName("pages"))
             .then(AutoMarshallingEvents(Jackson))
@@ -109,13 +107,13 @@ fun main() {
     val outboundFilters = StandardFilters.outgoing(events)
 
     val dataClient = if (isDevelopmentEnvironment) {
+        outboundFilters.then(static(ResourceLoader.Directory("services/data/datafiles")))
+    } else {
         EnsureSuccessfulResponse()
             .then(SetBaseUriFrom(Uri.of("/data")))
             .then(ClientFilters.SetHostFrom(dataServiceUri(environment)))
             .then(outboundFilters)
             .then(OkHttp())
-    } else {
-        static(ResourceLoader.Directory("services/data/datafiles"))
     }
 
     val server = Undertow().toServer(
