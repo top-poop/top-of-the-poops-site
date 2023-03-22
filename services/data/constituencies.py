@@ -7,6 +7,7 @@ import psycopg2
 
 
 def kebabcase(s):
+    s = s.replace("ô", "o")
     return "-".join(re.findall(
         r"[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+",
         s.lower()
@@ -18,6 +19,7 @@ def test_kebabcase():
     assert kebabcase("bob smith") == "bob-smith"
     assert kebabcase("Bob Smith") == "bob-smith"
     assert kebabcase("Bob,Smith") == "bob-smith"
+    assert kebabcase("Ynys Môn") == "ynys-mon"
 
 
 def iter_row(cursor, size=10):

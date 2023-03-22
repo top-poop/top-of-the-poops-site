@@ -58,6 +58,11 @@ class ConstituencyPageHandlerTest {
     }
 
     @Test
+    fun `renders a constituency with accents`() {
+        expectThat(service(Request(Method.GET, "/ynys-mon"))).status.isEqualTo(Status.OK)
+    }
+
+    @Test
     fun `renders a constituency with no overflows`() {
         // surprisingly there are one or two
         summaries = listOf()

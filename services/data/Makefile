@@ -8,7 +8,7 @@ __check_defined = \
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 
 SERVICE=data
-SERVICE_VERSION = 0.1
+SERVICE_VERSION = 0.2
 
 IMAGE_NAME=totp-$(SERVICE)
 
@@ -44,6 +44,7 @@ upgrade:
 	@test $(shell docker context show) = "totp"
 	docker service update --with-registry-auth --image $(FULL_NAME) $(SERVICE)
 
+
 PYTHON_DIR=venv/bin
 PYTHON=$(PYTHON_DIR)/python
 PIP=$(PYTHON_DIR)/pip
@@ -76,14 +77,11 @@ $(DATAFILES)/v1/2021/%.json: sql/v1/2021/$(basename $(notdir %)).sql $(PYTHON) $
 
 
 .PHONY: constituencies
-constituencies: constituencies.py constituencies.sql
+constituencies: $(PYTHON) constituencies.py constituencies.sql
 	rm -rf $(DATAFILES)/constituencies
 	@mkdir $(DATAFILES)/constituencies
-	$(PYTHON) $< $(DATAFILES)/constituencies
+	$(PYTHON) constituencies.py $(DATAFILES)/constituencies
 
 .PHONY: clean
 clean:
 	rm -rf datafiles/v1/2021
-
-
-
