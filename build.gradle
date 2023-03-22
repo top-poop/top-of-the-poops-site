@@ -47,6 +47,7 @@ dependencies {
     testImplementation(platform('org.junit:junit-bom:5.9.2'))
     testImplementation('org.junit.jupiter:junit-jupiter')
     testImplementation "org.http4k:http4k-testing-strikt"
+    testImplementation "org.jsoup:jsoup:1.15.4"
 }
 
 test {

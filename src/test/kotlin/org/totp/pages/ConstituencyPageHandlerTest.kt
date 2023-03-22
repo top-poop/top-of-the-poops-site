@@ -54,19 +54,19 @@ class ConstituencyPageHandlerTest {
 
     @Test
     fun `renders a constituency`() {
-        expectThat(service(Request(Method.GET, "/aldershot"))).status.isEqualTo(Status.OK)
+        Html(service(Request(Method.GET, "/aldershot")))
     }
 
     @Test
     fun `renders a constituency with accents`() {
-        expectThat(service(Request(Method.GET, "/ynys-mon"))).status.isEqualTo(Status.OK)
+        Html(service(Request(Method.GET, "/ynys-mon")))
     }
 
     @Test
     fun `renders a constituency with no overflows`() {
         // surprisingly there are one or two
         summaries = listOf()
-        expectThat(service(Request(Method.GET, "/aldershot"))).status.isEqualTo(Status.OK)
+        Html(service(Request(Method.GET, "/aldershot")))
     }
 
     @Test
@@ -98,7 +98,9 @@ class ConstituencyPageHandlerTest {
     "reporting_percent": 100.0
   }]"""
 
-        val summaries = ConstituencyCSOs { _ -> Response(Status.OK).body(text) }
+        val summaries = ConstituencyCSOs(
+            routes("/spills-all.json" bind { _: Request -> Response(Status.OK).body(text) })
+        )
         expectThat(summaries(ConstituencyName("Aberavon"))) {
             size.isEqualTo(1)
             get(0).and {

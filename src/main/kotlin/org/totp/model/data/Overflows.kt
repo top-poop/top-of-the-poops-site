@@ -7,8 +7,9 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Uri
-import org.totp.extensions.kebabCase
+import org.totp.pages.ConstituencyRank
 import org.totp.pages.ConstituencySlug
+import org.totp.pages.MP
 import java.time.Duration
 
 data class CSOTotals(
@@ -39,6 +40,34 @@ object ConstituencyBoundaries {
     }
 }
 
+object ConstituencyRankings {
+    operator fun invoke(handler: HttpHandler): () -> List<ConstituencyRank> {
+        return {
+            val response = handler(Request(Method.GET, "spills-by-constituency.json"))
+
+            objectMapper.readerForListOf(HashMap::class.java)
+                .readValue<List<Map<String, Any?>>>(response.bodyString())
+                .mapIndexed { r, it ->
+                    ConstituencyRank(
+                        rank = r + 1,
+                        constituencyName = ConstituencyName(it["constituency"] as String),
+                        mp = MP(
+                            name = it["mp_name"] as String,
+                            party = it["mp_party"] as String,
+                            handle = it["twitter_handle"] as String?,
+                            uri = Uri.of(it["mp_uri"] as String)
+                        ),
+                        company = it["company"] as String,
+                        count = (it["total_spills"] as Double).toInt(),
+                        duration = Duration.ofHours((it["total_hours"] as Double).toLong()),
+                        countDelta = (it["spills_increase"] as Double).toInt(),
+                        durationDelta = Duration.ofHours((it["hours_increase"] as Double).toLong())
+                    )
+                }
+        }
+    }
+}
+
 object ConstituencyCSOs {
     operator fun invoke(handler: HttpHandler): (ConstituencyName) -> List<CSOTotals> {
         return { name ->
@@ -50,11 +79,11 @@ object ConstituencyCSOs {
                     .readValue<List<Map<String, Any>>>(response.bodyString())
                     .map {
                         CSOTotals(
-                            constituency = ConstituencyName(it["constituency"].toString()),
+                            constituency = ConstituencyName(it["constituency"] as String),
                             cso = CSO(
-                                company = it["company_name"].toString(),
-                                sitename = it["site_name"].toString(),
-                                waterway = it["receiving_water"].toString(),
+                                company = it["company_name"] as String,
+                                sitename = it["site_name"] as String,
+                                waterway = it["receiving_water"] as String,
                                 location = Coordinates(
                                     lat = it["lat"] as Double,
                                     lon = it["lon"] as Double

@@ -26,9 +26,11 @@ import org.totp.http4k.StandardFilters
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyCSOs
+import org.totp.model.data.ConstituencyRankings
 import org.totp.pages.ConstituencyPageHandler
 import org.totp.pages.Decorators
 import org.totp.pages.EnsureSuccessfulResponse
+import org.totp.pages.HomepageHandler
 import org.totp.pages.SitemeshFilter
 import org.totp.pages.httpHandlerDecoratorSelector
 import java.time.Clock
@@ -116,17 +118,21 @@ fun main() {
             .then(OkHttp())
     }
 
+    val data2021 = SetBaseUriFrom(Uri.of("/v1/2021")).then(dataClient)
+
     val server = Undertow(
-        if (isDevelopmentEnvironment) { 8000 } else { 80 }
+        if (isDevelopmentEnvironment) 8000 else { 80 }
     ).toServer(
         routes(
             "/" bind inboundFilters.then(sitemesh).then(
                 routes(
+                    "/" bind HomepageHandler(
+                        renderer = renderer,
+                        rankings = ConstituencyRankings(data2021)
+                    ),
                     "/constituency/{constituency}" bind ConstituencyPageHandler(
                         renderer = renderer,
-                        constituencySpills = ConstituencyCSOs(
-                            SetBaseUriFrom(Uri.of("/v1/2021")).then(dataClient)
-                        ),
+                        constituencySpills = ConstituencyCSOs(data2021),
                         constituencyBoundary = ConstituencyBoundaries(
                             SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient)
                         )
