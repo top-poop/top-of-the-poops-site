@@ -13,4 +13,9 @@ class StringExtensionsKtTest {
         expectThat("Bob Smith".kebabCase()).isEqualTo("bob-smith")
         expectThat("Bob,Smith".kebabCase()).isEqualTo("bob-smith")
     }
+
+    @Test
+    fun diacritics() {
+        expectThat("Ynys Môn".kebabCase()).isEqualTo("ynys-mon")
+    }
 }
