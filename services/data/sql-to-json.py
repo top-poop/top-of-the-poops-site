@@ -1,14 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import argparse
-import contextlib
 import datetime
 import json
-import sys
+import psycopg2
 from decimal import Decimal
 from typing import Any
 
-import psycopg2
-
+from utils import smart_open
 
 class MultipleJsonEncoders:
     """
@@ -58,20 +56,6 @@ class TimeDeltaEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-@contextlib.contextmanager
-def smart_open(filename=None):
-    if filename and filename != '-':
-        fh = open(filename, 'w')
-    else:
-        fh = sys.stdout
-
-    try:
-        yield fh
-    finally:
-        if fh is not sys.stdout:
-            fh.close()
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="run sql script and make json")
     parser.add_argument("script", default=".", help="sql to run")
@@ -98,4 +82,5 @@ if __name__ == "__main__":
                 result = result[0]
 
             with smart_open(args.output) as fp:
-                json.dump(result, cls=MultipleJsonEncoders(DecimalEncoder, DateEncoder, TimeDeltaEncoder), indent=2, fp=fp)
+                json.dump(result, cls=MultipleJsonEncoders(DecimalEncoder, DateEncoder, TimeDeltaEncoder), indent=2,
+                          fp=fp)

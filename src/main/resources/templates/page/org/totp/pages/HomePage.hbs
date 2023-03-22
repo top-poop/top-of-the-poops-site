@@ -36,6 +36,9 @@
         <div class="row">
             <div class="col">
                 {{#> components/section title="Consituency Sewage" }}
+
+                    <div id="map-constituency"></div>
+
                     <table id="table-constituency" data-id="constituency" class="table table-striped"
                            style="width: 100%">
                         <thead>
@@ -45,7 +48,7 @@
                             <td>MP</td>
                             <td>MP Contact</td>
                             <td>MP Info</td>
-                            <td>MP Pary</td>
+                            <td>MP Party</td>
                             <td>Company</td>
                             <td>Sewage Dumps</td>
                             <td>Change</td>
@@ -59,7 +62,7 @@
                                 <td>{{this.rank}}</td>
                                 <td><a href="{{this.constituencyUri}}">{{this.constituencyName}}</a></td>
                                 <td>{{this.mp.name}}</td>
-                                <td>{{maybe this.mp.handle}}</td>
+                                <td>@@</td>
                                 <td><a href="{{this.mp.uri}}">Info</a></td>
                                 <td>{{this.mp.party}}</td>
                                 <td>{{this.company}}</td>
@@ -87,6 +90,17 @@
             });
 </script>
 
+<script>
+    const map = L.map("map-constituency", {scrollWheelZoom: false,});
+
+    fetch("/data/v1/")
+
+    const layer = L.geoJSON(JSON.parse(document.getElementById("map-geojson").textContent), {style: myStyle});
+    layer.addTo(map);
+    map.fitBounds(layer.getBounds())
+
+
+</script>
 
 </body>
 </html>

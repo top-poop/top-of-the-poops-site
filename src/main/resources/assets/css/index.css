@@ -78,6 +78,13 @@ h2 {
 
 /* --- */
 
+#table-constituency tbody td {
+    height: 3em;
+    overflow: hidden;
+}
+
+/* --- */
+
 .map {
     background-color: #fff;
     border-radius: 10px;

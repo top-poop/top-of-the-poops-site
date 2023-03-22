@@ -48,7 +48,8 @@ upgrade:
 PYTHON_DIR=venv/bin
 PYTHON=$(PYTHON_DIR)/python
 PIP=$(PYTHON_DIR)/pip
-GENERATE=generic.py
+SQL_TO_JSON=sql-to-json.py
+SQL_TO_TEXT=sql-to-text.py
 
 DATAFILES=datafiles
 
@@ -67,13 +68,21 @@ python: $(PYTHON)
 DATA_2021_SQL=$(wildcard sql/v1/2021/*.sql)
 DATA_2021_GENERATED=$(foreach sql,$(DATA_2021_SQL),$(DATAFILES)/v1/2021/$(basename $(notdir $(sql))).json)
 
+GEO_2021_SQL=$(wildcard sql/v1/2021/geo/*.sql)
+GEO_2021_GENERATED=$(foreach sql,$(GEO_2021_SQL),$(DATAFILES)/v1/2021/geo/$(basename $(notdir $(sql))).json)
+
 generated-data: generated-2021
 
 generated-2021: $(DATA_2021_GENERATED)
 
-$(DATAFILES)/v1/2021/%.json: sql/v1/2021/$(basename $(notdir %)).sql $(PYTHON) $(GENERATE)
+$(DATAFILES)/v1/2021/%.json: sql/v1/2021/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_JSON)
 	@mkdir -p $(dir $@)
-	$(PYTHON) $(GENERATE) $< $@
+	$(PYTHON) $(SQL_TO_JSON) $< $@
+
+$(DATAFILES)/v1/2021/geo/%.json:  sql/v1/2021/geo/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_TEXT)
+	@mkdir -p $(dir $@)
+	$(PYTHON) $(SQL_TO_TEXT) $< | jq -r tostring > $@
+
 
 
 .PHONY: constituencies
