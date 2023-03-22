@@ -18,6 +18,7 @@ data class MP(val name: String, val party: String, val handle: String?, val uri:
 data class ConstituencyRank(
     val rank: Int,
     val constituencyName: ConstituencyName,
+    val constituencyUri: Uri,
     val mp: MP,
     val company: String,
     val count: Int,

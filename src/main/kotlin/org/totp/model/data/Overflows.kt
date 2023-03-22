@@ -48,9 +48,11 @@ object ConstituencyRankings {
             objectMapper.readerForListOf(HashMap::class.java)
                 .readValue<List<Map<String, Any?>>>(response.bodyString())
                 .mapIndexed { r, it ->
+                    val constituencyName = ConstituencyName(it["constituency"] as String)
                     ConstituencyRank(
                         rank = r + 1,
-                        constituencyName = ConstituencyName(it["constituency"] as String),
+                        constituencyName = constituencyName,
+                        constituencyUri = Uri.of("/constituency/${ ConstituencySlug.from(constituencyName).value }"),
                         mp = MP(
                             name = it["mp_name"] as String,
                             party = it["mp_party"] as String,

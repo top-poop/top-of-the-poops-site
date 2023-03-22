@@ -33,5 +33,4 @@ object TotpHandlebars {
             it.registerHelper("concat") { context: Any, options -> (listOf(context) + options.params).joinToString("") }
         }
     }
-
 }

@@ -36,49 +36,57 @@
         <div class="row">
             <div class="col">
                 {{#> components/section title="Consituency Sewage" }}
-                    <div class="table-responsive">
-                        <div class="table-wrapper">
-                            <table data-id="constituency" class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <td>Rank</td>
-                                        <td>Constituency</td>
-                                        <td>MP</td>
-                                        <td>MP Contact</td>
-                                        <td>MP Info</td>
-                                        <td>MP Pary</td>
-                                        <td>Company</td>
-                                        <td>Sewage Dumps</td>
-                                        <td>Change</td>
-                                        <td>Duration</td>
-                                        <td>Change</td>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                {{#each rankings}}
-                                    <tr>
-                                        <td>{{this.rank}}</td>
-                                        <td>{{this.constituencyName.value}}</td>
-                                        <td>{{this.mp.name}}</td>
-                                        <td>{{maybe this.mp.handle}}</td>
-                                        <td>{{this.mp.uri}}</td>
-                                        <td>{{this.mp.party}}</td>
-                                        <td>{{this.company}}</td>
-                                        <td>{{this.count}}</td>
-                                        <td>{{this.countDelta}}</td>
-                                        <td>{{this.duration}}</td>
-                                        <td>{{this.durationDelta}}</td>
-                                    </tr>
-                                {{/each}}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <table id="table-constituency" data-id="constituency" class="table table-striped table-bordered"
+                           style="width: 100%">
+                        <thead>
+                        <tr>
+                            <td>Rank</td>
+                            <td>Constituency</td>
+                            <td>MP</td>
+                            <td>MP Contact</td>
+                            <td>MP Info</td>
+                            <td>MP Pary</td>
+                            <td>Company</td>
+                            <td>Sewage Dumps</td>
+                            <td>Change</td>
+                            <td>Duration</td>
+                            <td>Change</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#each rankings}}
+                            <tr>
+                                <td>{{this.rank}}</td>
+                                <td><a href="{{this.constituencyUri}}">{{this.constituencyName}}</a></td>
+                                <td>{{this.mp.name}}</td>
+                                <td>{{maybe this.mp.handle}}</td>
+                                <td><a href="{{this.mp.uri}}">Info</a></td>
+                                <td>{{this.mp.party}}</td>
+                                <td>{{this.company}}</td>
+                                <td>{{this.count}}</td>
+                                <td>{{this.countDelta}}</td>
+                                <td>{{this.duration.toHours}}</td>
+                                <td>{{this.durationDelta.toHours}}</td>
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
                 {{/components/section}}
             </div>
         </div>
     </div>
 
 </div>
+
+<script>
+    new DataTable('#table-constituency',
+            {
+                dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i>>"
+            });
+</script>
+
+
 </body>
 </html>
