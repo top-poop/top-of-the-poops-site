@@ -1,13 +1,47 @@
+check_defined = \
+    $(strip $(foreach 1,$1, \
+        $(call __check_defined,$1,$(strip $(value 2)))))
+__check_defined = \
+    $(if $(value $1),, \
+      $(error Undefined $1$(if $2, ($2))))
 
-IMAGE_NAME=nginx-data
-IMAGE_TAG = 0.1
+$(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
+
+SERVICE=data
+SERVICE_VERSION = 0.1
+
+IMAGE_NAME=totp-$(SERVICE)
+
+LOCAL_NAME=$(IMAGE_NAME):$(SERVICE_VERSION)
+FULL_NAME=$(DOCKER_HUB_ORG)/$(IMAGE_NAME):$(SERVICE_VERSION)
+
+
+.PHONY: check-context
+check-context:
+	@echo "Current docker context (expect 'default'):" $(shell docker context show)
+	@test $(shell docker context show) = default
 
 .PHONY: image
-image: generated-data
-	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+image: check-context generated-data
+	docker build -t $(LOCAL_NAME)  -t $(FULL_NAME) .
 
+.PHONY: image
 run: image
-	docker run  -p 8081:80 $(IMAGE_NAME):$(IMAGE_TAG)
+	docker run  -p 8081:80 $(LOCAL_NAME)
+
+.PHONY: push
+push: check-context
+	docker push $(FULL_NAME)
+
+.PHONY: deploy
+deploy:
+	@test $(shell docker context show) = "totp"
+	docker service create --with-registry-auth --name $(SERVICE) --network overlay-net $(FULL_NAME)
+
+.PHONY: upgrade
+upgrade:
+	@test $(shell docker context show) = "totp"
+	docker service update --with-registry-auth --image $(FULL_NAME) $(SERVICE)
 
 PYTHON_DIR=venv/bin
 PYTHON=$(PYTHON_DIR)/python
