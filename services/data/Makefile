@@ -8,7 +8,7 @@ __check_defined = \
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 
 SERVICE=data
-SERVICE_VERSION = 0.2
+SERVICE_VERSION = 0.3
 
 IMAGE_NAME=totp-$(SERVICE)
 

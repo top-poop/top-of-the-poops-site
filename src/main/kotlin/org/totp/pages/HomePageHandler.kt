@@ -9,9 +9,9 @@ import org.http4k.core.Uri
 import org.http4k.core.with
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.ConstituencyName
-import org.totp.model.data.GeoJSON
 import org.totp.model.data.MediaAppearance
 import java.time.Duration
 
@@ -33,7 +33,8 @@ data class ConstituencyRank(
 class HomePage(
     uri: Uri,
     val rankings: List<ConstituencyRank>,
-    val appearances: List<MediaAppearance>
+    val appearances: List<MediaAppearance>,
+    val share: SocialShare
 ) : PageViewModel(uri)
 
 object HomepageHandler {
@@ -50,9 +51,15 @@ object HomepageHandler {
             Response(Status.OK)
                 .with(
                     viewLens of HomePage(
-                        request.uri,
+                        pageUriFrom(request),
                         rankings().take(10),
-                        appearances().sortedByDescending { it.date }.take(9)
+                        appearances().sortedByDescending { it.date }.take(9),
+                        SocialShare(
+                            pageUriFrom(request),
+                            "Water companies are dumping #sewage into rivers and bathing areas all over the UK - over 470,000 times in 2021 - it needs to be stopped",
+                            listOf("sewage"),
+                            via = "@sewageuk"
+                        )
                     )
                 )
         }

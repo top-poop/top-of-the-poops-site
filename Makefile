@@ -10,7 +10,7 @@ $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 BUILD=./gradlew
 
 SERVICE=pages
-SERVICE_VERSION=0.2
+SERVICE_VERSION=0.4
 
 IMAGE_NAME=totp-$(SERVICE)
 

@@ -8,8 +8,7 @@
     {{> chunks/meta-styles }}
     {{> chunks/meta-scripts }}
 
-    {{> components/meta-facebook title=""}}
-    {{> components/meta-twitter title=""}}
+    {{> components/meta-opengraph title="Homepage"}}
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
@@ -35,8 +34,8 @@
             </div>
             <div class="row">
                 <div class="col">
-                    {{> components/share-facebook uri=uri}}
-                    {{> components/share-twitter uri=uri text="Hello" tags=["sewage","blah"] via="sewageuk"}}
+                    {{> components/share-facebook share}}
+                    {{> components/share-twitter share}}
                 </div>
             </div>
         </div>
@@ -69,7 +68,7 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            {{#> components/section title="Media" }}
+            {{#> components/section title="Top of the Poops in the Media" }}
                 <div class="row row-cols-1 row-cols-md-3">
                     {{#each appearances}}
                         <div class="col mb-4">

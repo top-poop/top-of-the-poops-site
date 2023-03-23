@@ -18,11 +18,13 @@ import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.extensions.kebabCase
+import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.CSOTotals
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.GeoJSON
 import org.totp.text.csv.readCSV
+import java.text.NumberFormat
 import java.time.Duration
 
 
@@ -73,10 +75,17 @@ data class ConstituencySummary(
 
 data class RenderableConstituency(val name: String, val current: Boolean, val uri: Uri)
 
+data class SocialShare(
+    val uri: Uri,
+    val text: String,
+    val tags: List<String>,
+    val via: String
+)
 
 class ConstituencyPage(
     uri: Uri,
     val name: ConstituencyName,
+    val share: SocialShare,
     val summary: ConstituencySummary,
     val geojson: GeoJSON,
     val csos: List<CSOTotals>,
@@ -115,6 +124,7 @@ object ConstituencyPageHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
         val constituencySlug = Path.value(ConstituencySlug).of("constituency", "The constituency")
+        val numberFormat = NumberFormat.getIntegerInstance()
 
         return ConstituencyRedirectFilter().then { request: Request ->
             val slug = constituencySlug(request)
@@ -131,12 +141,19 @@ object ConstituencyPageHandler {
                     }
 
                 val list = constituencySpills(constituencyName)
+                val summary = ConstituencySummary.from(list)
                 Response(Status.OK)
                     .with(
                         viewLens of ConstituencyPage(
-                            request.uri,
+                            pageUriFrom(request),
                             constituencyName,
-                            ConstituencySummary.from(list),
+                            SocialShare(
+                                pageUriFrom(request),
+                                text = "$constituencyName had ${numberFormat.format(summary.count)} sewage overflows in ${summary.year}",
+                                tags = listOf("sewage"),
+                                via = "@sewageuk"
+                            ),
+                            summary,
                             constituencyBoundary(constituencyName),
                             list.sortedByDescending { it.duration },
                             renderableConstituencies,

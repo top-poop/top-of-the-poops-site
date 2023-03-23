@@ -14,7 +14,6 @@ import org.http4k.format.Jackson
 import org.http4k.lens.boolean
 import org.http4k.lens.uri
 import org.http4k.routing.ResourceLoader
-import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.routing.static
@@ -29,11 +28,8 @@ import org.totp.model.data.ConstituencyCSOs
 import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.MediaAppearances
 import org.totp.pages.ConstituencyPageHandler
-import org.totp.pages.Decorators
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.HomepageHandler
-import org.totp.pages.SitemeshFilter
-import org.totp.pages.httpHandlerDecoratorSelector
 import java.time.Clock
 
 
@@ -107,7 +103,9 @@ fun main() {
     val data2021 = SetBaseUriFrom(Uri.of("/v1/2021")).then(dataClient)
 
     val server = Undertow(
-        if (isDevelopmentEnvironment) 8000 else { 80 }
+        if (isDevelopmentEnvironment) 8000 else {
+            80
+        }
     ).toServer(
         routes(
             "/" bind inboundFilters.then(
