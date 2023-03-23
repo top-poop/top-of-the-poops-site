@@ -65,9 +65,11 @@ fun main() {
     val isDevelopment =
         EnvironmentKey.boolean().required("DEVELOPMENT_MODE", "Use fake data server (local files) & hot reload")
     val dataServiceUri = EnvironmentKey.uri().required("DATA_SERVICE_URI", "URI for Data Service")
+    val debugging = EnvironmentKey.boolean().required("DEBUG_MODE", "Print all request and response")
 
     val defaultConfig = Environment.defaults(
         isDevelopment of false,
+        debugging of false,
         dataServiceUri of Uri.of("http://data")
     )
 
@@ -89,7 +91,7 @@ fun main() {
         devMode = isDevelopmentEnvironment
     )
 
-    val inboundFilters = StandardFilters.incoming(events)
+    val inboundFilters = StandardFilters.incoming(events, debugging(environment))
     val outboundFilters = StandardFilters.outgoing(events)
 
     val dataClient = if (isDevelopmentEnvironment) {
