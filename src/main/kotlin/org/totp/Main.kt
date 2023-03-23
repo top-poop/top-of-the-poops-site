@@ -23,6 +23,7 @@ import org.http4k.template.TemplateRenderer
 import org.totp.events.ServerStartedEvent
 import org.totp.http4k.StandardFilters
 import org.totp.model.TotpHandlebars
+import org.totp.model.data.BeachRankings
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyCSOs
 import org.totp.model.data.ConstituencyRankings
@@ -113,7 +114,8 @@ fun main() {
                 routes(
                     "/" bind HomepageHandler(
                         renderer = renderer,
-                        rankings = ConstituencyRankings(data2021),
+                        consituencyRankings = ConstituencyRankings(data2021),
+                        beachRankings = BeachRankings(data2021),
                         appearances = MediaAppearances(dataClient)
                     ),
                     "/media" bind MediaPageHandler(

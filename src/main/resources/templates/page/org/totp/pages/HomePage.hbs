@@ -57,7 +57,7 @@
 
             <h4>Top of The Poops - Constituencies</h4>
 
-            {{#each rankings}}
+            {{#each constituencyRankings}}
                 <div>
                     <b>{{this.rank}}.</b> <a
                         href="{{this.constituencyUri}}">{{this.constituencyName}}</a> {{numberFormat
@@ -81,9 +81,9 @@
 
             <h4>Top of The Poops - Beaches</h4>
 
-            {{#each beaches}}
+            {{#each beachRankings}}
                 <div>
-                    <b>{{this.rank}}.</b> {{this.constituencyName}}</a> {{numberFormat this.duration.toHours}} hours
+                    <b>{{this.rank}}.</b> {{this.beach}} {{numberFormat this.duration.toHours}} hours
                 </div>
             {{/each}}
         </div>

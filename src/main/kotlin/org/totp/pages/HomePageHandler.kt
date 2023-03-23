@@ -11,6 +11,7 @@ import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
+import org.totp.model.data.BeachRank
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.MediaAppearance
 import java.time.Duration
@@ -32,7 +33,8 @@ data class ConstituencyRank(
 @Suppress("unused")
 class HomePage(
     uri: Uri,
-    val rankings: List<ConstituencyRank>,
+    val constituencyRankings: List<ConstituencyRank>,
+    val beachRankings: List<BeachRank>,
     val appearances: List<MediaAppearance>,
     val share: SocialShare
 ) : PageViewModel(uri)
@@ -41,7 +43,8 @@ object HomepageHandler {
 
     operator fun invoke(
         renderer: TemplateRenderer,
-        rankings: () -> List<ConstituencyRank>,
+        consituencyRankings: () -> List<ConstituencyRank>,
+        beachRankings: () -> List<BeachRank>,
         appearances: () -> List<MediaAppearance>
     ): HttpHandler {
 
@@ -52,7 +55,8 @@ object HomepageHandler {
                 .with(
                     viewLens of HomePage(
                         pageUriFrom(request),
-                        rankings().take(10),
+                        consituencyRankings().take(10),
+                        beachRankings().take(10),
                         appearances().sortedByDescending { it.date }.take(8),
                         SocialShare(
                             pageUriFrom(request),

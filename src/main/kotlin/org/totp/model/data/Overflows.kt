@@ -53,7 +53,7 @@ object ConstituencyRankings {
                     ConstituencyRank(
                         rank = r + 1,
                         constituencyName = constituencyName,
-                        constituencyUri = Uri.of("/constituency/${ ConstituencySlug.from(constituencyName).value }"),
+                        constituencyUri = Uri.of("/constituency/${ConstituencySlug.from(constituencyName).value}"),
                         mp = MP(
                             name = it["mp_name"] as String,
                             party = it["mp_party"] as String,
@@ -65,6 +65,34 @@ object ConstituencyRankings {
                         duration = Duration.ofHours((it["total_hours"] as Double).toLong()),
                         countDelta = (it["spills_increase"] as Double).toInt(),
                         durationDelta = Duration.ofHours((it["hours_increase"] as Double).toLong())
+                    )
+                }
+        }
+    }
+}
+
+
+data class BeachRank(
+    val rank: Int,
+    val beach: String,
+    val company: String,
+    val count: Int,
+    val duration: Duration,
+)
+
+object BeachRankings {
+    operator fun invoke(handler: HttpHandler): () -> List<BeachRank> {
+        return {
+            val response = handler(Request(Method.GET, "spills-by-beach.json"))
+
+            objectMapper.readSimpleList(response.bodyString())
+                .mapIndexed { r, it ->
+                    BeachRank(
+                        rank = r + 1,
+                        beach = it["bathing"] as String,
+                        company = it["company_name"] as String,
+                        duration = Duration.ofHours((it["total_spill_hours"] as Double).toLong()),
+                        count = (it["total_spill_count"] as Double).toInt(),
                     )
                 }
         }

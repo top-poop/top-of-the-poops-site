@@ -9,6 +9,7 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
+import org.totp.model.data.BeachRank
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.MediaAppearance
@@ -27,7 +28,7 @@ class HomepageHandlerTest {
     val service = routes(
         "/" bind Method.GET to HomepageHandler(
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
-            rankings = {
+            consituencyRankings = {
                 listOf(
                     ConstituencyRank(
                         1,
@@ -52,6 +53,9 @@ class HomepageHandlerTest {
                         Duration.ofHours(20)
                     )
                 )
+            },
+            beachRankings = {
+                listOf(BeachRank(1, "beach", "company", 10, Duration.ofHours(1)))
             },
             appearances = {
                 listOf(
