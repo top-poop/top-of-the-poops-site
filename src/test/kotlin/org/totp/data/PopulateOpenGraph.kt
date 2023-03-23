@@ -26,7 +26,7 @@ fun main() {
             .then(EventFilters.AddServiceName("pages"))
             .then(AutoMarshallingEvents(Jackson))
 
-    val mediaJson = Bob::class.java.getResource("/data/media-appearances.json").readText()
+    val mediaJson = Bob::class.java.getResource("/services/data/provided/media-appearances.json").readText()
 
     val okHttpClient = StandardFilters.outgoing(events)
         .then(ClientFilters.FollowRedirects())

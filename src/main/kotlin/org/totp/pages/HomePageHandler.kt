@@ -12,6 +12,7 @@ import org.http4k.template.viewModel
 import org.totp.model.PageViewModel
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.GeoJSON
+import org.totp.model.data.MediaAppearance
 import java.time.Duration
 
 data class MP(val name: String, val party: String, val handle: String?, val uri: Uri)
@@ -29,13 +30,18 @@ data class ConstituencyRank(
 )
 
 @Suppress("unused")
-class HomePage(uri: Uri, val rankings: List<ConstituencyRank>) : PageViewModel(uri)
+class HomePage(
+    uri: Uri,
+    val rankings: List<ConstituencyRank>,
+    val appearances: List<MediaAppearance>
+) : PageViewModel(uri)
 
 object HomepageHandler {
 
     operator fun invoke(
         renderer: TemplateRenderer,
         rankings: () -> List<ConstituencyRank>,
+        appearances: () -> List<MediaAppearance>
     ): HttpHandler {
 
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
@@ -46,6 +52,7 @@ object HomepageHandler {
                     viewLens of HomePage(
                         request.uri,
                         rankings().take(10),
+                        appearances().sortedByDescending { it.date }.take(9)
                     )
                 )
         }

@@ -1,10 +1,24 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Constituency - {{ name.value }}</title>
+    <meta charset="utf-8"/>
+    <title>Top of the Poops | Constituency | {{ name }}</title>
+    <meta name="description" content="Analysing sewage dumps by water companies in {{ name }}">
+
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
     <link rel="stylesheet" href="/assets/css/leaflet.css"/>
     <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
+
+    {{> components/meta-facebook title=name }}
+    {{> components/meta-twitter title=name }}
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
 </head>
 <body>
+{{> chunks/title }}
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-8">
@@ -20,18 +34,20 @@
         <div class="col">
             <div class="row">
                 <div class="col">
-                    <div role="alert" class="fade alert alert-success show">Select the constituency from the drop-down</div>
+                    <div role="alert" class="fade alert alert-success show">Select the constituency from the drop-down
+                    </div>
                     <form>
                         <div class="form-group">
                             <label class="form-label">Constituency</label>
                             <select class="custom-select custom-select-lg" name="constituency" id="constituency-select">
                                 {{#each constituencies}}
-                                    <option value="{{this.uri}}"{{#if this.current}}selected{{/if}}>{{this.name}}</option>
+                                    <option value="{{this.uri}}"
+                                            {{#if this.current}}selected{{/if}}>{{this.name}}</option>
                                 {{/each}}
                             </select>
                             <script>
                                 document.getElementById("constituency-select")
-                                        .onchange=(e) => window.location = e.target.value;
+                                        .onchange = (e) => window.location = e.target.value;
                             </script>
                         </div>
                     </form>
@@ -39,7 +55,7 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <div class="card">
+                    <div class="card  mb-3">
                         <div class="card-header">Totals for {{ name.value }} in {{summary.year}}</div>
                         <div class="card-body">
                             <h5 class="card-title">{{summary.locationCount}} Sites polluted by {{join summary.companies
@@ -54,7 +70,7 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <div class="card">
+                    <div class="card  mb-3">
                         <div class="card-header">Take Action</div>
                         <div class="card-body">
                             <div class="card-text">
@@ -68,7 +84,7 @@
 
             <div class="row">
                 <div class="col">
-                    <div class="card">
+                    <div class="card mb-3">
                         <div class="card-header">Explore</div>
                         <div class="card-body">For information on pollution by <b>
                             <a class="card-link" href="/">River</a></b>, <b>
@@ -121,6 +137,16 @@
         </div>
     </div>
 </div>
+
+<div id="footer" class="container">
+    <div class="row">
+        <div class="col">{{> chunks/data-sources }}</div>
+    </div>
+    <div class="row">
+        <div class="col">{{> chunks/copyright }}</div>
+    </div>
+</div>
+
 
 <script>
     const myStyle = {

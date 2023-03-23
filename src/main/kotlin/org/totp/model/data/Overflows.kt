@@ -7,10 +7,12 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Uri
+import org.totp.extensions.readSimpleList
 import org.totp.pages.ConstituencyRank
 import org.totp.pages.ConstituencySlug
 import org.totp.pages.MP
 import java.time.Duration
+import java.time.LocalDate
 
 data class CSOTotals(
     val constituency: ConstituencyName,
@@ -45,8 +47,7 @@ object ConstituencyRankings {
         return {
             val response = handler(Request(Method.GET, "spills-by-constituency.json"))
 
-            objectMapper.readerForListOf(HashMap::class.java)
-                .readValue<List<Map<String, Any?>>>(response.bodyString())
+            objectMapper.readSimpleList(response.bodyString())
                 .mapIndexed { r, it ->
                     val constituencyName = ConstituencyName(it["constituency"] as String)
                     ConstituencyRank(
@@ -77,8 +78,7 @@ object ConstituencyCSOs {
             val response = handler(Request(Method.GET, "spills-all.json"))
 
             val list =
-                objectMapper.readerForListOf(HashMap::class.java)
-                    .readValue<List<Map<String, Any>>>(response.bodyString())
+                objectMapper.readSimpleList(response.bodyString())
                     .map {
                         CSOTotals(
                             constituency = ConstituencyName(it["constituency"] as String),
@@ -101,3 +101,31 @@ object ConstituencyCSOs {
         }
     }
 }
+
+data class MediaAppearance(
+    val title: String,
+    val publication: String,
+    val date: LocalDate,
+    val uri: Uri,
+    val imageUri: Uri
+)
+
+object MediaAppearances {
+    operator fun invoke(handler: HttpHandler): () -> List<MediaAppearance> {
+        return {
+            val response = handler(Request(Method.GET, "media-appearances.json"))
+
+            objectMapper.readSimpleList(response.bodyString())
+                .map {
+                    MediaAppearance(
+                        title = it["title"] as String,
+                        publication = it["where"] as String,
+                        date = LocalDate.parse(it["date"] as String),
+                        uri = Uri.of(it["href"] as String),
+                        imageUri = Uri.of(it["image"] as String)
+                    )
+                }
+        }
+    }
+}
+

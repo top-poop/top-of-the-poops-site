@@ -11,13 +11,16 @@ import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencyRankings
+import org.totp.model.data.MediaAppearance
+import org.totp.model.data.MediaAppearances
 import strikt.api.expectThat
 import strikt.assertions.get
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
-import strikt.assertions.isGreaterThan
-import strikt.assertions.size
+import strikt.assertions.isNotEmpty
 import java.time.Duration
+import java.time.LocalDate
+
 
 class HomepageHandlerTest {
 
@@ -49,6 +52,17 @@ class HomepageHandlerTest {
                         Duration.ofHours(20)
                     )
                 )
+            },
+            appearances = {
+                listOf(
+                    MediaAppearance(
+                        title = "Here",
+                        publication = "Mag",
+                        date = LocalDate.of(1996, 12, 25),
+                        uri = Uri.of("http:/example.com"),
+                        imageUri = Uri.of("http://example.com/image.jpg")
+                    )
+                )
             }
         )
     )
@@ -57,9 +71,34 @@ class HomepageHandlerTest {
     fun `renders the homepage`() {
         val html = Html(service(Request(Method.GET, "/")))
 
-        expectThat(html).select("table[data-id='constituency']").hasSize(1)
-        expectThat(html).select("table[data-id='constituency'] tbody tr").and {
-            size.isGreaterThan(2)
+        expectThat(html).select("#footer").isNotEmpty()
+    }
+
+
+    @Test
+    fun `loading media appearances`() {
+
+        val text = """[
+  {
+    "href": "http://example.com",
+    "where": "Some August Publication",
+    "title": "Nice Title",
+    "date": "2022-01-01",
+    "image": "http://example.com/image.jpg"
+  }]
+"""
+        val rankings = MediaAppearances(
+            routes("media-appearances.json" bind { _: Request -> Response(Status.OK).body(text) })
+        )
+
+        expectThat(rankings()).hasSize(1).and {
+            get(0).and {
+                get { uri }.isEqualTo(Uri.of("http://example.com"))
+                get { publication }.isEqualTo("Some August Publication")
+                get { title }.isEqualTo("Nice Title")
+                get { date }.isEqualTo(LocalDate.of(2022, 1, 1))
+                get { imageUri }.isEqualTo(Uri.of("http://example.com/image.jpg"))
+            }
         }
     }
 

@@ -1,14 +1,26 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="utf-8"/>
+    <title>Top of the Poops</title>
+    <meta name="description" content="Analysing sewage dumps by water companies in the UK">
 
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
+    {{> components/meta-facebook title=""}}
+    {{> components/meta-twitter title=""}}
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
+{{> chunks/title }}
 <div class="container-fluid">
-    <div class="row justify-content-md-center">
+    <div class="row justify-content-md-center  align-items-center">
         <div class="col-md-4 offset-md-2">
             <div class="row">
                 <div class="col">
-                    <h2 class="display-4">A Petri Dish</h2>
+                    <div class="display-4">A Petri Dish</div>
                     <p>Here are all the CSOs in England and Wales that 'overflowed' in 2021 - dumping raw or
                         minimally treated sewage into fragile chalk streams, rivers, onto beaches and into shellfish
                         areas</p>
@@ -30,12 +42,12 @@
         </div>
         <div id="map-spills" class="col-md-6 sewage-map"></div>
     </div>
-    <div class="row justify-content-md-center">
+    <div class="row justify-content-md-center align-items-center">
         <div class="col-md-6 offset-md-1">
             <div id="map-constituency" class="sewage-map"></div>
         </div>
         <div class="col-md-4">
-            <h2 class="display-4">Sewage everywhere</h2>
+            <div class="display-4">Sewage everywhere</div>
 
             <p>There is sewage in almost every constituency across England and Wales. This then flows into the
                 rivers,
@@ -58,20 +70,32 @@
     <div class="row">
         <div class="col">
             {{#> components/section title="Media" }}
-
-            <div class="card-group">
-                {{#each media}}
-                    <div class="card">
-                        <img src="{{this.imageUri}}" class="card-img-top" alt="Article image for {{this.publication}}">
-                        <div class="card-body">
-                            <h5 class="card-title">{{this.publication}}</h5>
-                            <p class="card-text">{{this.title}}</p>
-                            <p class="card-text"><small class="text-muted">{{dateFormat this.date}}</small></p>
+                <div class="row row-cols-1 row-cols-md-3">
+                    {{#each appearances}}
+                        <div class="col mb-4">
+                            <div class="card h-100">
+                                <img src="{{this.imageUri}}" class="card-img-top"
+                                     alt="Article image for {{this.publication}}">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{this.publication}}</h5>
+                                    <p class="card-text">{{this.title}}</p>
+                                    <p class="card-text"><small class="text-muted">{{dateFormat this.date}}</small></p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                {{/each}}
+                    {{/each}}
+                </div>
             {{/components/section}}
         </div>
+    </div>
+</div>
+
+<div id="footer" class="container">
+    <div class="row">
+        <div class="col">{{> chunks/data-sources }}</div>
+    </div>
+    <div class="row">
+        <div class="col">{{> chunks/copyright }}</div>
     </div>
 </div>
 

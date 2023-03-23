@@ -27,6 +27,7 @@ import org.totp.model.TotpHandlebars
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyCSOs
 import org.totp.model.data.ConstituencyRankings
+import org.totp.model.data.MediaAppearances
 import org.totp.pages.ConstituencyPageHandler
 import org.totp.pages.Decorators
 import org.totp.pages.EnsureSuccessfulResponse
@@ -35,14 +36,6 @@ import org.totp.pages.SitemeshFilter
 import org.totp.pages.httpHandlerDecoratorSelector
 import java.time.Clock
 
-
-object InternalRoutes {
-    operator fun invoke(renderer: TemplateRenderer): RoutingHttpHandler {
-        return routes(
-            "/decorator/{decorator}" bind Decorators(renderer)
-        )
-    }
-}
 
 object Resources {
 
@@ -96,15 +89,6 @@ fun main() {
         devMode = isDevelopmentEnvironment
     )
 
-    val internalRoutes = InternalRoutes(renderer)
-
-    val sitemesh = SitemeshFilter(
-        decoratorSelector = httpHandlerDecoratorSelector(
-            handler = EnsureSuccessfulResponse().then(internalRoutes),
-            mapper = { Uri.of("/decorator/main") }
-        )
-    )
-
     val inboundFilters = StandardFilters.incoming(events)
     val outboundFilters = StandardFilters.outgoing(events)
 
@@ -124,11 +108,12 @@ fun main() {
         if (isDevelopmentEnvironment) 8000 else { 80 }
     ).toServer(
         routes(
-            "/" bind inboundFilters.then(sitemesh).then(
+            "/" bind inboundFilters.then(
                 routes(
                     "/" bind HomepageHandler(
                         renderer = renderer,
-                        rankings = ConstituencyRankings(data2021)
+                        rankings = ConstituencyRankings(data2021),
+                        appearances = MediaAppearances(dataClient)
                     ),
                     "/constituency/{constituency}" bind ConstituencyPageHandler(
                         renderer = renderer,

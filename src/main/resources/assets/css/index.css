@@ -97,26 +97,26 @@ h2 {
 
 /* --- */
 
-.card {
-    background-color: #fff;
-    border-radius: 10px;
-    border: none;
-    position: relative;
-    margin-bottom: 30px;
-    box-shadow: 0 0.46875rem 2.1875rem rgba(90,97,105,0.1), 0 0.9375rem 1.40625rem rgba(90,97,105,0.1), 0 0.25rem 0.53125rem rgba(90,97,105,0.12), 0 0.125rem 0.1875rem rgba(90,97,105,0.1);
-}
+/*.card {*/
+/*    background-color: #fff;*/
+/*    border-radius: 10px;*/
+/*    border: none;*/
+/*    position: relative;*/
+/*    margin-bottom: 30px;*/
+/*    box-shadow: 0 0.46875rem 2.1875rem rgba(90,97,105,0.1), 0 0.9375rem 1.40625rem rgba(90,97,105,0.1), 0 0.25rem 0.53125rem rgba(90,97,105,0.12), 0 0.125rem 0.1875rem rgba(90,97,105,0.1);*/
+/*}*/
 
-.card-title {
-    font-size: 2rem;
-    margin-top: 1.5rem;
-}
+/*.card-title {*/
+/*    font-size: 2rem;*/
+/*    margin-top: 1.5rem;*/
+/*}*/
 
-.card-metric {
-    display: inline-block;
-    font-size: 3rem;
-    font-weight: 600;
-    color: #fff;
-}
+/*.card-metric {*/
+/*    display: inline-block;*/
+/*    font-size: 3rem;*/
+/*    font-weight: 600;*/
+/*    color: #fff;*/
+/*}*/
 
 .l-bg-cherry {
     background: linear-gradient(to right, #493240, #f09) !important;

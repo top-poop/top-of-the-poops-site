@@ -10,6 +10,7 @@ import strikt.api.Assertion
 import strikt.api.DescribeableBuilder
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNotEmpty
 
 fun Assertion.Builder<Document>.select(selector:String): DescribeableBuilder<Elements> {
     return get { this.select(selector) }
