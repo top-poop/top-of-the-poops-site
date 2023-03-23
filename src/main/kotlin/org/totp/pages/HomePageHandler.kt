@@ -53,7 +53,7 @@ object HomepageHandler {
                     viewLens of HomePage(
                         pageUriFrom(request),
                         rankings().take(10),
-                        appearances().sortedByDescending { it.date }.take(9),
+                        appearances().sortedByDescending { it.date }.take(8),
                         SocialShare(
                             pageUriFrom(request),
                             "Water companies are dumping #sewage into rivers and bathing areas all over the UK - over 470,000 times in 2021 - it needs to be stopped",
