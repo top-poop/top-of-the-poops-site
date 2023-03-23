@@ -139,7 +139,8 @@ fun main() {
                     )
                 )
             ),
-            "/assets" bind static(Resources.assets(isDevelopmentEnvironment))
+            "/data" bind inboundFilters.then(static(ResourceLoader.Directory("services/data/datafiles"))),
+            "/assets" bind static(Resources.assets(isDevelopmentEnvironment)),
         )
     )
 

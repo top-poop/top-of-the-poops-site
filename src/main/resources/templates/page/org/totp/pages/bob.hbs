@@ -1,0 +1,81 @@
+<div class="row">
+    <div class="col">
+        <table id="table-constituency" data-id="constituency" class="table table-striped"
+               style="width: 100%">
+            <thead>
+            <tr>
+                <td>Rank</td>
+                <td>Constituency</td>
+                <td>MP</td>
+                <td>MP Contact</td>
+                <td>MP Info</td>
+                <td>MP Party</td>
+                <td>Company</td>
+                <td>Sewage Dumps</td>
+                <td>Change</td>
+                <td>Duration</td>
+                <td>Change</td>
+            </tr>
+            </thead>
+            <tbody>
+            {{#each rankings}}
+                <tr>
+                    <td>{{this.rank}}</td>
+                    <td><a href="{{this.constituencyUri}}">{{this.constituencyName}}</a></td>
+                    <td>{{this.mp.name}}</td>
+                    <td>@@</td>
+                    <td><a href="{{this.mp.uri}}">Info</a></td>
+                    <td>{{this.mp.party}}</td>
+                    <td>{{this.company}}</td>
+                    <td>{{this.count}}</td>
+                    <td>{{this.countDelta}}</td>
+                    <td>{{this.duration.toHours}}</td>
+                    <td>{{this.durationDelta.toHours}}</td>
+                </tr>
+            {{/each}}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    new DataTable('#table-constituency',
+            {
+                dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i>>"
+            });
+</script>
+
+
+<div class="row">
+    <div class="col">
+        {{#> components/section title="It's not just a few outliers" }}
+            <p>There aren't just a handful of poorly behaving outlets, its a problem across the board. Here we can see how long each individual CSO
+                was polluting in 2021. You can see that many of them were polluting for long periods. The vertical lines indicate one month of pollution.
+                Many CSOs were polluting for more than a month over the year. A few were polluting for more than half the year!</p>
+            <p>While some water companies are clearly worse than others, there are no <em>good</em> ones - every single water company has some CSOs that are polluting for more than 4 months
+                of the year.</p>
+
+            <p>Another way of looking at the data is to visualise 'how many CSOs are polluting for longer than a certain time'. All CSOs will be polluting for zero or more hours,
+                and eventually as we increase the time, there will come a point where no CSOs are polluting for that long.</p>
+            <p>From the chart above we can see that some CSOs are polluting for almost the whole year. Using the same scale, we can see below
+                that a significant number of the CSOs are polluting for many months.</p>
+            <p>An an example, looking down the line of '2m' - we can see that Dwr Cymru has 150 CSO's that are polluting for more than two months of the year, while
+                United Utilities has about 95.</p>
+        {{/components/section}}
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col">
+        {{#> components/section title="But, it's getting better, right?" }}
+
+            <p>Unfortunately, in the years that we have been analysing the data, there hasn't been much progress. We can hope for some evidence of improvement when the 2022 figures come out at the end of March 2023</p>
+            <p>The numbers in this chart are very big, but a total of 850,000 hours is equivalent to a single CSO polluting continuously for <b>97 years</b></p>
+        {{/components/section}}
+    </div>
+</div>
+
+

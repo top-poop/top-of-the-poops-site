@@ -58,7 +58,7 @@ h2 {
     text-decoration: none;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 961px) {
     .sewage-map {
         height: 550px;
     }
@@ -67,7 +67,7 @@ h2 {
     }
 }
 
-@media screen and (min-width: 600px) {
+@media screen and (min-width: 961px) {
     .sewage-map {
         height: 800px;
     }

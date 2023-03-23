@@ -4,13 +4,11 @@
 </head>
 <body>
 <div class="container-fluid">
-    <div class="row justify-content-md-center align-items-center">
-        <div class="col-md-4 offset-md-1 sewage-map">
-
-        </div>
-        <div class="col-md-4">
+    <div class="row justify-content-md-center">
+        <div class="col-md-4 offset-md-2">
             <div class="row">
                 <div class="col">
+                    <h2 class="display-4">A Petri Dish</h2>
                     <p>Here are all the CSOs in England and Wales that 'overflowed' in 2021 - dumping raw or
                         minimally treated sewage into fragile chalk streams, rivers, onto beaches and into shellfish
                         areas</p>
@@ -30,77 +28,128 @@
                 </div>
             </div>
         </div>
+        <div id="map-spills" class="col-md-6 sewage-map"></div>
     </div>
+    <div class="row justify-content-md-center">
+        <div class="col-md-6 offset-md-1">
+            <div id="map-constituency" class="sewage-map"></div>
+        </div>
+        <div class="col-md-4">
+            <h2 class="display-4">Sewage everywhere</h2>
 
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                {{#> components/section title="Consituency Sewage" }}
+            <p>There is sewage in almost every constituency across England and Wales. This then flows into the
+                rivers,
+                creating a horrible environment for fish and other creatures - it poisons them, and the rivers
+                die.</p>
 
-                    <div id="map-constituency"></div>
+            <h4>Top of The Poops - Constituencies</h4>
 
-                    <table id="table-constituency" data-id="constituency" class="table table-striped"
-                           style="width: 100%">
-                        <thead>
-                        <tr>
-                            <td>Rank</td>
-                            <td>Constituency</td>
-                            <td>MP</td>
-                            <td>MP Contact</td>
-                            <td>MP Info</td>
-                            <td>MP Party</td>
-                            <td>Company</td>
-                            <td>Sewage Dumps</td>
-                            <td>Change</td>
-                            <td>Duration</td>
-                            <td>Change</td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {{#each rankings}}
-                            <tr>
-                                <td>{{this.rank}}</td>
-                                <td><a href="{{this.constituencyUri}}">{{this.constituencyName}}</a></td>
-                                <td>{{this.mp.name}}</td>
-                                <td>@@</td>
-                                <td><a href="{{this.mp.uri}}">Info</a></td>
-                                <td>{{this.mp.party}}</td>
-                                <td>{{this.company}}</td>
-                                <td>{{this.count}}</td>
-                                <td>{{this.countDelta}}</td>
-                                <td>{{this.duration.toHours}}</td>
-                                <td>{{this.durationDelta.toHours}}</td>
-                            </tr>
-                        {{/each}}
-                        </tbody>
-                    </table>
-                {{/components/section}}
-            </div>
+            {{#each rankings}}
+                <div>
+                    <b>{{this.rank}}.</b> <a
+                        href="{{this.constituencyUri}}">{{this.constituencyName}}</a> {{numberFormat
+                        this.duration.toHours}} hours
+                </div>
+            {{/each}}
         </div>
     </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            {{#> components/section title="Media" }}
 
+            <div class="card-group">
+                {{#each media}}
+                    <div class="card">
+                        <img src="{{this.imageUri}}" class="card-img-top" alt="Article image for {{this.publication}}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{this.publication}}</h5>
+                            <p class="card-text">{{this.title}}</p>
+                            <p class="card-text"><small class="text-muted">{{dateFormat this.date}}</small></p>
+                        </div>
+                    </div>
+                {{/each}}
+            {{/components/section}}
+        </div>
+    </div>
 </div>
 
-<script>
-    new DataTable('#table-constituency',
-            {
-                dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +
-                        "<'row'<'col-sm-12'tr>>" +
-                        "<'row'<'col-sm-12 col-md-5'i>>"
-            });
+<script type="module">
+    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
+
+    const chart = (data) => document.getElementById("map-spills").append(
+            Plot.plot({
+                        caption: "© CC-BY-SA-4.0 top-of-the-poops.org",
+                        projection: {
+                            type: "mercator",
+                            domain: {
+                                type: "MultiPoint",
+                                coordinates: [[-6, 49.9], [1.8, 55.9]],
+                            },
+                        },
+                        width: 800,
+                        r: {range: [1, 15], domain: [0, 8700]},
+                        marks: [
+                            Plot.dot(
+                                    data,
+                                    {
+                                        x: "lon",
+                                        y: "lat",
+                                        r: "total_spill_hours",
+                                        fill: "company_name",
+                                        opacity: 0.7,
+                                        mixBlendMode: "multiply",
+                                    }
+                            ),
+                        ]
+                    }
+            )
+    );
+
+    const r = await fetch("/data/v1/2021/spills-all.json");
+    if (r.ok) {
+        chart(await r.json())
+    }
+
 </script>
 
-<script>
-    const map = L.map("map-constituency", {scrollWheelZoom: false,});
+<script type="module">
 
-    fetch("/data/v1/")
+    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
 
-    const layer = L.geoJSON(JSON.parse(document.getElementById("map-geojson").textContent), {style: myStyle});
-    layer.addTo(map);
-    map.fitBounds(layer.getBounds())
+    const formatNumber = (n, m) => n.toLocaleString(undefined, {
+        minimumFractionDigits: m ? m : 0,
+        maximumFractionDigits: m ? m : 0
+    });
 
+    const chart = (data) => document.getElementById("map-constituency").append(
+            Plot.plot({
+                projection: {
+                    type: "mercator",
+                    domain: {
+                        type: "MultiPoint",
+                        coordinates: [[-6, 49.9], [1.8, 55.9]],
+                    },
+                },
+                width: 800,
+                color: {
+                    scheme: "reds",
+                },
+                marks: [
+                    Plot.geo(data, {
+                        fill: d => d.properties.total_hours,
+                        title: d => `${d.properties.constituency}: ${formatNumber(d.properties.total_hours)} hours of sewage`,
+                        stroke: "black",
+                        strokeOpacity: 0.5,
+                    }),
+                ]
+            }));
 
+    const r = await fetch("/data/v1/2021/geo/choropleth.json");
+    if (r.ok) {
+        chart(await r.json())
+    }
 </script>
-
 </body>
 </html>

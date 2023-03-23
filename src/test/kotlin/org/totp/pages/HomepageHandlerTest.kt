@@ -29,6 +29,7 @@ class HomepageHandlerTest {
                     ConstituencyRank(
                         1,
                         ConstituencyName("a"),
+                        Uri.of("/con/1"),
                         MP("mp1", "con", "handle1", Uri.of("https://example.com/1")),
                         "company 1",
                         100,
@@ -39,6 +40,7 @@ class HomepageHandlerTest {
                     ConstituencyRank(
                         2,
                         ConstituencyName("b"),
+                        Uri.of("/con/2"),
                         MP("mp2", "noc", "handle2", Uri.of("https://example.com/2")),
                         "company 2",
                         2,
