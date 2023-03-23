@@ -30,6 +30,7 @@ import org.totp.model.data.MediaAppearances
 import org.totp.pages.ConstituencyPageHandler
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.HomepageHandler
+import org.totp.pages.MediaPageHandler
 import java.time.Clock
 
 
@@ -113,6 +114,10 @@ fun main() {
                     "/" bind HomepageHandler(
                         renderer = renderer,
                         rankings = ConstituencyRankings(data2021),
+                        appearances = MediaAppearances(dataClient)
+                    ),
+                    "/media" bind MediaPageHandler(
+                        renderer = renderer,
                         appearances = MediaAppearances(dataClient)
                     ),
                     "/constituency/{constituency}" bind ConstituencyPageHandler(

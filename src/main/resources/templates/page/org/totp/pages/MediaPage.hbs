@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Top of the Poops</title>
+    <meta name="description" content="Analysing sewage dumps by water companies in the UK">
+
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
+    {{> components/meta-opengraph title="Homepage"}}
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+{{> chunks/title }}
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            {{#> components/section title="Top of the Poops in the Media" }}
+                <div class="row row-cols-1 row-cols-md-4">
+                    {{#each appearances}}
+                        <div class="col mb-4">
+                            <div class="card h-100">
+                                <a href="{{this.uri}}"><img src="{{this.imageUri}}" class="card-img-top"
+                                                            alt="Article image for {{this.publication}}"></a>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{this.publication}}</h5>
+                                    <p class="card-text">{{this.title}}</p>
+                                    <p class="card-text"><small class="text-muted">{{dateFormat this.date}}</small></p>
+                                </div>
+                            </div>
+                        </div>
+                    {{/each}}
+                </div>
+            {{/components/section}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            {{#> components/section title="Contact Us" }}
+                <p>If you would like to contact us, please get in touch with 'info' [at] top-of-the-poops.org</p>
+                <p>For press queries please use 'press' [at] top-of-the-poops.org</p>
+            {{/components/section}}
+        </div>
+    </div>
+</div>
+<div id="footer" class="container">
+    <div class="row">
+        <div class="col">{{> chunks/data-sources }}</div>
+    </div>
+    <div class="row">
+        <div class="col">{{> chunks/copyright }}</div>
+    </div>
+</div>
+
+</body>
+</html>
