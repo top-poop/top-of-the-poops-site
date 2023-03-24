@@ -8,13 +8,12 @@ __check_defined = \
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 
 SERVICE=data
-SERVICE_VERSION = 0.3
+SERVICE_VERSION=$(shell find . -type f -printf '%AF-%AH%AM %p\n' | sort -n | tail -1 | cut -d ' ' -f1)
 
 IMAGE_NAME=totp-$(SERVICE)
 
 LOCAL_NAME=$(IMAGE_NAME):$(SERVICE_VERSION)
 FULL_NAME=$(DOCKER_HUB_ORG)/$(IMAGE_NAME):$(SERVICE_VERSION)
-
 
 .PHONY: check-context
 check-context:
@@ -25,7 +24,7 @@ check-context:
 image: check-context generated-data
 	docker build -t $(LOCAL_NAME)  -t $(FULL_NAME) .
 
-.PHONY: image
+.PHONY: run
 run: image
 	docker run  -p 8081:80 $(LOCAL_NAME)
 

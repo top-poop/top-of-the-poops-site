@@ -10,7 +10,7 @@ $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 BUILD=./gradlew
 
 SERVICE=pages
-SERVICE_VERSION=0.5
+SERVICE_VERSION=$(shell find src Makefile build.gradle -type f -printf '%AF-%AH%AM %p\n' | sort -n | tail -1 | cut -d ' ' -f1)
 
 IMAGE_NAME=totp-$(SERVICE)
 

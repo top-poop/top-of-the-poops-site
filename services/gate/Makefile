@@ -8,7 +8,7 @@ __check_defined = \
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 
 SERVICE=gate
-SERVICE_VERSION = 0.10
+SERVICE_VERSION=$(shell find . -type f -printf '%AF-%AH%AM %p\n' | sort -n | tail -1 | cut -d ' ' -f1)
 
 IMAGE_NAME=totp-$(SERVICE)
 
