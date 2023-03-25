@@ -29,6 +29,7 @@ import org.totp.model.data.ConstituencyCSOs
 import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.MediaAppearances
 import org.totp.model.data.WaterCompanies
+import org.totp.pages.BeachesPageHandler
 import org.totp.pages.ConstituenciesPageHandler
 import org.totp.pages.ConstituencyPageHandler
 import org.totp.pages.EnsureSuccessfulResponse
@@ -128,6 +129,10 @@ fun main() {
                     "/constituencies" bind ConstituenciesPageHandler(
                         renderer = renderer,
                         consituencyRankings = ConstituencyRankings(data2021)
+                    ),
+                    "/beaches" bind BeachesPageHandler(
+                        renderer = renderer,
+                        beachRankings = BeachRankings(data2021)
                     ),
                     "/constituency/{constituency}" bind ConstituencyPageHandler(
                         renderer = renderer,

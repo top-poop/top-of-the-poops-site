@@ -49,7 +49,8 @@
             <div class="display-4">Sewage everywhere</div>
 
             <div class="mb-3">
-                <p>There is sewage overflowing into rivers in almost every constituency across England and Wales. A very few
+                <p>There is sewage overflowing into rivers in almost every constituency across England and Wales. A very
+                    few
                     miss out, simply because they don't have
                     any CSOs - Combined Sewage Overflows - that mix rainwater and toilet sewage.
                     This then flows into the rivers, creating a horrible environment for fish and other creatures - it
@@ -85,23 +86,28 @@
         <div class="col-md-4">
             <div class="display-4">Swimming in sewage</div>
 
-            <p>Most, if not actually all, of the beaches and designated coastal bathing locations around England
-                and Wales are regular recipients of a good layer of sewage.</p>
+            <div class="mb-4">
+                <p>Most, if not actually all, of the beaches and designated coastal bathing locations around England
+                    and Wales are regular recipients of a good layer of sewage.</p>
 
-            <p>Water companies have a duty to report on the summer bathing season separately, and this made grim reading
-                in 2022.
-                For more details check out <a href="https://www.sas.org.uk/waterquality2022/">Surfers Against Sewage
-                    Water Quality Report 2022</a></p>
+                <p>Water companies have a duty to report on the summer bathing season separately, and this made grim
+                    reading
+                    in 2022.
+                    For more details check out <a href="https://www.sas.org.uk/waterquality2022/">Surfers Against Sewage
+                        Water Quality Report 2022</a></p>
 
-            <h4>Top of The Poops - Beaches</h4>
+                <h4>Top of The Poops - Beaches</h4>
 
-            {{#each beachRankings}}
-                <div>
-                    <b>{{this.rank}}.</b> {{this.beach}} {{numberFormat this.duration.toHours}} hours
-                </div>
-            {{/each}}
+                {{#each beachRankings}}
+                    <div>
+                        <b>{{this.rank}}.</b> {{this.beach}} {{numberFormat this.duration.toHours}} hours
+                    </div>
+                {{/each}}
+            </div>
+            <a href="/beaches">
+                <button type="button" class="btn btn-primary">See all beach rankings</button>
+            </a>
         </div>
-
     </div>
 </div>
 
@@ -113,7 +119,8 @@
                     {{#each companies}}
                         <div class="col mb-4">
                             <div class="card h-100 align-items-center">
-                                <a href="{{this.uri}}"><img src="{{this.imageUri}}" class="mt-3 card-img-top" style="height: 50px; width: auto"
+                                <a href="{{this.uri}}"><img src="{{this.imageUri}}" class="mt-3 card-img-top"
+                                                            style="height: 50px; width: auto"
                                                             alt="Logo for {{this.name}}"></a>
                                 <div class="card-body">
                                     <h5 class="card-title">{{this.name}}</h5>
@@ -128,139 +135,139 @@
 </div>
 
 
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                {{#> components/section title="Top of the Poops in the Media" }}
-                    <div class="row row-cols-1 row-cols-md-4">
-                        {{#each appearances}}
-                            <div class="col mb-4">
-                                <div class="card h-100">
-                                    <a href="{{this.uri}}"><img src="{{this.imageUri}}" class="card-img-top"
-                                                                alt="Article image for {{this.publication}}"></a>
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{this.publication}}</h5>
-                                        <p class="card-text">{{this.title}}</p>
-                                        <p class="card-text"><small class="text-muted">{{dateFormat this.date}}</small>
-                                        </p>
-                                    </div>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            {{#> components/section title="Top of the Poops in the Media" }}
+                <div class="row row-cols-1 row-cols-md-4">
+                    {{#each appearances}}
+                        <div class="col mb-4">
+                            <div class="card h-100">
+                                <a href="{{this.uri}}"><img src="{{this.imageUri}}" class="card-img-top"
+                                                            alt="Article image for {{this.publication}}"></a>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{this.publication}}</h5>
+                                    <p class="card-text">{{this.title}}</p>
+                                    <p class="card-text"><small class="text-muted">{{dateFormat this.date}}</small>
+                                    </p>
                                 </div>
                             </div>
-                        {{/each}}
-                    </div>
-
-                    <div class="row mt3 justify-content-end">
-                        <div class="col-3">
-                            <a href="/media">
-                                <button type="button" class="btn btn-primary">See all our media links</button>
-                            </a>
                         </div>
+                    {{/each}}
+                </div>
+
+                <div class="row mt3 justify-content-end">
+                    <div class="col-3">
+                        <a href="/media">
+                            <button type="button" class="btn btn-primary">See all our media links</button>
+                        </a>
                     </div>
-                {{/components/section}}
-            </div>
+                </div>
+            {{/components/section}}
         </div>
     </div>
+</div>
 
-    <div id="footer" class="container">
-        <div class="row">
-            <div class="col">{{> chunks/data-sources }}</div>
-        </div>
-        <div class="row">
-            <div class="col">{{> chunks/copyright }}</div>
-        </div>
+<div id="footer" class="container">
+    <div class="row">
+        <div class="col">{{> chunks/data-sources }}</div>
     </div>
+    <div class="row">
+        <div class="col">{{> chunks/copyright }}</div>
+    </div>
+</div>
 
-    <script type="module">
+<script type="module">
 
-        import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
+    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
 
-        const formatNumber = (n, m) => n.toLocaleString(undefined, {
-            minimumFractionDigits: m ? m : 0,
-            maximumFractionDigits: m ? m : 0
-        });
+    const formatNumber = (n, m) => n.toLocaleString(undefined, {
+        minimumFractionDigits: m ? m : 0,
+        maximumFractionDigits: m ? m : 0
+    });
 
-        const chart = (data) => document.getElementById("map-constituency").append(
-                Plot.plot({
-                    projection: {
-                        type: "mercator",
-                        domain: {
-                            type: "MultiPoint",
-                            coordinates: [[-6, 49.9], [1.8, 55.9]],
+    const chart = (data) => document.getElementById("map-constituency").append(
+            Plot.plot({
+                projection: {
+                    type: "mercator",
+                    domain: {
+                        type: "MultiPoint",
+                        coordinates: [[-6, 49.9], [1.8, 55.9]],
+                    },
+                },
+                width: 800,
+                color: {
+                    scheme: "reds",
+                },
+                marks: [
+                    Plot.geo(data, {
+                        fill: d => d.properties.total_hours,
+                        title: d => `${d.properties.constituency}: ${formatNumber(d.properties.total_hours)} hours of sewage`,
+                        stroke: "black",
+                        strokeOpacity: 0.5,
+                    }),
+                ]
+            }));
+
+    const r = await fetch("/data/v1/2021/geo/choropleth.json");
+    if (r.ok) {
+        chart(await r.json())
+    }
+</script>
+
+<script type="module">
+    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
+
+    const chart = (data, countries) => document.getElementById("map-beaches").appendChild(
+            Plot.plot(
+                    {
+                        projection: {
+                            type: "mercator",
+                            domain: {
+                                type: "MultiPoint",
+                                coordinates: [[-6, 49.9], [1.8, 55.9]],
+                            },
                         },
-                    },
-                    width: 800,
-                    color: {
-                        scheme: "reds",
-                    },
-                    marks: [
-                        Plot.geo(data, {
-                            fill: d => d.properties.total_hours,
-                            title: d => `${d.properties.constituency}: ${formatNumber(d.properties.total_hours)} hours of sewage`,
-                            stroke: "black",
-                            strokeOpacity: 0.5,
-                        }),
-                    ]
-                }));
+                        width: 800,
+                        r: {range: [10, 45], domain: [100, 8700]},
+                        color: {
+                            type: "linear",
+                            range: ["steelblue", "#b47846"] // uses d3.interpolateRgb
+                        },
+                        marks: [
+                            Plot.geo(
+                                    countries,
+                                    {
+                                        fill: "rgb(5,118,11)",
+                                        fillOpacity: 0.1,
+                                        stroke: "#000000",
+                                        strokeWidth: 2,
+                                        strokeOpacity: 0.2,
+                                    }
+                            ),
+                            Plot.dot(
+                                    data,
+                                    {
+                                        x: "lon",
+                                        y: "lat",
+                                        r: "total_spill_hours",
+                                        fill: "total_spill_hours",
+                                        opacity: 0.5,
+                                        mixBlendMode: "multiply",
+                                        title: d => `${d.bathing} - ${d.total_spill_hours} hours of sewage in 2021`,
+                                    }
+                            )
+                        ]
+                    }
+            )
+    )
 
-        const r = await fetch("/data/v1/2021/geo/choropleth.json");
-        if (r.ok) {
-            chart(await r.json())
-        }
-    </script>
+    const beaches = await fetch("/data/v1/2021/spills-by-beach.json");
+    const countries = await fetch("/data/v1/2021/geo/countries.json")
+    if (beaches.ok && countries.ok) {
+        chart(await beaches.json(), await countries.json())
+    }
+</script>
 
-    <script type="module">
-        import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
-
-        const chart = (data, countries) => document.getElementById("map-beaches").appendChild(
-                Plot.plot(
-                        {
-                            projection: {
-                                type: "mercator",
-                                domain: {
-                                    type: "MultiPoint",
-                                    coordinates: [[-6, 49.9], [1.8, 55.9]],
-                                },
-                            },
-                            width: 800,
-                            r: {range: [10, 45], domain: [100, 8700]},
-                            color: {
-                                type: "linear",
-                                range: ["steelblue", "#b47846"] // uses d3.interpolateRgb
-                            },
-                            marks: [
-                                Plot.geo(
-                                        countries,
-                                        {
-                                            fill: "rgb(5,118,11)",
-                                            fillOpacity: 0.1,
-                                            stroke: "#000000",
-                                            strokeWidth: 2,
-                                            strokeOpacity: 0.2,
-                                        }
-                                ),
-                                Plot.dot(
-                                        data,
-                                        {
-                                            x: "lon",
-                                            y: "lat",
-                                            r: "total_spill_hours",
-                                            fill: "total_spill_hours",
-                                            opacity: 0.5,
-                                            mixBlendMode: "multiply",
-                                            title: d => `${d.bathing} - ${d.total_spill_hours} hours of sewage in 2021`,
-                                        }
-                                )
-                            ]
-                        }
-                )
-        )
-
-        const beaches = await fetch("/data/v1/2021/spills-by-beach.json");
-        const countries = await fetch("/data/v1/2021/geo/countries.json")
-        if (beaches.ok && countries.ok) {
-            chart(await beaches.json(), await countries.json())
-        }
-    </script>
-
-    </body>
-    </html>
+</body>
+</html>
