@@ -60,7 +60,7 @@ h2 {
 
 @media screen and (max-width: 961px) {
     .sewage-map {
-        height: 550px;
+        min-height: 400px;
     }
     .plot-chart {
         height: 200px;
