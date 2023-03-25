@@ -16,7 +16,10 @@
 {{> chunks/title }}
 <div class="container-fluid">
     <div class="row justify-content-md-center  align-items-center">
-        <div class="col-md-4 offset-md-2">
+        <div class="col-md-4 offset-md-1">
+            <img style="width: 100%; height: auto" src="/assets/images/top-of-the-poops-cso-2021-web-fs8.png"/>
+        </div>
+        <div class="col-md-4">
             <div class="row">
                 <div class="col">
                     <div class="display-4">A Petri Dish for E.Coli</div>
@@ -39,13 +42,10 @@
                 </div>
             </div>
         </div>
-        <div id="map-spills" class="col-md-6 sewage-map"></div>
     </div>
     <div class="row justify-content-md-center align-items-center">
-        <div class="col-md-6 offset-md-1">
-            <div id="map-constituency" class="sewage-map"></div>
-        </div>
-        <div class="col-md-4">
+
+        <div class="col-md-4  offset-md-2">
             <div class="display-4">Sewage everywhere</div>
 
             <p>There is sewage overflowing into rivers in almost every constituency across England and Wales. A very few
@@ -65,10 +65,17 @@
                 </div>
             {{/each}}
         </div>
+        <div class="col-md-6">
+            <div id="map-constituency" class="sewage-map"></div>
+        </div>
     </div>
 
     <div class="row justify-content-md-center align-items-center">
-        <div class="col-md-4  offset-md-2" >
+        <div class="col-md-6   offset-md-1">
+            <div id="map-beaches" class="sewage-map"></div>
+        </div>
+
+        <div class="col-md-4">
             <div class="display-4">Swimming in sewage</div>
 
             <p>Most, if not actually all, of the beaches and designated coastal bathing locations around England
@@ -88,9 +95,6 @@
             {{/each}}
         </div>
 
-        <div class="col-md-6">
-            <div id="map-beaches" class="sewage-map"></div>
-        </div>
     </div>
 </div>
 <div class="container">
@@ -133,46 +137,6 @@
         <div class="col">{{> chunks/copyright }}</div>
     </div>
 </div>
-
-
-<script type="module">
-    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
-
-    const chart = (data) => document.getElementById("map-spills").append(
-            Plot.plot({
-                        caption: "© CC-BY-SA-4.0 top-of-the-poops.org",
-                        projection: {
-                            type: "mercator",
-                            domain: {
-                                type: "MultiPoint",
-                                coordinates: [[-6, 49.9], [1.8, 55.9]],
-                            },
-                        },
-                        width: 800,
-                        r: {range: [1, 15], domain: [0, 8700]},
-                        marks: [
-                            Plot.dot(
-                                    data,
-                                    {
-                                        x: "lon",
-                                        y: "lat",
-                                        r: "total_spill_hours",
-                                        fill: "company_name",
-                                        opacity: 0.7,
-                                        mixBlendMode: "multiply",
-                                    }
-                            ),
-                        ]
-                    }
-            )
-    );
-
-    const r = await fetch("/data/v1/2021/spills-all.json");
-    if (r.ok) {
-        chart(await r.json())
-    }
-
-</script>
 
 <script type="module">
 
@@ -261,7 +225,7 @@
 
     const beaches = await fetch("/data/v1/2021/spills-by-beach.json");
     const countries = await fetch("/data/v1/2021/geo/countries.json")
-    if (beaches.ok && countries.ok ) {
+    if (beaches.ok && countries.ok) {
         chart(await beaches.json(), await countries.json())
     }
 </script>
