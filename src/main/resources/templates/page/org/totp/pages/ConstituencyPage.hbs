@@ -137,6 +137,16 @@
     </div>
 </div>
 
+<script>
+    new DataTable('#table-csos',
+            {
+                pageLength: 10,
+                dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i>>"
+            });
+</script>
+
 <div id="footer" class="container">
     <div class="row">
         <div class="col">{{> chunks/data-sources }}</div>
