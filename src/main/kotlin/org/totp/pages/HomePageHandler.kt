@@ -24,7 +24,6 @@ data class ConstituencyRank(
     val constituencyName: ConstituencyName,
     val constituencyUri: Uri,
     val mp: MP,
-    val company: String,
     val count: Int,
     val duration: Duration,
     val countDelta: Int,

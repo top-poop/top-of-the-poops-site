@@ -61,7 +61,6 @@ object ConstituencyRankings {
                             handle = it["twitter_handle"] as String?,
                             uri = Uri.of(it["mp_uri"] as String)
                         ),
-                        company = it["company"] as String,
                         count = (it["total_spills"] as Double).toInt(),
                         duration = Duration.ofHours((it["total_hours"] as Double).toLong()),
                         countDelta = (it["spills_increase"] as Double).toInt(),

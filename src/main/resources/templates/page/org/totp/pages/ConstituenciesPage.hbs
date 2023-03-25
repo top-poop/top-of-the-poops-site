@@ -21,7 +21,21 @@
 <div class="container">
     <div class="row">
         <div class="col">
+            <p class="display-4">Find your constituency & take action</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
             {{#> components/section title=(concat "Constituencies Ranked for " year)}}
+
+                <p>Here are all the constituencies in England and Wales that had sewage overflows in 2021</p>
+
+                <p><b>Click</b> on the constituency name to see more details...</p>
+
+                <p>You may see a slight difference from a previous version of this data. Previously different water companies were separated out
+                in this report, which meant that the totals for some constituencies were split across multiple entries, giving the impression of
+                less sewage. This has now been corrected.</p>
+
                 <table id="table-constituency" data-id="constituency" class="table table-striped"
                        style="width: 100%">
                     <thead>
@@ -30,7 +44,6 @@
                         <td>Constituency</td>
                         <td>MP</td>
                         <td>MP Party</td>
-                        <td>Company</td>
                         <td>Sewage Dumps</td>
                         <td>Change</td>
                         <td>Duration</td>
@@ -44,7 +57,6 @@
                             <td><a href="{{this.constituencyUri}}">{{this.constituencyName}}</a></td>
                             <td><a href="{{this.mp.uri}}">{{this.mp.name}}</a></td>
                             <td>{{this.mp.party}}</td>
-                            <td>{{this.company}}</td>
                             <td>{{this.count}}</td>
                             <td>{{this.countDelta}}</td>
                             <td>{{this.duration.toHours}}</td>

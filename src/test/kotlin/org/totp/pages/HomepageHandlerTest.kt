@@ -38,7 +38,6 @@ class HomepageHandlerTest {
                         ConstituencyName("a"),
                         Uri.of("/con/1"),
                         MP("mp1", "con", "handle1", Uri.of("https://example.com/1")),
-                        "company 1",
                         100,
                         Duration.ofHours(1),
                         25,
@@ -49,7 +48,6 @@ class HomepageHandlerTest {
                         ConstituencyName("b"),
                         Uri.of("/con/2"),
                         MP("mp2", "noc", "handle2", Uri.of("https://example.com/2")),
-                        "company 2",
                         2,
                         Duration.ofHours(2),
                         50,
@@ -147,7 +145,6 @@ class HomepageHandlerTest {
         val text = """[
   {
     "constituency": "PP",
-    "company": "DC",
     "total_spills": 6754.0,
     "total_hours": 79501.0,
     "spills_increase": 178.0,
@@ -166,7 +163,6 @@ class HomepageHandlerTest {
             get(0).and {
                 get { rank }.isEqualTo(1)
                 get { constituencyName }.isEqualTo(ConstituencyName("PP"))
-                get { company }.isEqualTo("DC")
                 get { mp }.and {
                     get { name }.isEqualTo("SC")
                     get { party }.isEqualTo("C")
