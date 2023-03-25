@@ -3,16 +3,23 @@ package org.totp
 import org.http4k.client.OkHttp
 import org.http4k.cloudnative.env.Environment
 import org.http4k.cloudnative.env.EnvironmentKey
+import org.http4k.core.HttpHandler
+import org.http4k.core.Response
+import org.http4k.core.Status
 import org.http4k.core.Uri
 import org.http4k.core.then
+import org.http4k.core.with
 import org.http4k.events.AutoMarshallingEvents
 import org.http4k.events.EventFilters
 import org.http4k.events.then
 import org.http4k.filter.ClientFilters
 import org.http4k.filter.ClientFilters.SetBaseUriFrom
 import org.http4k.format.Jackson
+import org.http4k.lens.Header.LOCATION
+import org.http4k.lens.Query
 import org.http4k.lens.boolean
 import org.http4k.lens.uri
+import org.http4k.lens.value
 import org.http4k.routing.ResourceLoader
 import org.http4k.routing.bind
 import org.http4k.routing.routes
@@ -26,15 +33,19 @@ import org.totp.model.TotpHandlebars
 import org.totp.model.data.BeachRankings
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyCSOs
+import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.MediaAppearances
 import org.totp.model.data.WaterCompanies
 import org.totp.pages.BeachesPageHandler
 import org.totp.pages.ConstituenciesPageHandler
 import org.totp.pages.ConstituencyPageHandler
+import org.totp.pages.ConstituencySlug
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.HomepageHandler
+import org.totp.pages.HtmlPageErrorFilter
 import org.totp.pages.MediaPageHandler
+import org.totp.pages.constituencyNames
 import java.time.Clock
 
 
@@ -56,6 +67,24 @@ object Resources {
             ResourceLoader.Directory(resourceBase.resolve("assets").toString())
         } else {
             ResourceLoader.Classpath("/assets")
+        }
+    }
+}
+
+object OldMapRedirectHandler {
+    operator fun invoke(): HttpHandler {
+
+        val constituency = Query.value(ConstituencyName).optional("c")
+
+        return { request ->
+            val selected = constituency(request);
+
+            if (selected != null && constituencyNames.contains(selected)) {
+                val slug = ConstituencySlug.from(selected)
+                Response(Status.TEMPORARY_REDIRECT).with(LOCATION of Uri.of("/constituency/$slug"))
+            } else {
+                Response(Status.TEMPORARY_REDIRECT).with(LOCATION of Uri.of("/constituencies"))
+            }
         }
     }
 }
@@ -112,39 +141,42 @@ fun main() {
             80
         }
     ).toServer(
-        routes(
-            "/" bind inboundFilters.then(
-                routes(
-                    "/" bind HomepageHandler(
-                        renderer = renderer,
-                        consituencyRankings = ConstituencyRankings(data2021),
-                        beachRankings = BeachRankings(data2021),
-                        appearances = MediaAppearances(dataClient),
-                        companies = WaterCompanies(dataClient)
-                    ),
-                    "/media" bind MediaPageHandler(
-                        renderer = renderer,
-                        appearances = MediaAppearances(dataClient)
-                    ),
-                    "/constituencies" bind ConstituenciesPageHandler(
-                        renderer = renderer,
-                        consituencyRankings = ConstituencyRankings(data2021)
-                    ),
-                    "/beaches" bind BeachesPageHandler(
-                        renderer = renderer,
-                        beachRankings = BeachRankings(data2021)
-                    ),
-                    "/constituency/{constituency}" bind ConstituencyPageHandler(
-                        renderer = renderer,
-                        constituencySpills = ConstituencyCSOs(data2021),
-                        constituencyBoundary = ConstituencyBoundaries(
-                            SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient)
-                        )
+        HtmlPageErrorFilter(events, renderer).then(
+            routes(
+                "/" bind inboundFilters.then(
+                    routes(
+                        "/" bind HomepageHandler(
+                            renderer = renderer,
+                            consituencyRankings = ConstituencyRankings(data2021),
+                            beachRankings = BeachRankings(data2021),
+                            appearances = MediaAppearances(dataClient),
+                            companies = WaterCompanies(dataClient)
+                        ),
+                        "/media" bind MediaPageHandler(
+                            renderer = renderer,
+                            appearances = MediaAppearances(dataClient)
+                        ),
+                        "/constituencies" bind ConstituenciesPageHandler(
+                            renderer = renderer,
+                            consituencyRankings = ConstituencyRankings(data2021)
+                        ),
+                        "/beaches" bind BeachesPageHandler(
+                            renderer = renderer,
+                            beachRankings = BeachRankings(data2021)
+                        ),
+                        "/constituency/{constituency}" bind ConstituencyPageHandler(
+                            renderer = renderer,
+                            constituencySpills = ConstituencyCSOs(data2021),
+                            constituencyBoundary = ConstituencyBoundaries(
+                                SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient)
+                            )
+                        ),
+                        "/map.html" bind OldMapRedirectHandler()
                     )
-                )
-            ),
-            "/data" bind inboundFilters.then(static(ResourceLoader.Directory("services/data/datafiles"))),
-            "/assets" bind static(Resources.assets(isDevelopmentEnvironment)),
+                ),
+                "/data" bind inboundFilters.then(static(ResourceLoader.Directory("services/data/datafiles"))),
+                "/assets" bind static(Resources.assets(isDevelopmentEnvironment)),
+            )
         )
     )
 

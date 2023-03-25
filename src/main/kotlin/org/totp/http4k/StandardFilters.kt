@@ -21,7 +21,6 @@ object StandardFilters {
             .then(ResponseFilters.ReportHttpTransaction {
                 events(HttpEvent.Incoming(it))
             })
-            .then(ServerFilters.CatchAll())
     }
 
     fun outgoing(events: Events): Filter {
