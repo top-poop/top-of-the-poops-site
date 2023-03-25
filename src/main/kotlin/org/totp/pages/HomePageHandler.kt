@@ -14,6 +14,7 @@ import org.totp.model.PageViewModel
 import org.totp.model.data.BeachRank
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.MediaAppearance
+import org.totp.model.data.WaterCompany
 import java.time.Duration
 
 data class MP(val name: String, val party: String, val handle: String?, val uri: Uri)
@@ -34,6 +35,7 @@ data class ConstituencyRank(
 class HomePage(
     uri: Uri,
     val constituencyRankings: List<ConstituencyRank>,
+    val companies: List<WaterCompany>,
     val beachRankings: List<BeachRank>,
     val appearances: List<MediaAppearance>,
     val share: SocialShare
@@ -45,7 +47,8 @@ object HomepageHandler {
         renderer: TemplateRenderer,
         consituencyRankings: () -> List<ConstituencyRank>,
         beachRankings: () -> List<BeachRank>,
-        appearances: () -> List<MediaAppearance>
+        appearances: () -> List<MediaAppearance>,
+        companies: () -> List<WaterCompany>,
     ): HttpHandler {
 
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
@@ -56,6 +59,7 @@ object HomepageHandler {
                     viewLens of HomePage(
                         pageUriFrom(request),
                         consituencyRankings().take(10),
+                        companies(),
                         beachRankings().take(10),
                         appearances().sortedByDescending { it.date }.take(8),
                         SocialShare(

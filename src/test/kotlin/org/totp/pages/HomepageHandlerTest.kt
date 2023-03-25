@@ -9,11 +9,14 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
+import org.totp.model.data.Address
 import org.totp.model.data.BeachRank
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.MediaAppearance
 import org.totp.model.data.MediaAppearances
+import org.totp.model.data.WaterCompanies
+import org.totp.model.data.WaterCompany
 import strikt.api.expectThat
 import strikt.assertions.get
 import strikt.assertions.hasSize
@@ -67,6 +70,14 @@ class HomepageHandlerTest {
                         imageUri = Uri.of("http://example.com/image.jpg")
                     )
                 )
+            },
+            companies = {
+                listOf(
+                    WaterCompany(
+                        "company", Address("1", "2", "3", "town", "postcode"),
+                        Uri.of(""), Uri.of("http://example.com/company"), Uri.of("http://example.com/image"), "@bob"
+                    )
+                )
             }
         )
     )
@@ -104,6 +115,31 @@ class HomepageHandlerTest {
                 get { imageUri }.isEqualTo(Uri.of("http://example.com/image.jpg"))
             }
         }
+    }
+
+
+    @Test
+    fun `loading water companies`() {
+        val text = """[
+  {
+    "name": "Anglian Water",
+    "address": {
+      "line1": "Lancaster House",
+      "line2": "Lancaster Way",
+      "line3": "Ermine Business Park",
+      "town": "Huntindon",
+      "postcode": "PE29 6YJ"
+    },
+    "phone": "+44 1480 323 000",
+    "web": "http://www.anglianwater.co.uk/",
+    "twitter": "@AnglianWater"
+  }]"""
+
+        val companies = WaterCompanies(
+            routes("water-companies.json" bind { _: Request -> Response(Status.OK).body(text) })
+        )
+
+        expectThat(companies()).hasSize(1)
     }
 
     @Test

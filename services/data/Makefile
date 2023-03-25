@@ -70,7 +70,9 @@ DATA_2021_GENERATED=$(foreach sql,$(DATA_2021_SQL),$(DATAFILES)/v1/2021/$(basena
 GEO_2021_SQL=$(wildcard sql/v1/2021/geo/*.sql)
 GEO_2021_GENERATED=$(foreach sql,$(GEO_2021_SQL),$(DATAFILES)/v1/2021/geo/$(basename $(notdir $(sql))).json)
 
-generated-data: generated-2021 $(DATAFILES)/constituencies/.uptodate $(DATAFILES)/media-appearances.json
+PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json
+
+generated-data: generated-2021 $(DATAFILES)/constituencies/.uptodate $(PROVIDED)
 
 generated-2021: $(DATA_2021_GENERATED)
 
@@ -90,6 +92,7 @@ $(DATAFILES)/constituencies/.uptodate: $(PYTHON) constituencies.py constituencie
 	touch $@
 
 $(DATAFILES)/media-appearances.json: provided/media-appearances.json
+$(DATAFILES)/water-companies.json: provided/water-companies.json
 	cp $< $@
 
 

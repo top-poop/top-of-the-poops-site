@@ -7,6 +7,7 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Uri
+import org.totp.extensions.kebabCase
 import org.totp.extensions.readSimpleList
 import org.totp.pages.ConstituencyRank
 import org.totp.pages.ConstituencySlug
@@ -151,6 +152,39 @@ object MediaAppearances {
                         date = LocalDate.parse(it["date"] as String),
                         uri = Uri.of(it["href"] as String),
                         imageUri = Uri.of(it["image"] as String)
+                    )
+                }
+        }
+    }
+}
+
+
+data class Address(val line1: String, val line2: String, val line3: String?, val town: String, val postcode: String)
+data class WaterCompany(val name: String, val address: Address, val phone: Uri, val uri: Uri, val imageUri: Uri, val handle: String?)
+
+object WaterCompanies {
+    operator fun invoke(handler: HttpHandler): () -> List<WaterCompany> {
+        return {
+            val response = handler(Request(Method.GET, "water-companies.json"))
+
+            objectMapper.readSimpleList(response.bodyString())
+                .map {
+                    val name = it["name"] as String
+                    WaterCompany(
+                        name = name,
+                        (it["address"] as Map<String, String?>).let {
+                            Address(
+                                line1 = it["line1"] as String,
+                                line2 = it["line2"] as String,
+                                line3 = it["line3"],
+                                town = it["town"] as String,
+                                postcode = it["postcode"] as String
+                            )
+                        },
+                        phone = Uri.of(""),
+                        uri = Uri.of(it["web"] as String),
+                        Uri.of("/assets/images/logos/${name.kebabCase()}.png"),
+                        handle = it["twitter"] as String?
                     )
                 }
         }
