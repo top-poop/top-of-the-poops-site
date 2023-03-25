@@ -1,51 +1,8 @@
 <div class="row">
     <div class="col">
-        <table id="table-constituency" data-id="constituency" class="table table-striped"
-               style="width: 100%">
-            <thead>
-            <tr>
-                <td>Rank</td>
-                <td>Constituency</td>
-                <td>MP</td>
-                <td>MP Contact</td>
-                <td>MP Info</td>
-                <td>MP Party</td>
-                <td>Company</td>
-                <td>Sewage Dumps</td>
-                <td>Change</td>
-                <td>Duration</td>
-                <td>Change</td>
-            </tr>
-            </thead>
-            <tbody>
-            {{#each rankings}}
-                <tr>
-                    <td>{{this.rank}}</td>
-                    <td><a href="{{this.constituencyUri}}">{{this.constituencyName}}</a></td>
-                    <td>{{this.mp.name}}</td>
-                    <td>@@</td>
-                    <td><a href="{{this.mp.uri}}">Info</a></td>
-                    <td>{{this.mp.party}}</td>
-                    <td>{{this.company}}</td>
-                    <td>{{this.count}}</td>
-                    <td>{{this.countDelta}}</td>
-                    <td>{{this.duration.toHours}}</td>
-                    <td>{{this.durationDelta.toHours}}</td>
-                </tr>
-            {{/each}}
-            </tbody>
-        </table>
     </div>
 </div>
 
-<script>
-    new DataTable('#table-constituency',
-            {
-                dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +
-                        "<'row'<'col-sm-12'tr>>" +
-                        "<'row'<'col-sm-12 col-md-5'i>>"
-            });
-</script>
 
 
 <div class="row">

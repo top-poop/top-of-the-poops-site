@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Top of the Poops | Constituencies</title>
+    <meta name="description" content="Analysing sewage dumps by water companies">
+
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
+    <link rel="stylesheet" href="/assets/css/leaflet.css"/>
+    <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
+
+    {{> components/meta-opengraph title="Constituencies" }}
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+{{> chunks/title }}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            {{#> components/section title=(concat "Constituencies Ranked for " year)}}
+                <table id="table-constituency" data-id="constituency" class="table table-striped"
+                       style="width: 100%">
+                    <thead>
+                    <tr>
+                        <td>Rank</td>
+                        <td>Constituency</td>
+                        <td>MP</td>
+                        <td>MP Party</td>
+                        <td>Company</td>
+                        <td>Sewage Dumps</td>
+                        <td>Change</td>
+                        <td>Duration</td>
+                        <td>Change</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#each constituencyRankings}}
+                        <tr>
+                            <td>{{this.rank}}</td>
+                            <td><a href="{{this.constituencyUri}}">{{this.constituencyName}}</a></td>
+                            <td><a href="{{this.mp.uri}}">{{this.mp.name}}</a></td>
+                            <td>{{this.mp.party}}</td>
+                            <td>{{this.company}}</td>
+                            <td>{{this.count}}</td>
+                            <td>{{this.countDelta}}</td>
+                            <td>{{this.duration.toHours}}</td>
+                            <td>{{this.durationDelta.toHours}}</td>
+                        </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            {{/components/section}}
+        </div>
+    </div>
+</div>
+
+<script>
+    new DataTable('#table-constituency',
+            {
+                dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i>>"
+            });
+</script>
+
+<div id="footer" class="container">
+    <div class="row">
+        <div class="col">{{> chunks/data-sources }}</div>
+    </div>
+    <div class="row">
+        <div class="col">{{> chunks/copyright }}</div>
+    </div>
+</div>
+</body>
+</html>

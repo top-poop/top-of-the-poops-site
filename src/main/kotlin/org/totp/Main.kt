@@ -28,6 +28,7 @@ import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyCSOs
 import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.MediaAppearances
+import org.totp.pages.ConstituenciesPageHandler
 import org.totp.pages.ConstituencyPageHandler
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.HomepageHandler
@@ -121,6 +122,10 @@ fun main() {
                     "/media" bind MediaPageHandler(
                         renderer = renderer,
                         appearances = MediaAppearances(dataClient)
+                    ),
+                    "/constituencies" bind ConstituenciesPageHandler(
+                        renderer = renderer,
+                        consituencyRankings = ConstituencyRankings(data2021)
                     ),
                     "/constituency/{constituency}" bind ConstituencyPageHandler(
                         renderer = renderer,
