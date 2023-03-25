@@ -7,7 +7,7 @@ __check_defined = \
 
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 
-SERVICE=gate
+SERVICE=tls
 SERVICE_VERSION=$(shell find . -type f -printf '%AF-%AH%AM %p\n' | sort -n | tail -1 | cut -d ' ' -f1)
 
 IMAGE_NAME=totp-$(SERVICE)
@@ -36,9 +36,7 @@ push: check-context
 .PHONY: deploy
 deploy:
 	@test $(shell docker context show) = "totp"
-	docker service create --with-registry-auth --name $(SERVICE) --publish published=8080,target=8080 --network overlay-net $(FULL_NAME)
+	SERVICE_FULL_NAME=$(FULL_NAME) docker compose up -d tls
 
 .PHONY: upgrade
-upgrade:
-	@test $(shell docker context show) = "totp"
-	docker service update --with-registry-auth --image $(FULL_NAME) $(SERVICE)
+upgrade: deploy

@@ -1,0 +1,12 @@
+services:
+  tls:
+    image: ${SERVICE_FULL_NAME}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8081:8081"
+      - "443:443"
+    volumes:
+      - /root/webroots:/webroots:ro
+      - /root/letsencrypt:/etc/letsencrypt:ro
+      - /etc/ssl/private/dhparam.pem:/etc/ssl/private/dhparam.pem:ro
