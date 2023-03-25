@@ -25,6 +25,11 @@
         </div>
     </div>
     <div class="row">
+        <div class="col ">
+            <div id="map-beaches" class="sewage-map  justify-content-md-center"></div>
+        </div>
+    </div>
+    <div class="row">
         <div class="col">
             {{#> components/section title=(concat "Beaches Ranked for " year)}}
 
@@ -66,6 +71,60 @@
                         "<'row'<'col-sm-12'tr>>" +
                         "<'row'<'col-sm-12 col-md-5'i>>"
             });
+</script>
+
+<script type="module">
+    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
+
+    const chart = (data, countries) => document.getElementById("map-beaches").appendChild(
+            Plot.plot(
+                    {
+                        projection: {
+                            type: "mercator",
+                            domain: {
+                                type: "MultiPoint",
+                                coordinates: [[-6, 49.9], [1.8, 55.9]],
+                            },
+                        },
+                        width: 800,
+                        r: {range: [10, 45], domain: [100, 8700]},
+                        color: {
+                            type: "linear",
+                            range: ["steelblue", "#b47846"] // uses d3.interpolateRgb
+                        },
+                        marks: [
+                            Plot.geo(
+                                    countries,
+                                    {
+                                        fill: "rgb(5,118,11)",
+                                        fillOpacity: 0.1,
+                                        stroke: "#000000",
+                                        strokeWidth: 2,
+                                        strokeOpacity: 0.2,
+                                    }
+                            ),
+                            Plot.dot(
+                                    data,
+                                    {
+                                        x: "lon",
+                                        y: "lat",
+                                        r: "total_spill_hours",
+                                        fill: "total_spill_hours",
+                                        opacity: 0.5,
+                                        mixBlendMode: "multiply",
+                                        title: d => `${d.bathing} - ${d.total_spill_hours} hours of sewage in 2021`,
+                                    }
+                            )
+                        ]
+                    }
+            )
+    )
+
+    const beaches = await fetch("/data/v1/2021/spills-by-beach.json");
+    const countries = await fetch("/data/v1/2021/geo/countries.json")
+    if (beaches.ok && countries.ok) {
+        chart(await beaches.json(), await countries.json())
+    }
 </script>
 
 <div id="footer" class="container">
