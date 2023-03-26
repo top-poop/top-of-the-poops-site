@@ -151,7 +151,7 @@ object ConstituencyPageHandler {
                                 pageUriFrom(request),
                                 text = "$constituencyName had ${numberFormat.format(summary.count)} sewage overflows in ${summary.year}",
                                 tags = listOf("sewage"),
-                                via = "@sewageuk"
+                                via = "sewageuk"
                             ),
                             summary,
                             constituencyBoundary(constituencyName),

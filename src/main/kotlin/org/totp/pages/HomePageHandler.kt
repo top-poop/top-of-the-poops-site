@@ -65,7 +65,7 @@ object HomepageHandler {
                             pageUriFrom(request),
                             "Water companies are dumping #sewage into rivers and bathing areas all over the UK - over 470,000 times in 2021 - it needs to be stopped",
                             listOf("sewage"),
-                            via = "@sewageuk"
+                            via = "sewageuk"
                         )
                     )
                 )

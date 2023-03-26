@@ -40,7 +40,7 @@ object MediaPageHandler {
                             pageUriFrom(request),
                             "Wow sewage is a really serious issue in England and Wales right now. What is your MP and @Ofwat doing about it?",
                             listOf("sewage"),
-                            via = "@sewageuk"
+                            via = "sewageuk"
                         )
                     )
                 )
