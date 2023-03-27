@@ -72,9 +72,13 @@ GEO_2021_GENERATED=$(foreach sql,$(GEO_2021_SQL),$(DATAFILES)/v1/2021/geo/$(base
 
 PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json
 
-generated-data: generated-2021 $(DATAFILES)/constituencies/.uptodate $(PROVIDED)
+generated-data: generated-2021 generated-live $(DATAFILES)/constituencies/.uptodate $(PROVIDED)
 
 generated-2021: $(DATA_2021_GENERATED)
+
+.PHONY: generated-live
+generated-live:
+	$(PYTHON) thames-summary.py
 
 $(DATAFILES)/v1/2021/%.json: sql/v1/2021/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_JSON)
 	@mkdir -p $(dir $@)
