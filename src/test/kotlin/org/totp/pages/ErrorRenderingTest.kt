@@ -11,8 +11,8 @@ import strikt.assertions.isEqualTo
 
 class ErrorRenderingTest {
 
-    val renderer = HandlebarsTemplates().HotReload("src/main/resources/templates/page")
-    val filter = HtmlPageErrorFilter(renderer)
+    val renderer = HandlebarsTemplates().HotReload("src/main/resources/templates/page/org/totp")
+    val filter = HtmlPageErrorFilter({}, renderer)
 
     @Test
     fun `renders an error page when there is an error`() {
