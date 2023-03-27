@@ -28,7 +28,7 @@ test:
 
 .PHONY: image
 image: check-context
-	./gradlew jibDockerBuild
+	./gradlew check jibDockerBuild
 	docker tag $(IMAGE_NAME):latest $(FULL_NAME)
 
 .PHONY: push
