@@ -74,7 +74,7 @@ data class ConstituencySummary(
     }
 }
 
-data class RenderableConstituency(val name: ConstituencyName, val current: Boolean, val uri: Uri, val live:Boolean)
+data class RenderableConstituency(val name: ConstituencyName, val current: Boolean, val uri: Uri, val live: Boolean)
 
 data class SocialShare(
     val uri: Uri,
@@ -169,12 +169,14 @@ object ConstituencyPageHandler {
                             constituencyBoundary(constituencyName),
                             list.sortedByDescending { it.duration },
                             renderableConstituencies,
-                            constituencyLiveData(constituencyName)?.let {
-                                ConstituencyPageLiveData(
-                                    it,
-                                    Uri.of("/data/live/constituencies/$slug.json")
-                                )
-                            }
+                            if (liveAvailable.contains(constituencyName)) {
+                                constituencyLiveData(constituencyName)?.let {
+                                    ConstituencyPageLiveData(
+                                        it,
+                                        Uri.of("/data/live/constituencies/$slug.json")
+                                    )
+                                }
+                            } else null,
                         )
                     )
             }
