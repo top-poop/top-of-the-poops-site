@@ -3,7 +3,6 @@ package org.totp.pages
 import com.github.jknack.handlebars.io.StringTemplateSource
 import org.http4k.core.Method
 import org.http4k.core.Request
-import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.Uri
 import org.http4k.routing.bind
@@ -14,17 +13,14 @@ import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.CSO
 import org.totp.model.data.CSOTotals
-import org.totp.model.data.ConstituencyBoundaries
-import org.totp.model.data.ConstituencyCSOs
+import org.totp.model.data.ConstituencyLiveData
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
 import strikt.api.expectCatching
 import strikt.api.expectThat
-import strikt.assertions.get
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFailure
-import strikt.assertions.size
 import java.time.Duration
 
 class ConstituencyPageHandlerTest {
@@ -48,7 +44,9 @@ class ConstituencyPageHandlerTest {
         "/{constituency}" bind Method.GET to ConstituencyPageHandler(
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
             constituencySpills = { summaries },
-            constituencyBoundary = { GeoJSON.of("some geojson") }
+            constituencyBoundary = { GeoJSON.of("some geojson") },
+            constituencyLiveData = { ConstituencyLiveData(ConstituencyName.of("a"), 1, 2) },
+            constituencyLiveAvailable = { listOf(ConstituencyName("bob"))}
         )
     )
 
@@ -80,45 +78,6 @@ class ConstituencyPageHandlerTest {
             status.isEqualTo(Status.TEMPORARY_REDIRECT)
             header("location").isEqualTo("/islington-south-and-finsbury")
         }
-    }
-
-    @Test
-    fun `loading cso summaries`() {
-
-        val text = """[
-  {
-    "constituency": "Aberavon",
-    "company_name": "Dwr Cymru Welsh Water",
-    "site_name": "BAGLAN SPS  BRITON FERRY  NEATH",
-    "receiving_water": "Swansea Bay",
-    "lat": 51.576878,
-    "lon": -3.873983,
-    "spill_count": 173.0,
-    "total_spill_hours": 1651.0,
-    "reporting_percent": 100.0
-  }]"""
-
-        val summaries = ConstituencyCSOs(
-            routes("/spills-all.json" bind { _: Request -> Response(Status.OK).body(text) })
-        )
-        expectThat(summaries(ConstituencyName("Aberavon"))) {
-            size.isEqualTo(1)
-            get(0).and {
-                get { constituency }.isEqualTo(ConstituencyName("Aberavon"))
-                get { cso }.and {
-                    get { location }.isEqualTo(Coordinates(lat = 51.576878, lon = -3.873983))
-                }
-                get { count }.isEqualTo(173)
-                get { duration }.isEqualTo(Duration.ofHours(1651))
-            }
-        }
-    }
-
-    @Test
-    fun `loading constituency boundaries`() {
-        val handler = routes("/aberavon.json" bind { _: Request -> Response(Status.OK).body("hi") })
-        val boundaries = ConstituencyBoundaries(handler)
-        expectThat(boundaries(ConstituencyName("Aberavon"))).isEqualTo(GeoJSON("hi"))
     }
 
     @Test

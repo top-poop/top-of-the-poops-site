@@ -27,8 +27,6 @@ object ConstituenciesPageHandler {
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
-        val numberFormat = NumberFormat.getIntegerInstance()
-
         return { request: Request ->
             Response(Status.OK)
                 .with(

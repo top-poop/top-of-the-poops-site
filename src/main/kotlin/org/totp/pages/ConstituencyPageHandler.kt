@@ -21,6 +21,7 @@ import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.CSOTotals
+import org.totp.model.data.ConstituencyLiveData
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.GeoJSON
 import org.totp.text.csv.readCSV
@@ -73,13 +74,18 @@ data class ConstituencySummary(
     }
 }
 
-data class RenderableConstituency(val name: String, val current: Boolean, val uri: Uri)
+data class RenderableConstituency(val name: ConstituencyName, val current: Boolean, val uri: Uri, val live:Boolean)
 
 data class SocialShare(
     val uri: Uri,
     val text: String,
     val tags: List<String>,
     val via: String
+)
+
+data class ConstituencyPageLiveData(
+    val data: ConstituencyLiveData,
+    val uri: Uri
 )
 
 class ConstituencyPage(
@@ -90,6 +96,7 @@ class ConstituencyPage(
     val geojson: GeoJSON,
     val csos: List<CSOTotals>,
     val constituencies: List<RenderableConstituency>,
+    val live: ConstituencyPageLiveData?,
 ) :
     PageViewModel(uri)
 
@@ -119,7 +126,9 @@ object ConstituencyPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
         constituencySpills: (ConstituencyName) -> List<CSOTotals>,
-        constituencyBoundary: (ConstituencyName) -> GeoJSON
+        constituencyBoundary: (ConstituencyName) -> GeoJSON,
+        constituencyLiveData: (ConstituencyName) -> ConstituencyLiveData?,
+        constituencyLiveAvailable: () -> List<ConstituencyName>
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -131,12 +140,15 @@ object ConstituencyPageHandler {
 
             slugToConstituency[slug]?.let { constituencyName ->
 
+                val liveAvailable = constituencyLiveAvailable().toSet()
+
                 val renderableConstituencies = slugToConstituency
                     .map {
                         RenderableConstituency(
-                            name = it.value.value,
+                            name = it.value,
                             current = it.key == slug,
-                            uri = Uri.of("/constituency/" + it.key)
+                            uri = Uri.of("/constituency/" + it.key),
+                            live = liveAvailable.contains(it.value),
                         )
                     }
 
@@ -157,6 +169,12 @@ object ConstituencyPageHandler {
                             constituencyBoundary(constituencyName),
                             list.sortedByDescending { it.duration },
                             renderableConstituencies,
+                            constituencyLiveData(constituencyName)?.let {
+                                ConstituencyPageLiveData(
+                                    it,
+                                    Uri.of("/data/live/constituencies/$slug.json")
+                                )
+                            }
                         )
                     )
             }

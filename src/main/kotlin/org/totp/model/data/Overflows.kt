@@ -1,16 +1,30 @@
 package org.totp.model.data
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import dev.forkhandles.values.StringValue
 import dev.forkhandles.values.StringValueFactory
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Uri
+import org.http4k.core.then
+import org.http4k.format.ConfigurableJackson
+import org.http4k.format.Jackson
+import org.http4k.format.Jackson.asA
+import org.http4k.format.asConfigurable
+import org.http4k.format.value
+import org.http4k.format.withStandardMappings
 import org.totp.extensions.kebabCase
 import org.totp.extensions.readSimpleList
 import org.totp.pages.ConstituencyRank
 import org.totp.pages.ConstituencySlug
+import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.MP
 import java.time.Duration
 import java.time.LocalDate
@@ -31,10 +45,67 @@ class ConstituencyName(value: String) : StringValue(value) {
     companion object : StringValueFactory<ConstituencyName>(::ConstituencyName)
 }
 
-val objectMapper = ObjectMapper()
+
+object TotpJson : ConfigurableJackson(
+    KotlinModule.Builder().build()
+        .asConfigurable()
+        .withStandardMappings()
+        .value(ConstituencyName)
+        .done()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .deactivateDefaultTyping()
+)
+
+data class LiveDataCSO(
+    @JsonProperty("p") val site: String,
+    @JsonProperty("cid") val permit: String,
+    @JsonProperty("d") val date: LocalDate,
+    @JsonProperty("a") val category: String
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class LiveData(val cso: List<LiveDataCSO>)
+
+
+object ConstituencyLiveAvailability {
+    operator fun invoke(handler: HttpHandler): () -> List<ConstituencyName> {
+        return {
+            val uri = Uri.of("/live/constituencies/constituencies-available.json")
+            val response = handler(Request(Method.GET, uri))
+
+            TotpJson.mapper.readValue(response.bodyString())
+        }
+    }
+}
+
+
+data class ConstituencyLiveData(val constituencyName: ConstituencyName, val dates: Int, val csos: Int)
+
+object ConstituencyLiveDataLoader {
+    operator fun invoke(handler: HttpHandler): (ConstituencyName) -> ConstituencyLiveData? {
+        return { name ->
+            val uri = ConstituencySlug.from(name).let { Uri.of("/live/constituencies/$it.json") }
+            val response = handler(Request(Method.GET, uri))
+
+            if ( response.status.successful ) {
+                val value = response.bodyString().asA(LiveData::class)
+                value.let {
+                    ConstituencyLiveData(
+                        name,
+                        csos = it.cso.map { it.site }.toSet().size,
+                        dates = it.cso.map { it.date }.toSet().size
+                    )
+                }
+            } else {
+                null
+            }
+        }
+    }
+}
 
 object ConstituencyBoundaries {
     operator fun invoke(handler: HttpHandler): (ConstituencyName) -> GeoJSON {
+        val handler = EnsureSuccessfulResponse().then(handler)
         return { name ->
             val slug = ConstituencySlug.from(name)
             val uri = Uri.of("$slug.json")
@@ -48,7 +119,7 @@ object ConstituencyRankings {
         return {
             val response = handler(Request(Method.GET, "spills-by-constituency.json"))
 
-            objectMapper.readSimpleList(response.bodyString())
+            TotpJson.mapper.readSimpleList(response.bodyString())
                 .mapIndexed { r, it ->
                     val constituencyName = ConstituencyName(it["constituency"] as String)
                     ConstituencyRank(
@@ -85,7 +156,7 @@ object BeachRankings {
         return {
             val response = handler(Request(Method.GET, "spills-by-beach.json"))
 
-            objectMapper.readSimpleList(response.bodyString())
+            TotpJson.mapper.readSimpleList(response.bodyString())
                 .mapIndexed { r, it ->
                     BeachRank(
                         rank = r + 1,
@@ -106,7 +177,7 @@ object ConstituencyCSOs {
             val response = handler(Request(Method.GET, "spills-all.json"))
 
             val list =
-                objectMapper.readSimpleList(response.bodyString())
+                TotpJson.mapper.readSimpleList(response.bodyString())
                     .map {
                         CSOTotals(
                             constituency = ConstituencyName(it["constituency"] as String),
@@ -140,10 +211,11 @@ data class MediaAppearance(
 
 object MediaAppearances {
     operator fun invoke(handler: HttpHandler): () -> List<MediaAppearance> {
+        val handler = EnsureSuccessfulResponse().then(handler)
         return {
             val response = handler(Request(Method.GET, "media-appearances.json"))
 
-            objectMapper.readSimpleList(response.bodyString())
+            TotpJson.mapper.readSimpleList(response.bodyString())
                 .map {
                     MediaAppearance(
                         title = it["title"] as String,
@@ -159,14 +231,21 @@ object MediaAppearances {
 
 
 data class Address(val line1: String, val line2: String, val line3: String?, val town: String, val postcode: String)
-data class WaterCompany(val name: String, val address: Address, val phone: Uri, val uri: Uri, val imageUri: Uri, val handle: String?)
+data class WaterCompany(
+    val name: String,
+    val address: Address,
+    val phone: Uri,
+    val uri: Uri,
+    val imageUri: Uri,
+    val handle: String?
+)
 
 object WaterCompanies {
     operator fun invoke(handler: HttpHandler): () -> List<WaterCompany> {
         return {
             val response = handler(Request(Method.GET, "water-companies.json"))
 
-            objectMapper.readSimpleList(response.bodyString())
+            TotpJson.mapper.readSimpleList(response.bodyString())
                 .map {
                     val name = it["name"] as String
                     WaterCompany(

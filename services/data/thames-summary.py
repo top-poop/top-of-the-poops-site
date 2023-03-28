@@ -117,8 +117,11 @@ if __name__ == "__main__":
 
     os.makedirs(args.output, exist_ok=True)
 
+    available_constituencies = []
+
     with psycopg2.connect(host="localhost", database="gis", user="docker", password="docker") as conn:
         for constituency, data in thames_summary(connection=conn):
+            available_constituencies.append(constituency)
             with open(args.output / f"{utils.kebabcase(constituency)}.json", "w") as bob:
                 json.dump(
                     fp=bob,
@@ -139,3 +142,7 @@ if __name__ == "__main__":
                         } for date, rainfall in rainfall_by_constituency(connection=conn, constituency=constituency).items()],
                     },
                 )
+
+        with open(args.output / "constituencies-available.json", "w") as bob:
+            json.dump(fp=bob, obj=sorted(available_constituencies))
+

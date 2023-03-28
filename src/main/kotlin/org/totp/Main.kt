@@ -4,6 +4,7 @@ import org.http4k.client.OkHttp
 import org.http4k.cloudnative.env.Environment
 import org.http4k.cloudnative.env.EnvironmentKey
 import org.http4k.core.HttpHandler
+import org.http4k.core.Method
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.Uri
@@ -33,6 +34,8 @@ import org.totp.model.TotpHandlebars
 import org.totp.model.data.BeachRankings
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyCSOs
+import org.totp.model.data.ConstituencyLiveAvailability
+import org.totp.model.data.ConstituencyLiveDataLoader
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.MediaAppearances
@@ -127,14 +130,13 @@ fun main() {
     val dataClient = if (isDevelopmentEnvironment) {
         outboundFilters.then(static(ResourceLoader.Directory("services/data/datafiles")))
     } else {
-        EnsureSuccessfulResponse()
-            .then(SetBaseUriFrom(Uri.of("/data")))
+        SetBaseUriFrom(Uri.of("/data"))
             .then(ClientFilters.SetHostFrom(dataServiceUri(environment)))
             .then(outboundFilters)
             .then(OkHttp())
     }
 
-    val data2021 = SetBaseUriFrom(Uri.of("/v1/2021")).then(dataClient)
+    val data2021 = SetBaseUriFrom(Uri.of("/v1/2021")).then(EnsureSuccessfulResponse()).then(dataClient)
 
     val server = Undertow(
         if (isDevelopmentEnvironment) 8000 else {
@@ -143,7 +145,7 @@ fun main() {
     ).toServer(
         HtmlPageErrorFilter(events, renderer).then(
             routes(
-                "/" bind inboundFilters.then(
+                "/" bind Method.GET to inboundFilters.then(
                     routes(
                         "/" bind HomepageHandler(
                             renderer = renderer,
@@ -169,7 +171,9 @@ fun main() {
                             constituencySpills = ConstituencyCSOs(data2021),
                             constituencyBoundary = ConstituencyBoundaries(
                                 SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient)
-                            )
+                            ),
+                            constituencyLiveData = ConstituencyLiveDataLoader(dataClient),
+                            constituencyLiveAvailable = ConstituencyLiveAvailability(dataClient)
                         ),
                         "/map.html" bind OldMapRedirectHandler()
                     )

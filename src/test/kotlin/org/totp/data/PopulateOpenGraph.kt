@@ -11,7 +11,7 @@ import org.http4k.events.then
 import org.http4k.filter.ClientFilters
 import org.http4k.format.Jackson
 import org.totp.http4k.StandardFilters
-import org.totp.model.data.objectMapper
+import org.totp.model.data.TotpJson
 import org.totp.pages.Html
 import java.io.IOException
 import java.time.Clock
@@ -32,7 +32,7 @@ fun main() {
         .then(ClientFilters.FollowRedirects())
         .then(OkHttp())
 
-    val uris = objectMapper.readerForListOf(HashMap::class.java)
+    val uris = TotpJson.mapper.readerForListOf(HashMap::class.java)
         .readValue<List<Map<String, Any?>>>(mediaJson)
         .map {
 
@@ -40,7 +40,7 @@ fun main() {
                 val uri = Uri.of(it["href"] as String)
                 val image = it["image"] as String?
 
-                if ( image == null ) {
+                if (image == null) {
 
                     val html = okHttpClient(Request(Method.GET, uri))
 
@@ -50,8 +50,7 @@ fun main() {
 
                     uri to og
                 }
-            }
-            catch (e: IOException) {
+            } catch (e: IOException) {
                 print(e)
             }
         }
