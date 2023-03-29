@@ -51,7 +51,11 @@ class ConstituencyPageHandlerTest {
             constituencyContacts = {
                 listOf(
                     ConstituencyContact(
-                        ConstituencyName.of("a"),
+                        ConstituencyName.of("Aldershot"),
+                        MP("bob", "con", null, Uri.of("http://example.com"))
+                    ),
+                    ConstituencyContact(
+                        ConstituencyName.of("Ynys Môn"),
                         MP("bob", "con", null, Uri.of("http://example.com"))
                     )
                 )
