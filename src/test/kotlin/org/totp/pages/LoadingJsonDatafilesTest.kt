@@ -7,6 +7,7 @@ import org.http4k.core.Uri
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
+import org.totp.model.data.CompanyAnnualSummaries
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyCSOs
 import org.totp.model.data.ConstituencyLiveAvailability
@@ -181,6 +182,13 @@ class LoadingJsonDatafilesTest {
     fun `loading river rankings`() {
         val content = File("services/data/datafiles/v1/2021/spills-by-river.json")
         val service = RiverRankings {Response(Status.OK).body(content.readText())}
+        expectThat(service()).size.isGreaterThan(3)
+    }
+
+    @Test
+    fun `loading company summaries`() {
+        val content = File("services/data/datafiles/v1/2021/spills-by-company.json")
+        val service = CompanyAnnualSummaries {Response(Status.OK).body(content.readText())}
         expectThat(service()).size.isGreaterThan(3)
     }
 

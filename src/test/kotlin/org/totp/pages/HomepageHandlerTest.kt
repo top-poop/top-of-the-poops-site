@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.Address
 import org.totp.model.data.BeachRank
+import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.MediaAppearance
 import org.totp.model.data.MediaAppearances
@@ -23,6 +24,16 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEmpty
 import java.time.Duration
 import java.time.LocalDate
+
+val aWaterCompany = WaterCompany(
+    CompanyName.of("Water Co"),
+    Address("1", "2", "3", "town", "postcode"),
+    Uri.of(""),
+    Uri.of("http://example.com/company"),
+    Uri.of("http://example.com/image"),
+    linkUri=Uri.of("http://example.com/link"),
+    "@bob"
+)
 
 
 class HomepageHandlerTest {
@@ -71,14 +82,7 @@ class HomepageHandlerTest {
                     )
                 )
             },
-            companies = {
-                listOf(
-                    WaterCompany(
-                        "company", Address("1", "2", "3", "town", "postcode"),
-                        Uri.of(""), Uri.of("http://example.com/company"), Uri.of("http://example.com/image"), "@bob"
-                    )
-                )
-            }
+            companies = { listOf(aWaterCompany) }
         )
     )
 

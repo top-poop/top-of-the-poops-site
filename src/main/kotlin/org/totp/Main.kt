@@ -32,6 +32,7 @@ import org.totp.events.ServerStartedEvent
 import org.totp.http4k.StandardFilters
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.BeachRankings
+import org.totp.model.data.CompanyAnnualSummaries
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyCSOs
 import org.totp.model.data.ConstituencyLiveAvailability
@@ -42,6 +43,7 @@ import org.totp.model.data.MediaAppearances
 import org.totp.model.data.RiverRankings
 import org.totp.model.data.WaterCompanies
 import org.totp.pages.BeachesPageHandler
+import org.totp.pages.CompanyPageHandler
 import org.totp.pages.ConstituenciesPageHandler
 import org.totp.pages.ConstituencyPageHandler
 import org.totp.pages.ConstituencySlug
@@ -140,6 +142,9 @@ fun main() {
 
     val data2021 = SetBaseUriFrom(Uri.of("/v1/2021")).then(EnsureSuccessfulResponse()).then(dataClient)
 
+    val mediaAppearances = MediaAppearances(dataClient)
+    val waterCompanies = WaterCompanies(dataClient)
+
     val server = Undertow(
         if (isDevelopmentEnvironment) 8000 else {
             80
@@ -154,12 +159,12 @@ fun main() {
                             consituencyRankings = ConstituencyRankings(data2021),
                             beachRankings = BeachRankings(data2021),
                             riverRankings = RiverRankings(data2021),
-                            appearances = MediaAppearances(dataClient),
-                            companies = WaterCompanies(dataClient)
+                            appearances = mediaAppearances,
+                            companies = waterCompanies
                         ),
                         "/media" bind MediaPageHandler(
                             renderer = renderer,
-                            appearances = MediaAppearances(dataClient)
+                            appearances = mediaAppearances
                         ),
                         "/constituencies" bind ConstituenciesPageHandler(
                             renderer = renderer,
@@ -181,6 +186,11 @@ fun main() {
                             ),
                             constituencyLiveData = ConstituencyLiveDataLoader(dataClient),
                             constituencyLiveAvailable = ConstituencyLiveAvailability(dataClient)
+                        ),
+                        "/company/{company}" bind CompanyPageHandler(
+                            renderer = renderer,
+                            companySummaries = CompanyAnnualSummaries(data2021),
+                            waterCompanies = waterCompanies,
                         ),
                         "/map.html" bind OldMapRedirectHandler()
                     )

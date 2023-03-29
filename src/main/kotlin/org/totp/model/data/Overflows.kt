@@ -3,8 +3,6 @@ package org.totp.model.data
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import dev.forkhandles.values.StringValue
@@ -15,13 +13,13 @@ import org.http4k.core.Request
 import org.http4k.core.Uri
 import org.http4k.core.then
 import org.http4k.format.ConfigurableJackson
-import org.http4k.format.Jackson
 import org.http4k.format.Jackson.asA
 import org.http4k.format.asConfigurable
 import org.http4k.format.value
 import org.http4k.format.withStandardMappings
-import org.totp.extensions.kebabCase
 import org.totp.extensions.readSimpleList
+import org.totp.pages.CompanyAnnualSummary
+import org.totp.pages.CompanySlug
 import org.totp.pages.ConstituencyRank
 import org.totp.pages.ConstituencySlug
 import org.totp.pages.EnsureSuccessfulResponse
@@ -43,6 +41,10 @@ data class Coordinates(val lat: Number, val lon: Number)
 
 class ConstituencyName(value: String) : StringValue(value) {
     companion object : StringValueFactory<ConstituencyName>(::ConstituencyName)
+}
+
+class CompanyName(value: String) : StringValue(value) {
+    companion object : StringValueFactory<CompanyName>(::CompanyName)
 }
 
 
@@ -87,7 +89,7 @@ object ConstituencyLiveDataLoader {
             val uri = ConstituencySlug.from(name).let { Uri.of("/live/constituencies/$it.json") }
             val response = handler(Request(Method.GET, uri))
 
-            if ( response.status.successful ) {
+            if (response.status.successful) {
                 val value = response.bodyString().asA(LiveData::class)
                 value.let {
                     ConstituencyLiveData(
@@ -199,9 +201,6 @@ object RiverRankings {
 }
 
 
-
-
-
 object ConstituencyCSOs {
     operator fun invoke(handler: HttpHandler): (ConstituencyName) -> List<CSOTotals> {
         return { name ->
@@ -264,11 +263,12 @@ object MediaAppearances {
 
 data class Address(val line1: String, val line2: String, val line3: String?, val town: String, val postcode: String)
 data class WaterCompany(
-    val name: String,
+    val name: CompanyName,
     val address: Address,
     val phone: Uri,
     val uri: Uri,
     val imageUri: Uri,
+    val linkUri: Uri,
     val handle: String?
 )
 
@@ -279,7 +279,8 @@ object WaterCompanies {
 
             TotpJson.mapper.readSimpleList(response.bodyString())
                 .map {
-                    val name = it["name"] as String
+                    val name = CompanyName.of(it["name"] as String)
+                    val slug = CompanySlug.from(name)
                     WaterCompany(
                         name = name,
                         (it["address"] as Map<String, String?>).let {
@@ -293,11 +294,31 @@ object WaterCompanies {
                         },
                         phone = Uri.of(""),
                         uri = Uri.of(it["web"] as String),
-                        Uri.of("/assets/images/logos/${name.kebabCase()}.png"),
-                        handle = it["twitter"] as String?
+                        imageUri = Uri.of("/assets/images/logos/$slug.png"),
+                        handle = it["twitter"] as String?,
+                        linkUri = Uri.of("/company/$slug")
                     )
                 }
         }
     }
 }
 
+
+object CompanyAnnualSummaries {
+    operator fun invoke(handler: HttpHandler): () -> List<CompanyAnnualSummary> {
+        return {
+            val response = handler(Request(Method.GET, "spills-by-company.json"))
+
+            TotpJson.mapper.readSimpleList(response.bodyString())
+                .map {
+                    CompanyAnnualSummary(
+                        CompanyName.of(it["company_name"] as String),
+                        it["reporting_year"] as Int,
+                        (it["count"] as Double).toInt(),
+                        Duration.ofHours((it["hours"] as Double).toLong()),
+                        it["location_count"] as Int
+                    )
+                }
+        }
+    }
+}

@@ -79,6 +79,7 @@ data class RenderableConstituency(val name: ConstituencyName, val current: Boole
 data class SocialShare(
     val uri: Uri,
     val text: String,
+    val cta: String,
     val tags: List<String>,
     val via: String
 )
@@ -162,6 +163,7 @@ object ConstituencyPageHandler {
                             SocialShare(
                                 pageUriFrom(request),
                                 text = "$constituencyName had ${numberFormat.format(summary.count)} sewage overflows in ${summary.year}",
+                                cta = "Share $constituencyName sewage horrors",
                                 tags = listOf("sewage"),
                                 via = "sewageuk"
                             ),
