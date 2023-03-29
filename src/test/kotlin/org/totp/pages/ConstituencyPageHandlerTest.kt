@@ -14,6 +14,7 @@ import org.totp.model.TotpHandlebars
 import org.totp.model.data.CSO
 import org.totp.model.data.CSOTotals
 import org.totp.model.data.CompanyName
+import org.totp.model.data.ConstituencyContact
 import org.totp.model.data.ConstituencyLiveData
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
@@ -47,6 +48,14 @@ class ConstituencyPageHandlerTest {
             constituencySpills = { summaries },
             constituencyBoundary = { GeoJSON.of("some geojson") },
             constituencyLiveData = { ConstituencyLiveData(ConstituencyName.of("a"), 1, 2) },
+            constituencyContacts = {
+                listOf(
+                    ConstituencyContact(
+                        ConstituencyName.of("a"),
+                        MP("bob", "con", null, Uri.of("http://example.com"))
+                    )
+                )
+            },
             constituencyLiveAvailable = { listOf(ConstituencyName("bob")) }
         )
     )

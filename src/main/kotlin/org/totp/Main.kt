@@ -36,6 +36,7 @@ import org.totp.model.data.BeachRankings
 import org.totp.model.data.CompanyAnnualSummaries
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyCSOs
+import org.totp.model.data.ConstituencyContacts
 import org.totp.model.data.ConstituencyLiveAvailability
 import org.totp.model.data.ConstituencyLiveDataLoader
 import org.totp.model.data.ConstituencyName
@@ -149,6 +150,7 @@ fun main() {
 
     val mediaAppearances = MediaAppearances(dataClient)
     val waterCompanies = WaterCompanies(dataClient)
+    val constituencyContacts = ConstituencyContacts(data2021)
 
     val server = Undertow(port = port(environment)).toServer(
         HtmlPageErrorFilter(events, renderer).then(
@@ -169,7 +171,8 @@ fun main() {
                         ),
                         "/constituencies" bind ConstituenciesPageHandler(
                             renderer = renderer,
-                            consituencyRankings = ConstituencyRankings(data2021)
+                            constituencyRankings = ConstituencyRankings(data2021),
+                            constituencyContacts = constituencyContacts,
                         ),
                         "/beaches" bind BeachesPageHandler(
                             renderer = renderer,
@@ -186,7 +189,8 @@ fun main() {
                                 SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient)
                             ),
                             constituencyLiveData = ConstituencyLiveDataLoader(dataClient),
-                            constituencyLiveAvailable = ConstituencyLiveAvailability(dataClient)
+                            constituencyLiveAvailable = ConstituencyLiveAvailability(dataClient),
+                            constituencyContacts = constituencyContacts
                         ),
                         "/company/{company}" bind CompanyPageHandler(
                             renderer = renderer,

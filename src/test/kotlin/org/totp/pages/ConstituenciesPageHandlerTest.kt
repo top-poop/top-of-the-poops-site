@@ -7,6 +7,7 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
+import org.totp.model.data.ConstituencyContact
 import org.totp.model.data.ConstituencyName
 import strikt.api.expectThat
 import strikt.assertions.isNotEmpty
@@ -15,16 +16,17 @@ import java.time.Duration
 
 class ConstituenciesPageHandlerTest {
 
+    val a = ConstituencyName("a")
+    val b = ConstituencyName("b")
     val service = routes(
         "/" bind Method.GET to ConstituenciesPageHandler(
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
-            consituencyRankings = {
+            constituencyRankings = {
                 listOf(
                     ConstituencyRank(
                         1,
-                        ConstituencyName("a"),
+                        a,
                         Uri.of("/con/1"),
-                        MP("mp1", "con", "handle1", Uri.of("https://example.com/1")),
                         100,
                         Duration.ofHours(1),
                         25,
@@ -32,9 +34,8 @@ class ConstituenciesPageHandlerTest {
                     ),
                     ConstituencyRank(
                         2,
-                        ConstituencyName("b"),
+                        b,
                         Uri.of("/con/2"),
-                        MP("mp2", "noc", "handle2", Uri.of("https://example.com/2")),
                         2,
                         Duration.ofHours(2),
                         50,
@@ -42,6 +43,12 @@ class ConstituenciesPageHandlerTest {
                     )
                 )
             },
+            constituencyContacts = {
+                listOf(
+                    ConstituencyContact(a, MP("mp1", "con", "handle1", Uri.of("https://example.com/1"))),
+                    ConstituencyContact(b, MP("mp2", "noc", "handle2", Uri.of("https://example.com/2")))
+                )
+            }
         )
     )
 

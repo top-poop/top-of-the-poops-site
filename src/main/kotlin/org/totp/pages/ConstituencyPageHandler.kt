@@ -22,6 +22,7 @@ import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.CSOTotals
 import org.totp.model.data.CompanyName
+import org.totp.model.data.ConstituencyContact
 import org.totp.model.data.ConstituencyLiveData
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
@@ -155,6 +156,7 @@ object ConstituencyPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
         constituencySpills: (ConstituencyName) -> List<CSOTotals>,
+        constituencyContacts: () -> List<ConstituencyContact>,
         constituencyBoundary: (ConstituencyName) -> GeoJSON,
         constituencyLiveData: (ConstituencyName) -> ConstituencyLiveData?,
         constituencyLiveAvailable: () -> List<ConstituencyName>
@@ -181,6 +183,8 @@ object ConstituencyPageHandler {
                     }
 
                 val list = constituencySpills(constituencyName).sortedByDescending { it.duration }
+                val contact = constituencyContacts().first { it.constituency == constituencyName }
+
                 val summary = ConstituencySummary.from(list)
                 Response(Status.OK)
                     .with(
@@ -189,7 +193,7 @@ object ConstituencyPageHandler {
                             constituencyName,
                             SocialShare(
                                 pageUriFrom(request),
-                                text = "$constituencyName had ${numberFormat.format(summary.count)} sewage overflows in ${summary.year}",
+                                text = "$constituencyName had ${numberFormat.format(summary.count)} sewage overflows in ${summary.year} - ${contact.mp.handle}",
                                 cta = "Share $constituencyName sewage horrors",
                                 tags = listOf("sewage"),
                                 via = "sewageuk"

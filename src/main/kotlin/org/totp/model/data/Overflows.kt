@@ -133,12 +133,6 @@ object ConstituencyRankings {
                         rank = r + 1,
                         constituencyName = constituencyName,
                         constituencyUri = Uri.of("/constituency/${ConstituencySlug.from(constituencyName).value}"),
-                        mp = MP(
-                            name = it["mp_name"] as String,
-                            party = it["mp_party"] as String,
-                            handle = it["twitter_handle"] as String?,
-                            uri = Uri.of(it["mp_uri"] as String)
-                        ),
                         count = (it["total_spills"] as Double).toInt(),
                         duration = Duration.ofHours((it["total_hours"] as Double).toLong()),
                         countDelta = (it["spills_increase"] as Double).toInt(),
@@ -322,6 +316,32 @@ object CompanyAnnualSummaries {
                         (it["count"] as Double).toInt(),
                         Duration.ofHours((it["hours"] as Double).toLong()),
                         it["location_count"] as Int
+                    )
+                }
+        }
+    }
+}
+
+data class ConstituencyContact(
+    val constituency: ConstituencyName,
+    val mp: MP
+)
+
+object ConstituencyContacts {
+    operator fun invoke(handler: HttpHandler): () -> List<ConstituencyContact> {
+        return {
+            val response = handler(Request(Method.GET, "constituency-social.json"))
+
+            TotpJson.mapper.readSimpleList(response.bodyString())
+                .map {
+                    ConstituencyContact(
+                        ConstituencyName.of(it["constituency"] as String),
+                        mp = MP(
+                            name = it["mp_name"] as String,
+                            party = it["mp_party"] as String,
+                            handle = it["twitter_handle"] as String?,
+                            uri = Uri.of(it["mp_uri"] as String)
+                        ),
                     )
                 }
         }

@@ -14,6 +14,7 @@ import org.totp.model.data.ConstituencyLiveAvailability
 import org.totp.model.data.ConstituencyLiveDataLoader
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencyRankings
+import org.totp.model.data.ConstituencyContacts
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
 import org.totp.model.data.RiverRankings
@@ -118,12 +119,6 @@ class LoadingJsonDatafilesTest {
             get(0).and {
                 get { rank }.isEqualTo(1)
                 get { constituencyName }.isEqualTo(ConstituencyName("PP"))
-                get { mp }.and {
-                    get { name }.isEqualTo("SC")
-                    get { party }.isEqualTo("C")
-                    get { handle }.isEqualTo("@example")
-                    get { uri }.isEqualTo(Uri.of("http://example.com/sc"))
-                }
                 get { count }.isEqualTo(6754)
                 get { duration }.isEqualTo(Duration.ofHours(79501))
                 get { countDelta }.isEqualTo(178)
@@ -192,6 +187,10 @@ class LoadingJsonDatafilesTest {
         expectThat(service()).size.isGreaterThan(3)
     }
 
-
-
+    @Test
+    fun `loading constituency socials`() {
+        val content = File("services/data/datafiles/v1/2021/constituency-social.json")
+        val service = ConstituencyContacts {Response(Status.OK).body(content.readText())}
+        expectThat(service()).size.isGreaterThan(3)
+    }
 }
