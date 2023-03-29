@@ -13,6 +13,7 @@ import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.BeachRank
+import org.totp.model.data.CompanyName
 import java.time.Duration
 
 class BeachesPage(
@@ -20,15 +21,31 @@ class BeachesPage(
     val year: Int,
     val totalCount: Int,
     val totalDuration: Duration,
-    val beachRankings: List<BeachRank>,
+    val beachRankings: List<RenderableBeachRank>,
     val polluterRankings: List<BeachPolluter>,
 ) : PageViewModel(uri)
 
+data class RenderableCompany(val name: CompanyName, val uri: Uri) {
+    companion object {
+        fun from(companyName: CompanyName): RenderableCompany {
+            return RenderableCompany(companyName, CompanySlug.from(companyName).let { Uri.of("/company/$it") })
+        }
+    }
+}
+
 data class BeachPolluter(
     val rank: Int,
-    val company: String,
+    val company: RenderableCompany,
     val count: Int,
     val duration: Duration
+)
+
+data class RenderableBeachRank(
+    val rank: Int,
+    val beach: String,
+    val company: RenderableCompany,
+    val count: Int,
+    val duration: Duration,
 )
 
 object BeachesPageHandler {
@@ -39,12 +56,12 @@ object BeachesPageHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
         return { request: Request ->
-            val rankings = beachRankings()
+            val rankings = beachRankings().sortedBy { it.rank }
             val polluters = rankings.groupBy { it.company }
                 .map {
                     BeachPolluter(
                         0,
-                        it.key,
+                        RenderableCompany.from(it.key),
                         count = it.value.sumOf { it.count },
                         duration = it.value.map { it.duration }.reduce { acc, duration -> acc + duration }
                     )
@@ -64,7 +81,15 @@ object BeachesPageHandler {
                         year = 2021,
                         totalCount,
                         totalDuration,
-                        rankings.sortedByDescending { it.rank },
+                        rankings.map {
+                            RenderableBeachRank(
+                                it.rank,
+                                it.beach,
+                                RenderableCompany.from(it.company),
+                                it.count,
+                                it.duration
+                            )
+                        },
                         polluterRankings = polluters
                     )
                 )

@@ -58,7 +58,7 @@
                     {{#each polluterRankings}}
                         <tr>
                             <td>{{this.rank}}</td>
-                            <td>{{this.company}}</td>
+                            <td><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
                             <td>{{numberFormat this.count}}</td>
                             <td>{{numberFormat this.duration.toHours}}</td>
                         </tr>
@@ -95,7 +95,7 @@
                         <tr>
                             <td>{{this.rank}}</td>
                             <td>{{this.beach}}</td>
-                            <td>{{this.company}}</td>
+                            <td><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
                             <td>{{numberFormat this.count}}</td>
                             <td>{{numberFormat this.duration.toHours}}</td>
                         </tr>

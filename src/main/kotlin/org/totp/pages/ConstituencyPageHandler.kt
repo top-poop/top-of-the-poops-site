@@ -21,8 +21,10 @@ import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.CSOTotals
+import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyLiveData
 import org.totp.model.data.ConstituencyName
+import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
 import org.totp.text.csv.readCSV
 import java.text.NumberFormat
@@ -47,7 +49,7 @@ val slugToConstituency = constituencyNames.associateBy { ConstituencySlug.from(i
 data class ConstituencySummary(
     val year: Int,
     val locationCount: Int,
-    val companies: List<String>,
+    val companies: List<CompanyName>,
     val count: Int,
     val duration: Duration
 ) {
@@ -61,7 +63,7 @@ data class ConstituencySummary(
                     .map { it.cso.company }
                     .toSet()
                     .toList()
-                    .sorted(),
+                    .sortedBy { it.value },
                 count = csos
                     .filter { it.duration > Duration.ZERO }
                     .sumOf { it.count },
@@ -74,7 +76,18 @@ data class ConstituencySummary(
     }
 }
 
-data class RenderableConstituency(val name: ConstituencyName, val current: Boolean, val uri: Uri, val live: Boolean)
+data class RenderableConstituency(val name: ConstituencyName, val current: Boolean, val uri: Uri, val live: Boolean) {
+    companion object {
+        fun from(name: ConstituencyName, current: Boolean = false, live: Boolean = false): RenderableConstituency {
+            return RenderableConstituency(
+                name = name,
+                current = current,
+                uri = ConstituencySlug.from(name).let { Uri.of("/constituency/$it") },
+                live = live,
+            )
+        }
+    }
+}
 
 data class SocialShare(
     val uri: Uri,
@@ -89,13 +102,28 @@ data class ConstituencyPageLiveData(
     val uri: Uri
 )
 
+data class RenderableCSO(
+    val company: RenderableCompany,
+    val sitename: String,
+    val waterway: String,
+    val location: Coordinates
+)
+
+data class RenderableCSOTotal(
+    val constituency: RenderableConstituency,
+    val cso: RenderableCSO,
+    val count: Int,
+    val duration: Duration,
+    val reporting: Number
+)
+
 class ConstituencyPage(
     uri: Uri,
     val name: ConstituencyName,
     val share: SocialShare,
     val summary: ConstituencySummary,
     val geojson: GeoJSON,
-    val csos: List<CSOTotals>,
+    val csos: List<RenderableCSOTotal>,
     val constituencies: List<RenderableConstituency>,
     val live: ConstituencyPageLiveData?,
 ) :
@@ -145,15 +173,14 @@ object ConstituencyPageHandler {
 
                 val renderableConstituencies = slugToConstituency
                     .map {
-                        RenderableConstituency(
-                            name = it.value,
+                        RenderableConstituency.from(
+                            it.value,
                             current = it.key == slug,
-                            uri = Uri.of("/constituency/" + it.key),
-                            live = liveAvailable.contains(it.value),
+                            live = liveAvailable.contains(it.value)
                         )
                     }
 
-                val list = constituencySpills(constituencyName)
+                val list = constituencySpills(constituencyName).sortedByDescending { it.duration }
                 val summary = ConstituencySummary.from(list)
                 Response(Status.OK)
                     .with(
@@ -169,7 +196,22 @@ object ConstituencyPageHandler {
                             ),
                             summary,
                             constituencyBoundary(constituencyName),
-                            list.sortedByDescending { it.duration },
+                            list.map {
+                                RenderableCSOTotal(
+                                    RenderableConstituency.from(it.constituency),
+                                    it.cso.let {
+                                        RenderableCSO(
+                                            RenderableCompany.from(it.company),
+                                            it.sitename,
+                                            it.waterway,
+                                            it.location
+                                        )
+                                    },
+                                    it.count,
+                                    it.duration,
+                                    it.reporting
+                                )
+                            },
                             renderableConstituencies,
                             if (liveAvailable.contains(constituencyName)) {
                                 constituencyLiveData(constituencyName)?.let {

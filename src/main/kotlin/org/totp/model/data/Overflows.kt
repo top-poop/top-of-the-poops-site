@@ -35,7 +35,12 @@ data class CSOTotals(
     val reporting: Number
 )
 
-data class CSO(val company: String, val sitename: String, val waterway: String, val location: Coordinates)
+data class CSO(
+    val company: CompanyName,
+    val sitename: String,
+    val waterway: String,
+    val location: Coordinates
+)
 
 data class Coordinates(val lat: Number, val lon: Number)
 
@@ -148,7 +153,7 @@ object ConstituencyRankings {
 data class BeachRank(
     val rank: Int,
     val beach: String,
-    val company: String,
+    val company: CompanyName,
     val count: Int,
     val duration: Duration,
 )
@@ -163,7 +168,7 @@ object BeachRankings {
                     BeachRank(
                         rank = r + 1,
                         beach = it["bathing"] as String,
-                        company = it["company_name"] as String,
+                        company = CompanyName(it["company_name"] as String),
                         duration = Duration.ofHours((it["total_spill_hours"] as Double).toLong()),
                         count = (it["total_spill_count"] as Double).toInt(),
                     )
@@ -213,7 +218,7 @@ object ConstituencyCSOs {
                         CSOTotals(
                             constituency = ConstituencyName(it["constituency"] as String),
                             cso = CSO(
-                                company = it["company_name"] as String,
+                                company = CompanyName.of(it["company_name"] as String),
                                 sitename = it["site_name"] as String,
                                 waterway = it["receiving_water"] as String,
                                 location = Coordinates(

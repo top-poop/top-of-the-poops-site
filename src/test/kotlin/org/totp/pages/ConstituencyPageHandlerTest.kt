@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.CSO
 import org.totp.model.data.CSOTotals
+import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyLiveData
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
@@ -29,7 +30,7 @@ class ConstituencyPageHandlerTest {
         CSOTotals(
             constituency = ConstituencyName("Your House"),
             cso = CSO(
-                company = "Venture Cap",
+                company = CompanyName.of("Venture Cap"),
                 sitename = "Your House",
                 waterway = "Your River",
                 location = Coordinates(lon = -0.12460789, lat = 51.49993385),
@@ -46,7 +47,7 @@ class ConstituencyPageHandlerTest {
             constituencySpills = { summaries },
             constituencyBoundary = { GeoJSON.of("some geojson") },
             constituencyLiveData = { ConstituencyLiveData(ConstituencyName.of("a"), 1, 2) },
-            constituencyLiveAvailable = { listOf(ConstituencyName("bob"))}
+            constituencyLiveAvailable = { listOf(ConstituencyName("bob")) }
         )
     )
 

@@ -12,13 +12,23 @@ import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
-import java.text.NumberFormat
+import java.time.Duration
 
 class ConstituenciesPage(
     uri: Uri,
     var year: Int,
-    val constituencyRankings: List<ConstituencyRank>
+    val constituencyRankings: List<RenderableConstituencyRank>
 ) : PageViewModel(uri)
+
+class RenderableConstituencyRank(
+    val rank: Int,
+    val constituency: RenderableConstituency,
+    val mp: MP,
+    val count: Int,
+    val duration: Duration,
+    val countDelta: Int,
+    val durationDelta: Duration
+)
 
 object ConstituenciesPageHandler {
     operator fun invoke(
@@ -33,7 +43,17 @@ object ConstituenciesPageHandler {
                     viewLens of ConstituenciesPage(
                         pageUriFrom(request),
                         year = 2021,
-                        consituencyRankings(),
+                        consituencyRankings().sortedBy { it.rank }.map {
+                            RenderableConstituencyRank(
+                                it.rank,
+                                RenderableConstituency.from(it.constituencyName ),
+                                it.mp,
+                                it.count,
+                                it.duration,
+                                countDelta = it.countDelta,
+                                durationDelta = it.durationDelta
+                            )
+                        },
                     )
                 )
         }

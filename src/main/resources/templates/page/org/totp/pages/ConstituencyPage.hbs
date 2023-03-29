@@ -144,7 +144,7 @@
                         {{#each csos}}
                             <tr data-class="cso" data-lat="{{this.cso.location.lat}}"
                                 data-lon="{{this.cso.location.lon}}">
-                                <td data-company>{{this.cso.company}}</td>
+                                <td data-company><a href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a></td>
                                 <td data-waterway>{{this.cso.waterway}}</td>
                                 <td data-sitename>{{this.cso.sitename}}</td>
                                 <td data-count>{{this.count}}</td>
