@@ -12,6 +12,7 @@ import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.BeachRank
+import org.totp.model.data.RiverRank
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.MediaAppearance
 import org.totp.model.data.WaterCompany
@@ -33,9 +34,11 @@ data class ConstituencyRank(
 @Suppress("unused")
 class HomePage(
     uri: Uri,
+    val year: Int,
     val constituencyRankings: List<ConstituencyRank>,
     val companies: List<WaterCompany>,
     val beachRankings: List<BeachRank>,
+    val riverRankings: List<RiverRank>,
     val appearances: List<MediaAppearance>,
     val share: SocialShare
 ) : PageViewModel(uri)
@@ -46,6 +49,7 @@ object HomepageHandler {
         renderer: TemplateRenderer,
         consituencyRankings: () -> List<ConstituencyRank>,
         beachRankings: () -> List<BeachRank>,
+        riverRankings: () -> List<RiverRank>,
         appearances: () -> List<MediaAppearance>,
         companies: () -> List<WaterCompany>,
     ): HttpHandler {
@@ -57,9 +61,11 @@ object HomepageHandler {
                 .with(
                     viewLens of HomePage(
                         pageUriFrom(request),
+                        year= 2021,
                         consituencyRankings().take(10),
                         companies(),
                         beachRankings().take(10),
+                        riverRankings().take(10),
                         appearances().sortedByDescending { it.date }.take(8),
                         SocialShare(
                             pageUriFrom(request),

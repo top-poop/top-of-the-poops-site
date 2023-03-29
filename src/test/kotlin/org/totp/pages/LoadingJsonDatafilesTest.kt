@@ -15,6 +15,7 @@ import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
+import org.totp.model.data.RiverRankings
 import org.totp.model.data.WaterCompanies
 import strikt.api.expectThat
 import strikt.assertions.get
@@ -175,4 +176,14 @@ class LoadingJsonDatafilesTest {
         val service = ConstituencyLiveAvailability {Response(Status.OK).body(content.readText())}
         expectThat(service()).size.isGreaterThan(3)
     }
+
+    @Test
+    fun `loading river rankings`() {
+        val content = File("services/data/datafiles/v1/2021/spills-by-river.json")
+        val service = RiverRankings {Response(Status.OK).body(content.readText())}
+        expectThat(service()).size.isGreaterThan(3)
+    }
+
+
+
 }

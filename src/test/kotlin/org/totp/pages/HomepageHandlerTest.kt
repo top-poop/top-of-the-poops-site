@@ -12,10 +12,9 @@ import org.totp.model.TotpHandlebars
 import org.totp.model.data.Address
 import org.totp.model.data.BeachRank
 import org.totp.model.data.ConstituencyName
-import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.MediaAppearance
 import org.totp.model.data.MediaAppearances
-import org.totp.model.data.WaterCompanies
+import org.totp.model.data.RiverRank
 import org.totp.model.data.WaterCompany
 import strikt.api.expectThat
 import strikt.assertions.get
@@ -57,6 +56,9 @@ class HomepageHandlerTest {
             },
             beachRankings = {
                 listOf(BeachRank(1, "beach", "company", 10, Duration.ofHours(1)))
+            },
+            riverRankings = {
+                listOf(RiverRank(1, "river", "company", 20, Duration.ofHours(22)))
             },
             appearances = {
                 listOf(

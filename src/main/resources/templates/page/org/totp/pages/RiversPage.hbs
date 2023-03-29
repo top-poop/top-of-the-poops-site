@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Top of the Poops | Rivers</title>
+    <meta name="description" content="Analysing sewage dumps by water companies">
+
+    {{> chunks/favicons }}
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
+    <link rel="stylesheet" href="/assets/css/leaflet.css"/>
+    <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
+
+    {{> components/meta-opengraph title="Rivers" }}
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+{{> chunks/title }}
+
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h3>There were at least <em>{{numberFormat totalCount}}</em> "sewage spills"
+            into rivers in {{year}}, lasting an almost unbelievable
+            {{numberFormat totalDuration.toHours}} hours </h3>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col ">
+            <img style="width: 100%; height: auto" src="/assets/images/top-of-the-poops-rivers-2021.png"/>
+            <figcaption class="figure-caption">A map, in brown all the rivers that received more than 24 hours of sewage dumps in {{year}}</figcaption>
+        </div>
+    </div>
+
+    {{>chunks/horrible-nav}}
+
+    <div class="row">
+        <div class="col">
+            {{#> components/section title=(concat "Rivers Ranked for " year)}}
+
+                <p>Here are all the rivers in England and Wales that had sewage overflows in 2021. As the list is grouped by company, some rivers
+                may feature more than once, being polluted by different companies along their length.</p>
+
+                <p>As there are different rivers with the same name in different parts of the country, it didn't seem sensible to group by river name alone.</p>
+
+                <p>The category of "river" is made by the water companies in their "Consent to Discharge with Conditions" - so although there are a number of Seas in this list, that's
+                what they are reporting</p>
+
+                <table id="table-river" data-id="river" class="table table-striped mt-3"
+                       style="width: 100%">
+                    <thead>
+                    <tr>
+                        <td>Rank</td>
+                        <td>River</td>
+                        <td>Company</td>
+                        <td>Sewage Dumps</td>
+                        <td>Duration (Hours)</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#each riverRankings}}
+                        <tr>
+                            <td>{{this.rank}}</td>
+                            <td>{{this.river}}</td>
+                            <td>{{this.company}}</td>
+                            <td>{{numberFormat this.count}}</td>
+                            <td>{{numberFormat this.duration.toHours}}</td>
+                        </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            {{/components/section}}
+        </div>
+    </div>
+</div>
+
+<script>
+    new DataTable('#table-river',
+            {
+                pageLength: 20,
+                dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i>>"
+            });
+</script>
+
+<div id="footer" class="container">
+    <div class="row">
+        <div class="col">{{> chunks/data-sources }}</div>
+    </div>
+    <div class="row">
+        <div class="col">{{> chunks/copyright }}</div>
+    </div>
+</div>
+</body>
+</html>

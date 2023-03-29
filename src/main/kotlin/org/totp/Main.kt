@@ -39,6 +39,7 @@ import org.totp.model.data.ConstituencyLiveDataLoader
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.MediaAppearances
+import org.totp.model.data.RiverRankings
 import org.totp.model.data.WaterCompanies
 import org.totp.pages.BeachesPageHandler
 import org.totp.pages.ConstituenciesPageHandler
@@ -48,6 +49,7 @@ import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.HomepageHandler
 import org.totp.pages.HtmlPageErrorFilter
 import org.totp.pages.MediaPageHandler
+import org.totp.pages.RiversPageHandler
 import org.totp.pages.constituencyNames
 import java.time.Clock
 
@@ -151,6 +153,7 @@ fun main() {
                             renderer = renderer,
                             consituencyRankings = ConstituencyRankings(data2021),
                             beachRankings = BeachRankings(data2021),
+                            riverRankings = RiverRankings(data2021),
                             appearances = MediaAppearances(dataClient),
                             companies = WaterCompanies(dataClient)
                         ),
@@ -165,6 +168,10 @@ fun main() {
                         "/beaches" bind BeachesPageHandler(
                             renderer = renderer,
                             beachRankings = BeachRankings(data2021)
+                        ),
+                        "/rivers" bind RiversPageHandler(
+                            renderer = renderer,
+                            riverRankings = RiverRankings(data2021)
                         ),
                         "/constituency/{constituency}" bind ConstituencyPageHandler(
                             renderer = renderer,

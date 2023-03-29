@@ -110,6 +110,39 @@
             </a>
         </div>
     </div>
+
+
+    <div class="row justify-content-md-center align-items-center">
+        <div class="col-md-4   offset-md-2">
+            <div class="display-4">Rivers & Streams</div>
+
+            <div class="mb-4">
+                <p>Of the 4700 rivers in England, few escape from sewage dumping</p>
+
+                <p>On the image, you can see a map, in blue of all the rivers that escaped sewage in {{year}},
+                and in brown all the rivers that received more than 24 hours of sewage dumps.</p>
+
+                <p>The 1100 or so rivers in Wales didn't escape, unfortunately, but Dwr Cymru don't include the information in their reports
+                to enable us to draw the map very easily. Perhaps they will include it in 2022?</p>
+
+                <h4>Top of The Poops - Rivers</h4>
+
+                {{#each riverRankings}}
+                    <div>
+                        <b>{{this.rank}}.</b> {{this.river}} {{numberFormat this.duration.toHours}} hours
+                    </div>
+                {{/each}}
+            </div>
+            <a href="/rivers">
+                <button type="button" class="btn btn-primary">See all river rankings</button>
+            </a>
+        </div>
+        <div class="col-md-6 ">
+            <img style="width: 100%; height: auto" src="/assets/images/top-of-the-poops-rivers-2021.png"/>
+        </div>
+    </div>
+
+
 </div>
 
 <div class="container">
