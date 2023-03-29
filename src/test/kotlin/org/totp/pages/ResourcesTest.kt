@@ -1,7 +1,5 @@
 package org.totp.pages
 
-import org.http4k.core.Method
-import org.http4k.core.Uri
 import org.http4k.template.ViewModel
 import org.junit.jupiter.api.Test
 import org.totp.Resources
@@ -14,7 +12,7 @@ class ResourcesTest {
     @Test
     fun `loading templates in prod mode`() {
 
-        val renderer = Resources.templates(TotpHandlebars.templates(), devMode = false)
+        val renderer = Resources.templates(TotpHandlebars.templates(), hotReload = false)
 
         renderer(object : ViewModel { override fun template(): String = "chunks/copyright" })
     }
@@ -22,7 +20,7 @@ class ResourcesTest {
     @Test
     fun `loading templates in dev mode`() {
 
-        val renderer = Resources.templates(TotpHandlebars.templates(), devMode = true)
+        val renderer = Resources.templates(TotpHandlebars.templates(), hotReload = true)
 
         renderer(object : ViewModel { override fun template(): String = "chunks/copyright" })
     }

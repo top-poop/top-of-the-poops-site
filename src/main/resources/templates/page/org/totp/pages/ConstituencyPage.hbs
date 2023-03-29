@@ -144,12 +144,12 @@
                         {{#each csos}}
                             <tr data-class="cso" data-lat="{{this.cso.location.lat}}"
                                 data-lon="{{this.cso.location.lon}}">
-                                <td data-company><a href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a></td>
-                                <td data-waterway>{{this.cso.waterway}}</td>
-                                <td data-sitename>{{this.cso.sitename}}</td>
-                                <td data-count>{{this.count}}</td>
-                                <td data-duration>{{this.duration.toHours}}</td>
-                                <td>{{this.reporting}}</td>
+                                <td class="align-middle" data-company><a href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a></td>
+                                <td class="align-middle" data-waterway>{{this.cso.waterway}}</td>
+                                <td class="align-middle" data-sitename>{{this.cso.sitename}}</td>
+                                <td class="align-middle" data-count>{{numberFormat this.count}}</td>
+                                <td class="align-middle" data-duration>{{numberFormat this.duration.toHours}}</td>
+                                <td class="align-middle">{{this.reporting}}</td>
                             </tr>
                         {{/each}}
                         </tbody>

@@ -1,5 +1,7 @@
 package org.totp.pages
 
+import dev.forkhandles.values.IntValue
+import dev.forkhandles.values.IntValueFactory
 import org.http4k.core.Body
 import org.http4k.core.ContentType
 import org.http4k.core.HttpHandler
@@ -20,14 +22,33 @@ class ConstituenciesPage(
     val constituencyRankings: List<RenderableConstituencyRank>
 ) : PageViewModel(uri)
 
+class DeltaValue(value: Int) : IntValue(value) {
+    companion object : IntValueFactory<DeltaValue>(::DeltaValue)
+
+    fun isPositive() = value > 0
+    fun isNegative() = value < 0
+}
+
+class RenderableDuration(value: Duration) {
+    val hours = value.toHours()
+}
+
+class RenderableDurationDelta(val value: Duration) {
+    val hours = value.toHours()
+
+    fun isPositive() = value > Duration.ZERO
+    fun isNegative() = value < Duration.ZERO
+
+}
+
 class RenderableConstituencyRank(
     val rank: Int,
     val constituency: RenderableConstituency,
     val mp: MP,
     val count: Int,
-    val duration: Duration,
-    val countDelta: Int,
-    val durationDelta: Duration
+    val duration: RenderableDuration,
+    val countDelta: DeltaValue,
+    val durationDelta: RenderableDurationDelta
 )
 
 object ConstituenciesPageHandler {
@@ -46,12 +67,12 @@ object ConstituenciesPageHandler {
                         consituencyRankings().sortedBy { it.rank }.map {
                             RenderableConstituencyRank(
                                 it.rank,
-                                RenderableConstituency.from(it.constituencyName ),
+                                RenderableConstituency.from(it.constituencyName),
                                 it.mp,
                                 it.count,
-                                it.duration,
-                                countDelta = it.countDelta,
-                                durationDelta = it.durationDelta
+                                RenderableDuration(it.duration),
+                                countDelta = DeltaValue.of(it.countDelta),
+                                durationDelta = RenderableDurationDelta(it.durationDelta)
                             )
                         },
                     )

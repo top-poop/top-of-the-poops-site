@@ -19,6 +19,7 @@ import org.http4k.format.Jackson
 import org.http4k.lens.Header.LOCATION
 import org.http4k.lens.Query
 import org.http4k.lens.boolean
+import org.http4k.lens.int
 import org.http4k.lens.uri
 import org.http4k.lens.value
 import org.http4k.routing.ResourceLoader
@@ -61,8 +62,8 @@ object Resources {
     private val resourceBase = java.nio.file.Path.of("src/main/resources")
 
     //not very keen on dev mode, but good enough for now.
-    fun templates(templates: HandlebarsTemplates, devMode: Boolean): TemplateRenderer {
-        return if (devMode) {
+    fun templates(templates: HandlebarsTemplates, hotReload: Boolean): TemplateRenderer {
+        return if (hotReload) {
             templates.HotReload(resourceBase.resolve("templates/page/org/totp").toString())
         } else {
             templates.CachingClasspath("templates.page.org.totp")
@@ -103,11 +104,15 @@ fun main() {
         EnvironmentKey.boolean().required("DEVELOPMENT_MODE", "Use fake data server (local files) & hot reload")
     val dataServiceUri = EnvironmentKey.uri().required("DATA_SERVICE_URI", "URI for Data Service")
     val debugging = EnvironmentKey.boolean().required("DEBUG_MODE", "Print all request and response")
+    val port = EnvironmentKey.int().required("PORT", "Listen Port")
+    val hotReloadingTemplates = EnvironmentKey.boolean().required("HOT_TEMPLATES")
 
     val defaultConfig = Environment.defaults(
         isDevelopment of false,
         debugging of false,
-        dataServiceUri of Uri.of("http://data")
+        dataServiceUri of Uri.of("http://data"),
+        port of 80,
+        hotReloadingTemplates of false
     )
 
     val environment = Environment.JVM_PROPERTIES overrides
@@ -125,7 +130,7 @@ fun main() {
 
     val renderer = Resources.templates(
         templates = TotpHandlebars.templates(),
-        devMode = isDevelopmentEnvironment
+        hotReload = hotReloadingTemplates(environment)
     )
 
     val inboundFilters = StandardFilters.incoming(events, debugging(environment))
@@ -145,11 +150,7 @@ fun main() {
     val mediaAppearances = MediaAppearances(dataClient)
     val waterCompanies = WaterCompanies(dataClient)
 
-    val server = Undertow(
-        if (isDevelopmentEnvironment) 8000 else {
-            80
-        }
-    ).toServer(
+    val server = Undertow(port = port(environment)).toServer(
         HtmlPageErrorFilter(events, renderer).then(
             routes(
                 "/" bind Method.GET to inboundFilters.then(

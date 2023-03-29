@@ -54,14 +54,14 @@
                     <tbody>
                     {{#each constituencyRankings}}
                         <tr>
-                            <td>{{this.rank}}</td>
-                            <td><a href="{{this.constituency.uri}}">{{this.constituency.name}}</a></td>
-                            <td><a href="{{this.mp.uri}}">{{this.mp.name}}</a></td>
-                            <td>{{this.mp.party}}</td>
-                            <td>{{this.count}}</td>
-                            <td>{{this.countDelta}}</td>
-                            <td>{{this.duration.toHours}}</td>
-                            <td>{{this.durationDelta.toHours}}</td>
+                            <td class="align-middle">{{this.rank}}</td>
+                            <td class="align-middle"><a href="{{this.constituency.uri}}">{{this.constituency.name}}</a></td>
+                            <td class="align-middle"><a href="{{this.mp.uri}}">{{this.mp.name}}</a></td>
+                            <td class="align-middle">{{this.mp.party}}</td>
+                            <td class="align-middle">{{numberFormat this.count}}</td>
+                            <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat this.countDelta.value}}</td>
+                            <td class="align-middle">{{numberFormat this.duration.hours}}</td>
+                            <td class="align-middle {{>components/class-delta this.durationDelta}}">{{numberFormat this.durationDelta.hours}}</td>
                         </tr>
                     {{/each}}
                     </tbody>
