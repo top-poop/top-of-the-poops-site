@@ -98,7 +98,7 @@ object CompanyPageHandler {
                                     numberFormat.format(
                                         mostRecent.spillCount
                                     )
-                                } times in ${mostRecent.year} - Take action!",
+                                } times in ${mostRecent.year} - Unacceptable!",
                                 cta = "Tweet your displeasure to $name",
                                 listOf("sewage"),
                                 via = "sewageuk"

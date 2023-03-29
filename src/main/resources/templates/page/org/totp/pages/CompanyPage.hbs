@@ -24,11 +24,11 @@
                 <div class="col">
                     <div class="display-3">{{ name }}</div>
 
-                    <p>{{ name }} was responsible for {{numberFormat summary.spillCount }} sewage overflows
+                    <p>{{ name }} was responsible for <span class="align-middle display-4 font-weight-bold">{{numberFormat summary.spillCount }}</span> sewage overflows
                         in {{ summary.year }}</p>
 
-                    <p>These lasted for {{numberFormat summary.duration.toHours}} hours - in {{numberFormat
-                            summary.locationCount}} different locations across their service area</p>
+                    <p>These lasted for {{numberFormat summary.duration.toHours}} hours - in
+                        {{numberFormat summary.locationCount}} different locations across their service area</p>
                 </div>
             </div>
             <div class="row">
