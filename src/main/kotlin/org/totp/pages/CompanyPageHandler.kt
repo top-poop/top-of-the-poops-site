@@ -94,12 +94,15 @@ object CompanyPageHandler {
                             },
                             share = SocialShare(
                                 pageUriFrom(request),
-                                "$name - ${company.handle} - dumped #sewage into rivers,seas & bathing areas ${numberFormat.format(mostRecent.spillCount)} times in ${mostRecent.year} - Take action!",
-                                cta="Tweet your displeasure to $name",
+                                "$name - ${company.handle} - dumped #sewage into rivers,seas & bathing areas ${
+                                    numberFormat.format(
+                                        mostRecent.spillCount
+                                    )
+                                } times in ${mostRecent.year} - Take action!",
+                                cta = "Tweet your displeasure to $name",
                                 listOf("sewage"),
                                 via = "sewageuk"
                             )
-
                         )
                     )
             } else {
