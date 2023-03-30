@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Top of the Poops | Constituency | {{ name }}</title>
+    <meta name="description" content="Mapping sewage pollution for { name }}">
+
+    {{> chunks/favicons }}
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
+    <link rel="stylesheet" href="/assets/css/leaflet.css"/>
+    <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
+
+    {{> components/meta-opengraph title=(concat "Waterway | " name) }}
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+{{> chunks/title }}
+
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h3>{{ name.value }} polluted by sewage {{numberFormat summary.count}} times in {{summary.year}} - lasting
+            {{numberFormat summary.duration.toHours}} hours</h3>
+    </div>
+</div>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div id="map" class="map">
+                <div style="display:none" data-map-attribution>
+                    &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors <br/>
+                    Contains OS Data &copy; Crown copyright &amp; database right 2021<br/>
+                    &copy; <a href="https://top-of-the-poops.org">Top of the Poops</a> 2021-2023
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="row">
+                <div class="col">
+                    <div class="card  mb-3">
+                        <div class="card-header">Totals for {{ name.value }} in {{summary.year}}</div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{summary.locationCount}} Sites polluted by {{join summary.companies
+                                                                                                      ', '}}</h5>
+                            <div class="card-text">
+                                {{numberFormat summary.count}} sewage dumps<br>
+                                <span class="spill-hours">{{numberFormat summary.duration.toHours}}
+                                    h </span>duration<br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="card  mb-3">
+                        <div class="card-header">Take Action</div>
+                        <div class="card-body">
+                            <div class="card-text">
+                                {{> components/share-facebook share}}
+                                {{> components/share-twitter  share}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    {{>chunks/horrible-nav}}
+
+    <div class="row">
+        <div class="col">
+            {{#> components/section title=(concat "Pollution Summary " summary.year)}}
+
+                <p>Here are all the reported sewage overflow totals for {{ name.value }} in {{ summary.year }}.
+                    Sometimes sewage can be being dumped for <b>months</b> at a time.</p>
+
+                <div class="table-responsive">
+                    <table id="table-csos" class="table">
+                        <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Waterway</th>
+                            <th>Site</th>
+                            <th>Sewage Dumps</th>
+                            <th>Duration (Hours)</th>
+                            <th>Reporting %</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#each csos}}
+                            <tr data-class="cso" data-lat="{{this.cso.location.lat}}"
+                                data-lon="{{this.cso.location.lon}}">
+                                <td class="align-middle" data-company><a
+                                        href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a></td>
+                                <td class="align-middle" data-waterway>{{this.cso.waterway}}</td>
+                                <td class="align-middle" data-sitename>{{this.cso.sitename}}</td>
+                                <td class="align-middle" data-count>{{numberFormat this.count}}</td>
+                                <td class="align-middle" data-duration>{{numberFormat this.duration.toHours}}</td>
+                                <td class="align-middle">{{this.reporting}}</td>
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            {{/components/section}}
+        </div>
+    </div>
+</div>
+
+<div id="footer" class="container">
+    <div class="row">
+        <div class="col">{{> chunks/data-sources }}</div>
+    </div>
+    <div class="row">
+        <div class="col">{{> chunks/copyright }}</div>
+    </div>
+</div>
+
+
+<script>
+
+    const ewBounds = [
+        [49.674737880665994, -6.064453125000001],
+        [56.029087419764366, 1.9555664062500002]
+    ];
+
+    const myStyle = {
+        "color": "#ff7800",
+        "weight": 5,
+        "opacity": 0.65
+    };
+
+    const map = L.map("map", {scrollWheelZoom: false, dragging: !L.Browser.mobile, tap: !L.Browser.mobile});
+
+    L.tileLayer(
+            'https://maps.top-of-the-poops.org/styles/v1/{z}/{x}/{y}.png',
+            {
+                attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
+            }
+    )
+            .addTo(map);
+
+
+    const attr = (a, tr) => {
+        const f = tr ? tr : (n => n);
+        return n => f(n.attributes[`data-${a}`].value)
+    };
+
+    const text = (tr) => {
+        const f = tr ? tr : (n => n);
+        return n => f(n.textContent)
+    };
+
+    const markerIcon = (colour) => {
+        return L.icon({
+            iconUrl: `/assets/icons/leaflet/marker-icon-${colour}.png`,
+            iconRetinaUrl: `/assets/icons/leaflet/marker-icon-2x-${colour}.png`,
+            iconAnchor: [5, 55],
+            popupAnchor: [10, -44],
+            iconSize: [25, 41]
+        })
+    }
+
+    const markerBlue = markerIcon("blue")
+    const markerRed = markerIcon("red")
+
+    const durationIcon = (n) => n > 700 ? markerRed : markerBlue;
+
+    const lat = attr("lat", Number)
+    const lon = attr("lon", Number)
+
+    const company = text()
+    const sitename = text()
+    const waterway = text()
+    const count = text(Number)
+    const duration = text(Number)
+
+    const markers = Array.from(document.getElementById("table-csos").querySelectorAll("tr[data-class='cso']"))
+            .map(it => {
+                return {
+                    lat: lat(it),
+                    lon: lon(it),
+                    company: company(it.querySelector("[data-company]")),
+                    waterway: company(it.querySelector("[data-waterway]")),
+                    sitename: sitename(it.querySelector("[data-sitename]")),
+                    count: count(it.querySelector("[data-count]")),
+                    duration: duration(it.querySelector("[data-duration]"))
+                }
+            })
+            .map(it => {
+                return {
+                    lat: it.lat, lon: it.lon, duration: it.duration,
+                    text: `${it.sitename}<br/>${it.waterway}<br/>${it.count} Dumps / ${it.duration} hours by ${it.company}`
+                }
+            })
+            .map(it => L.marker([it.lat, it.lon], {icon: durationIcon(it.duration)}).bindTooltip(it.text));
+
+    const bounds = markers.reduce( (acc, m) => {
+        if (acc == null) {
+            return L.latLngBounds(m.getLatLng())
+        } else {
+            return acc.extend(m.getLatLng())
+        }
+    }, null)
+
+    markers.forEach(it => {
+        it.addTo(map);
+    })
+
+    if (bounds) {
+        map.fitBounds(bounds)
+    } else {
+        map.fitBounds(ewBounds)
+    }
+
+</script>
+
+
+<script>
+    new DataTable('#table-csos',
+            {
+                pageLength: 10,
+                dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i>>"
+            });
+</script>
+</body>
+</html>

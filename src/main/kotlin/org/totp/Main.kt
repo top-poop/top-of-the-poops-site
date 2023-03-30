@@ -32,10 +32,10 @@ import org.http4k.template.TemplateRenderer
 import org.totp.events.ServerStartedEvent
 import org.totp.http4k.StandardFilters
 import org.totp.model.TotpHandlebars
+import org.totp.model.data.AllSpills
 import org.totp.model.data.BeachRankings
 import org.totp.model.data.CompanyAnnualSummaries
 import org.totp.model.data.ConstituencyBoundaries
-import org.totp.model.data.ConstituencyCSOs
 import org.totp.model.data.ConstituencyContacts
 import org.totp.model.data.ConstituencyLiveAvailability
 import org.totp.model.data.ConstituencyLiveDataLoader
@@ -44,6 +44,8 @@ import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.MediaAppearances
 import org.totp.model.data.RiverRankings
 import org.totp.model.data.WaterCompanies
+import org.totp.model.data.constituencyCSOs
+import org.totp.model.data.waterwayCSOs
 import org.totp.pages.BeachesPageHandler
 import org.totp.pages.CompanyPageHandler
 import org.totp.pages.ConstituenciesPageHandler
@@ -54,6 +56,7 @@ import org.totp.pages.HomepageHandler
 import org.totp.pages.HtmlPageErrorFilter
 import org.totp.pages.MediaPageHandler
 import org.totp.pages.RiversPageHandler
+import org.totp.pages.WaterwayPageHandler
 import org.totp.pages.constituencyNames
 import java.time.Clock
 
@@ -151,6 +154,7 @@ fun main() {
     val mediaAppearances = MediaAppearances(dataClient)
     val waterCompanies = WaterCompanies(dataClient)
     val constituencyContacts = ConstituencyContacts(data2021)
+    val allSpills = AllSpills(data2021)
 
     val server = Undertow(port = port(environment)).toServer(
         HtmlPageErrorFilter(events, renderer).then(
@@ -182,9 +186,13 @@ fun main() {
                             renderer = renderer,
                             riverRankings = RiverRankings(data2021)
                         ),
+                        "/waterway/{company}/{waterway}" bind WaterwayPageHandler(
+                            renderer = renderer,
+                            waterwaySpills = waterwayCSOs(allSpills)
+                        ),
                         "/constituency/{constituency}" bind ConstituencyPageHandler(
                             renderer = renderer,
-                            constituencySpills = ConstituencyCSOs(data2021),
+                            constituencySpills = constituencyCSOs(allSpills),
                             constituencyBoundary = ConstituencyBoundaries(
                                 SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient)
                             ),

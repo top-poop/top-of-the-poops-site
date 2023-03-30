@@ -27,6 +27,7 @@ import org.totp.model.data.ConstituencyLiveData
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
+import org.totp.model.data.WaterwayName
 import org.totp.text.csv.readCSV
 import java.text.NumberFormat
 import java.time.Duration
@@ -36,6 +37,9 @@ val constituencyNames = readCSV(
     resource = "/data/constituencies.csv",
     mapper = { ConstituencyName(it[0]) }
 ).toSortedSet(Comparator.comparing { it.value })
+
+
+
 
 class ConstituencySlug(value: String) : StringValue(value) {
     companion object : StringValueFactory<ConstituencySlug>(::ConstituencySlug) {
@@ -47,7 +51,7 @@ class ConstituencySlug(value: String) : StringValue(value) {
 
 val slugToConstituency = constituencyNames.associateBy { ConstituencySlug.from(it) }
 
-data class ConstituencySummary(
+data class PollutionSummary(
     val year: Int,
     val locationCount: Int,
     val companies: List<CompanyName>,
@@ -56,8 +60,8 @@ data class ConstituencySummary(
 ) {
 
     companion object {
-        fun from(csos: List<CSOTotals>): ConstituencySummary {
-            return ConstituencySummary(
+        fun from(csos: List<CSOTotals>): PollutionSummary {
+            return PollutionSummary(
                 year = 2021,
                 locationCount = csos.size,
                 companies = csos
@@ -106,7 +110,7 @@ data class ConstituencyPageLiveData(
 data class RenderableCSO(
     val company: RenderableCompany,
     val sitename: String,
-    val waterway: String,
+    val waterway: WaterwayName,
     val location: Coordinates
 )
 
@@ -122,7 +126,7 @@ class ConstituencyPage(
     uri: Uri,
     val name: ConstituencyName,
     val share: SocialShare,
-    val summary: ConstituencySummary,
+    val summary: PollutionSummary,
     val geojson: GeoJSON,
     val csos: List<RenderableCSOTotal>,
     val constituencies: List<RenderableConstituency>,
@@ -185,7 +189,7 @@ object ConstituencyPageHandler {
                 val list = constituencySpills(constituencyName).sortedByDescending { it.duration }
                 val contact = constituencyContacts().first { it.constituency == constituencyName }
 
-                val summary = ConstituencySummary.from(list)
+                val summary = PollutionSummary.from(list)
                 Response(Status.OK)
                     .with(
                         viewLens of ConstituencyPage(

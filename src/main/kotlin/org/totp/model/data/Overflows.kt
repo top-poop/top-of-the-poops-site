@@ -24,6 +24,7 @@ import org.totp.pages.ConstituencyRank
 import org.totp.pages.ConstituencySlug
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.MP
+import org.totp.pages.WaterwaySlug
 import java.time.Duration
 import java.time.LocalDate
 
@@ -38,7 +39,7 @@ data class CSOTotals(
 data class CSO(
     val company: CompanyName,
     val sitename: String,
-    val waterway: String,
+    val waterway: WaterwayName,
     val location: Coordinates
 )
 
@@ -46,6 +47,10 @@ data class Coordinates(val lat: Number, val lon: Number)
 
 class ConstituencyName(value: String) : StringValue(value) {
     companion object : StringValueFactory<ConstituencyName>(::ConstituencyName)
+}
+
+class WaterwayName(value: String) : StringValue(value) {
+    companion object : StringValueFactory<WaterwayName>(::WaterwayName)
 }
 
 class CompanyName(value: String) : StringValue(value) {
@@ -200,36 +205,43 @@ object RiverRankings {
 }
 
 
-object ConstituencyCSOs {
-    operator fun invoke(handler: HttpHandler): (ConstituencyName) -> List<CSOTotals> {
-        return { name ->
-
+object AllSpills {
+    operator fun invoke(handler: HttpHandler): () -> List<CSOTotals> {
+        return {
             val response = handler(Request(Method.GET, "spills-all.json"))
 
-            val list =
-                TotpJson.mapper.readSimpleList(response.bodyString())
-                    .map {
-                        CSOTotals(
-                            constituency = ConstituencyName(it["constituency"] as String),
-                            cso = CSO(
-                                company = CompanyName.of(it["company_name"] as String),
-                                sitename = it["site_name"] as String,
-                                waterway = it["receiving_water"] as String,
-                                location = Coordinates(
-                                    lat = it["lat"] as Double,
-                                    lon = it["lon"] as Double
-                                )
-                            ),
-                            count = (it["spill_count"] as Double).toInt(),
-                            duration = Duration.ofHours((it["total_spill_hours"] as Double).toLong()),
-                            reporting = it["reporting_percent"] as Double
-                        )
-                    }
-
-            list.filter { it.constituency == name }
+            TotpJson.mapper.readSimpleList(response.bodyString())
+                .map {
+                    CSOTotals(
+                        constituency = ConstituencyName(it["constituency"] as String),
+                        cso = CSO(
+                            company = CompanyName.of(it["company_name"] as String),
+                            sitename = it["site_name"] as String,
+                            waterway = WaterwayName.of(it["receiving_water"] as String),
+                            location = Coordinates(
+                                lat = it["lat"] as Double,
+                                lon = it["lon"] as Double
+                            )
+                        ),
+                        count = (it["spill_count"] as Double).toInt(),
+                        duration = Duration.ofHours((it["total_spill_hours"] as Double).toLong()),
+                        reporting = it["reporting_percent"] as Double
+                    )
+                }
         }
     }
 }
+
+
+fun constituencyCSOs(source: () -> List<CSOTotals>) =
+    { name: ConstituencyName -> source().filter { name == it.constituency } }
+
+fun waterwayCSOs(source: () -> List<CSOTotals>) =
+    { name: WaterwaySlug, company: CompanySlug ->
+        source()
+            .filter { name == WaterwaySlug.from(it.cso.waterway) }
+            .filter { company == CompanySlug.from(it.cso.company) }
+    }
 
 data class MediaAppearance(
     val title: String,

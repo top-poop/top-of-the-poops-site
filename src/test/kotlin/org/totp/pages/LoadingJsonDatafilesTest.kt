@@ -3,18 +3,17 @@ package org.totp.pages
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
-import org.http4k.core.Uri
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
+import org.totp.model.data.AllSpills
 import org.totp.model.data.CompanyAnnualSummaries
 import org.totp.model.data.ConstituencyBoundaries
-import org.totp.model.data.ConstituencyCSOs
+import org.totp.model.data.ConstituencyContacts
 import org.totp.model.data.ConstituencyLiveAvailability
 import org.totp.model.data.ConstituencyLiveDataLoader
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencyRankings
-import org.totp.model.data.ConstituencyContacts
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
 import org.totp.model.data.RiverRankings
@@ -48,10 +47,12 @@ class LoadingJsonDatafilesTest {
     "reporting_percent": 100.0
   }]"""
 
-        val summaries = ConstituencyCSOs(
-            routes("/spills-all.json" bind { _: Request -> Response(Status.OK).body(text) })
-        )
-        expectThat(summaries(ConstituencyName("Aberavon"))) {
+        val summaries =
+            AllSpills(
+                routes("/spills-all.json" bind { _: Request -> Response(Status.OK).body(text) })
+            )
+
+        expectThat(summaries()) {
             size.isEqualTo(1)
             get(0).and {
                 get { constituency }.isEqualTo(ConstituencyName("Aberavon"))
@@ -169,28 +170,28 @@ class LoadingJsonDatafilesTest {
     @Test
     fun `loading available live data names`() {
         val content = File("services/data/datafiles/live/constituencies/constituencies-available.json")
-        val service = ConstituencyLiveAvailability {Response(Status.OK).body(content.readText())}
+        val service = ConstituencyLiveAvailability { Response(Status.OK).body(content.readText()) }
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
     fun `loading river rankings`() {
         val content = File("services/data/datafiles/v1/2021/spills-by-river.json")
-        val service = RiverRankings {Response(Status.OK).body(content.readText())}
+        val service = RiverRankings { Response(Status.OK).body(content.readText()) }
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
     fun `loading company summaries`() {
         val content = File("services/data/datafiles/v1/2021/spills-by-company.json")
-        val service = CompanyAnnualSummaries {Response(Status.OK).body(content.readText())}
+        val service = CompanyAnnualSummaries { Response(Status.OK).body(content.readText()) }
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
     fun `loading constituency socials`() {
         val content = File("services/data/datafiles/v1/2021/constituency-social.json")
-        val service = ConstituencyContacts {Response(Status.OK).body(content.readText())}
+        val service = ConstituencyContacts { Response(Status.OK).body(content.readText()) }
         expectThat(service()).size.isGreaterThan(3)
     }
 }

@@ -19,6 +19,7 @@ import org.totp.model.data.ConstituencyLiveData
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
+import org.totp.model.data.WaterwayName
 import strikt.api.expectCatching
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -33,7 +34,7 @@ class ConstituencyPageHandlerTest {
             cso = CSO(
                 company = CompanyName.of("Venture Cap"),
                 sitename = "Your House",
-                waterway = "Your River",
+                waterway = WaterwayName("Your River"),
                 location = Coordinates(lon = -0.12460789, lat = 51.49993385),
             ),
             count = 100,
