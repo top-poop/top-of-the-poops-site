@@ -60,7 +60,13 @@ object RiversPageHandler {
             val totalDuration = rankings.map { it.duration }.reduce { acc, duration -> acc + duration }
             val totalCount = rankings.map { it.count }.reduce { acc, count -> acc + count }
 
-            val display = if (showAll) rankings else rankings.take(20)
+            val display = if (showAll) {
+                rankings.filter {
+                    it.duration > Duration.ofDays(1)
+                }
+            } else {
+                rankings.take(20)
+            }
 
             Response(Status.OK)
                 .with(
