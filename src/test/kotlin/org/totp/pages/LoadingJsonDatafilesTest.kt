@@ -7,6 +7,7 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.data.AllSpills
+import org.totp.model.data.BeachRankings
 import org.totp.model.data.CompanyAnnualSummaries
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyContacts
@@ -212,6 +213,13 @@ class LoadingJsonDatafilesTest {
     fun `loading constituency socials 2022`() {
         val content = File("services/data/datafiles/v1/2022/constituency-social.json")
         val service = ConstituencyContacts { Response(Status.OK).body(content.readText()) }
+        expectThat(service()).size.isGreaterThan(3)
+    }
+
+    @Test
+    fun `loading  beaches 2022`() {
+        val content = File("services/data/datafiles/v1/2022/spills-by-beach.json")
+        val service = BeachRankings { Response(Status.OK).body(content.readText()) }
         expectThat(service()).size.isGreaterThan(3)
     }
 }

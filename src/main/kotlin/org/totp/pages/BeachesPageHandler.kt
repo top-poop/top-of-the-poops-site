@@ -37,7 +37,9 @@ data class BeachPolluter(
     val rank: Int,
     val company: RenderableCompany,
     val count: Int,
-    val duration: Duration
+    val duration: Duration,
+    val countDelta: DeltaValue,
+    val durationDelta: RenderableDurationDelta
 )
 
 data class RenderableBeachRank(
@@ -46,6 +48,8 @@ data class RenderableBeachRank(
     val company: RenderableCompany,
     val count: Int,
     val duration: Duration,
+    val countDelta: DeltaValue,
+    val durationDelta: RenderableDurationDelta
 )
 
 object BeachesPageHandler {
@@ -63,7 +67,11 @@ object BeachesPageHandler {
                         0,
                         RenderableCompany.from(it.key),
                         count = it.value.sumOf { it.count },
-                        duration = it.value.map { it.duration }.reduce { acc, duration -> acc + duration }
+                        duration = it.value.map { it.duration }.reduce { acc, duration -> acc + duration },
+                        countDelta = it.value.map { it.countDelta }
+                            .reduce { acc, deltaValue -> DeltaValue(acc.value + deltaValue.value) },
+                        durationDelta = it.value.map { it.durationDelta }.reduce { acc, duration -> acc + duration }
+                            .let { RenderableDurationDelta(it) },
                     )
                 }.sortedByDescending {
                     it.duration
@@ -87,7 +95,9 @@ object BeachesPageHandler {
                                 it.beach,
                                 RenderableCompany.from(it.company),
                                 it.count,
-                                it.duration
+                                it.duration,
+                                it.countDelta,
+                                RenderableDurationDelta(it.durationDelta)
                             )
                         },
                         polluterRankings = polluters

@@ -53,16 +53,20 @@
                         <td>Rank</td>
                         <td>Company</td>
                         <td>Sewage Overflows</td>
+                        <td>Change</td>
                         <td>Total Duration (Hours)</td>
+                        <td>Change</td>
                     </tr>
                     </thead>
                     <tbody>
                     {{#each polluterRankings}}
                         <tr>
-                            <td>{{this.rank}}</td>
-                            <td><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
-                            <td>{{numberFormat this.count}}</td>
-                            <td>{{numberFormat this.duration.toHours}}</td>
+                            <td class="align-middle">{{this.rank}}</td>
+                            <td class="align-middle"><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
+                            <td class="align-middle">{{numberFormat this.count}}</td>
+                            <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat this.countDelta.value}}</td>
+                            <td class="align-middle">{{numberFormat this.duration.toHours}}</td>
+                            <td class="align-middle {{>components/class-delta this.durationDelta}}">{{numberFormat this.durationDelta.hours}}</td>
                         </tr>
                     {{/each}}
                     </tbody>
@@ -89,17 +93,21 @@
                         <td>Beach</td>
                         <td>Company</td>
                         <td>Sewage Dumps</td>
+                        <td>Change</td>
                         <td>Duration (Hours)</td>
+                        <td>Change</td>
                     </tr>
                     </thead>
                     <tbody>
                     {{#each beachRankings}}
                         <tr>
-                            <td>{{this.rank}}</td>
-                            <td>{{this.beach}}</td>
-                            <td><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
-                            <td>{{numberFormat this.count}}</td>
-                            <td>{{numberFormat this.duration.toHours}}</td>
+                            <td class="align-middle">{{this.rank}}</td>
+                            <td class="align-middle">{{this.beach}}</td>
+                            <td class="align-middle"><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
+                            <td class="align-middle">{{numberFormat this.count}}</td>
+                            <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat this.countDelta.value}}</td>
+                            <td class="align-middle">{{numberFormat this.duration.toHours}}</td>
+                            <td class="align-middle {{>components/class-delta this.durationDelta}}">{{numberFormat this.durationDelta.hours}}</td>
                         </tr>
                     {{/each}}
                     </tbody>

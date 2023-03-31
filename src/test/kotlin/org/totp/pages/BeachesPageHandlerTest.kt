@@ -23,7 +23,9 @@ class BeachesPageHandlerTest {
                         "beach",
                         CompanyName.of("company"),
                         10,
-                        Duration.ofHours(1)
+                        Duration.ofHours(1),
+                        DeltaValue.of(10),
+                        Duration.ofSeconds(11)
                     )
                 )
             },

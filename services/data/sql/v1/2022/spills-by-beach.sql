@@ -1,14 +1,9 @@
-select edm.bathing,
-       company_name,
-       sum(edm.total_spill_hours) as total_spill_hours,
-       sum(edm.spill_count) as total_spill_count,
-       st_x(st_centroid(st_collect(point))) as lon,
-       st_y(st_centroid(st_collect(point))) as lat
-from edm_consent_view as edm
-         join grid_references as grid on edm.effluent_grid_ref = grid.grid_reference
-where bathing is not null
-  and reporting_year = 2022
-  and total_spill_hours > 0
-group by bathing, company_name
-having sum(edm.total_spill_hours) > 10
-order by total_spill_hours desc ;
+select this.*,
+       coalesce(this.total_spill_count - last.total_spill_count,0) as spills_increase,
+       coalesce(this.total_spill_hours - last.total_spill_hours,0) as hours_increase
+from bathing_view this
+         left join bathing_view as last on this.bathing = last.bathing and this.company_name = last.company_name
+where
+    this.reporting_year = 2022
+and last.reporting_year = 2021
+order by this.total_spill_hours desc
