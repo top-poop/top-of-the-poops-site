@@ -86,14 +86,16 @@ object WaterwayPageHandler {
                             ),
                             summary = summary,
                             constituencies = constituencies.map { RenderableConstituency.from(it) },
-                            csos = spills.map {
+                            csos = spills
+                                .sortedByDescending { it.duration }
+                                .map {
                                 RenderableCSOTotal(
                                     RenderableConstituency.from(it.constituency),
                                     it.cso.let {
                                         RenderableCSO(
                                             RenderableCompany.from(it.company),
                                             it.sitename,
-                                            it.waterway,
+                                            RenderableWaterway(it.waterway, Uri.of("/waterway/$companySlug/$waterwaySlug")),
                                             it.location
                                         )
                                     },

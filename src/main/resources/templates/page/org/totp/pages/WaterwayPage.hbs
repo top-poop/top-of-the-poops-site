@@ -120,7 +120,7 @@
                                 data-lon="{{this.cso.location.lon}}">
                                 <td class="align-middle" data-company><a
                                         href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a></td>
-                                <td class="align-middle" data-waterway>{{this.cso.waterway}}</td>
+                                <td class="align-middle" data-waterway>{{this.cso.waterway.name}}</td>
                                 <td class="align-middle" data-sitename>{{this.cso.sitename}}</td>
                                 <td class="align-middle" data-count>{{numberFormat this.count}}</td>
                                 <td class="align-middle" data-duration>{{numberFormat this.duration.toHours}}</td>
@@ -225,7 +225,7 @@
 
     const bounds = markers.reduce( (acc, m) => {
         if (acc == null) {
-            return L.latLngBounds(m.getLatLng())
+            return L.latLngBounds(m.getLatLng(), m.getLatLng())
         } else {
             return acc.extend(m.getLatLng())
         }

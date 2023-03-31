@@ -17,6 +17,7 @@ import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.RiverRank
 import org.totp.model.data.WaterwayName
+import org.totp.pages.SiteLocations.waterwayUriFor
 import java.time.Duration
 
 class RiversPage(
@@ -69,11 +70,10 @@ object RiversPageHandler {
                         showingSummary = !showAll,
                         showAllUri = Uri.of(request.uri.path).query("all", "true"),
                         display.map {
-                            val waterwaySlug = WaterwaySlug.from(it.river)
                             val companySlug = CompanySlug.from(it.company)
                             RenderableRiverRank(
                                 it.rank,
-                                RenderableWaterway(it.river, Uri.of("/waterway/$companySlug/$waterwaySlug")),
+                                RenderableWaterway(it.river, waterwayUriFor(it.river, it.company)),
                                 RenderableCompany(it.company, Uri.of("/company/$companySlug")),
                                 it.count,
                                 it.duration

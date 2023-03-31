@@ -42,7 +42,7 @@ class HomepageHandlerTest {
     val service = routes(
         "/" bind Method.GET to HomepageHandler(
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
-            consituencyRankings = {
+            constituencyRankings = {
                 listOf(
                     ConstituencyRank(
                         1,

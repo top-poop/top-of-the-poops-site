@@ -27,7 +27,7 @@ import org.totp.model.data.ConstituencyLiveData
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
-import org.totp.model.data.WaterwayName
+import org.totp.pages.SiteLocations.waterwayUriFor
 import org.totp.text.csv.readCSV
 import java.text.NumberFormat
 import java.time.Duration
@@ -37,8 +37,6 @@ val constituencyNames = readCSV(
     resource = "/data/constituencies.csv",
     mapper = { ConstituencyName(it[0]) }
 ).toSortedSet(Comparator.comparing { it.value })
-
-
 
 
 class ConstituencySlug(value: String) : StringValue(value) {
@@ -110,7 +108,7 @@ data class ConstituencyPageLiveData(
 data class RenderableCSO(
     val company: RenderableCompany,
     val sitename: String,
-    val waterway: WaterwayName,
+    val waterway: RenderableWaterway,
     val location: Coordinates
 )
 
@@ -211,7 +209,7 @@ object ConstituencyPageHandler {
                                         RenderableCSO(
                                             RenderableCompany.from(it.company),
                                             it.sitename,
-                                            it.waterway,
+                                            RenderableWaterway(it.waterway, waterwayUriFor(it.waterway, it.company)),
                                             it.location
                                         )
                                     },
