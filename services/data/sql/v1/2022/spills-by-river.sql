@@ -22,6 +22,4 @@ select reports_this.*,
 from reports_this
          left join reports_last on reports_this.company_name = reports_last.company_name and
                                    reports_this.river_name = reports_last.river_name
-where
-   reports_last.total_hours > 24 or reports_this.total_hours > 24
 order by total_hours desc, river_name

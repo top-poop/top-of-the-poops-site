@@ -86,7 +86,9 @@ object HomepageHandler {
                                 RenderableWaterway(it.river, Uri.of("/waterway/$companySlug/$waterwaySlug")),
                                 RenderableCompany(it.company, Uri.of("/company/$companySlug")),
                                 it.count,
-                                it.duration
+                                it.duration,
+                                it.countDelta,
+                                RenderableDurationDelta(it.durationDelta)
                             )
                         },
                         appearances().sortedByDescending { it.date }.take(8),

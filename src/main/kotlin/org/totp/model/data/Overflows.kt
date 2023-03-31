@@ -23,6 +23,7 @@ import org.totp.pages.CompanyAnnualSummary
 import org.totp.pages.CompanySlug
 import org.totp.pages.ConstituencyRank
 import org.totp.pages.ConstituencySlug
+import org.totp.pages.DeltaValue
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.MP
 import org.totp.pages.WaterwaySlug
@@ -189,6 +190,8 @@ data class RiverRank(
     val company: CompanyName,
     val count: Int,
     val duration: Duration,
+    val countDelta: DeltaValue,
+    val durationDelta: Duration
 )
 
 object RiverRankings {
@@ -204,6 +207,8 @@ object RiverRankings {
                         company = CompanyName.of(it["company_name"] as String),
                         duration = fromEDMHours(it["total_hours"] as Double),
                         count = (it["total_count"] as Double).toInt(),
+                        countDelta = DeltaValue.of((it["spills_increase"] as Double).toInt()),
+                        durationDelta = fromEDMHours(it["hours_increase"] as Double)
                     )
                 }
         }
@@ -241,16 +246,16 @@ object AllSpills {
 
 fun constituencyCSOs(source: () -> List<CSOTotals>) =
     { name: ConstituencyName ->
-        val result = source().filter { name == it.constituency }
-        print("Got ${result.size}")
-        result
+        source().filter { name == it.constituency }
     }
 
 fun waterwayCSOs(source: () -> List<CSOTotals>) =
     { name: WaterwaySlug, company: CompanySlug ->
-        source()
+        val result = source()
             .filter { name == WaterwaySlug.from(it.cso.waterway) }
             .filter { company == CompanySlug.from(it.cso.company) }
+        print("Got ${result.size}")
+        result
     }
 
 data class MediaAppearance(

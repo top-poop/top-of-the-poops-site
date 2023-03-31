@@ -70,7 +70,9 @@
                         <td>River</td>
                         <td>Company</td>
                         <td>Sewage Dumps</td>
+                        <td>Change</td>
                         <td>Duration (Hours)</td>
+                        <td>Change</td>
                     </tr>
                     </thead>
                     <tbody>
@@ -80,7 +82,9 @@
                             <td><a href="{{this.river.uri}}">{{this.river.name}}</a></td>
                             <td><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
                             <td>{{numberFormat this.count}}</td>
+                            <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat this.countDelta.value}}</td>
                             <td>{{numberFormat this.duration.toHours}}</td>
+                            <td class="align-middle {{>components/class-delta this.durationDelta}}">{{numberFormat this.durationDelta.hours}}</td>
                         </tr>
                     {{/each}}
                     </tbody>

@@ -68,7 +68,15 @@ class HomepageHandlerTest {
                 listOf(BeachRank(1, "beach", CompanyName.of("company"), 10, Duration.ofHours(1)))
             },
             riverRankings = {
-                listOf(RiverRank(1, WaterwayName("river"), CompanyName("company"), 20, Duration.ofHours(22)))
+                listOf(RiverRank(
+                    1,
+                    WaterwayName("river"),
+                    CompanyName("company"),
+                    20,
+                    Duration.ofHours(22),
+                    DeltaValue.of(10),
+                    Duration.ofHours(10)
+                ))
             },
             appearances = {
                 listOf(

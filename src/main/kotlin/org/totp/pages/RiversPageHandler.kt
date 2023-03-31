@@ -39,6 +39,8 @@ data class RenderableRiverRank(
     val company: RenderableCompany,
     val count: Int,
     val duration: Duration,
+    val countDelta: DeltaValue,
+    val durationDelta: RenderableDurationDelta
 )
 
 object RiversPageHandler {
@@ -76,7 +78,9 @@ object RiversPageHandler {
                                 RenderableWaterway(it.river, waterwayUriFor(it.river, it.company)),
                                 RenderableCompany(it.company, Uri.of("/company/$companySlug")),
                                 it.count,
-                                it.duration
+                                it.duration,
+                                it.countDelta,
+                                RenderableDurationDelta(it.durationDelta)
                             )
                         },
                     )
