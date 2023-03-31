@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import dev.forkhandles.values.ComparableValue
 import dev.forkhandles.values.StringValue
 import dev.forkhandles.values.StringValueFactory
 import org.http4k.core.HttpHandler
@@ -45,15 +46,15 @@ data class CSO(
 
 data class Coordinates(val lat: Number, val lon: Number)
 
-class ConstituencyName(value: String) : StringValue(value) {
+class ConstituencyName(value: String) : StringValue(value), ComparableValue<ConstituencyName, String> {
     companion object : StringValueFactory<ConstituencyName>(::ConstituencyName)
 }
 
-class WaterwayName(value: String) : StringValue(value) {
+class WaterwayName(value: String) : StringValue(value), ComparableValue<ConstituencyName, String> {
     companion object : StringValueFactory<WaterwayName>(::WaterwayName)
 }
 
-class CompanyName(value: String) : StringValue(value) {
+class CompanyName(value: String) : StringValue(value), ComparableValue<ConstituencyName, String> {
     companion object : StringValueFactory<CompanyName>(::CompanyName)
 }
 

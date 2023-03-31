@@ -27,6 +27,7 @@ class WaterwayPage(
     val name: WaterwayName,
     val share: SocialShare,
     val summary: PollutionSummary,
+    val constituencies: List<RenderableConstituency>,
     val csos: List<RenderableCSOTotal>,
 ) :
     PageViewModel(uri)
@@ -63,6 +64,12 @@ object WaterwayPageHandler {
 
                 val name = spills.first().cso.waterway
 
+                val constituencies = spills
+                    .map { it.constituency }
+                    .toSet()
+                    .toList()
+                    .sorted()
+
                 val summary = PollutionSummary.from(spills)
 
                 Response(Status.OK)
@@ -78,6 +85,7 @@ object WaterwayPageHandler {
                                 via = "sewageuk"
                             ),
                             summary = summary,
+                            constituencies = constituencies.map { RenderableConstituency.from(it) },
                             csos = spills.map {
                                 RenderableCSOTotal(
                                     RenderableConstituency.from(it.constituency),

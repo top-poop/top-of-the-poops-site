@@ -69,6 +69,20 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col">
+                    <div class="card  mb-3">
+                        <div class="card-header">Constituencies along {{name}}</div>
+                        <div class="card-body">
+                            <div class="card-text">
+                                {{#each constituencies}}
+                                    <a href="{{this.uri}}"><button class="btn btn-primary mb-2">{{this.name}}</button></a>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
