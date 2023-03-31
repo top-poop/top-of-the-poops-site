@@ -12,9 +12,9 @@ import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.BeachRank
-import org.totp.model.data.RiverRank
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.MediaAppearance
+import org.totp.model.data.RiverRank
 import org.totp.model.data.WaterCompany
 import java.time.Duration
 
@@ -37,7 +37,7 @@ class HomePage(
     val constituencyRankings: List<ConstituencyRank>,
     val companies: List<WaterCompany>,
     val beachRankings: List<BeachRank>,
-    val riverRankings: List<RiverRank>,
+    val riverRankings: List<RenderableRiverRank>,
     val appearances: List<MediaAppearance>,
     val share: SocialShare
 ) : PageViewModel(uri)
@@ -46,7 +46,7 @@ object HomepageHandler {
 
     operator fun invoke(
         renderer: TemplateRenderer,
-        consituencyRankings: () -> List<ConstituencyRank>,
+        constituencyRankings: () -> List<ConstituencyRank>,
         beachRankings: () -> List<BeachRank>,
         riverRankings: () -> List<RiverRank>,
         appearances: () -> List<MediaAppearance>,
@@ -55,21 +55,33 @@ object HomepageHandler {
 
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
+        val rivers = riverRankings().take(10)
+
         return { request ->
             Response(Status.OK)
                 .with(
                     viewLens of HomePage(
                         pageUriFrom(request),
-                        year= 2021,
-                        consituencyRankings().take(10),
+                        year = 2021,
+                        constituencyRankings().take(10),
                         companies(),
                         beachRankings().take(10),
-                        riverRankings().take(10),
+                        rivers.map {
+                            val waterwaySlug = WaterwaySlug.from(it.river)
+                            val companySlug = CompanySlug.from(it.company)
+                            RenderableRiverRank(
+                                it.rank,
+                                RenderableWaterway(it.river, Uri.of("/waterway/$companySlug/$waterwaySlug")),
+                                RenderableCompany(it.company, Uri.of("/company/$companySlug")),
+                                it.count,
+                                it.duration
+                            )
+                        },
                         appearances().sortedByDescending { it.date }.take(8),
                         SocialShare(
                             pageUriFrom(request),
                             "Water companies are dumping #sewage into rivers and bathing areas all over the UK - over 470,000 times in 2021 - it needs to be stopped",
-                            cta="Take action. Tweet this to your followers",
+                            cta = "Take action. Tweet this to your followers",
                             listOf("sewage"),
                             via = "sewageuk"
                         )

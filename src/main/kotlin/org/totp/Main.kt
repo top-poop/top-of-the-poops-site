@@ -163,7 +163,7 @@ fun main() {
                     routes(
                         "/" bind HomepageHandler(
                             renderer = renderer,
-                            consituencyRankings = ConstituencyRankings(data2021),
+                            constituencyRankings = ConstituencyRankings(data2021),
                             beachRankings = BeachRankings(data2021),
                             riverRankings = RiverRankings(data2021),
                             appearances = mediaAppearances,

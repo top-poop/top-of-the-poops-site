@@ -130,7 +130,7 @@
 
                 {{#each riverRankings}}
                     <div>
-                        <b>{{this.rank}}.</b> {{this.river}} {{numberFormat this.duration.toHours}} hours
+                        <b>{{this.rank}}.</b><a href="{{this.river.uri}}">{{this.river.name}}</a> {{numberFormat this.duration.toHours}} hours
                     </div>
                 {{/each}}
             </div>
