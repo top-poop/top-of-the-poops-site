@@ -77,8 +77,8 @@
                     {{#each riverRankings}}
                         <tr>
                             <td>{{this.rank}}</td>
-                            <td>{{this.river}}</td>
-                            <td>{{this.company}}</td>
+                            <td><a href="{{this.river.uri}}">{{this.river.name}}</a></td>
+                            <td><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
                             <td>{{numberFormat this.count}}</td>
                             <td>{{numberFormat this.duration.toHours}}</td>
                         </tr>

@@ -1,13 +1,10 @@
 package org.totp.pages
 
-import com.github.jknack.handlebars.io.StringTemplateSource
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Status
-import org.http4k.core.Uri
 import org.http4k.routing.bind
 import org.http4k.routing.routes
-import org.http4k.strikt.header
 import org.http4k.strikt.status
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
@@ -18,10 +15,8 @@ import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
 import org.totp.model.data.WaterwayName
 import org.totp.model.data.waterwayCSOs
-import strikt.api.expectCatching
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import strikt.assertions.isFailure
 import java.time.Duration
 
 class WaterwayPageHandlerTest {
@@ -54,9 +49,16 @@ class WaterwayPageHandlerTest {
     }
 
     @Test
-    fun `renders a river with no overflows`() {
+    fun `a river with no overflows is 404`() {
         // surprisingly there are one or two
         summaries = listOf()
-        Html(service(Request(Method.GET, "/venture-cap/your-river")))
+        Html(
+            service(
+                Request(
+                    Method.GET,
+                    "/venture-cap/your-river"
+                )
+            )
+        ) { expectThat(it).status.isEqualTo(Status.NOT_FOUND) }
     }
 }

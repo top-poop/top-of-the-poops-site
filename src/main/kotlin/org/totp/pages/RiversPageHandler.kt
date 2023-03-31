@@ -16,6 +16,7 @@ import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.RiverRank
+import org.totp.model.data.WaterwayName
 import java.time.Duration
 
 class RiversPage(
@@ -25,9 +26,19 @@ class RiversPage(
     val totalDuration: Duration,
     val showingSummary: Boolean,
     val showAllUri: Uri,
-    val riverRankings: List<RiverRank>,
+    val riverRankings: List<RenderableRiverRank>,
 ) : PageViewModel(uri)
 
+
+data class RenderableWaterway(val name: WaterwayName, val uri: Uri)
+
+data class RenderableRiverRank(
+    val rank: Int,
+    val river: RenderableWaterway,
+    val company: RenderableCompany,
+    val count: Int,
+    val duration: Duration,
+)
 
 object RiversPageHandler {
     operator fun invoke(
@@ -57,7 +68,17 @@ object RiversPageHandler {
                         totalDuration,
                         showingSummary = !showAll,
                         showAllUri = Uri.of(request.uri.path).query("all", "true"),
-                        display,
+                        display.map {
+                            val waterwaySlug = WaterwaySlug.from(it.river)
+                            val companySlug = CompanySlug.from(it.company)
+                            RenderableRiverRank(
+                                it.rank,
+                                RenderableWaterway(it.river, Uri.of("/waterway/$companySlug/$waterwaySlug")),
+                                RenderableCompany(it.company, Uri.of("/company/$companySlug")),
+                                it.count,
+                                it.duration
+                            )
+                        },
                     )
                 )
         }

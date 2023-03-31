@@ -179,8 +179,8 @@ object BeachRankings {
 
 data class RiverRank(
     val rank: Int,
-    val river: String,
-    val company: String,
+    val river: WaterwayName,
+    val company: CompanyName,
     val count: Int,
     val duration: Duration,
 )
@@ -194,8 +194,8 @@ object RiverRankings {
                 .mapIndexed { r, it ->
                     RiverRank(
                         rank = r + 1,
-                        river = it["river_name"] as String,
-                        company = it["company_name"] as String,
+                        river = WaterwayName.of(it["river_name"] as String),
+                        company = CompanyName.of(it["company_name"] as String),
                         duration = Duration.ofHours((it["total_hours"] as Double).toLong()),
                         count = (it["total_count"] as Double).toInt(),
                     )
