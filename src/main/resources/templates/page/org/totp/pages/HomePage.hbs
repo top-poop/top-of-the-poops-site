@@ -15,6 +15,16 @@
 </head>
 <body>
 {{> chunks/title }}
+
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h3>Preliminary analysis shows <em>{{numberFormat totalCount}}</em> "sewage spills"
+            into rivers in {{year}}, lasting
+            {{numberFormat totalDuration.toHours}} hours </h3>
+    </div>
+</div>
+
+
 <div class="container-fluid">
     <div class="row justify-content-md-center  align-items-center">
         <div class="col-md-4 offset-md-1">
@@ -24,7 +34,7 @@
             <div class="row">
                 <div class="col">
                     <div class="display-4">A Petri Dish for E.Coli</div>
-                    <p>Here are all the CSOs in England and Wales that 'overflowed' in 2021 - dumping raw or
+                    <p>Here are all the CSOs in England and Wales that 'overflowed' in {{ year }} - dumping raw or
                         minimally treated sewage into fragile chalk streams, rivers, onto beaches and into shellfish
                         areas</p>
                     <p>Each colour represents a different Water Company, the size of each dot relates to how long each
@@ -90,6 +100,8 @@
             <div class="mb-4">
                 <p>Most, if not actually all, of the beaches and designated coastal bathing locations around England
                     and Wales are regular recipients of a good layer of sewage.</p>
+
+                <p><b>Please note:</b> We don't have data from Dwr Cmyru / Welsh Water yet - they didn't suddenly get better.</p>
 
                 <p>Water companies have a duty to report on the summer bathing season separately, and this made grim
                     reading
@@ -237,7 +249,7 @@
                 ]
             }));
 
-    const r = await fetch("/data/v1/2021/geo/choropleth.json");
+    const r = await fetch("/data/v1/{{year}}/geo/choropleth.json");
     if (r.ok) {
         chart(await r.json())
     }
@@ -282,7 +294,7 @@
                                         fill: "total_spill_hours",
                                         opacity: 0.5,
                                         mixBlendMode: "multiply",
-                                        title: d => `${d.bathing} - ${d.total_spill_hours} hours of sewage in 2021`,
+                                        title: d => `${d.bathing} - ${d.total_spill_hours} hours of sewage in {{year}}`,
                                     }
                             )
                         ]
@@ -290,8 +302,8 @@
             )
     )
 
-    const beaches = await fetch("/data/v1/2021/spills-by-beach.json");
-    const countries = await fetch("/data/v1/2021/geo/countries.json")
+    const beaches = await fetch("/data/v1/{{year}}/spills-by-beach.json");
+    const countries = await fetch("/data/v1/{{year}}/geo/countries.json")
     if (beaches.ok && countries.ok) {
         chart(await beaches.json(), await countries.json())
     }

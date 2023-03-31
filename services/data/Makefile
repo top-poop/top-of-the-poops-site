@@ -76,7 +76,7 @@ GEO_2021_GENERATED=$(foreach sql,$(GEO_2021_SQL),$(DATAFILES)/v1/2021/geo/$(base
 GEO_2022_SQL=$(wildcard sql/v1/2022/geo/*.sql)
 GEO_2022_GENERATED=$(foreach sql,$(GEO_2022_SQL),$(DATAFILES)/v1/2022/geo/$(basename $(notdir $(sql))).json)
 
-PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json
+PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAFILES)/v1/2021/geo/countries.json $(DATAFILES)/v1/2022/geo/countries.json
 
 generated-data: generated-2021 generated-2022 generated-live $(DATAFILES)/constituencies/.uptodate $(PROVIDED)
 
@@ -114,6 +114,9 @@ $(DATAFILES)/media-appearances.json: provided/media-appearances.json
 $(DATAFILES)/water-companies.json: provided/water-companies.json
 	cp $< $@
 
+$(DATAFILES)/v1/2021/geo/countries.json: provided/countries.json
+$(DATAFILES)/v1/2022/geo/countries.json: provided/countries.json
+	cp $< $@
 
 .PHONY: clean
 clean:

@@ -34,7 +34,7 @@
             <div id="map" class="map">
                 <div style="display:none" data-map-attribution>
                     &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors <br/>
-                    Contains OS Data &copy; Crown copyright &amp; database right 2021<br/>
+                    Contains OS Data &copy; Crown copyright &amp; database right 2021-2023<br/>
                     &copy; <a href="https://top-of-the-poops.org">Top of the Poops</a> 2021-2023
                 </div>
             </div>
@@ -77,7 +77,7 @@
         <div class="col">
             {{#> components/section title=(concat "Beaches Ranked for " year)}}
 
-                <p>Here are all the beaches in England and Wales that had sewage overflows in 2021</p>
+                <p>Here are all the beaches in England and Wales that had sewage overflows in {{year}}</p>
 
                 <table id="table-beach" data-id="beach" class="table table-striped"
                        style="width: 100%">
@@ -143,7 +143,7 @@
     )
             .addTo(map);
 
-    const response = await fetch("/data/v1/2021/spills-by-beach.json")
+    const response = await fetch("/data/v1/{{year}}/spills-by-beach.json")
     if (response.ok) {
         const beaches = await (response.json())
         beaches

@@ -44,13 +44,13 @@
             {{#> components/section title=(concat "Rivers Ranked for " year)}}
 
                 {{#if showingSummary}}
-                    <p>Here are the top rivers in England and Wales that had sewage overflows in 2021. As the list is
+                    <p>Here are the top rivers in England and Wales that had sewage overflows in {{year}}. As the list is
                         grouped by company, some rivers
                         may feature more than once, being polluted by different companies along their length.</p>
 
                     <p>The full list is quite long. You can access that <a href="{{showAllUri}}"><button class="btn btn-primary">here</button></a></p>
                 {{else}}
-                    <p>Here are all the rivers in England and Wales that had sewage overflows in 2021. As the list is
+                    <p>Here are all the rivers in England and Wales that had sewage overflows in {{year}}. As the list is
                         grouped by company, some rivers
                         may feature more than once, being polluted by different companies along their length.</p>
                 {{/if}}

@@ -149,12 +149,12 @@ fun main() {
             .then(OkHttp())
     }
 
-    val data2021 = SetBaseUriFrom(Uri.of("/v1/2021")).then(EnsureSuccessfulResponse()).then(dataClient)
+    val data2022 = SetBaseUriFrom(Uri.of("/v1/2022")).then(EnsureSuccessfulResponse()).then(dataClient)
 
     val mediaAppearances = MediaAppearances(dataClient)
     val waterCompanies = WaterCompanies(dataClient)
-    val constituencyContacts = ConstituencyContacts(data2021)
-    val allSpills = AllSpills(data2021)
+    val constituencyContacts = ConstituencyContacts(data2022)
+    val allSpills = AllSpills(data2022)
 
     val server = Undertow(port = port(environment)).toServer(
         HtmlPageErrorFilter(events, renderer).then(
@@ -163,9 +163,9 @@ fun main() {
                     routes(
                         "/" bind HomepageHandler(
                             renderer = renderer,
-                            constituencyRankings = ConstituencyRankings(data2021),
-                            beachRankings = BeachRankings(data2021),
-                            riverRankings = RiverRankings(data2021),
+                            constituencyRankings = ConstituencyRankings(data2022),
+                            beachRankings = BeachRankings(data2022),
+                            riverRankings = RiverRankings(data2022),
                             appearances = mediaAppearances,
                             companies = waterCompanies
                         ),
@@ -175,16 +175,16 @@ fun main() {
                         ),
                         "/constituencies" bind ConstituenciesPageHandler(
                             renderer = renderer,
-                            constituencyRankings = ConstituencyRankings(data2021),
+                            constituencyRankings = ConstituencyRankings(data2022),
                             constituencyContacts = constituencyContacts,
                         ),
                         "/beaches" bind BeachesPageHandler(
                             renderer = renderer,
-                            beachRankings = BeachRankings(data2021)
+                            beachRankings = BeachRankings(data2022)
                         ),
                         "/rivers" bind RiversPageHandler(
                             renderer = renderer,
-                            riverRankings = RiverRankings(data2021)
+                            riverRankings = RiverRankings(data2022)
                         ),
                         "/waterway/{company}/{waterway}" bind WaterwayPageHandler(
                             renderer = renderer,
@@ -202,7 +202,7 @@ fun main() {
                         ),
                         "/company/{company}" bind CompanyPageHandler(
                             renderer = renderer,
-                            companySummaries = CompanyAnnualSummaries(data2021),
+                            companySummaries = CompanyAnnualSummaries(data2022),
                             waterCompanies = waterCompanies,
                         ),
                         "/map.html" bind OldMapRedirectHandler()

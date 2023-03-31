@@ -79,6 +79,11 @@ data class LiveDataCSO(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class LiveData(val cso: List<LiveDataCSO>)
 
+fun fromEDMHours(hours: Double): Duration {
+    val seconds = hours * 3600
+    return Duration.ofSeconds(seconds.toLong())
+}
+
 
 object ConstituencyLiveAvailability {
     operator fun invoke(handler: HttpHandler): () -> List<ConstituencyName> {
@@ -140,9 +145,9 @@ object ConstituencyRankings {
                         constituencyName = constituencyName,
                         constituencyUri = Uri.of("/constituency/${ConstituencySlug.from(constituencyName).value}"),
                         count = (it["total_spills"] as Double).toInt(),
-                        duration = Duration.ofHours((it["total_hours"] as Double).toLong()),
+                        duration = fromEDMHours((it["total_hours"] as Double)),
                         countDelta = (it["spills_increase"] as Double).toInt(),
-                        durationDelta = Duration.ofHours((it["hours_increase"] as Double).toLong())
+                        durationDelta = fromEDMHours(it["hours_increase"] as Double)
                     )
                 }
         }
@@ -169,7 +174,7 @@ object BeachRankings {
                         rank = r + 1,
                         beach = it["bathing"] as String,
                         company = CompanyName(it["company_name"] as String),
-                        duration = Duration.ofHours((it["total_spill_hours"] as Double).toLong()),
+                        duration = fromEDMHours(it["total_spill_hours"] as Double),
                         count = (it["total_spill_count"] as Double).toInt(),
                     )
                 }
@@ -197,7 +202,7 @@ object RiverRankings {
                         rank = r + 1,
                         river = WaterwayName.of(it["river_name"] as String),
                         company = CompanyName.of(it["company_name"] as String),
-                        duration = Duration.ofHours((it["total_hours"] as Double).toLong()),
+                        duration = fromEDMHours(it["total_hours"] as Double),
                         count = (it["total_count"] as Double).toInt(),
                     )
                 }
@@ -225,7 +230,7 @@ object AllSpills {
                             )
                         ),
                         count = (it["spill_count"] as Double).toInt(),
-                        duration = Duration.ofHours((it["total_spill_hours"] as Double).toLong()),
+                        duration = fromEDMHours(it["total_spill_hours"] as Double),
                         reporting = it["reporting_percent"] as Double
                     )
                 }
@@ -235,7 +240,11 @@ object AllSpills {
 
 
 fun constituencyCSOs(source: () -> List<CSOTotals>) =
-    { name: ConstituencyName -> source().filter { name == it.constituency } }
+    { name: ConstituencyName ->
+        val result = source().filter { name == it.constituency }
+        print("Got ${result.size}")
+        result
+    }
 
 fun waterwayCSOs(source: () -> List<CSOTotals>) =
     { name: WaterwaySlug, company: CompanySlug ->
@@ -327,7 +336,7 @@ object CompanyAnnualSummaries {
                         CompanyName.of(it["company_name"] as String),
                         it["reporting_year"] as Int,
                         (it["count"] as Double).toInt(),
-                        Duration.ofHours((it["hours"] as Double).toLong()),
+                        fromEDMHours(it["hours"] as Double),
                         it["location_count"] as Int
                     )
                 }

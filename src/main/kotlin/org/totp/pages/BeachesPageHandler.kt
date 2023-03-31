@@ -78,7 +78,7 @@ object BeachesPageHandler {
                 .with(
                     viewLens of BeachesPage(
                         pageUriFrom(request),
-                        year = 2021,
+                        year = 2022,
                         totalCount,
                         totalDuration,
                         rankings.map {

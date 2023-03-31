@@ -68,7 +68,7 @@ object ConstituenciesPageHandler {
                 .with(
                     viewLens of ConstituenciesPage(
                         pageUriFrom(request),
-                        year = 2021,
+                        year = 2022,
                         constituencyRankings().sortedBy { it.rank }.map {
                             RenderableConstituencyRank(
                                 it.rank,

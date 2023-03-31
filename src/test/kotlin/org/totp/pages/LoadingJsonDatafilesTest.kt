@@ -166,7 +166,6 @@ class LoadingJsonDatafilesTest {
         service(ConstituencyName.of("bob"))
     }
 
-
     @Test
     fun `loading available live data names`() {
         val content = File("services/data/datafiles/live/constituencies/constituencies-available.json")
@@ -191,6 +190,28 @@ class LoadingJsonDatafilesTest {
     @Test
     fun `loading constituency socials`() {
         val content = File("services/data/datafiles/v1/2021/constituency-social.json")
+        val service = ConstituencyContacts { Response(Status.OK).body(content.readText()) }
+        expectThat(service()).size.isGreaterThan(3)
+    }
+
+
+    @Test
+    fun `loading river rankings 2022`() {
+        val content = File("services/data/datafiles/v1/2022/spills-by-river.json")
+        val service = RiverRankings { Response(Status.OK).body(content.readText()) }
+        expectThat(service()).size.isGreaterThan(3)
+    }
+
+    @Test
+    fun `loading company summaries 2022`() {
+        val content = File("services/data/datafiles/v1/2022/spills-by-company.json")
+        val service = CompanyAnnualSummaries { Response(Status.OK).body(content.readText()) }
+        expectThat(service()).size.isGreaterThan(3)
+    }
+
+    @Test
+    fun `loading constituency socials 2022`() {
+        val content = File("services/data/datafiles/v1/2022/constituency-social.json")
         val service = ConstituencyContacts { Response(Status.OK).body(content.readText()) }
         expectThat(service()).size.isGreaterThan(3)
     }

@@ -60,7 +60,7 @@ data class PollutionSummary(
     companion object {
         fun from(csos: List<CSOTotals>): PollutionSummary {
             return PollutionSummary(
-                year = 2021,
+                year = 2022,
                 locationCount = csos.size,
                 companies = csos
                     .map { it.cso.company }
@@ -68,11 +68,10 @@ data class PollutionSummary(
                     .toList()
                     .sortedBy { it.value },
                 count = csos
-                    .filter { it.duration > Duration.ZERO }
                     .sumOf { it.count },
                 duration = csos
                     .map { it.duration }
-                    .reduceOrNull() { acc, duration -> acc.plus(duration) }
+                    .reduceOrNull { acc, duration -> acc.plus(duration) }
                     ?: Duration.ZERO
             )
         }
