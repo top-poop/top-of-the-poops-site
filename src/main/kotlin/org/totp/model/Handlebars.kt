@@ -31,16 +31,14 @@ object TotpHandlebars {
             StringHelpers.join.registerHelper(it)
             StringHelpers.dateFormat.registerHelper(it)
             it.registerHelper("numberFormat") { context: Any, _: Options ->
-                if ( context is Number ) {
+                if (context is Number) {
                     NumberFormat.getNumberInstance().format(context)
-                }
-                else {
-                    print("eek")
+                } else {
                     throw IllegalArgumentException("Wrong type for context")
                 }
             }
             it.registerHelper("inc") { context: Any, _: Options -> context.toString().toInt() + 1 }
-            it.registerHelper("maybe") { context: Any?, _: Options -> context?.let { it.toString() } ?: ""}
+            it.registerHelper("maybe") { context: Any?, _: Options -> context?.let { it.toString() } ?: "" }
             it.registerHelper("urlencode") { context: Any, _: Options -> context.toString().urlEncoded() }
             it.registerHelper("concat") { context: Any, options -> (listOf(context) + options.params).joinToString("") }
         }

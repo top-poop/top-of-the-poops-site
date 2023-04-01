@@ -56,6 +56,8 @@ import org.totp.pages.HomepageHandler
 import org.totp.pages.HtmlPageErrorFilter
 import org.totp.pages.MediaPageHandler
 import org.totp.pages.RiversPageHandler
+import org.totp.pages.SitemapHandler
+import org.totp.pages.SitemapUris
 import org.totp.pages.WaterwayPageHandler
 import org.totp.pages.constituencyNames
 import java.time.Clock
@@ -157,6 +159,7 @@ fun main() {
     val allSpills = AllSpills(data2022)
     val riverRankings = RiverRankings(data2022)
     val beachRankings = BeachRankings(data2022)
+    val constituencyRankings = ConstituencyRankings(data2022)
 
     val server = Undertow(port = port(environment)).toServer(
         HtmlPageErrorFilter(events, renderer).then(
@@ -165,7 +168,7 @@ fun main() {
                     routes(
                         "/" bind HomepageHandler(
                             renderer = renderer,
-                            constituencyRankings = ConstituencyRankings(data2022),
+                            constituencyRankings = constituencyRankings,
                             beachRankings = beachRankings,
                             riverRankings = riverRankings,
                             appearances = mediaAppearances,
@@ -177,7 +180,7 @@ fun main() {
                         ),
                         "/constituencies" bind ConstituenciesPageHandler(
                             renderer = renderer,
-                            constituencyRankings = ConstituencyRankings(data2022),
+                            constituencyRankings = constituencyRankings,
                             constituencyContacts = constituencyContacts,
                         ),
                         "/beaches" bind BeachesPageHandler(
@@ -209,7 +212,15 @@ fun main() {
                             riverRankings = riverRankings,
                             beachRankings = beachRankings
                         ),
-                        "/map.html" bind OldMapRedirectHandler()
+                        "/map.html" bind OldMapRedirectHandler(),
+                        "/sitemap.xml" bind SitemapHandler(
+                            renderer = renderer,
+                            siteBaseUri = Uri.of("https://top-of-the-poops.org"),
+                            uris = SitemapUris(
+                                constituencies = constituencyRankings,
+                                riverRankings = riverRankings
+                            )
+                        ),
                     )
                 ),
                 "/data" bind inboundFilters.then(static(ResourceLoader.Directory("services/data/datafiles"))),
