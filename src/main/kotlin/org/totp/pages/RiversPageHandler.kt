@@ -33,15 +33,39 @@ class RiversPage(
 
 data class RenderableWaterway(val name: WaterwayName, val uri: Uri)
 
+data class RenderableCount(val count:Int) {
+
+    val perDay = count / 365
+    val perWeek = count / 52
+    val perMonth = count / 12
+
+    val isPerDay = perDay > 1
+    val isPerWeek = perWeek > 1
+}
+
 data class RenderableRiverRank(
     val rank: Int,
     val river: RenderableWaterway,
     val company: RenderableCompany,
-    val count: Int,
-    val duration: Duration,
+    val count: RenderableCount,
+    val duration: RenderableDuration,
     val countDelta: DeltaValue,
     val durationDelta: RenderableDurationDelta
 )
+
+fun RiverRank.toRenderable(): RenderableRiverRank {
+    val waterwaySlug = WaterwaySlug.from(river)
+    val companySlug = CompanySlug.from(company)
+    return RenderableRiverRank(
+        rank,
+        RenderableWaterway(river, Uri.of("/waterway/$companySlug/$waterwaySlug")),
+        RenderableCompany(company, Uri.of("/company/$companySlug")),
+        RenderableCount(count),
+        RenderableDuration(duration),
+        countDelta,
+        RenderableDurationDelta(durationDelta)
+    )
+}
 
 object RiversPageHandler {
     operator fun invoke(
@@ -78,16 +102,7 @@ object RiversPageHandler {
                         showingSummary = !showAll,
                         showAllUri = Uri.of(request.uri.path).query("all", "true"),
                         display.map {
-                            val companySlug = CompanySlug.from(it.company)
-                            RenderableRiverRank(
-                                it.rank,
-                                RenderableWaterway(it.river, waterwayUriFor(it.river, it.company)),
-                                RenderableCompany(it.company, Uri.of("/company/$companySlug")),
-                                it.count,
-                                it.duration,
-                                it.countDelta,
-                                RenderableDurationDelta(it.durationDelta)
-                            )
+                            it.toRenderable()
                         },
                     )
                 )

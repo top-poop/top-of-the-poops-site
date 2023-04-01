@@ -24,7 +24,9 @@
                 <div class="col">
                     <div class="display-3">{{ name }}</div>
 
-                    <p>{{ name }} was responsible for <span class="align-middle display-4 font-weight-bold">{{numberFormat summary.spillCount }}</span> sewage overflows
+                    <p>{{ name }} was responsible for <span
+                            class="align-middle display-4 font-weight-bold">{{numberFormat summary.spillCount }}</span>
+                        sewage overflows
                         in {{ summary.year }}</p>
 
                     <p>These lasted for {{numberFormat summary.duration.toHours}} hours - in
@@ -48,8 +50,38 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            {{#> components/section title="More information on the way..." }}
-                <p>We've been pretty busy on the new site layout - more information about water companies coming soon</p>
+            {{#> components/section title=(concat "Rivers Polluted by " name)}}
+                <div class="row row-cols-1 row-cols-md-4">
+                    {{#each rivers}}
+                        <a class="quiet-link" href="{{this.river.uri}}">
+                        <div class="col mb-4">
+                            <div class="card h-100">
+                                <div class="card-header">{{inc @index}}. {{this.river.name}}</div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{numberFormat this.duration.hours}} hours</h5>
+                                    <p class="card-text"><small class="text-muted">
+                                        {{#if this.duration.hasMonths}}
+                                            That's {{numberFormat this.duration.months}} <b>months</b>
+                                        {{else}}
+                                            That's {{numberFormat this.duration.days}} days
+                                        {{/if}}
+                                    </small></p>
+                                    <p class="card-text">{{numberFormat this.count.count}} incidents</p>
+                                    <p class="card-text"><small class="text-muted">
+                                        {{#if this.count.isPerDay}}
+                                            On average {{numberFormat this.count.perDay}} every <b>day</b>
+                                        {{else if this.count.isPerWeek}}
+                                            {{numberFormat this.count.perWeek}} every week, on average
+                                        {{else}}
+                                            {{numberFormat this.count.perMonth}} a month, over the year
+                                        {{/if}}
+                                    </small></p>
+                                </div>
+                            </div>
+                        </div>
+                        </a>
+                    {{/each}}
+                </div>
             {{/components/section}}
         </div>
     </div>
@@ -73,7 +105,9 @@
 
     <div class="row row-cols-1 row-cols-md-4">
         {{#each links}}
-            {{> components/card-company this.company}}
+            <div class="col mb-4">
+                {{> components/card-company this.company}}
+            </div>
         {{/each}}
     </div>
 </div>

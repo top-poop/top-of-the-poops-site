@@ -52,6 +52,19 @@ data class RenderableBeachRank(
     val durationDelta: RenderableDurationDelta
 )
 
+fun BeachRank.toRenderable(): RenderableBeachRank {
+    return RenderableBeachRank(
+        rank,
+        beach,
+        RenderableCompany.from(company),
+        count,
+        duration,
+        countDelta,
+        RenderableDurationDelta(durationDelta)
+    )
+}
+
+
 object BeachesPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
@@ -90,15 +103,7 @@ object BeachesPageHandler {
                         totalCount,
                         totalDuration,
                         rankings.map {
-                            RenderableBeachRank(
-                                it.rank,
-                                it.beach,
-                                RenderableCompany.from(it.company),
-                                it.count,
-                                it.duration,
-                                it.countDelta,
-                                RenderableDurationDelta(it.durationDelta)
-                            )
+                            it.toRenderable()
                         },
                         polluterRankings = polluters
                     )

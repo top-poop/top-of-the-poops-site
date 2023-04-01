@@ -26,7 +26,9 @@ class CompanyPageHandlerTest {
                     )
                 )
             },
-            waterCompanies = { listOf(aWaterCompany) }
+            waterCompanies = { listOf(aWaterCompany) },
+            beachRankings = { listOf(aBeach) },
+            riverRankings = { listOf(aRiver(1)) }
         )
     )
 

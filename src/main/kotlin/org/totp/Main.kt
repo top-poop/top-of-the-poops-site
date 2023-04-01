@@ -155,6 +155,8 @@ fun main() {
     val waterCompanies = WaterCompanies(dataClient)
     val constituencyContacts = ConstituencyContacts(data2022)
     val allSpills = AllSpills(data2022)
+    val riverRankings = RiverRankings(data2022)
+    val beachRankings = BeachRankings(data2022)
 
     val server = Undertow(port = port(environment)).toServer(
         HtmlPageErrorFilter(events, renderer).then(
@@ -164,8 +166,8 @@ fun main() {
                         "/" bind HomepageHandler(
                             renderer = renderer,
                             constituencyRankings = ConstituencyRankings(data2022),
-                            beachRankings = BeachRankings(data2022),
-                            riverRankings = RiverRankings(data2022),
+                            beachRankings = beachRankings,
+                            riverRankings = riverRankings,
                             appearances = mediaAppearances,
                             companies = waterCompanies
                         ),
@@ -180,11 +182,11 @@ fun main() {
                         ),
                         "/beaches" bind BeachesPageHandler(
                             renderer = renderer,
-                            beachRankings = BeachRankings(data2022)
+                            beachRankings = beachRankings
                         ),
                         "/rivers" bind RiversPageHandler(
                             renderer = renderer,
-                            riverRankings = RiverRankings(data2022)
+                            riverRankings = riverRankings
                         ),
                         "/waterway/{company}/{waterway}" bind WaterwayPageHandler(
                             renderer = renderer,
@@ -204,6 +206,8 @@ fun main() {
                             renderer = renderer,
                             companySummaries = CompanyAnnualSummaries(data2022),
                             waterCompanies = waterCompanies,
+                            riverRankings = riverRankings,
+                            beachRankings = beachRankings
                         ),
                         "/map.html" bind OldMapRedirectHandler()
                     )

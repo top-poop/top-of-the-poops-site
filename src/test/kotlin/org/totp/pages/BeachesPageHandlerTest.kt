@@ -17,17 +17,7 @@ class BeachesPageHandlerTest {
         "/" bind Method.GET to BeachesPageHandler(
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
             beachRankings = {
-                listOf(
-                    BeachRank(
-                        1,
-                        "beach",
-                        CompanyName.of("company"),
-                        10,
-                        Duration.ofHours(1),
-                        DeltaValue.of(10),
-                        Duration.ofSeconds(11)
-                    )
-                )
+                listOf(aBeach)
             },
         )
     )

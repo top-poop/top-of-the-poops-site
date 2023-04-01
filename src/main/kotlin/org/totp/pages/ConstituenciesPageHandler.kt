@@ -33,6 +33,10 @@ class DeltaValue(value: Int) : IntValue(value) {
 
 class RenderableDuration(value: Duration) {
     val hours = value.toHours()
+    val days = value.toDays()
+    val months = value.toDays() / 30.0
+
+    val hasMonths = months > 1.0
 }
 
 class RenderableDurationDelta(val value: Duration) {
@@ -40,7 +44,6 @@ class RenderableDurationDelta(val value: Duration) {
 
     fun isPositive() = value > Duration.ZERO
     fun isNegative() = value < Duration.ZERO
-
 }
 
 class RenderableConstituencyRank(

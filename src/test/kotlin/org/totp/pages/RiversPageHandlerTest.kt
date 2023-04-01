@@ -22,24 +22,8 @@ class RiversPageHandlerTest {
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
             riverRankings = {
                 listOf(
-                    RiverRank(
-                        1,
-                        WaterwayName("river"),
-                        CompanyName("company"),
-                        10,
-                        Duration.ofHours(1),
-                        DeltaValue.of(10),
-                        Duration.ofHours(15)
-                    ),
-                    RiverRank(
-                        2,
-                        WaterwayName("river2"),
-                        CompanyName("company2"),
-                        11,
-                        Duration.ofHours(1),
-                        DeltaValue.of(99),
-                        Duration.ofSeconds(55)
-                    ),
+                    aRiver(1),
+                    aRiver(2),
                 )
             },
         )

@@ -17,7 +17,9 @@ import org.http4k.template.viewModel
 import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
+import org.totp.model.data.BeachRank
 import org.totp.model.data.CompanyName
+import org.totp.model.data.RiverRank
 import org.totp.model.data.WaterCompany
 import java.text.NumberFormat
 import java.time.Duration
@@ -30,6 +32,8 @@ class CompanyPage(
     val summary: CompanyAnnualSummary,
     val company: WaterCompany,
     val links: List<WaterCompanyLink>,
+    val rivers: List<RenderableRiverRank>,
+    val beaches: List<RenderableBeachRank>,
     val share: SocialShare,
 ) : PageViewModel(uri)
 
@@ -58,7 +62,9 @@ object CompanyPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
         companySummaries: () -> List<CompanyAnnualSummary>,
-        waterCompanies: () -> List<WaterCompany>
+        waterCompanies: () -> List<WaterCompany>,
+        riverRankings: () -> List<RiverRank>,
+        beachRankings: () -> List<BeachRank>,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
         val companySlug = Path.value(CompanySlug).of("company", "The company")
@@ -92,6 +98,8 @@ object CompanyPageHandler {
                             links = companies.map {
                                 WaterCompanyLink(it.name == name, it)
                             },
+                            beaches = beachRankings().filter { it.company == company.name }.take(5).map { it.toRenderable()},
+                            rivers = riverRankings().filter { it.company == company.name }.take(8).map { it.toRenderable()},
                             share = SocialShare(
                                 pageUriFrom(request),
                                 "$name - ${company.handle} - dumped #sewage into rivers,seas & bathing areas ${

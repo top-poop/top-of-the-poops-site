@@ -79,17 +79,7 @@ object HomepageHandler {
                         companies(),
                         beachRankings().take(10),
                         rivers.map {
-                            val waterwaySlug = WaterwaySlug.from(it.river)
-                            val companySlug = CompanySlug.from(it.company)
-                            RenderableRiverRank(
-                                it.rank,
-                                RenderableWaterway(it.river, Uri.of("/waterway/$companySlug/$waterwaySlug")),
-                                RenderableCompany(it.company, Uri.of("/company/$companySlug")),
-                                it.count,
-                                it.duration,
-                                it.countDelta,
-                                RenderableDurationDelta(it.durationDelta)
-                            )
+                            it.toRenderable()
                         },
                         appearances().sortedByDescending { it.date }.take(8),
                         SocialShare(
