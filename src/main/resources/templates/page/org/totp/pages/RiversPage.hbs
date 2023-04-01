@@ -81,9 +81,9 @@
                             <td>{{this.rank}}</td>
                             <td><a href="{{this.river.uri}}">{{this.river.name}}</a></td>
                             <td><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
-                            <td>{{numberFormat this.count}}</td>
+                            <td>{{numberFormat this.count.count}}</td>
                             <td class="align-middle {{#if this.countDelta.positive}}delta-positive {{else}}delta-negative {{/if}}">{{numberFormat this.countDelta.value}}</td>
-                            <td>{{numberFormat this.duration.toHours}}</td>
+                            <td>{{numberFormat this.duration.hours}}</td>
                             <td class="align-middle {{#if this.countDelta.positive}}delta-positive {{else}}delta-negative {{/if}}">{{numberFormat this.durationDelta.hours}}</td>
                         </tr>
                     {{/each}}

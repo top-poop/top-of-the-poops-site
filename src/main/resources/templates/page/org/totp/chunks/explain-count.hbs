@@ -1,0 +1,7 @@
+{{#if isPerDay}}
+    On average {{numberFormat perDay}} every <b>day</b>
+{{else if isPerWeek}}
+    {{numberFormat perWeek}} every week, on average
+{{else}}
+    {{numberFormat perMonth}} a month, over the year
+{{/if}}

@@ -22,8 +22,8 @@
 
 <div class="jumbotron jumbotron-fluid">
     <div class="container">
-        <h3>{{ name.value }} polluted by sewage {{numberFormat summary.count}} times in {{summary.year}} - lasting
-            {{numberFormat summary.duration.toHours}} hours</h3>
+        <h3>{{ name.value }} polluted by sewage {{numberFormat summary.count.count}} times in {{summary.year}} - lasting
+            {{numberFormat summary.duration.hours}} hours</h3>
     </div>
 </div>
 
@@ -48,10 +48,15 @@
                             <h5 class="card-title">{{summary.locationCount}} Sites polluted by {{join summary.companies
                                                                                                       ', '}}</h5>
                             <div class="card-text">
-                                {{numberFormat summary.count}} sewage dumps<br>
-                                <span class="spill-hours">{{numberFormat summary.duration.toHours}}
+                                {{numberFormat summary.count.count}} sewage dumps<br>
+                                <span class="spill-hours">{{numberFormat summary.duration.hours}}
                                     h </span>duration<br>
                             </div>
+
+                            <small class="text-muted">
+                                {{> chunks/explain-duration summary.duration}}
+                                {{> chunks/explain-count summary.count}}
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -122,8 +127,8 @@
                                         href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a></td>
                                 <td class="align-middle" data-waterway>{{this.cso.waterway.name}}</td>
                                 <td class="align-middle" data-sitename>{{this.cso.sitename}}</td>
-                                <td class="align-middle" data-count>{{numberFormat this.count}}</td>
-                                <td class="align-middle" data-duration>{{numberFormat this.duration.toHours}}</td>
+                                <td class="align-middle" data-count>{{numberFormat this.count.count}}</td>
+                                <td class="align-middle" data-duration>{{numberFormat this.duration.hours}}</td>
                                 <td class="align-middle">{{this.reporting}}</td>
                             </tr>
                         {{/each}}

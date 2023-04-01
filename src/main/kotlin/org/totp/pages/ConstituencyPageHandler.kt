@@ -53,8 +53,8 @@ data class PollutionSummary(
     val year: Int,
     val locationCount: Int,
     val companies: List<CompanyName>,
-    val count: Int,
-    val duration: Duration
+    val count: RenderableCount,
+    val duration: RenderableDuration
 ) {
 
     companion object {
@@ -68,11 +68,15 @@ data class PollutionSummary(
                     .toList()
                     .sortedBy { it.value },
                 count = csos
-                    .sumOf { it.count },
-                duration = csos
+                    .sumOf { it.count }
+                    .let { RenderableCount(it) },
+                duration = (csos
                     .map { it.duration }
                     .reduceOrNull { acc, duration -> acc.plus(duration) }
-                    ?: Duration.ZERO
+                    ?: Duration.ZERO)
+                    .let {
+                        RenderableDuration(it)
+                    }
             )
         }
     }
@@ -194,7 +198,7 @@ object ConstituencyPageHandler {
                             constituencyName,
                             SocialShare(
                                 pageUriFrom(request),
-                                text = "$constituencyName had ${numberFormat.format(summary.count)} sewage overflows in ${summary.year} - ${contact.mp.handle}",
+                                text = "$constituencyName had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year} - ${contact.mp.handle}",
                                 cta = "Share $constituencyName sewage horrors",
                                 tags = listOf("sewage"),
                                 via = "sewageuk"

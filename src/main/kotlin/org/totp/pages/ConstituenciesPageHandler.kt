@@ -35,8 +35,10 @@ class RenderableDuration(value: Duration) {
     val hours = value.toHours()
     val days = value.toDays()
     val months = value.toDays() / 30.0
+    val years = value.toDays() / 365.0
 
     val hasMonths = months > 1.0
+    val hasYears = months > 12.0
 }
 
 class RenderableDurationDelta(val value: Duration) {

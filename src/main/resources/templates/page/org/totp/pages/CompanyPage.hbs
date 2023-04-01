@@ -60,21 +60,11 @@
                                 <div class="card-body">
                                     <h5 class="card-title">{{numberFormat this.duration.hours}} hours</h5>
                                     <p class="card-text"><small class="text-muted">
-                                        {{#if this.duration.hasMonths}}
-                                            That's {{numberFormat this.duration.months}} <b>months</b>
-                                        {{else}}
-                                            That's {{numberFormat this.duration.days}} days
-                                        {{/if}}
+                                        {{> chunks/explain-duration this.duration}}
                                     </small></p>
                                     <p class="card-text">{{numberFormat this.count.count}} incidents</p>
                                     <p class="card-text"><small class="text-muted">
-                                        {{#if this.count.isPerDay}}
-                                            On average {{numberFormat this.count.perDay}} every <b>day</b>
-                                        {{else if this.count.isPerWeek}}
-                                            {{numberFormat this.count.perWeek}} every week, on average
-                                        {{else}}
-                                            {{numberFormat this.count.perMonth}} a month, over the year
-                                        {{/if}}
+                                        {{> chunks/explain-count this.count}}
                                     </small></p>
                                 </div>
                             </div>
