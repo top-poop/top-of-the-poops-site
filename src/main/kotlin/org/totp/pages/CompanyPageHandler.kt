@@ -29,7 +29,7 @@ class CompanyPage(
     val year: Int,
     val csoUri: Uri,
     val name: CompanyName,
-    val summary: CompanyAnnualSummary,
+    val summary: RenderableCompanyAnnualSummary,
     val company: WaterCompany,
     val links: List<WaterCompanyLink>,
     val rivers: List<RenderableRiverRank>,
@@ -52,6 +52,24 @@ data class CompanyAnnualSummary(
     val duration: Duration,
     val locationCount: Int
 )
+
+data class RenderableCompanyAnnualSummary(
+    val company: RenderableCompany,
+    val year: Int,
+    val count: RenderableCount,
+    val duration: RenderableDuration,
+    val locationCount: Int
+)
+
+fun CompanyAnnualSummary.toRenderable(): RenderableCompanyAnnualSummary {
+    return RenderableCompanyAnnualSummary(
+        RenderableCompany.from(name),
+        year,
+        RenderableCount(spillCount),
+        RenderableDuration(duration),
+        locationCount
+    )
+}
 
 data class WaterCompanyLink(
     val selected: Boolean,
@@ -82,8 +100,8 @@ object CompanyPageHandler {
 
                 val companies = waterCompanies()
 
-                val mostRecent = applicable.first()
-                val name = mostRecent.name
+                val mostRecent = applicable.first().toRenderable()
+                val name = mostRecent.company.name
 
                 val company = companies.first { it.name == name }
                 Response(Status.OK)
@@ -98,13 +116,15 @@ object CompanyPageHandler {
                             links = companies.map {
                                 WaterCompanyLink(it.name == name, it)
                             },
-                            beaches = beachRankings().filter { it.company == company.name }.take(5).map { it.toRenderable()},
-                            rivers = riverRankings().filter { it.company == company.name }.take(8).map { it.toRenderable()},
+                            beaches = beachRankings().filter { it.company == company.name }.take(6)
+                                .map { it.toRenderable() },
+                            rivers = riverRankings().filter { it.company == company.name }.take(6)
+                                .map { it.toRenderable() },
                             share = SocialShare(
                                 pageUriFrom(request),
                                 "$name - ${company.handle} - dumped #sewage into rivers,seas & bathing areas ${
                                     numberFormat.format(
-                                        mostRecent.spillCount
+                                        mostRecent.count.count
                                     )
                                 } times in ${mostRecent.year} - Unacceptable!",
                                 cta = "Tweet your displeasure to $name",

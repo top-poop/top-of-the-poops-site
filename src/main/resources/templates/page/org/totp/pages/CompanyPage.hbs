@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <title>Top of the Poops | Company | {{ name }}</title>
-    <meta name="description" content="Analysing sewage dumps by {{ name }}">
+    <meta name="description" content="{{ name }} polluted waterways {{numberFormat summary.count.count}} times in {{summary.year}}">
 
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
@@ -25,11 +25,11 @@
                     <div class="display-3">{{ name }}</div>
 
                     <p>{{ name }} was responsible for <span
-                            class="align-middle display-4 font-weight-bold">{{numberFormat summary.spillCount }}</span>
-                        sewage overflows
-                        in {{ summary.year }}</p>
+                            class="align-middle display-4 font-weight-bold">{{numberFormat summary.count.count }}</span>
+                        sewage overflows in {{ summary.year }}<br/>
+                        {{> chunks/explain-count summary.count}} </p>
 
-                    <p>These lasted for {{numberFormat summary.duration.toHours}} hours - in
+                    <p>These lasted for {{numberFormat summary.duration.hours}} hours ({{> chunks/explain-duration summary.duration}}) - in
                         {{numberFormat summary.locationCount}} different locations across their service area</p>
                 </div>
             </div>
@@ -51,7 +51,7 @@
     <div class="row">
         <div class="col">
             {{#> components/section title=(concat "Rivers Polluted by " name)}}
-                <div class="row row-cols-1 row-cols-md-4">
+                <div class="row row-cols-1 row-cols-md-3">
                     {{#each rivers}}
                         <a class="quiet-link" href="{{this.river.uri}}">
                         <div class="col mb-4">
@@ -76,6 +76,39 @@
         </div>
     </div>
 </div>
+
+
+{{#if beaches}}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            {{#> components/section title=(concat "Beaches Polluted by " name)}}
+                <div class="row row-cols-1 row-cols-md-3">
+                    {{#each beaches}}
+                        <a class="quiet-link" href="/beaches">
+                            <div class="col mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header">{{inc @index}}. {{this.beach}}</div>
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{numberFormat this.duration.hours}} hours</h5>
+                                        <p class="card-text"><small class="text-muted">
+                                            {{> chunks/explain-duration this.duration}}
+                                        </small></p>
+                                        <p class="card-text">{{numberFormat this.count.count}} incidents</p>
+                                        <p class="card-text"><small class="text-muted">
+                                            {{> chunks/explain-count this.count}}
+                                        </small></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    {{/each}}
+                </div>
+            {{/components/section}}
+        </div>
+    </div>
+</div>
+{{/if}}
 
 <div class="container">
     <div class="row">

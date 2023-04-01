@@ -39,7 +39,7 @@ class HomePage(
     val totalDuration: Duration,
     val constituencyRankings: List<ConstituencyRank>,
     val companies: List<WaterCompany>,
-    val beachRankings: List<BeachRank>,
+    val beachRankings: List<RenderableBeachRank>,
     val riverRankings: List<RenderableRiverRank>,
     val appearances: List<MediaAppearance>,
     val share: SocialShare
@@ -77,7 +77,7 @@ object HomepageHandler {
                         totalDuration,
                         rankings.take(10),
                         companies(),
-                        beachRankings().take(10),
+                        beachRankings().take(10).map { it.toRenderable() },
                         rivers.map {
                             it.toRenderable()
                         },

@@ -46,8 +46,8 @@ data class RenderableBeachRank(
     val rank: Int,
     val beach: String,
     val company: RenderableCompany,
-    val count: Int,
-    val duration: Duration,
+    val count: RenderableCount,
+    val duration: RenderableDuration,
     val countDelta: DeltaValue,
     val durationDelta: RenderableDurationDelta
 )
@@ -57,8 +57,8 @@ fun BeachRank.toRenderable(): RenderableBeachRank {
         rank,
         beach,
         RenderableCompany.from(company),
-        count,
-        duration,
+        RenderableCount(count),
+        RenderableDuration(duration),
         countDelta,
         RenderableDurationDelta(durationDelta)
     )

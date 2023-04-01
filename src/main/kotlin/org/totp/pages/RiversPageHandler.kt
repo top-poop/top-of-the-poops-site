@@ -35,9 +35,9 @@ data class RenderableWaterway(val name: WaterwayName, val uri: Uri)
 
 data class RenderableCount(val count:Int) {
 
-    val perDay = count / 365
-    val perWeek = count / 52
-    val perMonth = count / 12
+    val perDay = count / 365.0
+    val perWeek = count / 52.0
+    val perMonth = count / 12.0
 
     val isPerDay = perDay > 1
     val isPerWeek = perWeek > 1
