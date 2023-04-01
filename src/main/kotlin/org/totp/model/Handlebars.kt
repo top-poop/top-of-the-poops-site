@@ -7,6 +7,7 @@ import org.http4k.core.Uri
 import org.http4k.template.HandlebarsTemplates
 import org.http4k.template.ViewModel
 import org.http4k.urlEncoded
+import java.text.NumberFormat
 
 
 open class PageViewModel(val uri: Uri) : ViewModel {
@@ -27,7 +28,9 @@ object TotpHandlebars {
                     "Missing value for: " + options.helperName
                 )
             }
-            StringHelpers.register(it)
+            StringHelpers.join.registerHelper(it)
+            StringHelpers.dateFormat.registerHelper(it)
+            it.registerHelper("numberFormat") { context: Any, _: Options -> NumberFormat.getNumberInstance().format(context as Number)}
             it.registerHelper("inc") { context: Any, _: Options -> context.toString().toInt() + 1 }
             it.registerHelper("maybe") { context: Any?, _: Options -> context?.let { it.toString() } ?: ""}
             it.registerHelper("urlencode") { context: Any, _: Options -> context.toString().urlEncoded() }
