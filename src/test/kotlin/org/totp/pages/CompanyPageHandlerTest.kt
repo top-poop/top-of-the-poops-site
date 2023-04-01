@@ -7,6 +7,9 @@ import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.CompanyName
+import strikt.api.expectThat
+import strikt.assertions.contains
+import java.io.File
 import java.time.Duration
 
 
@@ -21,7 +24,7 @@ class CompanyPageHandlerTest {
                         CompanyName.of("Water Co"),
                         2020,
                         1234,
-                        Duration.ofHours(10),
+                        Duration.ofHours(100),
                         4321
                     )
                 )
@@ -34,6 +37,17 @@ class CompanyPageHandlerTest {
 
     @Test
     fun `renders the company  page`() {
-        val html = Html(service(Request(Method.GET, "/water-co")))
+
+        print(File(".").absolutePath)
+
+        val response = service(Request(Method.GET, "/water-co"))
+        val html = Html(response)
+
+        expectThat(response.bodyString()) {
+            contains("1,234")
+            contains("2020")
+            contains("That's 4.167 days")
+            contains("On average 3.381")
+        }
     }
 }

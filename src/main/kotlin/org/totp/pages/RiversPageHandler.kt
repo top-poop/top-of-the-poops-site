@@ -39,8 +39,8 @@ data class RenderableCount(val count:Int) {
     val perWeek = count / 52.0
     val perMonth = count / 12.0
 
-    val isPerDay = perDay > 1
-    val isPerWeek = perWeek > 1
+    val useDays = perDay > 1
+    val useWeeks = perWeek > 1
 }
 
 data class RenderableRiverRank(

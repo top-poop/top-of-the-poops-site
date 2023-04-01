@@ -30,7 +30,15 @@ object TotpHandlebars {
             }
             StringHelpers.join.registerHelper(it)
             StringHelpers.dateFormat.registerHelper(it)
-            it.registerHelper("numberFormat") { context: Any, _: Options -> NumberFormat.getNumberInstance().format(context as Number)}
+            it.registerHelper("numberFormat") { context: Any, _: Options ->
+                if ( context is Number ) {
+                    NumberFormat.getNumberInstance().format(context)
+                }
+                else {
+                    print("eek")
+                    throw IllegalArgumentException("Wrong type for context")
+                }
+            }
             it.registerHelper("inc") { context: Any, _: Options -> context.toString().toInt() + 1 }
             it.registerHelper("maybe") { context: Any?, _: Options -> context?.let { it.toString() } ?: ""}
             it.registerHelper("urlencode") { context: Any, _: Options -> context.toString().urlEncoded() }

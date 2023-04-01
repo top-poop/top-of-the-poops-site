@@ -23,7 +23,7 @@ fun aRiver(rank: Int) = RiverRank(
     WaterwayName("river-$rank"),
     CompanyName("company"),
     10 * rank,
-    Duration.ofHours(1L * rank),
+    Duration.ofHours(100L * rank),
     DeltaValue.of(10 * rank),
     Duration.ofHours(15L * rank)
 )
