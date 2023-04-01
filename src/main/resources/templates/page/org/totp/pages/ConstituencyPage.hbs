@@ -20,12 +20,10 @@
 <body>
 {{> chunks/title }}
 
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-        <h3>{{ name.value }} polluted by sewage {{numberFormat summary.count.count}} times in {{summary.year}} - lasting
-            {{numberFormat summary.duration.hours}} hours</h3>
-    </div>
-</div>
+{{#> components/jumbotron }}
+    {{ name.value }} polluted by sewage {{numberFormat summary.count.count}} times in {{summary.year}} - lasting
+            {{numberFormat summary.duration.hours}} hours
+{{/components/jumbotron}}
 
 
 <div class="container-fluid">

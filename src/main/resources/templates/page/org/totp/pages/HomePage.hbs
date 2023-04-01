@@ -16,13 +16,11 @@
 <body>
 {{> chunks/title }}
 
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-        <h3>Preliminary analysis shows <em>{{numberFormat totalCount}}</em> "sewage spills"
-            into waterways in {{year}}, lasting
-            {{numberFormat totalDuration.toHours}} hours </h3>
-    </div>
-</div>
+{{#> components/jumbotron }}
+    Preliminary analysis shows <em>{{numberFormat totalCount}}</em> "sewage spills"
+    into waterways in {{year}}, lasting
+    {{numberFormat totalDuration.toHours}} hours
+{{/components/jumbotron}}
 
 
 <div class="container-fluid">
@@ -101,7 +99,8 @@
                 <p>Most, if not actually all, of the beaches and designated coastal bathing locations around England
                     and Wales are regular recipients of a good layer of sewage.</p>
 
-                <p><b>Please note:</b> We don't have data from Dwr Cmyru / Welsh Water yet - they didn't suddenly get better.</p>
+                <p><b>Please note:</b> We don't have data from Dwr Cmyru / Welsh Water yet - they didn't suddenly get
+                    better.</p>
 
                 <p>Water companies have a duty to report on the summer bathing season separately, and this made grim
                     reading
@@ -113,7 +112,8 @@
 
                 {{#each beachRankings}}
                     <div>
-                        <b>{{this.rank}}.</b>{{this.company.name}} - {{this.beach}} {{numberFormat this.duration.hours}} hours
+                        <b>{{this.rank}}.</b>{{this.company.name}} - {{this.beach}} {{numberFormat this.duration.hours}}
+                        hours
                     </div>
                 {{/each}}
             </div>
@@ -142,7 +142,8 @@
 
                 {{#each riverRankings}}
                     <div>
-                        <b>{{this.rank}}.</b>{{this.company.name}} - <a href="{{this.river.uri}}">{{this.river.name}}</a> {{numberFormat this.duration.hours}} hours
+                        <b>{{this.rank}}.</b>{{this.company.name}} - <a
+                            href="{{this.river.uri}}">{{this.river.name}}</a> {{numberFormat this.duration.hours}} hours
                     </div>
                 {{/each}}
             </div>
