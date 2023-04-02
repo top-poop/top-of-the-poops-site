@@ -1,11 +1,8 @@
 package org.totp.pages
 
-import dev.forkhandles.values.IntValue
-import dev.forkhandles.values.IntValueFactory
 import org.http4k.core.Body
 import org.http4k.core.ContentType
 import org.http4k.core.HttpHandler
-import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.Uri
@@ -15,66 +12,39 @@ import org.http4k.template.viewModel
 import org.totp.extensions.Defect
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
+import org.totp.model.data.CSOTotals
 import org.totp.model.data.ConstituencyContact
-import java.time.Duration
+import org.totp.model.data.ConstituencyName
+import org.totp.model.data.GeoJSON
 
-class ConstituenciesPage(
+class BadgesConstituenciesPage(
     uri: Uri,
-    var year: Int,
-    val constituencyRankings: List<RenderableConstituencyRank>
+    val year: Int,
+    val constituencies: List<RenderableConstituencyRank>,
+    val boundaries: List<Pair<ConstituencySlug, GeoJSON>>,
 ) : PageViewModel(uri)
 
-class DeltaValue(value: Int) : IntValue(value) {
-    companion object : IntValueFactory<DeltaValue>(::DeltaValue)
 
-    fun isPositive() = value > 0
-    fun isNegative() = value < 0
-}
-
-class RenderableDuration(value: Duration) {
-    val hours = value.toHours()
-    val days = hours / 24.0
-    val months = days / 30.0
-    val years = months / 12.0
-
-    val hasMonths = months > 1.0
-    val hasYears = years > 1.0
-}
-
-class RenderableDurationDelta(val value: Duration) {
-    val hours = value.toHours()
-
-    fun isPositive() = value > Duration.ZERO
-    fun isNegative() = value < Duration.ZERO
-}
-
-class RenderableConstituencyRank(
-    val rank: Int,
-    val constituency: RenderableConstituency,
-    val mp: MP,
-    val count: RenderableCount,
-    val duration: RenderableDuration,
-    val countDelta: DeltaValue,
-    val durationDelta: RenderableDurationDelta
-)
-
-object ConstituenciesPageHandler {
+object BadgesConstituenciesHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
         constituencyRankings: () -> List<ConstituencyRank>,
-        constituencyContacts: () -> List<ConstituencyContact>
+        constituencyContacts: () -> List<ConstituencyContact>,
+        constituencyBoundaries: (ConstituencyName) -> GeoJSON,
+        constituencySpills: (ConstituencyName) -> List<CSOTotals>,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
-        val mps = constituencyContacts().associateBy { it.constituency }
+        return { request ->
+            val rankings = constituencyRankings()
+            val mps = constituencyContacts().associateBy { it.constituency }
 
-        return { request: Request ->
             Response(Status.OK)
                 .with(
-                    viewLens of ConstituenciesPage(
+                    viewLens of BadgesConstituenciesPage(
                         pageUriFrom(request),
-                        year = 2022,
-                        constituencyRankings().sortedBy { it.rank }.map {
+                        2022,
+                        rankings.sortedBy { it.constituencyName }.map {
                             RenderableConstituencyRank(
                                 it.rank,
                                 RenderableConstituency.from(it.constituencyName),
@@ -86,6 +56,9 @@ object ConstituenciesPageHandler {
                                 durationDelta = RenderableDurationDelta(it.durationDelta)
                             )
                         },
+                        rankings.map {
+                            RenderableConstituency.from(it.constituencyName).slug to constituencyBoundaries(it.constituencyName)
+                        }
                     )
                 )
         }

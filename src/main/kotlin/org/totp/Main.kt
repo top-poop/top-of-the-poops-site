@@ -46,6 +46,7 @@ import org.totp.model.data.RiverRankings
 import org.totp.model.data.WaterCompanies
 import org.totp.model.data.constituencyCSOs
 import org.totp.model.data.waterwayCSOs
+import org.totp.pages.BadgesConstituenciesHandler
 import org.totp.pages.BeachesPageHandler
 import org.totp.pages.CompanyPageHandler
 import org.totp.pages.ConstituenciesPageHandler
@@ -161,6 +162,9 @@ fun main() {
     val beachRankings = BeachRankings(data2022)
     val constituencyRankings = ConstituencyRankings(data2022)
 
+    val constituencyBoundaries = ConstituencyBoundaries(
+        SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient)
+    )
     val server = Undertow(port = port(environment)).toServer(
         HtmlPageErrorFilter(events, renderer).then(
             routes(
@@ -198,9 +202,7 @@ fun main() {
                         "/constituency/{constituency}" bind ConstituencyPageHandler(
                             renderer = renderer,
                             constituencySpills = constituencyCSOs(allSpills),
-                            constituencyBoundary = ConstituencyBoundaries(
-                                SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient)
-                            ),
+                            constituencyBoundary = constituencyBoundaries,
                             constituencyLiveData = ConstituencyLiveDataLoader(dataClient),
                             constituencyLiveAvailable = ConstituencyLiveAvailability(dataClient),
                             constituencyContacts = constituencyContacts
@@ -221,6 +223,13 @@ fun main() {
                                 riverRankings = riverRankings
                             )
                         ),
+                        "/badges/constituencies" bind BadgesConstituenciesHandler(
+                            renderer = renderer,
+                            constituencyRankings = constituencyRankings,
+                            constituencyContacts = constituencyContacts,
+                            constituencyBoundaries = constituencyBoundaries,
+                            constituencySpills = constituencyCSOs(allSpills),
+                        )
                     )
                 ),
                 "/data" bind inboundFilters.then(static(ResourceLoader.Directory("services/data/datafiles"))),

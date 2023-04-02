@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
+    <link rel="stylesheet" href="/assets/css/leaflet.css"/>
+    <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        svg {
+            /*height: 263px;*/
+            /*left: 0;*/
+            position: absolute;
+            top: 10px;
+        }
+
+        img {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            top: 150px;
+            left: 400px;
+            opacity: 0.4;
+        }
+
+        svg[class^="plot-"] {
+            background: rgba(0, 0, 0, 0);
+            height: 263px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ml-3 mt-3">
+    {{#each constituencies}}
+        <div style="width: 508px; height:263px; overflow: clip"
+             id="{{this.constituency.slug}}"
+             class="constituency mb-2">
+            <div class="card  h-100  rounded-lg " data-name="{{this.constituency.name}}">
+                <img src="/assets/poop.png"/>
+                <div class="card-body" style="background-color: #f9f7ef">
+                    <h5 class="card-title"
+                        style="font-size:2.5rem;font-weight:500;line-height:1.2">{{this.constituency.name}}</h5>
+                    <p class="card-text">Polluted by <b>#sewage</b>
+                        <span class="align-middle display-2" style="font-size:2.5rem;font-weight:500">{{numberFormat
+                                this.count.count}}</span>
+                        times in 2022
+                    </p>
+
+                    <div class="row align-middle">
+                        <div class="col">
+                            <p class="card-text"><small class="text-muted">{{>chunks/explain-count this.count}}</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {{/each}}
+</div>
+
+<div style="display:none">
+    {{#each boundaries}}
+        <div id="boundary-{{this.first}}">{{this.second}}</div>
+    {{/each}}
+</div>
+
+<script type="module">
+    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
+
+    const chart = (element, feature, items) => {
+        return Plot.plot(
+                {
+                    projection: {
+                        type: "mercator",
+                        domain: feature,
+                    },
+                    height: 263,
+                    r: {range: [5, 15], domain: [0, 5000]},
+                    marks: [
+                        Plot.geo(
+                                feature,
+                                {
+                                    fill: "rgb(2,46,4)",
+                                    fillOpacity: 0.1,
+                                    stroke: "#000000",
+                                    strokeWidth: 2,
+                                    strokeOpacity: 0.2,
+                                }
+                        ),
+                        Plot.dot(
+                                items,
+                                {
+                                    x: "lon",
+                                    y: "lat",
+                                    r: "total_spill_hours",
+                                    fill: "company_name",
+                                    opacity: 0.7,
+                                    mixBlendMode: "multiply",
+                                }
+                        )
+                    ]
+                }
+        )
+                ;
+    }
+
+    const response = await fetch("/data/v1/2022/spills-all.json");
+
+    if (response.ok) {
+
+        const spills = await (response.json());
+
+        Array.from(document.querySelectorAll(".constituency"))
+                .map(it => {
+                    const id = it.id;
+                    const geojson = JSON.parse(document.getElementById(`boundary-${id}`).textContent);
+
+                    const el = it.querySelector(".card")
+
+                    const name = it.querySelector("[data-name]").getAttribute("data-name")
+
+                    const relevant = spills
+                            .filter(it => it.constituency == name)
+                            .filter(it => it.spill_count > 0)
+
+                    el.insertAdjacentElement('afterbegin', chart(el, geojson, relevant));
+
+                });
+    }
+
+
+</script>
+
+</body>
+</html>

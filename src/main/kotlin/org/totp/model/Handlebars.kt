@@ -32,7 +32,10 @@ object TotpHandlebars {
             StringHelpers.dateFormat.registerHelper(it)
             it.registerHelper("numberFormat") { context: Any, _: Options ->
                 if (context is Number) {
-                    NumberFormat.getNumberInstance().format(context)
+                    NumberFormat.getNumberInstance().also {
+                        it.maximumFractionDigits = 2
+                    }
+                        .format(context)
                 } else {
                     throw IllegalArgumentException("Wrong type for context")
                 }

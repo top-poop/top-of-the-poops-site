@@ -82,13 +82,15 @@ data class PollutionSummary(
     }
 }
 
-data class RenderableConstituency(val name: ConstituencyName, val current: Boolean, val uri: Uri, val live: Boolean) {
+data class RenderableConstituency(val name: ConstituencyName, val current: Boolean, val slug: ConstituencySlug, val uri: Uri, val live: Boolean) {
     companion object {
         fun from(name: ConstituencyName, current: Boolean = false, live: Boolean = false): RenderableConstituency {
+            val slug = ConstituencySlug.from(name)
             return RenderableConstituency(
                 name = name,
                 current = current,
-                uri = ConstituencySlug.from(name).let { Uri.of("/constituency/$it") },
+                slug = slug,
+                uri = slug.let { Uri.of("/constituency/$it") },
                 live = live,
             )
         }
