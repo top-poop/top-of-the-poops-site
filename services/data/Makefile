@@ -8,7 +8,7 @@ __check_defined = \
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 
 SERVICE=data
-SERVICE_VERSION=$(shell find . -type f -printf '%AF-%AH%AM %p\n' | sort -n | tail -1 | cut -d ' ' -f1)
+SERVICE_VERSION=$(shell ../../bin/content-hash.sh nginx.conf Dockerfile datafiles)
 
 IMAGE_NAME=totp-$(SERVICE)
 
@@ -80,8 +80,8 @@ PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAF
 
 generated-data: generated-2021 generated-2022 generated-live $(DATAFILES)/constituencies/.uptodate $(PROVIDED)
 
-generated-2021: $(DATA_2021_GENERATED) $(GEO_2021_GENERATED)
-generated-2022: $(DATA_2022_GENERATED) $(GEO_2022_GENERATED)
+generated-2021: $(DATA_2021_GENERATED) $(GEO_2021_GENERATED) $(PROVIDED)
+generated-2022: $(DATA_2022_GENERATED) $(GEO_2022_GENERATED) $(PROVIDED)
 
 .PHONY: generated-live
 generated-live:
@@ -118,6 +118,14 @@ $(DATAFILES)/v1/2021/geo/countries.json: provided/countries.json
 $(DATAFILES)/v1/2022/geo/countries.json: provided/countries.json
 	cp $< $@
 
-.PHONY: clean
-clean:
+.PHONY: clean-2021
+clean-2021:
 	rm -rf datafiles/v1/2021
+
+.PHONY: clean-2022
+clean-2022:
+	rm -rf datafiles/v1/2022
+
+
+.PHONY: generated-2022-again
+generated-2022-again: clean-2022 generated-2022
