@@ -9,6 +9,7 @@ import org.totp.model.TotpHandlebars
 import org.totp.model.data.CompanyName
 import strikt.api.expectThat
 import strikt.assertions.contains
+import strikt.assertions.isEqualTo
 import java.io.File
 import java.time.Duration
 
@@ -42,6 +43,9 @@ class CompanyPageHandlerTest {
 
         val response = service(Request(Method.GET, "/water-co"))
         val html = Html(response)
+
+        expectThat(html).twitterImageUri()
+            .isEqualTo("https://top-of-the-poops.org/badges/company/water-co.png")
 
         expectThat(response.bodyString()) {
             contains("1,234")
