@@ -102,7 +102,8 @@ data class SocialShare(
     val text: String,
     val cta: String,
     val tags: List<String>,
-    val via: String
+    val via: String,
+    val twitterImageUri: Uri? = null
 )
 
 data class ConstituencyPageLiveData(
@@ -203,7 +204,8 @@ object ConstituencyPageHandler {
                                 text = "$constituencyName had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year} - ${contact.mp.handle}",
                                 cta = "Share $constituencyName sewage horrors",
                                 tags = listOf("sewage"),
-                                via = "sewageuk"
+                                via = "sewageuk",
+                                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}.png")
                             ),
                             summary,
                             constituencyBoundary(constituencyName),

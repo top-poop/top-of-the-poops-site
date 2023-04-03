@@ -11,6 +11,7 @@ import org.totp.model.data.BeachRank
 import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyContact
 import org.totp.model.data.ConstituencyName
+import org.totp.model.data.GeoJSON
 import java.time.Duration
 
 
@@ -50,6 +51,12 @@ class BadgesConstituenciesHandlerTest {
                     ConstituencyContact(a, MP("mp1", "con", "handle1", Uri.of("https://example.com/1"))),
                     ConstituencyContact(b, MP("mp2", "noc", "handle2", Uri.of("https://example.com/2")))
                 )
+            },
+            constituencyBoundaries = {
+                GeoJSON.of("{}")
+            },
+            constituencySpills =  {
+                listOf()
             }
         )
     )

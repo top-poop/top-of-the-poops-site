@@ -46,8 +46,8 @@ class CompanyPageHandlerTest {
         expectThat(response.bodyString()) {
             contains("1,234")
             contains("2020")
-            contains("That's 4.167 days")
-            contains("On average 3.381")
+            contains("That's 4.17 days")
+            contains("On average 3.38")
         }
     }
 }

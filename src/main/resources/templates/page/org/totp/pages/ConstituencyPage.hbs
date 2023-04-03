@@ -12,7 +12,10 @@
     <link rel="stylesheet" href="/assets/css/leaflet.css"/>
     <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
 
-    {{> components/meta-opengraph title=(concat "Constituency | " name) }}
+    {{> components/meta-opengraph
+            title=(concat "Constituency | " name)
+            twitterImageUri=share.twitterImageUri
+    }}
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 

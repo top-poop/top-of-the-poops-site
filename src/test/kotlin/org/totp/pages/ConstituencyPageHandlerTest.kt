@@ -67,7 +67,10 @@ class ConstituencyPageHandlerTest {
 
     @Test
     fun `renders a constituency`() {
-        Html(service(Request(Method.GET, "/aldershot")))
+        val html = Html(service(Request(Method.GET, "/aldershot")))
+
+        expectThat(html).twitterImageUri()
+            .isEqualTo("https://top-of-the-poops.org/badges/constituency/aldershot.png")
     }
 
     @Test

@@ -21,4 +21,8 @@
 {{/if}}
 
 <meta property="og:image" content="https://top-of-the-poops.org/assets/poop.png">
-<meta name="twitter:image" content="https://top-of-the-poops.org/assets/poop.png">
+{{#if twitterImageUri}}
+    <meta name="twitter:image" content="{{twitterImageUri}}">
+{{else}}
+    <meta name="twitter:image" content="https://top-of-the-poops.org/assets/poop.png">
+{{/if}}
