@@ -8,7 +8,7 @@ __check_defined = \
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 
 SERVICE=gate
-SERVICE_VERSION=$(shell find . -type f -printf '%AF-%AH%AM %p\n' | sort -n | tail -1 | cut -d ' ' -f1)
+SERVICE_VERSION=$(shell ../../bin/content-hash.sh nginx.conf Dockerfile)
 
 IMAGE_NAME=totp-$(SERVICE)
 
