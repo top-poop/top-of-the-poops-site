@@ -59,7 +59,7 @@ fun RiverRank.toRenderable(): RenderableRiverRank {
     return RenderableRiverRank(
         rank,
         RenderableWaterway(river, Uri.of("/waterway/$companySlug/$waterwaySlug")),
-        RenderableCompany(company, Uri.of("/company/$companySlug")),
+        RenderableCompany.from(company),
         RenderableCount(count),
         RenderableDuration(duration),
         countDelta,

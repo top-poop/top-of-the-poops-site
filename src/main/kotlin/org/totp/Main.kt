@@ -46,6 +46,7 @@ import org.totp.model.data.RiverRankings
 import org.totp.model.data.WaterCompanies
 import org.totp.model.data.constituencyCSOs
 import org.totp.model.data.waterwayCSOs
+import org.totp.pages.BadgesCompaniesHandler
 import org.totp.pages.BadgesConstituenciesHandler
 import org.totp.pages.BadgesHomeHandler
 import org.totp.pages.BeachesPageHandler
@@ -229,6 +230,10 @@ fun main() {
                             constituencyRankings = constituencyRankings,
                             constituencyContacts = constituencyContacts,
                             constituencyBoundaries = constituencyBoundaries,
+                        ),
+                        "/private/badges/companies" bind BadgesCompaniesHandler(
+                            renderer = renderer,
+                            companySummaries = CompanyAnnualSummaries(data2022),
                         ),
                         "/private/badges/home" bind BadgesHomeHandler(
                             renderer = renderer,

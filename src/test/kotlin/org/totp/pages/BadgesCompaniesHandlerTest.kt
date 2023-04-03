@@ -2,21 +2,24 @@ package org.totp.pages
 
 import org.http4k.core.Method
 import org.http4k.core.Request
+import org.http4k.core.Uri
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
+import org.totp.model.data.BeachRank
 import org.totp.model.data.CompanyName
-import strikt.api.expectThat
-import strikt.assertions.contains
-import java.io.File
+import org.totp.model.data.ConstituencyContact
+import org.totp.model.data.ConstituencyName
+import org.totp.model.data.GeoJSON
 import java.time.Duration
 
 
-class CompanyPageHandlerTest {
+class BadgesCompaniesHandlerTest {
+
 
     val service = routes(
-        "/{company}" bind Method.GET to CompanyPageHandler(
+        "/" bind Method.GET to BadgesCompaniesHandler(
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
             companySummaries = {
                 listOf(
@@ -29,25 +32,11 @@ class CompanyPageHandlerTest {
                     )
                 )
             },
-            waterCompanies = { listOf(aWaterCompany) },
-            beachRankings = { listOf(aBeach) },
-            riverRankings = { listOf(aRiver(1)) }
         )
     )
 
     @Test
-    fun `renders the company  page`() {
-
-        print(File(".").absolutePath)
-
-        val response = service(Request(Method.GET, "/water-co"))
-        val html = Html(response)
-
-        expectThat(response.bodyString()) {
-            contains("1,234")
-            contains("2020")
-            contains("That's 4.17 days")
-            contains("On average 3.4")
-        }
+    fun `renders the companies badges  page`() {
+        val html = Html(service(Request(Method.GET, "/")))
     }
 }

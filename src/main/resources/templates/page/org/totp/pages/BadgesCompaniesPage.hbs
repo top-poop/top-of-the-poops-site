@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
+    <link rel="stylesheet" href="/assets/css/leaflet.css"/>
+    <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        svg {
+            /*height: 263px;*/
+            /*left: 0;*/
+            position: absolute;
+            top: 10px;
+        }
+
+        img.right {
+            position: absolute;
+            height: 260px;
+            top: 5px;
+            left: 300px;
+            opacity: 0.9;
+        }
+
+        img.poop {
+            position: absolute;
+            height: 250px;
+            top: 10px;
+            left: 50px;
+            opacity: 0.1;
+        }
+
+        svg[class^="plot-"] {
+            background: rgba(0, 0, 0, 0);
+            height: 263px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ml-3 mt-3">
+    {{#each companies}}
+        <div style="width: 526px; height:263px; overflow: clip"
+             id="{{this.company.slug}}"
+             class="twitter-badge constituency mb-2">
+            <div class="card  h-100  rounded-lg " data-name="{{this.company.name}}">
+                <img class="poop" src="/assets/poop.png"/>
+                <img class="right" src="/assets/images/top-of-the-poops-cso-{{this.company.slug}}.png"/>
+                <div class="card-body" style="background-color: #f9f7ef">
+                    <h5 class="card-title"
+                        style="font-size:2.5rem;font-weight:500;line-height:1.2">{{this.company.name}}</h5>
+                    <div class="row">
+                        <div class="col col-md-7">
+                            <p class="card-text">Responsible for <b>#sewage</b> pollution
+                                <span class="align-middle display-2" style="font-size:2.5rem;font-weight:500">{{numberFormat
+                                        this.count.count}}</span>
+                                times in 2022
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row align-middle">
+                        <div class="col">
+                            <p class="card-text"><small class="text-muted">{{>chunks/explain-count this.count}}</small>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row align-middle">
+                        <div class="col col-md-8">
+                            <p class="card-text">This is a significant underestimate, as loads of sewage outlets are not monitored.</p>
+                        </div>
+                    </div>
+
+                    <div class="row align-middle mt-1">
+                        <div class="col">
+                            <p class="card-text"><small class="text-muted">top-of-the-poops.org</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {{/each}}
+</div>
+
+<div id="maybe-complete">
+
+</div>
+
+</body>
+</html>

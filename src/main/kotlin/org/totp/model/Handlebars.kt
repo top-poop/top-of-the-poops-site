@@ -30,6 +30,17 @@ object TotpHandlebars {
             }
             StringHelpers.join.registerHelper(it)
             StringHelpers.dateFormat.registerHelper(it)
+            it.registerHelper("numberFormat1") { context: Any, _: Options ->
+                if (context is Number) {
+                    val instance = NumberFormat.getNumberInstance()
+                    instance.also {
+                        it.maximumFractionDigits = 1
+                    }
+                        .format(context)
+                } else {
+                    throw IllegalArgumentException("Wrong type for context")
+                }
+            }
             it.registerHelper("numberFormat") { context: Any, _: Options ->
                 if (context is Number) {
                     NumberFormat.getNumberInstance().also {

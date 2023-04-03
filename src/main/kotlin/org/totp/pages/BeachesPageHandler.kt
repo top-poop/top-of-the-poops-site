@@ -27,10 +27,11 @@ class BeachesPage(
     val share: SocialShare,
 ) : PageViewModel(uri)
 
-data class RenderableCompany(val name: CompanyName, val uri: Uri) {
+data class RenderableCompany(val name: CompanyName, val slug: CompanySlug, val uri: Uri) {
     companion object {
         fun from(companyName: CompanyName): RenderableCompany {
-            return RenderableCompany(companyName, CompanySlug.from(companyName).let { Uri.of("/company/$it") })
+            val slug = CompanySlug.from(companyName)
+            return RenderableCompany(companyName, slug, slug.let { Uri.of("/company/$it") })
         }
     }
 }
