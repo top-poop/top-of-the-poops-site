@@ -54,9 +54,6 @@ class BadgesConstituenciesHandlerTest {
             },
             constituencyBoundaries = {
                 GeoJSON.of("{}")
-            },
-            constituencySpills =  {
-                listOf()
             }
         )
     )

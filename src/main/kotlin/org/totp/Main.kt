@@ -228,7 +228,6 @@ fun main() {
                             constituencyRankings = constituencyRankings,
                             constituencyContacts = constituencyContacts,
                             constituencyBoundaries = constituencyBoundaries,
-                            constituencySpills = constituencyCSOs(allSpills),
                         ),
                     )
                 ),

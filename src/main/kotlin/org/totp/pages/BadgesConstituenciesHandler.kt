@@ -31,7 +31,6 @@ object BadgesConstituenciesHandler {
         constituencyRankings: () -> List<ConstituencyRank>,
         constituencyContacts: () -> List<ConstituencyContact>,
         constituencyBoundaries: (ConstituencyName) -> GeoJSON,
-        constituencySpills: (ConstituencyName) -> List<CSOTotals>,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
