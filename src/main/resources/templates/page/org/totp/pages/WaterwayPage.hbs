@@ -120,12 +120,12 @@
                     {{#each csos}}
                         <tr data-class="cso" data-lat="{{this.cso.location.lat}}"
                             data-lon="{{this.cso.location.lon}}">
-                            <td class="align-middle" data-company><a
+                            <td class="align-middle" data-company="{{this.cso.company.name}}"><a
                                     href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a></td>
-                            <td class="align-middle" data-waterway>{{this.cso.waterway.name}}</td>
-                            <td class="align-middle" data-sitename>{{this.cso.sitename}}</td>
-                            <td class="align-middle" data-count>{{numberFormat this.count}}</td>
-                            <td class="align-middle" data-duration>{{numberFormat this.duration.toHours}}</td>
+                            <td class="align-middle" data-waterway="{{this.cso.waterway.name}}">{{this.cso.waterway.name}}</td>
+                            <td class="align-middle" data-sitename="{{this.cso.sitename}}">{{this.cso.sitename}}</td>
+                            <td class="align-middle" data-count="{{this.count}}">{{numberFormat this.count}}</td>
+                            <td class="align-middle" data-duration="{{this.duration.toHours}}">{{numberFormat this.duration.toHours}}</td>
                             <td class="align-middle">{{numberFormat this.reporting}}</td>
                         </tr>
                     {{/each}}
@@ -171,8 +171,9 @@
 
 
     const attr = (a, tr) => {
+        const attributeName = `data-${a}`
         const f = tr ? tr : (n => n);
-        return n => f(n.attributes[`data-${a}`].value)
+        return n => f(n.attributes[attributeName].value)
     };
 
     const text = (tr) => {
@@ -198,11 +199,11 @@
     const lat = attr("lat", Number)
     const lon = attr("lon", Number)
 
-    const company = text()
-    const sitename = text()
-    const waterway = text()
-    const count = text(Number)
-    const duration = text(Number)
+    const company = attr("company")
+    const sitename = attr("sitename")
+    const waterway = attr("waterway")
+    const count = attr("count", Number)
+    const duration = attr("duration", Number)
 
     const markers = Array.from(document.getElementById("table-csos").querySelectorAll("tr[data-class='cso']"))
             .map(it => {
@@ -210,7 +211,7 @@
                     lat: lat(it),
                     lon: lon(it),
                     company: company(it.querySelector("[data-company]")),
-                    waterway: company(it.querySelector("[data-waterway]")),
+                    waterway: waterway(it.querySelector("[data-waterway]")),
                     sitename: sitename(it.querySelector("[data-sitename]")),
                     count: count(it.querySelector("[data-count]")),
                     duration: duration(it.querySelector("[data-duration]"))

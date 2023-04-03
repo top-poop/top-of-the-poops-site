@@ -10,7 +10,7 @@
     {{> chunks/meta-scripts }}
 
     <!-- only for constituency page atm -->
-    <link rel="canonical" href="{{ uri  }}" />
+    <link rel="canonical" href="{{ uri  }}"/>
 
     <link rel="stylesheet" href="/assets/css/leaflet.css"/>
     <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
@@ -28,7 +28,7 @@
 
 {{#> components/jumbotron }}
     {{ name.value }} polluted by sewage {{numberFormat summary.count.count}} times in {{summary.year}} - lasting
-            {{numberFormat summary.duration.hours}} hours
+    {{numberFormat summary.duration.hours}} hours
 {{/components/jumbotron}}
 
 
@@ -53,7 +53,9 @@
                         <div class="form-group">
                             <label class="form-label">Constituency</label>
                             <select class="custom-select custom-select-lg" name="constituency" id="constituency-select">
-                                {{#each constituencies}}<option value="{{this.uri}}" {{#if this.current}}selected{{/if}}>{{#if this.live}}✔ {{else}}- {{/if}}{{this.name}}</option>
+                                {{#each constituencies}}
+                                    <option value="{{this.uri}}" {{#if this.current}}selected{{/if}}>{{#if this.live}}
+                                        ✔ {{else}}- {{/if}}{{this.name}}</option>
                                 {{/each}}
                             </select>
                             <script>
@@ -104,7 +106,7 @@
 </div>
 
 {{#if live}}
-    <div class="container container-fluid" >
+    <div class="container container-fluid">
         <div class="row">
             <div class="col">
                 <div class="card">
@@ -152,11 +154,15 @@
                     {{#each csos}}
                         <tr data-class="cso" data-lat="{{this.cso.location.lat}}"
                             data-lon="{{this.cso.location.lon}}">
-                            <td class="align-middle" data-company><a href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a></td>
-                            <td class="align-middle" data-waterway><a href="{{this.cso.waterway.uri}}">{{this.cso.waterway.name}}</a></td>
-                            <td class="align-middle" data-sitename>{{this.cso.sitename}}</td>
-                            <td class="align-middle" data-count>{{numberFormat this.count}}</td>
-                            <td class="align-middle" data-duration>{{numberFormat this.duration.toHours}}</td>
+                            <td class="align-middle" data-company="{{this.cso.company.name}}">
+                                <a href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a>
+                            </td>
+                            <td class="align-middle" data-waterway="{{this.cso.waterway.name}}">
+                                <a href="{{this.cso.waterway.uri}}">{{this.cso.waterway.name}}</a>
+                            </td>
+                            <td class="align-middle" data-sitename="{{this.cso.sitename}}">{{this.cso.sitename}}</td>
+                            <td class="align-middle" data-count="{{this.count}}">{{numberFormat this.count}}</td>
+                            <td class="align-middle" data-duration="{{this.duration.toHours}}">{{numberFormat this.duration.toHours}}</td>
                             <td class="align-middle">{{numberFormat this.reporting}}</td>
                         </tr>
                     {{/each}}
@@ -199,8 +205,9 @@
     map.fitBounds(layer.getBounds())
 
     const attr = (a, tr) => {
+        const attributeName = `data-${a}`
         const f = tr ? tr : (n => n);
-        return n => f(n.attributes[`data-${a}`].value)
+        return n => f(n.attributes[attributeName].value)
     };
 
     const text = (tr) => {
@@ -226,11 +233,11 @@
     const lat = attr("lat", Number)
     const lon = attr("lon", Number)
 
-    const company = text()
-    const sitename = text()
-    const waterway = text()
-    const count = text(Number)
-    const duration = text(Number)
+    const company = attr("company")
+    const sitename = attr("sitename")
+    const waterway = attr("waterway")
+    const count = attr("count", Number)
+    const duration = attr("duration", Number)
 
     Array.from(document.getElementById("table-csos").querySelectorAll("tr[data-class='cso']"))
             .map(it => {
@@ -238,7 +245,7 @@
                     lat: lat(it),
                     lon: lon(it),
                     company: company(it.querySelector("[data-company]")),
-                    waterway: company(it.querySelector("[data-waterway]")),
+                    waterway: waterway(it.querySelector("[data-waterway]")),
                     sitename: sitename(it.querySelector("[data-sitename]")),
                     count: count(it.querySelector("[data-count]")),
                     duration: duration(it.querySelector("[data-duration]"))
