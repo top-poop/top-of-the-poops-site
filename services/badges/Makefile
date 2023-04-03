@@ -80,6 +80,8 @@ HOME_QUANT=$(foreach png,$(HOME_ORIG),$(HOME_BADGES)/$(notdir $(png)))
 quantised: $(CONSTITUENCY_QUANT) $(HOME_QUANT)
 
 $(CONSTITUENCY_BADGES)/%.png: $(TMP_CON_ORIG)/%.png
+	@mkdir -p $(@D)
+	pngcrush $< $@
 $(HOME_BADGES)/%.png: $(TMP_HOME_ORIG)/%.png
 	@mkdir -p $(@D)
 	pngcrush $< $@

@@ -26,8 +26,8 @@ const captureScreenshotsOfElements = async (path, elements) => {
 
 async function run(url, path) {
 
-    const browser = await pup.connect({
-        browserURL: "http://localhost:21222",
+    const browser = await pup.launch({
+        executablePath: "/opt/google/chrome/google-chrome",
         defaultViewport: null,
         ignoreDefaultArgs: ['--disable-dev-shm-usage']
     })
