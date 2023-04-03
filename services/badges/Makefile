@@ -47,6 +47,7 @@ upgrade:
 PYTHON_DIR=venv/bin
 PYTHON=$(PYTHON_DIR)/python
 PIP=$(PYTHON_DIR)/pip
+NPM=npm
 
 DATAFILES=datafiles
 BADGES=$(DATAFILES)
@@ -75,11 +76,11 @@ quantised: $(CONSTITUENCY_QUANT)
 
 $(CONSTITUENCY_BADGES)/%.png: $(TMP_CON_ORIG)/%.png
 	@mkdir -p $(@D)
-	pngquant -o $@ $<
+	pngcrush $< $@
 
 generate-constituency-badges:
-	@mkdir -p $(TMP_CONSTITUENCIES)
-	$(NPM) run save-elements http://localhost:8000/private/badges/constituencies $(TMP_CONSTITUENCIES)
+	@mkdir -p $(TMP_CON_ORIG)
+	$(NPM) run save-elements http://localhost:8000/private/badges/constituencies $(TMP_CON_ORIG)
 
 
 

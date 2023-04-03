@@ -4,6 +4,6 @@
     "yargs": "^17.7.1"
   },
   "scripts": {
-	  "do": "node save-elements.mjs"
+	  "save-elements": "node save-elements.mjs"
   }
 }
