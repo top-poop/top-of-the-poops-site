@@ -10,6 +10,7 @@ import org.jsoup.select.Elements
 import strikt.api.Assertion
 import strikt.api.DescribeableBuilder
 import strikt.api.expectThat
+import strikt.assertions.first
 import strikt.assertions.get
 import strikt.assertions.isEqualTo
 
@@ -22,8 +23,7 @@ fun Assertion.Builder<Element>.attribute(name:String): DescribeableBuilder<Strin
 }
 
 fun Assertion.Builder<Document>.twitterImageUri(): DescribeableBuilder<String> {
-    return this.select("meta[name='twitter:image']")[0]
-        .attribute("content")
+    return this.select("meta[name='twitter:image']").first().attribute("content")
 }
 
 

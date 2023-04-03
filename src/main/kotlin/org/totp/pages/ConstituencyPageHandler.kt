@@ -10,15 +10,20 @@ import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.Uri
+import org.http4k.core.removeQueries
 import org.http4k.core.then
+import org.http4k.core.toParameters
+import org.http4k.core.toUrlFormEncoded
 import org.http4k.core.with
 import org.http4k.lens.Header.LOCATION
 import org.http4k.lens.Path
+import org.http4k.lens.Query
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
+import org.totp.http4k.removeQuery
 import org.totp.model.PageViewModel
 import org.totp.model.data.CSOTotals
 import org.totp.model.data.CompanyName
@@ -82,7 +87,13 @@ data class PollutionSummary(
     }
 }
 
-data class RenderableConstituency(val name: ConstituencyName, val current: Boolean, val slug: ConstituencySlug, val uri: Uri, val live: Boolean) {
+data class RenderableConstituency(
+    val name: ConstituencyName,
+    val current: Boolean,
+    val slug: ConstituencySlug,
+    val uri: Uri,
+    val live: Boolean
+) {
     companion object {
         fun from(name: ConstituencyName, current: Boolean = false, live: Boolean = false): RenderableConstituency {
             val slug = ConstituencySlug.from(name)
@@ -197,7 +208,7 @@ object ConstituencyPageHandler {
                 Response(Status.OK)
                     .with(
                         viewLens of ConstituencyPage(
-                            pageUriFrom(request),
+                            pageUriFrom(request).removeQuery(),
                             constituencyName,
                             SocialShare(
                                 pageUriFrom(request),

@@ -31,6 +31,8 @@ object StandardFilters {
     }
 }
 
+fun Uri.removeQuery() = copy(query="")
+
 fun pageUriFrom(request: Request) : Uri {
     val proxied = request.header("X-Forwarded-Host")
 

@@ -22,6 +22,7 @@ import org.totp.model.data.GeoJSON
 import org.totp.model.data.WaterwayName
 import strikt.api.expectCatching
 import strikt.api.expectThat
+import strikt.assertions.first
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFailure
 import java.time.Duration
@@ -67,10 +68,15 @@ class ConstituencyPageHandlerTest {
 
     @Test
     fun `renders a constituency`() {
-        val html = Html(service(Request(Method.GET, "/aldershot")))
+        val html = Html(service(Request(Method.GET, "/aldershot").header("host", "bob.com")))
 
         expectThat(html).twitterImageUri()
             .isEqualTo("https://top-of-the-poops.org/badges/constituency/aldershot.png")
+
+        expectThat(html)
+            .select("link[rel='canonical']").first()
+            .attribute("href")
+            .isEqualTo("http://bob.com/aldershot")
     }
 
     @Test
