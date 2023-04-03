@@ -43,7 +43,7 @@ async function run(url, path) {
             throw Error(`Got status ${response.status()} for ${url}`)
         }
 
-        console.log("Loaded page");
+        console.log("Loaded page, waiting for page to 'complete'");
 
         //available after everything is drawn
         await page.waitForSelector("#complete");
