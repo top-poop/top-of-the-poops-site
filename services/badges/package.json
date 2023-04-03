@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "puppeteer-core": "^19.8.1",
+    "yargs": "^17.7.1"
+  },
+  "scripts": {
+	  "do": "node save-elements.mjs"
+  }
+}

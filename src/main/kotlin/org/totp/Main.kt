@@ -223,13 +223,13 @@ fun main() {
                                 riverRankings = riverRankings
                             )
                         ),
-                        "/badges/constituencies" bind BadgesConstituenciesHandler(
+                        "/private/badges/constituencies" bind BadgesConstituenciesHandler(
                             renderer = renderer,
                             constituencyRankings = constituencyRankings,
                             constituencyContacts = constituencyContacts,
                             constituencyBoundaries = constituencyBoundaries,
                             constituencySpills = constituencyCSOs(allSpills),
-                        )
+                        ),
                     )
                 ),
                 "/data" bind inboundFilters.then(static(ResourceLoader.Directory("services/data/datafiles"))),

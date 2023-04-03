@@ -68,6 +68,10 @@
     {{/each}}
 </div>
 
+<div id="maybe-complete">
+
+</div>
+
 <script type="module">
     import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
 
@@ -130,6 +134,12 @@
                     el.insertAdjacentElement('afterbegin', chart(el, geojson, relevant));
 
                 });
+
+        const complete = document.createElement("div")
+        complete.setAttribute("id", "complete")
+
+        document.getElementById("maybe-complete").appendChild(complete)
+
     }
 
 
