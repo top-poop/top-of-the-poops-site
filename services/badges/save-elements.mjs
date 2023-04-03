@@ -16,9 +16,10 @@ const captureScreenshotsOfElements = async (path, elements) => {
 
         const name = await element.evaluate(it => it.id)
 
-        console.log(name);
+        const filepath = `${path}/${name}.png`
+        console.log(filepath);
 
-        await element.screenshot({ path: `${path}/${name}.png` });
+        await element.screenshot({ path: filepath });
         i += 1;
     }
 };
@@ -49,7 +50,7 @@ async function run(url, path) {
 
         console.log("Page rendering complete");
 
-        const elements = await page.$$(".constituency");
+        const elements = await page.$$(".twitter-badge");
 
         await captureScreenshotsOfElements(path, elements);
     } finally {

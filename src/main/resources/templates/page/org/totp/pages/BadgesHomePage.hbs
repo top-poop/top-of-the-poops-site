@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
+    <link rel="stylesheet" href="/assets/css/leaflet.css"/>
+    <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        svg {
+            height: 253px;
+            right: 0px;
+            position: absolute;
+            top: 10px;
+        }
+
+        img.right {
+            position: absolute;
+            height: 200px;
+            top: 40px;
+            left: 350px;
+            opacity: 0.9;
+        }
+
+        img.poop {
+            position: absolute;
+            height: 250px;
+            top: 10px;
+            left: 50px;
+            opacity: 0.1;
+        }
+
+        svg[class^="plot-"] {
+            background: rgba(0, 0, 0, 0);
+            height: 263px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ml-3 mt-3">
+    <div style="width: 526px; height:263px; overflow: clip"
+         id="home"
+         class="twitter-badge mb-2">
+        <div class="card  h-100  rounded-lg">
+            <img class="right" src="/assets/images/top-of-the-poops-cso-2021-web-fs8.png"/>
+            <img class="poop" src="/assets/poop.png"/>
+            <div class="card-body" style="background-color: #f9f7ef">
+                <h5 class="card-title"
+                    style="font-size:2.5rem;font-weight:500;line-height:1.2">Sewage Everywhere</h5>
+
+                <div class="row mt-3">
+                    <div class="col col-md-8">
+                        <span class="display-4  align-middle">{{numberFormat count.count}}</span> "sewage spills"
+                        into waterways in {{year}}, lasting
+                        {{numberFormat duration.hours}} hours
+                    </div>
+                </div>
+
+                <div class="row align-middle mt-2">
+                    <div class="col">
+                        <p class="card-text"><small class="text-muted">{{> chunks/explain-count count}}</small>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row align-middle mt-1">
+                    <div class="col">
+                        <p class="card-text"><small class="text-muted">top-of-the-poops.org</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div style="width: 526px; height:263px; overflow: clip"
+         id="beaches"
+         class="twitter-badge mb-2">
+        <div class="card  h-100  rounded-lg">
+            <img class="poop" src="/assets/poop.png"/>
+            <div class="card-body" style="background-color: #f9f7ef">
+                <h5 class="card-title"
+                    style="font-size:2.5rem;font-weight:500;line-height:1.2">Swimming in Sewage</h5>
+
+                <div class="row mt-2">
+                    <div class="col col-md-8">
+                        <span class="display-4 align-middle">{{numberFormat beachCount.count}}</span> "sewage spills"
+                        into designated bathing areas in {{year}}, lasting
+                        {{numberFormat beachDuration.hours}} hours
+                    </div>
+                </div>
+
+                <div class="row align-middle mt-1">
+                    <div class="col">
+                        <p class="card-text"><small class="text-muted">{{> chunks/explain-count beachCount}}</small></p>
+                    </div>
+                </div>
+
+                <div class="row align-middle mt-1">
+                    <div class="col">
+                        <p class="card-text"><small class="text-muted">top-of-the-poops.org</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="maybe-complete">
+
+</div>
+
+
+<script type="module">
+    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
+
+    const chart = (data, countries) => Plot.plot(
+            {
+                projection: {
+                    type: "mercator",
+                    domain: {
+                        type: "MultiPoint",
+                        coordinates: [[-6, 49.9], [1.8, 55.9]],
+                    },
+                },
+                width: 263,
+                r: {range: [3, 20], domain: [100, 8700]},
+                color: {
+                    type: "linear",
+                    range: ["steelblue", "#b47846"] // uses d3.interpolateRgb
+                },
+                marks: [
+                    Plot.geo(
+                            countries,
+                            {
+                                fill: "rgb(5,118,11)",
+                                fillOpacity: 0.1,
+                                stroke: "#000000",
+                                strokeWidth: 2,
+                                strokeOpacity: 0.2,
+                            }
+                    ),
+                    Plot.dot(
+                            data,
+                            {
+                                x: "lon",
+                                y: "lat",
+                                r: "total_spill_hours",
+                                fill: "total_spill_hours",
+                                opacity: 0.5,
+                                mixBlendMode: "multiply",
+                                title: d => `${d.bathing} - ${d.total_spill_hours} hours of sewage in {{year}}`,
+                            }
+                    )
+                ]
+            }
+    )
+
+    const beaches = await fetch("/data/v1/{{year}}/spills-by-beach.json");
+    const countries = await fetch("/data/v1/{{year}}/geo/countries.json")
+    if (beaches.ok && countries.ok) {
+        document.getElementById("beaches")
+                .querySelector(".card")
+                .insertAdjacentElement(
+                "afterbegin",
+                chart(await beaches.json(), await countries.json())
+        )
+    }
+
+    const complete = document.createElement("div")
+    complete.setAttribute("id", "complete")
+    document.getElementById("maybe-complete").appendChild(complete)
+
+</script>
+
+
+</body>
+</html>

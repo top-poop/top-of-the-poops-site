@@ -53,6 +53,7 @@ DATAFILES=datafiles
 BADGES=$(DATAFILES)
 
 CONSTITUENCY_BADGES=$(BADGES)/constituency
+HOME_BADGES=$(BADGES)/home
 
 $(PYTHON): .python_uptodate
 
@@ -67,20 +68,29 @@ python: $(PYTHON)
 
 
 TMP_CON_ORIG=tmp/constituencies
+TMP_HOME_ORIG=tmp/home
 
 CONSTITUENCY_ORIG=$(wildcard $(TMP_CON_ORIG)/*.png)
 CONSTITUENCY_QUANT=$(foreach png,$(CONSTITUENCY_ORIG),$(CONSTITUENCY_BADGES)/$(notdir $(png)))
 
+HOME_ORIG=$(wildcard $(TMP_HOME_ORIG)/*.png)
+HOME_QUANT=$(foreach png,$(HOME_ORIG),$(HOME_BADGES)/$(notdir $(png)))
+
 .PHONY: quantised
-quantised: $(CONSTITUENCY_QUANT)
+quantised: $(CONSTITUENCY_QUANT) $(HOME_QUANT)
 
 $(CONSTITUENCY_BADGES)/%.png: $(TMP_CON_ORIG)/%.png
+$(HOME_BADGES)/%.png: $(TMP_HOME_ORIG)/%.png
 	@mkdir -p $(@D)
 	pngcrush $< $@
 
 generate-constituency-badges:
 	@mkdir -p $(TMP_CON_ORIG)
 	$(NPM) run save-elements http://localhost:8000/private/badges/constituencies $(TMP_CON_ORIG)
+
+generate-home-badges:
+	@mkdir -p $(TMP_HOME_ORIG)
+	$(NPM) run save-elements http://localhost:8000/private/badges/home $(TMP_HOME_ORIG)
 
 
 

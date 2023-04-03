@@ -38,7 +38,7 @@
     {{#each constituencies}}
         <div style="width: 526px; height:263px; overflow: clip"
              id="{{this.constituency.slug}}"
-             class="constituency mb-2">
+             class="twitter-badge constituency mb-2">
             <div class="card  h-100  rounded-lg " data-name="{{this.constituency.name}}">
                 <img src="/assets/poop.png"/>
                 <div class="card-body" style="background-color: #f9f7ef">
@@ -75,7 +75,7 @@
 <script type="module">
     import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
 
-    const chart = (element, feature, items) => {
+    const chart = (feature, items) => {
         return Plot.plot(
                 {
                     projection: {
@@ -131,13 +131,12 @@
                             .filter(it => it.constituency == name)
                             .filter(it => it.spill_count > 0)
 
-                    el.insertAdjacentElement('afterbegin', chart(el, geojson, relevant));
+                    el.insertAdjacentElement('afterbegin', chart(geojson, relevant));
 
                 });
 
         const complete = document.createElement("div")
         complete.setAttribute("id", "complete")
-
         document.getElementById("maybe-complete").appendChild(complete)
 
     }
