@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.BeachRank
 import org.totp.model.data.CompanyName
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
 import java.time.Duration
 
 
@@ -25,5 +27,8 @@ class BeachesPageHandlerTest {
     @Test
     fun `renders the beaches  page`() {
         val html = Html(service(Request(Method.GET, "/")))
+
+        expectThat(html).twitterImageUri()
+            .isEqualTo("https://top-of-the-poops.org/badges/home/beaches.png")
     }
 }

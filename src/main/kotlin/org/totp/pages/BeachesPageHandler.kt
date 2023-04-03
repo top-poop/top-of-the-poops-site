@@ -14,6 +14,7 @@ import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.BeachRank
 import org.totp.model.data.CompanyName
+import java.text.NumberFormat
 import java.time.Duration
 
 class BeachesPage(
@@ -23,6 +24,7 @@ class BeachesPage(
     val totalDuration: Duration,
     val beachRankings: List<RenderableBeachRank>,
     val polluterRankings: List<BeachPolluter>,
+    val share: SocialShare,
 ) : PageViewModel(uri)
 
 data class RenderableCompany(val name: CompanyName, val uri: Uri) {
@@ -73,6 +75,7 @@ object BeachesPageHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
         return { request: Request ->
+            val numberFormat = NumberFormat.getNumberInstance()
             val rankings = beachRankings().sortedBy { it.rank }
             val polluters = rankings.groupBy { it.company }
                 .map {
@@ -105,7 +108,16 @@ object BeachesPageHandler {
                         rankings.map {
                             it.toRenderable()
                         },
-                        polluterRankings = polluters
+                        polluterRankings = polluters,
+                        SocialShare(
+                            pageUriFrom(request),
+                            "Are the beaches safe for swimming? - ${numberFormat.format(totalCount)} sewage pollution incidents in 2022",
+                            cta = "Take action. Tweet this to your followers",
+                            listOf("sewage"),
+                            via = "sewageuk",
+                            twitterImageUri=Uri.of("https://top-of-the-poops.org/badges/home/beaches.png")
+                        )
+
                     )
                 )
         }

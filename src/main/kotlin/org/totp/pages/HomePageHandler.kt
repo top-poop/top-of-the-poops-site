@@ -87,7 +87,8 @@ object HomepageHandler {
                             "Water companies are dumping #sewage into rivers and bathing areas all over the UK - over ${totalSpillsRounded} times in 2022 - it needs to be stopped",
                             cta = "Take action. Tweet this to your followers",
                             listOf("sewage"),
-                            via = "sewageuk"
+                            via = "sewageuk",
+                            twitterImageUri=Uri.of("https://top-of-the-poops.org/badges/home/home.png")
                         )
                     )
                 )

@@ -108,7 +108,7 @@ class HomepageHandlerTest {
         expectThat(html).select("#footer").isNotEmpty()
 
         expectThat(html).twitterImageUri()
-            .isEqualTo("https://top-of-the-poops.org/assets/poop.png")
+            .isEqualTo("https://top-of-the-poops.org/badges/home/home.png")
     }
 
 

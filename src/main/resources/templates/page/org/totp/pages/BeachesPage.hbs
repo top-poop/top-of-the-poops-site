@@ -12,7 +12,9 @@
     <link rel="stylesheet" href="/assets/css/leaflet.css"/>
     <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
 
-    {{> components/meta-opengraph title="Beaches" }}
+    {{> components/meta-opengraph title="Beaches"
+            twitterImageUri=share.twitterImageUri
+    }}
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -22,8 +24,8 @@
 
 {{#> components/jumbotron }}
     There were at least <em>{{numberFormat totalCount}}</em> "sewage spills"
-            on to designated bathing areas in {{year}}, lasting a staggering
-            {{numberFormat totalDuration.toHours}} hours
+    on to designated bathing areas in {{year}}, lasting a staggering
+    {{numberFormat totalDuration.toHours}} hours
 {{/components/jumbotron}}
 
 <div class="container">
@@ -43,10 +45,11 @@
         <div class="col">
             {{#> components/section title="Who is polluting beaches the most?"}}
 
-                <p><b>Please note</b> Dwr Cymru Welsh Water did not release this bathing information, that we can find, so we retrofitted it using previous
-                CSO to Bathing area information.</p>
+                <p><b>Please note</b> Dwr Cymru Welsh Water did not release this bathing information, that we can find,
+                    so we retrofitted it using previous
+                    CSO to Bathing area information.</p>
 
-                <table id="table-polluter" class="table table-striped" >
+                <table id="table-polluter" class="table table-striped">
                     <thead>
                     <tr>
                         <td>Rank</td>
@@ -63,9 +66,11 @@
                             <td class="align-middle">{{this.rank}}</td>
                             <td class="align-middle"><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
                             <td class="align-middle">{{numberFormat this.count}}</td>
-                            <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat this.countDelta.value}}</td>
+                            <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat
+                                    this.countDelta.value}}</td>
                             <td class="align-middle">{{numberFormat this.duration.toHours}}</td>
-                            <td class="align-middle {{>components/class-delta this.durationDelta}}">{{numberFormat this.durationDelta.hours}}</td>
+                            <td class="align-middle {{>components/class-delta this.durationDelta}}">{{numberFormat
+                                    this.durationDelta.hours}}</td>
                         </tr>
                     {{/each}}
                     </tbody>
@@ -104,9 +109,11 @@
                             <td class="align-middle">{{this.beach}}</td>
                             <td class="align-middle"><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
                             <td class="align-middle">{{numberFormat this.count.count}}</td>
-                            <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat this.countDelta.value}}</td>
+                            <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat
+                                    this.countDelta.value}}</td>
                             <td class="align-middle">{{numberFormat this.duration.hours}}</td>
-                            <td class="align-middle {{>components/class-delta this.durationDelta}}">{{numberFormat this.durationDelta.hours}}</td>
+                            <td class="align-middle {{>components/class-delta this.durationDelta}}">{{numberFormat
+                                    this.durationDelta.hours}}</td>
                         </tr>
                     {{/each}}
                     </tbody>
@@ -157,13 +164,13 @@
         const beaches = await (response.json())
         beaches
                 .map(it => L.circleMarker([it.lat, it.lon], {
-                    color: "#498940",
-                    fillColor: "#942c2c",
-                    fillOpacity: 0.5,
-                    mixBlendMode: "multiply",
-                    radius: 10,
-                })
-                        .bindTooltip(`${it.bathing} - ${it.total_spill_hours} hours`)
+                            color: "#498940",
+                            fillColor: "#942c2c",
+                            fillOpacity: 0.5,
+                            mixBlendMode: "multiply",
+                            radius: 10,
+                        })
+                                .bindTooltip(`${it.bathing} - ${it.total_spill_hours} hours`)
                 )
                 .forEach(it => it.addTo(map))
     }
