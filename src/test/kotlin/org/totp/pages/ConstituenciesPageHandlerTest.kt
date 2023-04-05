@@ -55,6 +55,6 @@ class ConstituenciesPageHandlerTest {
     @Test
     fun `renders the constituency page`() {
         val html = Html(service(Request(Method.GET, "/")))
-        expectThat(html).select("#footer").isNotEmpty()
+        expectThat(html).select(".footer").isNotEmpty()
     }
 }

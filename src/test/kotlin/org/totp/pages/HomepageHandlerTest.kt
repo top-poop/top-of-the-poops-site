@@ -105,7 +105,7 @@ class HomepageHandlerTest {
     fun `renders the homepage`() {
         val html = Html(service(Request(Method.GET, "/")))
 
-        expectThat(html).select("#footer").isNotEmpty()
+        expectThat(html).select(".footer").isNotEmpty()
 
         expectThat(html).twitterImageUri()
             .isEqualTo("https://top-of-the-poops.org/badges/home/home.png")

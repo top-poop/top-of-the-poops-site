@@ -12,11 +12,6 @@ blockquote {
     font-weight: 700;
 }
 
-h2 {
-    margin-top: 2em;
-    margin-bottom: 2em;
-}
-
 .container-fluid {
     max-width: 2000px;
 }
@@ -81,6 +76,49 @@ h2 {
 a.quiet-link {
    color: #000000
 }
+
+/* ------ */
+
+.footer {
+    background: #f9f7ef;
+    color: black;
+}
+
+.footer .links ul {
+    list-style-type: none;
+}
+
+.footer .links li a {
+    /*color: black;*/
+    transition: color 0.2s;
+}
+
+.footer .links li a:hover {
+    text-decoration: none;
+    color: #4180CB;
+}
+
+.footer .about i {
+    font-size: 25px;
+}
+
+.footer .about a {
+    color: black;
+    transition: color 0.2s;
+}
+
+.footer .about a:hover {
+    color: #4180CB;
+}
+
+.footer .location i {
+    font-size: 18px;
+}
+
+.footer .copyright {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 
 /* --- */
 
