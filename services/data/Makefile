@@ -111,10 +111,14 @@ $(DATAFILES)/constituencies/.uptodate: $(PYTHON) constituencies.py constituencie
 	touch $@
 
 $(DATAFILES)/media-appearances.json: provided/media-appearances.json
+	cp $< $@
+
 $(DATAFILES)/water-companies.json: provided/water-companies.json
 	cp $< $@
 
 $(DATAFILES)/v1/2021/geo/countries.json: provided/countries.json
+	cp $< $@
+
 $(DATAFILES)/v1/2022/geo/countries.json: provided/countries.json
 	cp $< $@
 
