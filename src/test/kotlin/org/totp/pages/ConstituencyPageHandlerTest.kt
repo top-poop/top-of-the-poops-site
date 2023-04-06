@@ -26,6 +26,9 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isFailure
 import java.time.Duration
 
+val anMP = MP("bob", "con", null, Uri.of("http://example.com"))
+
+
 class ConstituencyPageHandlerTest {
 
     var summaries = listOf(
@@ -50,7 +53,7 @@ class ConstituencyPageHandlerTest {
             constituencyBoundary = { GeoJSON.of("some geojson") },
             constituencyLiveData = { ConstituencyLiveData(ConstituencyName.of("a"), 1, 2) },
             mpFor = {
-                MP("bob", "con", null, Uri.of("http://example.com"))
+                anMP
             },
             constituencyLiveAvailable = { listOf(ConstituencyName("bob")) },
             constituencyNeighbours = { listOf(ConstituencyName("c"), ConstituencyName("d")) },

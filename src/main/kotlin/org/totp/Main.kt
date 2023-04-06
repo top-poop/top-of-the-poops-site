@@ -100,7 +100,7 @@ object OldMapRedirectHandler {
         val constituency = Query.value(ConstituencyName).optional("c")
 
         return { request ->
-            val selected = constituency(request);
+            val selected = constituency(request)
 
             if (selected != null && constituencyNames.contains(selected)) {
                 val slug = ConstituencySlug.from(selected)
@@ -189,13 +189,17 @@ fun main() {
     val riverRankings = memoize(RiverRankings(data2022))
     val beachRankings = memoize(BeachRankings(data2022))
 
-    val constituencyRankings = memoize(ConstituencyRankings(data2022));
+    val constituencyRankings = memoize(ConstituencyRankings(data2022))
 
     val mpFor = mpForConstituency(constituencyContacts)
 
     val constituencyBoundaries = ConstituencyBoundaries(
         SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient)
     )
+
+    val constituencyRank = { wanted: ConstituencyName ->
+        constituencyRankings().firstOrNull { it.constituencyName == wanted }
+    }
 
     val server = Undertow(port = port(environment)).toServer(
 
@@ -232,7 +236,9 @@ fun main() {
                             ),
                             "/waterway/{company}/{waterway}" bind WaterwayPageHandler(
                                 renderer = renderer,
-                                waterwaySpills = waterwayCSOs(allSpills)
+                                waterwaySpills = waterwayCSOs(allSpills),
+                                mpFor = mpFor,
+                                constituencyRank = constituencyRank
                             ),
                             "/constituency/{constituency}" bind ConstituencyPageHandler(
                                 renderer = renderer,
@@ -242,9 +248,7 @@ fun main() {
                                 constituencyLiveAvailable = ConstituencyLiveAvailability(dataClient),
                                 mpFor = mpFor,
                                 constituencyNeighbours = ConstituencyNeighbours(data2022),
-                                constituencyRank = { wanted ->
-                                    constituencyRankings().firstOrNull { it.constituencyName == wanted }
-                                },
+                                constituencyRank = constituencyRank,
                             ),
                             "/company/{company}" bind CompanyPageHandler(
                                 renderer = renderer,

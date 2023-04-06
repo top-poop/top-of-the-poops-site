@@ -40,6 +40,17 @@ class WaterwayPageHandlerTest {
         "/{company}/{waterway}" bind Method.GET to WaterwayPageHandler(
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
             waterwaySpills = waterwayCSOs { summaries },
+            mpFor = { anMP },
+            constituencyRank = {
+                ConstituencyRank(
+                    1,
+                    ConstituencyName("Aldershot"),
+                    10,
+                    Duration.ofHours(1),
+                    20,
+                    Duration.ZERO
+                )
+            }
         )
     )
 

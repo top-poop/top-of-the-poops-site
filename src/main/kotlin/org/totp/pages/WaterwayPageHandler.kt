@@ -18,6 +18,7 @@ import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.CSOTotals
+import org.totp.model.data.ConstituencyName
 import org.totp.model.data.WaterwayName
 import java.text.NumberFormat
 
@@ -27,7 +28,7 @@ class WaterwayPage(
     val name: WaterwayName,
     val share: SocialShare,
     val summary: PollutionSummary,
-    val constituencies: List<RenderableConstituency>,
+    val constituencies: List<RenderableConstituencyRank>,
     val csos: List<RenderableCSOTotal>,
 ) :
     PageViewModel(uri)
@@ -46,6 +47,8 @@ object WaterwayPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
         waterwaySpills: (WaterwaySlug, CompanySlug) -> List<CSOTotals>,
+        mpFor: (ConstituencyName) -> MP,
+        constituencyRank: (ConstituencyName) -> ConstituencyRank?
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -67,8 +70,14 @@ object WaterwayPageHandler {
                 val constituencies = spills
                     .map { it.constituency }
                     .toSet()
-                    .toList()
                     .sorted()
+                    .map {
+                        constituencyRank(it)
+                    }
+                    .filterNotNull()
+                    .map {
+                        it.toRenderable(mpFor)
+                    }
 
                 val summary = PollutionSummary.from(spills)
 
@@ -85,7 +94,7 @@ object WaterwayPageHandler {
                                 via = "sewageuk"
                             ),
                             summary = summary,
-                            constituencies = constituencies.map { it.toRenderable() },
+                            constituencies = constituencies,
                             csos = spills
                                 .sortedByDescending { it.duration }
                                 .map {

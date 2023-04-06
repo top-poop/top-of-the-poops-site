@@ -79,8 +79,10 @@
                         <div class="card-body">
                             <div class="card-text">
                                 {{#each constituencies}}
-                                    <a href="{{this.uri}}">
-                                        <button class="btn btn-primary mb-2">{{this.name}}</button>
+                                    <a href="{{this.constituency.uri}}">
+                                        <button class="btn btn-primary mb-2">
+                                            {{this.constituency.name}}<span class="badge badge-info ml-1">{{numberFormat this.count.count}}</span>
+                                        </button>
                                     </a>
                                 {{/each}}
                             </div>
