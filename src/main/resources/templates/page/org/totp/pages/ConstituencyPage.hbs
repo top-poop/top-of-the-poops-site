@@ -139,35 +139,39 @@
                 <p>Here are all the reported sewage overflow totals for {{ name.value }} in {{ summary.year }}.
                     Sometimes sewage can be being dumped for <b>months</b> at a time.</p>
 
-                <table id="table-csos" class="table table-responsive">
-                    <thead>
-                    <tr>
-                        <th>Company</th>
-                        <th>Waterway</th>
-                        <th>Site</th>
-                        <th>Sewage Dumps</th>
-                        <th>Duration (Hours)</th>
-                        <th>Reporting %</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {{#each csos}}
-                        <tr data-class="cso" data-lat="{{this.cso.location.lat}}"
-                            data-lon="{{this.cso.location.lon}}">
-                            <td class="align-middle" data-company="{{this.cso.company.name}}">
-                                <a href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a>
-                            </td>
-                            <td class="align-middle" data-waterway="{{this.cso.waterway.name}}">
-                                <a href="{{this.cso.waterway.uri}}">{{this.cso.waterway.name}}</a>
-                            </td>
-                            <td class="align-middle" data-sitename="{{this.cso.sitename}}">{{this.cso.sitename}}</td>
-                            <td class="align-middle" data-count="{{this.count}}">{{numberFormat this.count}}</td>
-                            <td class="align-middle" data-duration="{{this.duration.toHours}}">{{numberFormat this.duration.toHours}}</td>
-                            <td class="align-middle">{{numberFormat this.reporting}}</td>
+                <div class="table-responsive">
+                    <table id="table-csos" class="table">
+                        <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Waterway</th>
+                            <th>Site</th>
+                            <th>Sewage Dumps</th>
+                            <th>Duration (Hours)</th>
+                            <th>Reporting %</th>
                         </tr>
-                    {{/each}}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {{#each csos}}
+                            <tr data-class="cso" data-lat="{{this.cso.location.lat}}"
+                                data-lon="{{this.cso.location.lon}}">
+                                <td class="align-middle" data-company="{{this.cso.company.name}}">
+                                    <a href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a>
+                                </td>
+                                <td class="align-middle" data-waterway="{{this.cso.waterway.name}}">
+                                    <a href="{{this.cso.waterway.uri}}">{{this.cso.waterway.name}}</a>
+                                </td>
+                                <td class="align-middle"
+                                    data-sitename="{{this.cso.sitename}}">{{this.cso.sitename}}</td>
+                                <td class="align-middle" data-count="{{this.count}}">{{numberFormat this.count}}</td>
+                                <td class="align-middle" data-duration="{{this.duration.toHours}}">{{numberFormat
+                                        this.duration.toHours}}</td>
+                                <td class="align-middle">{{numberFormat this.reporting}}</td>
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
+                </div>
             {{/components/section}}
         </div>
     </div>
