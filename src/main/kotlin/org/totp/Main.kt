@@ -117,7 +117,9 @@ fun <T> memoize(loader: () -> T): () -> T {
         loader,
         5, TimeUnit.MINUTES
     )
-    return { cache.get() }
+    return {
+        cache.get()
+    }
 }
 
 fun mpForConstituency(contacts: () -> List<ConstituencyContact>): (ConstituencyName) -> MP {
@@ -182,10 +184,10 @@ fun main() {
 
     val mediaAppearances = MediaAppearances(dataClient)
     val waterCompanies = WaterCompanies(dataClient)
-    val constituencyContacts = ConstituencyContacts(data2022)
+    val constituencyContacts = memoize(ConstituencyContacts(data2022))
     val allSpills = memoize(AllSpills(data2022))
-    val riverRankings = RiverRankings(data2022)
-    val beachRankings = BeachRankings(data2022)
+    val riverRankings = memoize(RiverRankings(data2022))
+    val beachRankings = memoize(BeachRankings(data2022))
 
     val constituencyRankings = memoize(ConstituencyRankings(data2022));
 
