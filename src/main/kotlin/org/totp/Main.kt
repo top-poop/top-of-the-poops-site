@@ -112,18 +112,21 @@ object OldMapRedirectHandler {
     }
 }
 
+fun <T> memoize(loader: () -> T): () -> T {
+    val cache = Suppliers.memoizeWithExpiration(
+        loader,
+        5, TimeUnit.MINUTES
+    )
+    return { cache.get() }
+}
+
 fun mpForConstituency(contacts: () -> List<ConstituencyContact>): (ConstituencyName) -> MP {
 
-    val get = {
+    val cache = memoize {
         contacts().associateBy { it.constituency }
     }
 
-    val cache = Suppliers.memoizeWithExpiration(
-        get,
-        5, TimeUnit.MINUTES
-    )
-
-    return { name -> cache.get()[name]?.mp ?: throw Defect("We don't have the MP for $name") }
+    return { name -> cache()[name]?.mp ?: throw Defect("We don't have the MP for $name") }
 }
 
 
@@ -179,12 +182,11 @@ fun main() {
     val mediaAppearances = MediaAppearances(dataClient)
     val waterCompanies = WaterCompanies(dataClient)
     val constituencyContacts = ConstituencyContacts(data2022)
-    val allSpills = AllSpills(data2022)
+    val allSpills = memoize(AllSpills(data2022))
     val riverRankings = RiverRankings(data2022)
     val beachRankings = BeachRankings(data2022)
 
-    val constituencyRankingCache = Suppliers.memoizeWithExpiration(ConstituencyRankings(data2022), 5, TimeUnit.MINUTES);
-    val constituencyRankings = { constituencyRankingCache.get() }
+    val constituencyRankings = memoize(ConstituencyRankings(data2022));
 
     val mpFor = mpForConstituency(constituencyContacts)
 

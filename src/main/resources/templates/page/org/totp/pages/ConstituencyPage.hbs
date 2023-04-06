@@ -109,7 +109,9 @@
                             <div class="card-text">
                                 {{#each neighbours}}
                                     <a href="{{this.constituency.uri}}">
-                                        <button class="btn btn-primary mb-2">{{this.constituency.name}}</button>
+                                        <button class="btn btn-primary mb-2">
+                                            {{this.constituency.name}}<span class="badge badge-info ml-1">{{numberFormat this.count.count}}</span>
+                                        </button>
                                     </a>
                                 {{/each}}
                             </div>
