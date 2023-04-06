@@ -156,6 +156,7 @@ fun main() {
     val events =
         EventFilters.AddTimestamp(Clock.systemUTC())
             .then(EventFilters.AddEventName())
+            .then(EventFilters.AddZipkinTraces())
             .then(EventFilters.AddServiceName("pages"))
             .then(AutoMarshallingEvents(Jackson))
 
