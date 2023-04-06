@@ -82,7 +82,7 @@ object ConstituenciesPageHandler {
                         constituencyRankings().sortedBy { it.rank }.map {
                             RenderableConstituencyRank(
                                 it.rank,
-                                RenderableConstituency.from(it.constituencyName),
+                                it.constituencyName.toRenderable(),
                                 mps[it.constituencyName]?.mp
                                     ?: throw Defect("We don't have the MP for ${it.constituencyName}"),
                                 RenderableCount(it.count),

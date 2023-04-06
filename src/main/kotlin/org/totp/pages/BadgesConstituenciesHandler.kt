@@ -12,7 +12,6 @@ import org.http4k.template.viewModel
 import org.totp.extensions.Defect
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
-import org.totp.model.data.CSOTotals
 import org.totp.model.data.ConstituencyContact
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.GeoJSON
@@ -46,7 +45,7 @@ object BadgesConstituenciesHandler {
                         rankings.sortedBy { it.constituencyName }.map {
                             RenderableConstituencyRank(
                                 it.rank,
-                                RenderableConstituency.from(it.constituencyName),
+                                it.constituencyName.toRenderable(),
                                 mps[it.constituencyName]?.mp
                                     ?: throw Defect("We don't have the MP for ${it.constituencyName}"),
                                 RenderableCount(it.count),
@@ -56,7 +55,7 @@ object BadgesConstituenciesHandler {
                             )
                         },
                         rankings.map {
-                            RenderableConstituency.from(it.constituencyName).slug to constituencyBoundaries(it.constituencyName)
+                            it.constituencyName.toRenderable().slug to constituencyBoundaries(it.constituencyName)
                         }
                     )
                 )

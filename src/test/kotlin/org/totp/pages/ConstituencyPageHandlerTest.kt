@@ -62,7 +62,8 @@ class ConstituencyPageHandlerTest {
                     )
                 )
             },
-            constituencyLiveAvailable = { listOf(ConstituencyName("bob")) }
+            constituencyLiveAvailable = { listOf(ConstituencyName("bob")) },
+            constituencyNeighbours = { listOf(ConstituencyName("c"), ConstituencyName("d")) }
         )
     )
 

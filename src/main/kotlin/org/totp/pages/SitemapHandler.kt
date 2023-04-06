@@ -47,7 +47,7 @@ object SitemapUris {
                 Uri.of("/rivers"),
             ).plus(
                 constituencies().map {
-                    RenderableConstituency.from(it.constituencyName).uri
+                    it.constituencyName.toRenderable().uri
                 }
             ).plus(
                 riverRankings().flatMap {

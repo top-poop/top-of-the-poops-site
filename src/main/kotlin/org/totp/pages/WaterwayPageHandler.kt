@@ -85,24 +85,27 @@ object WaterwayPageHandler {
                                 via = "sewageuk"
                             ),
                             summary = summary,
-                            constituencies = constituencies.map { RenderableConstituency.from(it) },
+                            constituencies = constituencies.map { it.toRenderable() },
                             csos = spills
                                 .sortedByDescending { it.duration }
                                 .map {
-                                RenderableCSOTotal(
-                                    RenderableConstituency.from(it.constituency),
-                                    it.cso.let {
-                                        RenderableCSO(
-                                            RenderableCompany.from(it.company),
-                                            it.sitename,
-                                            RenderableWaterway(it.waterway, Uri.of("/waterway/$companySlug/$waterwaySlug")),
-                                            it.location
-                                        )
-                                    },
-                                    it.count,
-                                    it.duration,
-                                    it.reporting
-                                )
+                                    RenderableCSOTotal(
+                                        it.constituency.toRenderable(),
+                                        it.cso.let {
+                                            RenderableCSO(
+                                                RenderableCompany.from(it.company),
+                                                it.sitename,
+                                                RenderableWaterway(
+                                                    it.waterway,
+                                                    Uri.of("/waterway/$companySlug/$waterwaySlug")
+                                                ),
+                                                it.location
+                                            )
+                                        },
+                                        it.count,
+                                        it.duration,
+                                        it.reporting
+                                    )
                             })
                     )
             }

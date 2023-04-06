@@ -40,6 +40,7 @@ import org.totp.model.data.ConstituencyContacts
 import org.totp.model.data.ConstituencyLiveAvailability
 import org.totp.model.data.ConstituencyLiveDataLoader
 import org.totp.model.data.ConstituencyName
+import org.totp.model.data.ConstituencyNeighbours
 import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.MediaAppearances
 import org.totp.model.data.RiverRankings
@@ -207,7 +208,8 @@ fun main() {
                             constituencyBoundary = constituencyBoundaries,
                             constituencyLiveData = ConstituencyLiveDataLoader(dataClient),
                             constituencyLiveAvailable = ConstituencyLiveAvailability(dataClient),
-                            constituencyContacts = constituencyContacts
+                            constituencyContacts = constituencyContacts,
+                            constituencyNeighbours = ConstituencyNeighbours(data2022)
                         ),
                         "/company/{company}" bind CompanyPageHandler(
                             renderer = renderer,

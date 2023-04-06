@@ -68,7 +68,7 @@ DATA_2021_SQL=$(wildcard sql/v1/2021/*.sql)
 DATA_2021_GENERATED=$(foreach sql,$(DATA_2021_SQL),$(DATAFILES)/v1/2021/$(basename $(notdir $(sql))).json)
 
 DATA_2022_SQL=$(wildcard sql/v1/2022/*.sql)
-DATA_2022_GENERATED=$(foreach sql,$(DATA_2021_SQL),$(DATAFILES)/v1/2022/$(basename $(notdir $(sql))).json)
+DATA_2022_GENERATED=$(foreach sql,$(DATA_2022_SQL),$(DATAFILES)/v1/2022/$(basename $(notdir $(sql))).json)
 
 GEO_2021_SQL=$(wildcard sql/v1/2021/geo/*.sql)
 GEO_2021_GENERATED=$(foreach sql,$(GEO_2021_SQL),$(DATAFILES)/v1/2021/geo/$(basename $(notdir $(sql))).json)

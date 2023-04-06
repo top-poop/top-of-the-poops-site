@@ -10,14 +10,10 @@ import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.Uri
-import org.http4k.core.removeQueries
 import org.http4k.core.then
-import org.http4k.core.toParameters
-import org.http4k.core.toUrlFormEncoded
 import org.http4k.core.with
 import org.http4k.lens.Header.LOCATION
 import org.http4k.lens.Path
-import org.http4k.lens.Query
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
@@ -93,20 +89,7 @@ data class RenderableConstituency(
     val slug: ConstituencySlug,
     val uri: Uri,
     val live: Boolean
-) {
-    companion object {
-        fun from(name: ConstituencyName, current: Boolean = false, live: Boolean = false): RenderableConstituency {
-            val slug = ConstituencySlug.from(name)
-            return RenderableConstituency(
-                name = name,
-                current = current,
-                slug = slug,
-                uri = slug.let { Uri.of("/constituency/$it") },
-                live = live,
-            )
-        }
-    }
-}
+)
 
 data class SocialShare(
     val uri: Uri,
@@ -146,6 +129,7 @@ class ConstituencyPage(
     val csos: List<RenderableCSOTotal>,
     val constituencies: List<RenderableConstituency>,
     val live: ConstituencyPageLiveData?,
+    val neighbours: List<RenderableConstituency>,
 ) :
     PageViewModel(uri)
 
@@ -178,7 +162,8 @@ object ConstituencyPageHandler {
         constituencyContacts: () -> List<ConstituencyContact>,
         constituencyBoundary: (ConstituencyName) -> GeoJSON,
         constituencyLiveData: (ConstituencyName) -> ConstituencyLiveData?,
-        constituencyLiveAvailable: () -> List<ConstituencyName>
+        constituencyLiveAvailable: () -> List<ConstituencyName>,
+        constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -194,8 +179,7 @@ object ConstituencyPageHandler {
 
                 val renderableConstituencies = slugToConstituency
                     .map {
-                        RenderableConstituency.from(
-                            it.value,
+                        it.value.toRenderable(
                             current = it.key == slug,
                             live = liveAvailable.contains(it.value)
                         )
@@ -222,7 +206,7 @@ object ConstituencyPageHandler {
                             constituencyBoundary(constituencyName),
                             list.map {
                                 RenderableCSOTotal(
-                                    RenderableConstituency.from(it.constituency),
+                                    it.constituency.toRenderable(),
                                     it.cso.let {
                                         RenderableCSO(
                                             RenderableCompany.from(it.company),
@@ -245,10 +229,22 @@ object ConstituencyPageHandler {
                                     )
                                 }
                             } else null,
+                            constituencyNeighbours(constituencyName).sorted().map { it.toRenderable() }
                         )
                     )
             }
                 ?: Response(Status.NOT_FOUND)
         }
     }
+}
+
+fun ConstituencyName.toRenderable(current: Boolean = false, live: Boolean = false): RenderableConstituency {
+    val slug = ConstituencySlug.from(this)
+    return RenderableConstituency(
+        name = this,
+        current = current,
+        slug = slug,
+        uri = slug.let { Uri.of("/constituency/$it") },
+        live = live,
+    )
 }

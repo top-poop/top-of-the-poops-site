@@ -1,8 +1,12 @@
 package org.totp.pages
 
+import org.http4k.core.HttpHandler
+import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
+import org.http4k.core.Uri
+import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
@@ -11,9 +15,9 @@ import org.totp.model.data.BeachRankings
 import org.totp.model.data.CompanyAnnualSummaries
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyContacts
-import org.totp.model.data.ConstituencyLiveAvailability
 import org.totp.model.data.ConstituencyLiveDataLoader
 import org.totp.model.data.ConstituencyName
+import org.totp.model.data.ConstituencyNeighbours
 import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
@@ -24,6 +28,7 @@ import strikt.assertions.get
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import strikt.assertions.isGreaterThan
+import strikt.assertions.isNotBlank
 import strikt.assertions.isNotNull
 import strikt.assertions.size
 import java.io.File
@@ -160,66 +165,104 @@ class LoadingJsonDatafilesTest {
         }
     }
 
+
+    fun uriHavingFileContent(uri: Uri, file: File): RoutingHttpHandler {
+        expectThat(uri.path).isNotBlank()
+        val handler: HttpHandler = { Response(Status.OK).body(file.readText()) }
+        return routes(
+            uri.path bind Method.GET to handler
+        )
+    }
+
     @Test
     fun `loading actual live data`() {
-        val content = File("services/data/datafiles/live/constituencies/aldershot.json")
-        val service = ConstituencyLiveDataLoader { Response(Status.OK).body(content.readText()) }
+        val remote = uriHavingFileContent(
+            Uri.of("/live/constituencies/bob.json"),
+            File("services/data/datafiles/live/constituencies/aldershot.json")
+        )
+        val service = ConstituencyLiveDataLoader(remote)
         service(ConstituencyName.of("bob"))
     }
 
-//    @Test
-//    fun `loading available live data names`() {
-//        val content = File("services/data/datafiles/live/constituencies/constituencies-available.json")
-//        val service = ConstituencyLiveAvailability { Response(Status.OK).body(content.readText()) }
-//        expectThat(service()).size.isGreaterThan(3)
-//    }
-
     @Test
     fun `loading river rankings`() {
-        val content = File("services/data/datafiles/v1/2021/spills-by-river.json")
-        val service = RiverRankings { Response(Status.OK).body(content.readText()) }
+        val remote = uriHavingFileContent(
+            Uri.of("spills-by-river.json"),
+            File("services/data/datafiles/v1/2021/spills-by-river.json")
+        )
+        val service = RiverRankings(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
     fun `loading company summaries`() {
-        val content = File("services/data/datafiles/v1/2021/spills-by-company.json")
-        val service = CompanyAnnualSummaries { Response(Status.OK).body(content.readText()) }
+        val remote = uriHavingFileContent(
+            Uri.of("spills-by-company.json"),
+            File("services/data/datafiles/v1/2021/spills-by-company.json")
+        )
+        val service = CompanyAnnualSummaries(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
     fun `loading constituency socials`() {
-        val content = File("services/data/datafiles/v1/2021/constituency-social.json")
-        val service = ConstituencyContacts { Response(Status.OK).body(content.readText()) }
+        val remote = uriHavingFileContent(
+            Uri.of("constituency-social.json"),
+            File("services/data/datafiles/v1/2021/constituency-social.json")
+        )
+        val service = ConstituencyContacts(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
     fun `loading river rankings 2022`() {
-        val content = File("services/data/datafiles/v1/2022/spills-by-river.json")
-        val service = RiverRankings { Response(Status.OK).body(content.readText()) }
+        val remote = uriHavingFileContent(
+            Uri.of("spills-by-river.json"),
+            File("services/data/datafiles/v1/2022/spills-by-river.json")
+        )
+        val service = RiverRankings(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
     fun `loading company summaries 2022`() {
-        val content = File("services/data/datafiles/v1/2022/spills-by-company.json")
-        val service = CompanyAnnualSummaries { Response(Status.OK).body(content.readText()) }
+        val remote = uriHavingFileContent(
+            Uri.of("spills-by-company.json"),
+            File("services/data/datafiles/v1/2022/spills-by-company.json")
+        )
+        val service = CompanyAnnualSummaries(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
     fun `loading constituency socials 2022`() {
-        val content = File("services/data/datafiles/v1/2022/constituency-social.json")
-        val service = ConstituencyContacts { Response(Status.OK).body(content.readText()) }
+        val remote = uriHavingFileContent(
+            Uri.of("constituency-social.json"),
+            File("services/data/datafiles/v1/2022/constituency-social.json")
+        )
+        val service = ConstituencyContacts(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
     fun `loading  beaches 2022`() {
-        val content = File("services/data/datafiles/v1/2022/spills-by-beach.json")
-        val service = BeachRankings { Response(Status.OK).body(content.readText()) }
+        val remote = uriHavingFileContent(
+            Uri.of("spills-by-beach.json"),
+            File("services/data/datafiles/v1/2022/spills-by-beach.json")
+        )
+        val service = BeachRankings (remote)
         expectThat(service()).size.isGreaterThan(3)
+    }
+
+    @Test
+    fun `loading  neighbours 2022`() {
+
+        val remote = uriHavingFileContent(
+            Uri.of("constituency-neighbours.json"),
+            File("services/data/datafiles/v1/2022/constituency-neighbours.json")
+        )
+
+        val service = ConstituencyNeighbours (remote)
+        expectThat(service(ConstituencyName("Aldershot"))).size.isEqualTo(4)
     }
 }

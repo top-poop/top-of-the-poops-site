@@ -26,7 +26,6 @@ import org.totp.pages.ConstituencySlug
 import org.totp.pages.DeltaValue
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.MP
-import org.totp.pages.RenderableDurationDelta
 import org.totp.pages.WaterwaySlug
 import java.time.Duration
 import java.time.LocalDate
@@ -374,6 +373,26 @@ object ConstituencyContacts {
                             uri = Uri.of(it["mp_uri"] as String)
                         ),
                     )
+                }
+        }
+    }
+}
+
+object ConstituencyNeighbours {
+    operator fun invoke(handler: HttpHandler): (ConstituencyName) -> List<ConstituencyName> {
+        return { wanted ->
+            val response = handler(Request(Method.GET, "constituency-neighbours.json"))
+
+            TotpJson.mapper.readSimpleList(response.bodyString())
+                .map {
+                    ConstituencyName(it["pcon20nm"] as String) to
+                            ConstituencyName(it["neighbour"] as String)
+                }
+                .filter {
+                    it.first == wanted
+                }
+                .map {
+                    it.second
                 }
         }
     }
