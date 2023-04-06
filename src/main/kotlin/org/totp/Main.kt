@@ -198,86 +198,90 @@ fun main() {
     )
 
     val server = Undertow(port = port(environment)).toServer(
-        HtmlPageErrorFilter(events, renderer).then(
-            routes(
-                "/" bind Method.GET to inboundFilters.then(
-                    routes(
-                        "/" bind HomepageHandler(
-                            renderer = renderer,
-                            constituencyRankings = constituencyRankings,
-                            beachRankings = beachRankings,
-                            riverRankings = riverRankings,
-                            appearances = mediaAppearances,
-                            companies = waterCompanies,
-                            mpFor = mpFor,
-                        ),
-                        "/media" bind MediaPageHandler(
-                            renderer = renderer,
-                            appearances = mediaAppearances
-                        ),
-                        "/constituencies" bind ConstituenciesPageHandler(
-                            renderer = renderer,
-                            constituencyRankings = constituencyRankings,
-                            mpFor = mpFor,
-                        ),
-                        "/beaches" bind BeachesPageHandler(
-                            renderer = renderer,
-                            beachRankings = beachRankings
-                        ),
-                        "/rivers" bind RiversPageHandler(
-                            renderer = renderer,
-                            riverRankings = riverRankings
-                        ),
-                        "/waterway/{company}/{waterway}" bind WaterwayPageHandler(
-                            renderer = renderer,
-                            waterwaySpills = waterwayCSOs(allSpills)
-                        ),
-                        "/constituency/{constituency}" bind ConstituencyPageHandler(
-                            renderer = renderer,
-                            constituencySpills = constituencyCSOs(allSpills),
-                            constituencyBoundary = constituencyBoundaries,
-                            constituencyLiveData = ConstituencyLiveDataLoader(dataClient),
-                            constituencyLiveAvailable = ConstituencyLiveAvailability(dataClient),
-                            constituencyContacts = constituencyContacts,
-                            constituencyNeighbours = ConstituencyNeighbours(data2022),
-                            constituencyRank = { wanted -> constituencyRankings().first { it.constituencyName == wanted } },
-                        ),
-                        "/company/{company}" bind CompanyPageHandler(
-                            renderer = renderer,
-                            companySummaries = CompanyAnnualSummaries(data2022),
-                            waterCompanies = waterCompanies,
-                            riverRankings = riverRankings,
-                            beachRankings = beachRankings
-                        ),
-                        "/map.html" bind OldMapRedirectHandler(),
-                        "/sitemap.xml" bind SitemapHandler(
-                            renderer = renderer,
-                            siteBaseUri = Uri.of("https://top-of-the-poops.org"),
-                            uris = SitemapUris(
-                                constituencies = constituencyRankings,
+
+        routes(
+            "/" bind Method.GET to inboundFilters.then(
+                HtmlPageErrorFilter(events, renderer)
+                    .then(
+                        routes(
+                            "/" bind HomepageHandler(
+                                renderer = renderer,
+                                constituencyRankings = constituencyRankings,
+                                beachRankings = beachRankings,
+                                riverRankings = riverRankings,
+                                appearances = mediaAppearances,
+                                companies = waterCompanies,
+                                mpFor = mpFor,
+                            ),
+                            "/media" bind MediaPageHandler(
+                                renderer = renderer,
+                                appearances = mediaAppearances
+                            ),
+                            "/constituencies" bind ConstituenciesPageHandler(
+                                renderer = renderer,
+                                constituencyRankings = constituencyRankings,
+                                mpFor = mpFor,
+                            ),
+                            "/beaches" bind BeachesPageHandler(
+                                renderer = renderer,
+                                beachRankings = beachRankings
+                            ),
+                            "/rivers" bind RiversPageHandler(
+                                renderer = renderer,
                                 riverRankings = riverRankings
-                            )
-                        ),
-                        "/private/badges/constituencies" bind BadgesConstituenciesHandler(
-                            renderer = renderer,
-                            constituencyRankings = constituencyRankings,
-                            constituencyContacts = constituencyContacts,
-                            constituencyBoundaries = constituencyBoundaries,
-                        ),
-                        "/private/badges/companies" bind BadgesCompaniesHandler(
-                            renderer = renderer,
-                            companySummaries = CompanyAnnualSummaries(data2022),
-                        ),
-                        "/private/badges/home" bind BadgesHomeHandler(
-                            renderer = renderer,
-                            constituencyRankings = constituencyRankings,
-                            beachRankings = beachRankings,
-                        ),
+                            ),
+                            "/waterway/{company}/{waterway}" bind WaterwayPageHandler(
+                                renderer = renderer,
+                                waterwaySpills = waterwayCSOs(allSpills)
+                            ),
+                            "/constituency/{constituency}" bind ConstituencyPageHandler(
+                                renderer = renderer,
+                                constituencySpills = constituencyCSOs(allSpills),
+                                constituencyBoundary = constituencyBoundaries,
+                                constituencyLiveData = ConstituencyLiveDataLoader(dataClient),
+                                constituencyLiveAvailable = ConstituencyLiveAvailability(dataClient),
+                                constituencyContacts = constituencyContacts,
+                                constituencyNeighbours = ConstituencyNeighbours(data2022),
+                                constituencyRank = { wanted ->
+                                    constituencyRankings().first { it.constituencyName == wanted }
+                                },
+                            ),
+                            "/company/{company}" bind CompanyPageHandler(
+                                renderer = renderer,
+                                companySummaries = CompanyAnnualSummaries(data2022),
+                                waterCompanies = waterCompanies,
+                                riverRankings = riverRankings,
+                                beachRankings = beachRankings
+                            ),
+                            "/map.html" bind OldMapRedirectHandler(),
+                            "/sitemap.xml" bind SitemapHandler(
+                                renderer = renderer,
+                                siteBaseUri = Uri.of("https://top-of-the-poops.org"),
+                                uris = SitemapUris(
+                                    constituencies = constituencyRankings,
+                                    riverRankings = riverRankings
+                                )
+                            ),
+                            "/private/badges/constituencies" bind BadgesConstituenciesHandler(
+                                renderer = renderer,
+                                constituencyRankings = constituencyRankings,
+                                constituencyContacts = constituencyContacts,
+                                constituencyBoundaries = constituencyBoundaries,
+                            ),
+                            "/private/badges/companies" bind BadgesCompaniesHandler(
+                                renderer = renderer,
+                                companySummaries = CompanyAnnualSummaries(data2022),
+                            ),
+                            "/private/badges/home" bind BadgesHomeHandler(
+                                renderer = renderer,
+                                constituencyRankings = constituencyRankings,
+                                beachRankings = beachRankings,
+                            ),
+                        )
                     )
-                ),
-                "/data" bind inboundFilters.then(static(ResourceLoader.Directory("services/data/datafiles"))),
-                "/assets" bind static(Resources.assets(isDevelopmentEnvironment)),
-            )
+            ),
+            "/data" bind static(ResourceLoader.Directory("services/data/datafiles")),
+            "/assets" bind static(Resources.assets(isDevelopmentEnvironment)),
         )
     )
 
