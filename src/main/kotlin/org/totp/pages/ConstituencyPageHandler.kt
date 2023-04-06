@@ -62,7 +62,9 @@ data class PollutionSummary(
         fun from(csos: List<CSOTotals>): PollutionSummary {
             return PollutionSummary(
                 year = 2022,
-                locationCount = csos.size,
+                locationCount = csos
+                    .filter { it.count > 0}
+                    .size,
                 companies = csos
                     .map { it.cso.company }
                     .toSet()
