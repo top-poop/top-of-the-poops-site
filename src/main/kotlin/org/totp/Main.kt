@@ -240,7 +240,7 @@ fun main() {
                                 constituencyBoundary = constituencyBoundaries,
                                 constituencyLiveData = ConstituencyLiveDataLoader(dataClient),
                                 constituencyLiveAvailable = ConstituencyLiveAvailability(dataClient),
-                                constituencyContacts = constituencyContacts,
+                                mpFor = mpFor,
                                 constituencyNeighbours = ConstituencyNeighbours(data2022),
                                 constituencyRank = { wanted ->
                                     constituencyRankings().firstOrNull { it.constituencyName == wanted }
@@ -265,7 +265,7 @@ fun main() {
                             "/private/badges/constituencies" bind BadgesConstituenciesHandler(
                                 renderer = renderer,
                                 constituencyRankings = constituencyRankings,
-                                constituencyContacts = constituencyContacts,
+                                mpFor = mpFor,
                                 constituencyBoundaries = constituencyBoundaries,
                             ),
                             "/private/badges/companies" bind BadgesCompaniesHandler(

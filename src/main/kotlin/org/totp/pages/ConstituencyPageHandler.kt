@@ -162,7 +162,7 @@ object ConstituencyPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
         constituencySpills: (ConstituencyName) -> List<CSOTotals>,
-        constituencyContacts: () -> List<ConstituencyContact>,
+        mpFor: (ConstituencyName) -> MP,
         constituencyBoundary: (ConstituencyName) -> GeoJSON,
         constituencyLiveData: (ConstituencyName) -> ConstituencyLiveData?,
         constituencyLiveAvailable: () -> List<ConstituencyName>,
@@ -191,17 +191,12 @@ object ConstituencyPageHandler {
                     }
 
                 val list = constituencySpills(constituencyName).sortedByDescending { it.duration }
-                val contacts = constituencyContacts()
-                val contact = contacts.first { it.constituency == constituencyName }
-
-                val mps = contacts.associateBy { it.constituency }
-                val mp = { name: ConstituencyName -> mps[name]?.mp ?: throw Defect("We don't have the MP for ${name}") }
 
                 val neighbours = constituencyNeighbours(constituencyName)
                     .sorted()
                     .map { constituencyRank(it) }
                     .filterNotNull()
-                    .map { it.toRenderable(mp) }
+                    .map { it.toRenderable(mpFor) }
 
                 val summary = PollutionSummary.from(list)
                 Response(Status.OK)
@@ -211,7 +206,7 @@ object ConstituencyPageHandler {
                             constituencyName,
                             SocialShare(
                                 pageUriFrom(request),
-                                text = "$constituencyName had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year} - ${contact.mp.handle}",
+                                text = "$constituencyName had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year} - ${mpFor(constituencyName).handle}",
                                 cta = "Share $constituencyName sewage horrors",
                                 tags = listOf("sewage"),
                                 via = "sewageuk",

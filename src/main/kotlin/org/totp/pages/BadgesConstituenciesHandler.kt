@@ -28,14 +28,13 @@ object BadgesConstituenciesHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
         constituencyRankings: () -> List<ConstituencyRank>,
-        constituencyContacts: () -> List<ConstituencyContact>,
+        mpFor: (ConstituencyName) -> MP,
         constituencyBoundaries: (ConstituencyName) -> GeoJSON,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
         return { request ->
             val rankings = constituencyRankings()
-            val mps = constituencyContacts().associateBy { it.constituency }
 
             Response(Status.OK)
                 .with(
@@ -46,8 +45,7 @@ object BadgesConstituenciesHandler {
                             RenderableConstituencyRank(
                                 it.rank,
                                 it.constituencyName.toRenderable(),
-                                mps[it.constituencyName]?.mp
-                                    ?: throw Defect("We don't have the MP for ${it.constituencyName}"),
+                                mpFor(it.constituencyName),
                                 RenderableCount(it.count),
                                 RenderableDuration(it.duration),
                                 countDelta = DeltaValue.of(it.countDelta),

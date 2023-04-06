@@ -7,7 +7,6 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
-import org.totp.model.data.ConstituencyContact
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.GeoJSON
 import java.time.Duration
@@ -42,11 +41,8 @@ class BadgesConstituenciesHandlerTest {
                     )
                 )
             },
-            constituencyContacts = {
-                listOf(
-                    ConstituencyContact(a, MP("mp1", "con", "handle1", Uri.of("https://example.com/1"))),
-                    ConstituencyContact(b, MP("mp2", "noc", "handle2", Uri.of("https://example.com/2")))
-                )
+            mpFor = {
+                MP("mp2", "noc", "handle2", Uri.of("https://example.com/2"))
             },
             constituencyBoundaries = {
                 GeoJSON.of("{}")
