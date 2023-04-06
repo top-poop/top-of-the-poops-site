@@ -24,11 +24,16 @@ class ConstituenciesPage(
     val constituencyRankings: List<RenderableConstituencyRank>
 ) : PageViewModel(uri)
 
-class DeltaValue(value: Int) : IntValue(value) {
+interface Delta {
+    fun isPositive(): Boolean
+    fun isNegative(): Boolean
+}
+
+class DeltaValue(value: Int) : IntValue(value), Delta {
     companion object : IntValueFactory<DeltaValue>(::DeltaValue)
 
-    fun isPositive() = value > 0
-    fun isNegative() = value < 0
+    override fun isPositive() = value > 0
+    override fun isNegative() = value < 0
 }
 
 class RenderableDuration(value: Duration) {
@@ -41,11 +46,11 @@ class RenderableDuration(value: Duration) {
     val hasYears = years > 1.0
 }
 
-class RenderableDurationDelta(val value: Duration) {
+class RenderableDurationDelta(val value: Duration): Delta {
     val hours = value.toHours()
 
-    fun isPositive() = value > Duration.ZERO
-    fun isNegative() = value < Duration.ZERO
+    override fun isPositive() = value > Duration.ZERO
+    override fun isNegative() = value < Duration.ZERO
 }
 
 class RenderableConstituencyRank(

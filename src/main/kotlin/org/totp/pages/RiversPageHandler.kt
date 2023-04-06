@@ -1,5 +1,11 @@
 package org.totp.pages
 
+import kotlinx.html.a
+import kotlinx.html.classes
+import kotlinx.html.stream.createHTML
+import kotlinx.html.tbody
+import kotlinx.html.td
+import kotlinx.html.tr
 import org.http4k.core.Body
 import org.http4k.core.ContentType
 import org.http4k.core.HttpHandler
@@ -15,9 +21,9 @@ import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
+import org.totp.model.TotpHandlebars.numberFormat
 import org.totp.model.data.RiverRank
 import org.totp.model.data.WaterwayName
-import org.totp.pages.SiteLocations.waterwayUriFor
 import java.time.Duration
 
 class RiversPage(
@@ -28,12 +34,13 @@ class RiversPage(
     val showingSummary: Boolean,
     val showAllUri: Uri,
     val riverRankings: List<RenderableRiverRank>,
+    val riverTableRows: String,
 ) : PageViewModel(uri)
 
 
 data class RenderableWaterway(val name: WaterwayName, val uri: Uri)
 
-data class RenderableCount(val count:Int) {
+data class RenderableCount(val count: Int) {
 
     val perDay = count / 365.0
     val perWeek = count / 52.0
@@ -67,6 +74,57 @@ fun RiverRank.toRenderable(): RenderableRiverRank {
     )
 }
 
+
+/*
+    <tr>
+        <td>{{this.rank}}</td>
+        <td><a href="{{this.river.uri}}">{{this.river.name}}</a></td>
+        <td><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
+        <td>{{numberFormat this.count.count}}</td>
+        <td class="align-middle {{#if this.countDelta.positive}}delta-positive {{else}}delta-negative {{/if}}">{{numberFormat this.countDelta.value}}</td>
+        <td>{{numberFormat this.duration.hours}}</td>
+        <td class="align-middle {{#if this.countDelta.positive}}delta-positive {{else}}delta-negative {{/if}}">{{numberFormat this.durationDelta.hours}}</td>
+    </tr>
+ */
+
+fun classesFor(d: Delta): Set<String> {
+    if ( d.isNegative() ) {
+        return setOf("delta-negative")
+    }
+    else if (d.isPositive()) {
+        return setOf("delta-positive")
+    }
+    return setOf()
+}
+
+
+// Handlebars too slow for this big list.
+fun tableRows(items: List<RenderableRiverRank>): String {
+
+    val nf = numberFormat()
+
+    return createHTML().tbody {
+        items.map { r ->
+            tr {
+                td { +"${r.rank}" }
+                td { a("${r.river.uri}") { +"${r.river.name}" } }
+                td { a("${r.company.uri}") { +"${r.company.name}" } }
+                td { +nf(r.count.count) }
+                td(classes = "align-middle") {
+                    classes += classesFor(r.countDelta)
+                    +nf(r.countDelta.value)
+                }
+                td { +nf(r.duration.hours) }
+                td(classes = "align-middle") {
+                    classes += classesFor(r.durationDelta)
+                    +nf(r.durationDelta.hours)
+                }
+            }
+        }
+    }
+}
+
+
 object RiversPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
@@ -92,6 +150,10 @@ object RiversPageHandler {
                 rankings.take(20)
             }
 
+            val renderables = display.map {
+                it.toRenderable()
+            }
+
             Response(Status.OK)
                 .with(
                     viewLens of RiversPage(
@@ -101,9 +163,8 @@ object RiversPageHandler {
                         totalDuration,
                         showingSummary = !showAll,
                         showAllUri = Uri.of(request.uri.path).query("all", "true"),
-                        display.map {
-                            it.toRenderable()
-                        },
+                        renderables,
+                        tableRows(renderables)
                     )
                 )
         }

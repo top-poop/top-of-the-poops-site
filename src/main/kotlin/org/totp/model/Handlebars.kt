@@ -43,10 +43,7 @@ object TotpHandlebars {
             }
             it.registerHelper("numberFormat") { context: Any, _: Options ->
                 if (context is Number) {
-                    NumberFormat.getNumberInstance().also {
-                        it.maximumFractionDigits = 2
-                    }
-                        .format(context)
+                    numberFormat()(context)
                 } else {
                     throw IllegalArgumentException("Wrong type for context")
                 }
@@ -56,5 +53,12 @@ object TotpHandlebars {
             it.registerHelper("urlencode") { context: Any, _: Options -> context.toString().urlEncoded() }
             it.registerHelper("concat") { context: Any, options -> (listOf(context) + options.params).joinToString("") }
         }
+    }
+
+    fun numberFormat(): (Number) -> String {
+        val nf = NumberFormat.getNumberInstance().also {
+            it.maximumFractionDigits = 2
+        }
+        return { nf.format(it) }
     }
 }
