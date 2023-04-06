@@ -1,5 +1,6 @@
 package org.totp
 
+import com.google.common.base.Suppliers
 import org.http4k.client.OkHttp
 import org.http4k.cloudnative.env.Environment
 import org.http4k.cloudnative.env.EnvironmentKey
@@ -30,12 +31,14 @@ import org.http4k.server.Undertow
 import org.http4k.template.HandlebarsTemplates
 import org.http4k.template.TemplateRenderer
 import org.totp.events.ServerStartedEvent
+import org.totp.extensions.Defect
 import org.totp.http4k.StandardFilters
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.AllSpills
 import org.totp.model.data.BeachRankings
 import org.totp.model.data.CompanyAnnualSummaries
 import org.totp.model.data.ConstituencyBoundaries
+import org.totp.model.data.ConstituencyContact
 import org.totp.model.data.ConstituencyContacts
 import org.totp.model.data.ConstituencyLiveAvailability
 import org.totp.model.data.ConstituencyLiveDataLoader
@@ -58,6 +61,7 @@ import org.totp.pages.ConstituencySlug
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.HomepageHandler
 import org.totp.pages.HtmlPageErrorFilter
+import org.totp.pages.MP
 import org.totp.pages.MediaPageHandler
 import org.totp.pages.RiversPageHandler
 import org.totp.pages.SitemapHandler
@@ -65,6 +69,7 @@ import org.totp.pages.SitemapUris
 import org.totp.pages.WaterwayPageHandler
 import org.totp.pages.constituencyNames
 import java.time.Clock
+import java.util.concurrent.TimeUnit
 
 
 object Resources {
@@ -105,6 +110,20 @@ object OldMapRedirectHandler {
             }
         }
     }
+}
+
+fun mpForConstituency(contacts: () -> List<ConstituencyContact>): (ConstituencyName) -> MP {
+
+    val get = {
+        contacts().associateBy { it.constituency }
+    }
+
+    val cache = Suppliers.memoizeWithExpiration(
+        get,
+        5, TimeUnit.MINUTES
+    )
+
+    return { name -> cache.get()[name]?.mp ?: throw Defect("We don't have the MP for $name") }
 }
 
 
@@ -163,11 +182,16 @@ fun main() {
     val allSpills = AllSpills(data2022)
     val riverRankings = RiverRankings(data2022)
     val beachRankings = BeachRankings(data2022)
-    val constituencyRankings = ConstituencyRankings(data2022)
+
+    val constituencyRankingCache = Suppliers.memoizeWithExpiration(ConstituencyRankings(data2022), 5, TimeUnit.MINUTES);
+    val constituencyRankings = { constituencyRankingCache.get() }
+
+    val mpFor = mpForConstituency(constituencyContacts)
 
     val constituencyBoundaries = ConstituencyBoundaries(
         SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient)
     )
+
     val server = Undertow(port = port(environment)).toServer(
         HtmlPageErrorFilter(events, renderer).then(
             routes(
@@ -179,7 +203,8 @@ fun main() {
                             beachRankings = beachRankings,
                             riverRankings = riverRankings,
                             appearances = mediaAppearances,
-                            companies = waterCompanies
+                            companies = waterCompanies,
+                            mpFor = mpFor,
                         ),
                         "/media" bind MediaPageHandler(
                             renderer = renderer,
@@ -188,7 +213,7 @@ fun main() {
                         "/constituencies" bind ConstituenciesPageHandler(
                             renderer = renderer,
                             constituencyRankings = constituencyRankings,
-                            constituencyContacts = constituencyContacts,
+                            mpFor = mpFor,
                         ),
                         "/beaches" bind BeachesPageHandler(
                             renderer = renderer,
@@ -209,7 +234,8 @@ fun main() {
                             constituencyLiveData = ConstituencyLiveDataLoader(dataClient),
                             constituencyLiveAvailable = ConstituencyLiveAvailability(dataClient),
                             constituencyContacts = constituencyContacts,
-                            constituencyNeighbours = ConstituencyNeighbours(data2022)
+                            constituencyNeighbours = ConstituencyNeighbours(data2022),
+                            constituencyRank = { wanted -> constituencyRankings().first { it.constituencyName == wanted } },
                         ),
                         "/company/{company}" bind CompanyPageHandler(
                             renderer = renderer,

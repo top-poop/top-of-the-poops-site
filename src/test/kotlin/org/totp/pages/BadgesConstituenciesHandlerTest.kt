@@ -7,8 +7,6 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
-import org.totp.model.data.BeachRank
-import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyContact
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.GeoJSON
@@ -29,7 +27,6 @@ class BadgesConstituenciesHandlerTest {
                     ConstituencyRank(
                         1,
                         a,
-                        Uri.of("/con/1"),
                         100,
                         Duration.ofHours(1),
                         25,
@@ -38,7 +35,6 @@ class BadgesConstituenciesHandlerTest {
                     ConstituencyRank(
                         2,
                         b,
-                        Uri.of("/con/2"),
                         2,
                         Duration.ofHours(2),
                         50,

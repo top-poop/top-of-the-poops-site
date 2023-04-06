@@ -47,7 +47,6 @@ class HomepageHandlerTest {
                     ConstituencyRank(
                         1,
                         ConstituencyName("a"),
-                        Uri.of("/con/1"),
                         100,
                         Duration.ofHours(1),
                         25,
@@ -56,7 +55,6 @@ class HomepageHandlerTest {
                     ConstituencyRank(
                         2,
                         ConstituencyName("b"),
-                        Uri.of("/con/2"),
                         2,
                         Duration.ofHours(2),
                         50,
@@ -97,7 +95,8 @@ class HomepageHandlerTest {
                     )
                 )
             },
-            companies = { listOf(aWaterCompany) }
+            companies = { listOf(aWaterCompany) },
+            mpFor = { MP("mp1", "con", "handle1", Uri.of("https://example.com/1")) }
         )
     )
 

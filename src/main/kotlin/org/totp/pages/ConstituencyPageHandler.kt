@@ -17,6 +17,7 @@ import org.http4k.lens.Path
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.extensions.Defect
 import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.http4k.removeQuery
@@ -63,7 +64,7 @@ data class PollutionSummary(
             return PollutionSummary(
                 year = 2022,
                 locationCount = csos
-                    .filter { it.count > 0}
+                    .filter { it.count > 0 }
                     .size,
                 companies = csos
                     .map { it.cso.company }
@@ -131,7 +132,7 @@ class ConstituencyPage(
     val csos: List<RenderableCSOTotal>,
     val constituencies: List<RenderableConstituency>,
     val live: ConstituencyPageLiveData?,
-    val neighbours: List<RenderableConstituency>,
+    val neighbours: List<RenderableConstituencyRank>,
 ) :
     PageViewModel(uri)
 
@@ -166,11 +167,13 @@ object ConstituencyPageHandler {
         constituencyLiveData: (ConstituencyName) -> ConstituencyLiveData?,
         constituencyLiveAvailable: () -> List<ConstituencyName>,
         constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
+        constituencyRank: (ConstituencyName) -> ConstituencyRank
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
         val constituencySlug = Path.value(ConstituencySlug).of("constituency", "The constituency")
         val numberFormat = NumberFormat.getIntegerInstance()
+
 
         return ConstituencyRedirectFilter().then { request: Request ->
             val slug = constituencySlug(request)
@@ -188,7 +191,16 @@ object ConstituencyPageHandler {
                     }
 
                 val list = constituencySpills(constituencyName).sortedByDescending { it.duration }
-                val contact = constituencyContacts().first { it.constituency == constituencyName }
+                val contacts = constituencyContacts()
+                val contact = contacts.first { it.constituency == constituencyName }
+
+                val mps = contacts.associateBy { it.constituency }
+                val mp = { name: ConstituencyName -> mps[name]?.mp ?: throw Defect("We don't have the MP for ${name}") }
+
+                val neighbours = constituencyNeighbours(constituencyName)
+                    .sorted()
+                    .map { constituencyRank(it) }
+                    .map { it.toRenderable(mp) }
 
                 val summary = PollutionSummary.from(list)
                 Response(Status.OK)
@@ -231,7 +243,7 @@ object ConstituencyPageHandler {
                                     )
                                 }
                             } else null,
-                            constituencyNeighbours(constituencyName).sorted().map { it.toRenderable() }
+                            neighbours
                         )
                     )
             }

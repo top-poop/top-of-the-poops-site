@@ -12,6 +12,7 @@ import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.BeachRank
+import org.totp.model.data.ConstituencyContact
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.MediaAppearance
 import org.totp.model.data.RiverRank
@@ -24,7 +25,6 @@ data class MP(val name: String, val party: String, val handle: String?, val uri:
 data class ConstituencyRank(
     val rank: Int,
     val constituencyName: ConstituencyName,
-    val constituencyUri: Uri,
     val count: Int,
     val duration: Duration,
     val countDelta: Int,
@@ -37,7 +37,7 @@ class HomePage(
     val year: Int,
     val totalCount: Int,
     val totalDuration: Duration,
-    val constituencyRankings: List<ConstituencyRank>,
+    val constituencyRankings: List<RenderableConstituencyRank>,
     val companies: List<WaterCompany>,
     val beachRankings: List<RenderableBeachRank>,
     val riverRankings: List<RenderableRiverRank>,
@@ -54,6 +54,7 @@ object HomepageHandler {
         riverRankings: () -> List<RiverRank>,
         appearances: () -> List<MediaAppearance>,
         companies: () -> List<WaterCompany>,
+        mpFor: (ConstituencyName) -> MP,
     ): HttpHandler {
 
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
@@ -75,7 +76,7 @@ object HomepageHandler {
                         year = 2022,
                         totalSpillsRounded,
                         totalDuration,
-                        rankings.take(10),
+                        rankings.take(10).map { it.toRenderable(mpFor)},
                         companies(),
                         beachRankings().take(10).map { it.toRenderable() },
                         rivers.map {

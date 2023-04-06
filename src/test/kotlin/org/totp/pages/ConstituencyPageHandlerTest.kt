@@ -63,7 +63,17 @@ class ConstituencyPageHandlerTest {
                 )
             },
             constituencyLiveAvailable = { listOf(ConstituencyName("bob")) },
-            constituencyNeighbours = { listOf(ConstituencyName("c"), ConstituencyName("d")) }
+            constituencyNeighbours = { listOf(ConstituencyName("c"), ConstituencyName("d")) },
+            constituencyRank = {
+                ConstituencyRank(
+                    1,
+                    ConstituencyName("Aldershot"),
+                    10,
+                    Duration.ofHours(1),
+                    20,
+                    Duration.ZERO
+                )
+            }
         )
     )
 

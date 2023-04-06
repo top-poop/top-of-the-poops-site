@@ -2,7 +2,6 @@ package org.totp.pages
 
 import org.http4k.core.Method
 import org.http4k.core.Request
-import org.http4k.core.Uri
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
@@ -21,7 +20,6 @@ class BadgesHomeHandlerTest {
                     ConstituencyRank(
                         1,
                         ConstituencyName("a"),
-                        Uri.of("/con/1"),
                         100,
                         Duration.ofHours(1),
                         25,

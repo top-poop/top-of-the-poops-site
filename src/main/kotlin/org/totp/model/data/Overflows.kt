@@ -144,7 +144,6 @@ object ConstituencyRankings {
                     ConstituencyRank(
                         rank = r + 1,
                         constituencyName = constituencyName,
-                        constituencyUri = Uri.of("/constituency/${ConstituencySlug.from(constituencyName).value}"),
                         count = (it["total_spills"] as Double).toInt(),
                         duration = fromEDMHours((it["total_hours"] as Double)),
                         countDelta = (it["spills_increase"] as Double).toInt(),

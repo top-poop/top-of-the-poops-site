@@ -72,9 +72,8 @@
 
                 {{#each constituencyRankings}}
                     <div>
-                        <b>{{this.rank}}.</b> <a
-                            href="{{this.constituencyUri}}">{{this.constituencyName}}</a> {{numberFormat
-                            this.duration.toHours}} hours
+                        <b>{{this.rank}}.</b>
+                        <a href="{{this.constituency.uri}}">{{this.constituency.name}}</a> {{numberFormat this.duration.hours}} hours
                     </div>
                 {{/each}}
             </div>
