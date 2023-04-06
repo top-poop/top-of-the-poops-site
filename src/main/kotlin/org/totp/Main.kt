@@ -243,7 +243,7 @@ fun main() {
                                 constituencyContacts = constituencyContacts,
                                 constituencyNeighbours = ConstituencyNeighbours(data2022),
                                 constituencyRank = { wanted ->
-                                    constituencyRankings().first { it.constituencyName == wanted }
+                                    constituencyRankings().firstOrNull { it.constituencyName == wanted }
                                 },
                             ),
                             "/company/{company}" bind CompanyPageHandler(

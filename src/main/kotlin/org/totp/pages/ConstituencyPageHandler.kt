@@ -167,7 +167,7 @@ object ConstituencyPageHandler {
         constituencyLiveData: (ConstituencyName) -> ConstituencyLiveData?,
         constituencyLiveAvailable: () -> List<ConstituencyName>,
         constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
-        constituencyRank: (ConstituencyName) -> ConstituencyRank
+        constituencyRank: (ConstituencyName) -> ConstituencyRank?
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -200,6 +200,7 @@ object ConstituencyPageHandler {
                 val neighbours = constituencyNeighbours(constituencyName)
                     .sorted()
                     .map { constituencyRank(it) }
+                    .filterNotNull()
                     .map { it.toRenderable(mp) }
 
                 val summary = PollutionSummary.from(list)
