@@ -2,6 +2,12 @@ package org.totp.pages
 
 import dev.forkhandles.values.IntValue
 import dev.forkhandles.values.IntValueFactory
+import kotlinx.html.a
+import kotlinx.html.classes
+import kotlinx.html.stream.createHTML
+import kotlinx.html.tbody
+import kotlinx.html.td
+import kotlinx.html.tr
 import org.http4k.core.Body
 import org.http4k.core.ContentType
 import org.http4k.core.HttpHandler
@@ -14,13 +20,14 @@ import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
+import org.totp.model.TotpHandlebars
 import org.totp.model.data.ConstituencyName
 import java.time.Duration
 
 class ConstituenciesPage(
     uri: Uri,
     var year: Int,
-    val constituencyRankings: List<RenderableConstituencyRank>
+    val constituenciesTableRows: String
 ) : PageViewModel(uri)
 
 interface Delta {
@@ -62,6 +69,54 @@ class RenderableConstituencyRank(
     val durationDelta: RenderableDurationDelta
 )
 
+/*
+                        {{#each constituencyRankings}}
+                            <tr>
+                                <td class="align-middle">{{this.rank}}</td>
+                                <td class="align-middle"><a
+                                        href="{{this.constituency.uri}}">{{this.constituency.name}}</a></td>
+                                <td class="align-middle"><a href="{{this.mp.uri}}">{{this.mp.name}}</a></td>
+                                <td class="align-middle">{{this.mp.party}}</td>
+                                <td class="align-middle">{{numberFormat this.count.count}}</td>
+                                <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat
+                                        this.countDelta.value}}</td>
+                                <td class="align-middle">{{numberFormat this.duration.hours}}</td>
+                                <td class="align-middle {{>components/class-delta this.durationDelta}}">{{numberFormat
+                                        this.durationDelta.hours}}</td>
+                            </tr>
+                        {{/each}}
+ */
+
+
+fun tableRows(items: List<RenderableConstituencyRank>): String {
+    val nf = TotpHandlebars.numberFormat()
+
+    return createHTML().tbody {
+        items.map { r ->
+            tr {
+                td(classes = "align-middle") { +"${r.rank}" }
+                td(classes = "align-middle") {
+                    a("${r.constituency.uri}") { +"${r.constituency.name}" }
+                }
+                td(classes = "align-middle") {
+                    a("${r.mp.uri}") { +r.mp.name }
+                }
+                td(classes = "align-middle") { +r.mp.party }
+                td(classes = "align-middle") { +nf(r.count.count) }
+                td(classes = "align-middle") {
+                    classes += classesFor(r.countDelta)
+                    +nf(r.countDelta.value)
+                }
+                td(classes = "align-middle") { +nf(r.duration.hours) }
+                td(classes = "align-middle") {
+                    classes += classesFor(r.durationDelta)
+                    +nf(r.duration.hours)
+                }
+            }
+        }
+    }
+}
+
 object ConstituenciesPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
@@ -77,9 +132,11 @@ object ConstituenciesPageHandler {
                     viewLens of ConstituenciesPage(
                         pageUriFrom(request),
                         year = 2022,
-                        constituencyRankings().sortedBy { it.rank }.map {
-                            it.toRenderable(mpFor)
-                        },
+                        tableRows(
+                            constituencyRankings().sortedBy { it.rank }.map {
+                                it.toRenderable(mpFor)
+                            }
+                        )
                     )
                 )
         }
