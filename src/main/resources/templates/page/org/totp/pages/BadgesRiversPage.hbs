@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
+    <link rel="stylesheet" href="/assets/css/leaflet.css"/>
+    <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        svg {
+            /*height: 263px;*/
+            /*left: 0;*/
+            position: absolute;
+            top: 10px;
+        }
+
+        img {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            top: 150px;
+            left: 400px;
+            opacity: 0.4;
+        }
+
+        svg[class^="plot-"] {
+            background: rgba(0, 0, 0, 0);
+            height: 263px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ml-3 mt-3">
+    {{#each rivers}}
+        <div style="width: 526px; height:263px; overflow: clip"
+             id="{{this.company.slug}}/{{this.river.slug}}"
+             class="twitter-badge river mb-2">
+            <div class="card  h-100  rounded-lg " data-name="{{this.river.name}}">
+                <img src="/assets/poop.png"/>
+                <div class="card-body" style="background-color: #f9f7ef">
+                    <h5 class="card-title"
+                        style="font-size:2.5rem;font-weight:500;line-height:1.2">{{this.river.name}}</h5>
+                    <p class="card-text">Polluted by <b>{{this.company.name}}</b>
+                        <span class="align-middle display-2" style="font-size:2.5rem;font-weight:500">{{numberFormat this.count.count}}</span>
+                        times in 2022, lasting {{numberFormat this.duration.hours}} hours
+                    </p>
+
+                    <div class="row align-middle">
+                        <div class="col">
+                            <p class="card-text"><small class="text-muted">{{>chunks/explain-duration this.duration}}, {{>chunks/explain-count this.count}}</small></p>
+                        </div>
+                    </div>
+
+                    <div class="row align-middle mt-1">
+                        <div class="col">
+                            <p class="card-text"><small class="text-muted">top-of-the-poops.org</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {{/each}}
+</div>
+
+<div id="maybe-complete">
+    <div id="complete"></div>
+</div>
+
+</body>
+</html>

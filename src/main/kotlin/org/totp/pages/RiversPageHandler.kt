@@ -22,6 +22,7 @@ import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.TotpHandlebars.numberFormat
+import org.totp.model.data.CompanyName
 import org.totp.model.data.RiverRank
 import org.totp.model.data.WaterwayName
 import java.time.Duration
@@ -38,7 +39,7 @@ class RiversPage(
 ) : PageViewModel(uri)
 
 
-data class RenderableWaterway(val name: WaterwayName, val uri: Uri)
+data class RenderableWaterway(val name: WaterwayName, val slug: WaterwaySlug, val uri: Uri)
 
 data class RenderableCount(val count: Int) {
 
@@ -61,17 +62,21 @@ data class RenderableRiverRank(
 )
 
 fun RiverRank.toRenderable(): RenderableRiverRank {
-    val waterwaySlug = WaterwaySlug.from(river)
-    val companySlug = CompanySlug.from(company)
     return RenderableRiverRank(
         rank,
-        RenderableWaterway(river, Uri.of("/waterway/$companySlug/$waterwaySlug")),
+        river.toRenderable(company),
         RenderableCompany.from(company),
         RenderableCount(count),
         RenderableDuration(duration),
         countDelta,
         RenderableDurationDelta(durationDelta)
     )
+}
+
+fun WaterwayName.toRenderable(companyName: CompanyName): RenderableWaterway {
+    val waterwaySlug = WaterwaySlug.from(this)
+    val companySlug = CompanySlug.from(companyName)
+    return RenderableWaterway(this, waterwaySlug, Uri.of("/waterway/$companySlug/$waterwaySlug"))
 }
 
 
@@ -88,10 +93,9 @@ fun RiverRank.toRenderable(): RenderableRiverRank {
  */
 
 fun classesFor(d: Delta): Set<String> {
-    if ( d.isNegative() ) {
+    if (d.isNegative()) {
         return setOf("delta-negative")
-    }
-    else if (d.isPositive()) {
+    } else if (d.isPositive()) {
         return setOf("delta-positive")
     }
     return setOf()

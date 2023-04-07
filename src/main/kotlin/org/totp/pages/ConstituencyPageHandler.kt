@@ -17,19 +17,16 @@ import org.http4k.lens.Path
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
-import org.totp.extensions.Defect
 import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.http4k.removeQuery
 import org.totp.model.PageViewModel
 import org.totp.model.data.CSOTotals
 import org.totp.model.data.CompanyName
-import org.totp.model.data.ConstituencyContact
 import org.totp.model.data.ConstituencyLiveData
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
-import org.totp.pages.SiteLocations.waterwayUriFor
 import org.totp.text.csv.readCSV
 import java.text.NumberFormat
 import java.time.Duration
@@ -221,7 +218,7 @@ object ConstituencyPageHandler {
                                         RenderableCSO(
                                             RenderableCompany.from(it.company),
                                             it.sitename,
-                                            RenderableWaterway(it.waterway, waterwayUriFor(it.waterway, it.company)),
+                                            it.waterway.toRenderable(it.company),
                                             it.location
                                         )
                                     },

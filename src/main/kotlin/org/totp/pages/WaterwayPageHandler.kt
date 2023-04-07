@@ -104,10 +104,7 @@ object WaterwayPageHandler {
                                             RenderableCSO(
                                                 RenderableCompany.from(it.company),
                                                 it.sitename,
-                                                RenderableWaterway(
-                                                    it.waterway,
-                                                    Uri.of("/waterway/$companySlug/$waterwaySlug")
-                                                ),
+                                                it.waterway.toRenderable(it.company),
                                                 it.location
                                             )
                                         },
@@ -115,7 +112,7 @@ object WaterwayPageHandler {
                                         it.duration,
                                         it.reporting
                                     )
-                            })
+                                })
                     )
             }
         }

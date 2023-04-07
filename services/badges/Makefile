@@ -71,6 +71,7 @@ python: $(PYTHON)
 TMP_CON_ORIG=tmp/constituencies
 TMP_HOME_ORIG=tmp/home
 TMP_COMPANY_ORIG=tmp/companies
+TMP_RIVERS_ORIG=tmp/waterway
 
 CONSTITUENCY_ORIG=$(wildcard $(TMP_CON_ORIG)/*.png)
 CONSTITUENCY_QUANT=$(foreach png,$(CONSTITUENCY_ORIG),$(CONSTITUENCY_BADGES)/$(notdir $(png)))
@@ -81,8 +82,11 @@ HOME_QUANT=$(foreach png,$(HOME_ORIG),$(HOME_BADGES)/$(notdir $(png)))
 COMPANY_ORIG=$(wildcard $(TMP_COMPANY_ORIG)/*.png)
 COMPANY_QUANT=$(foreach png,$(COMPANY_ORIG),$(COMPANY_BADGES)/$(notdir $(png)))
 
+RIVERS_ORIG=$(wildcard $(TMP_RIVERS_ORIG)/*.png)
+RIVERS_QUANT=$(foreach png,$(RIVERS_ORIG),$(RIVERS_BADGES)/$(notdir $(png)))
+
 .PHONY: quantised
-quantised: $(CONSTITUENCY_QUANT) $(HOME_QUANT) $(COMPANY_QUANT)
+quantised: $(CONSTITUENCY_QUANT) $(HOME_QUANT) $(COMPANY_QUANT) $(RIVERS_QUANT)
 
 $(CONSTITUENCY_BADGES)/%.png: $(TMP_CON_ORIG)/%.png
 	@mkdir -p $(@D)
@@ -93,6 +97,10 @@ $(HOME_BADGES)/%.png: $(TMP_HOME_ORIG)/%.png
 	pngcrush $< $@
 
 $(COMPANY_BADGES)/%.png: $(TMP_COMPANY_ORIG)/%.png
+	@mkdir -p $(@D)
+	pngcrush $< $@
+
+$(RIVERS_BADGES)/%.png: $(TMP_RIVERS_ORIG)/%.png
 	@mkdir -p $(@D)
 	pngcrush $< $@
 
@@ -108,7 +116,10 @@ generate-home-badges:
 	@mkdir -p $(TMP_HOME_ORIG)
 	$(NPM) run save-elements http://localhost:8000/private/badges/home $(TMP_HOME_ORIG)
 
+generate-rivers-badges:
+	@mkdir -p $(TMP_RIVERS_ORIG)
+	$(NPM) run save-elements http://localhost:8000/private/badges/rivers $(TMP_RIVERS_ORIG)
 
 
 .PHONY: generated-data
-generated-data:
+generated-data: generate-company-badges generate-constituency-badges generate-home-badges

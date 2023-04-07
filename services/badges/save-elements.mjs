@@ -1,13 +1,11 @@
 import pup from "puppeteer-core";
 import yargs from 'yargs'
 import console from 'console';
+import * as fs from "fs";
+import * as fpath from "path";
+
 
 const stderr = new console.Console(process.stderr);
-
-/*
-Use an already-running chrome instance, with debugging enabled, to get pages.
-Start chrome with (something like) - /opt/google/chrome/google-chrome --remote-debugging-port=21222
- */
 
 const captureScreenshotsOfElements = async (path, elements) => {
     let i = 0;
@@ -17,7 +15,16 @@ const captureScreenshotsOfElements = async (path, elements) => {
         const name = await element.evaluate(it => it.id)
 
         const filepath = `${path}/${name}.png`
+
+        const directory = fpath.dirname(filepath);
+
+        if ( ! fs.existsSync(directory)) {
+            fs.mkdirSync(directory)
+        }
+
         console.log(filepath);
+
+
 
         await element.screenshot({ path: filepath });
         i += 1;

@@ -53,6 +53,7 @@ import org.totp.model.data.waterwayCSOs
 import org.totp.pages.BadgesCompaniesHandler
 import org.totp.pages.BadgesConstituenciesHandler
 import org.totp.pages.BadgesHomeHandler
+import org.totp.pages.BadgesRiversHandler
 import org.totp.pages.BeachesPageHandler
 import org.totp.pages.CompanyPageHandler
 import org.totp.pages.ConstituenciesPageHandler
@@ -281,6 +282,10 @@ fun main() {
                                 constituencyRankings = constituencyRankings,
                                 beachRankings = beachRankings,
                             ),
+                            "/private/badges/rivers" bind BadgesRiversHandler(
+                                renderer = renderer,
+                                riverRankings = riverRankings,
+                            )
                         )
                     )
             ),
