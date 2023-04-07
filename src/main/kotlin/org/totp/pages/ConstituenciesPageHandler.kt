@@ -110,7 +110,7 @@ fun tableRows(items: List<RenderableConstituencyRank>): String {
                 td(classes = "align-middle") { +nf(r.duration.hours) }
                 td(classes = "align-middle") {
                     classes += classesFor(r.durationDelta)
-                    +nf(r.duration.hours)
+                    +nf(r.durationDelta.hours)
                 }
             }
         }
