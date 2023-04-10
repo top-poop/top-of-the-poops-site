@@ -66,7 +66,8 @@ class ConstituencyPageHandlerTest {
                     20,
                     Duration.ZERO
                 )
-            }
+            },
+            constituencyRivers = { listOf(aRiver(1)) }
         )
     )
 

@@ -27,6 +27,7 @@ import org.totp.model.data.ConstituencyLiveData
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
+import org.totp.model.data.RiverRank
 import org.totp.text.csv.readCSV
 import java.text.NumberFormat
 import java.time.Duration
@@ -130,6 +131,7 @@ class ConstituencyPage(
     val constituencies: List<RenderableConstituency>,
     val live: ConstituencyPageLiveData?,
     val neighbours: List<RenderableConstituencyRank>,
+    val rivers: List<RenderableRiverRank>,
 ) :
     PageViewModel(uri)
 
@@ -155,6 +157,23 @@ object ConstituencyRedirectFilter {
     }
 }
 
+fun CSOTotals.toRenderable(): RenderableCSOTotal {
+    return RenderableCSOTotal(
+        constituency.toRenderable(),
+        cso.let {
+            RenderableCSO(
+                RenderableCompany.from(it.company),
+                it.sitename,
+                it.waterway.toRenderable(it.company),
+                it.location
+            )
+        },
+        count,
+        duration,
+        reporting
+    )
+}
+
 object ConstituencyPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
@@ -164,13 +183,13 @@ object ConstituencyPageHandler {
         constituencyLiveData: (ConstituencyName) -> ConstituencyLiveData?,
         constituencyLiveAvailable: () -> List<ConstituencyName>,
         constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
-        constituencyRank: (ConstituencyName) -> ConstituencyRank?
+        constituencyRank: (ConstituencyName) -> ConstituencyRank?,
+        constituencyRivers: (ConstituencyName) -> List<RiverRank>,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
         val constituencySlug = Path.value(ConstituencySlug).of("constituency", "The constituency")
         val numberFormat = NumberFormat.getIntegerInstance()
-
 
         return ConstituencyRedirectFilter().then { request: Request ->
             val slug = constituencySlug(request)
@@ -196,6 +215,11 @@ object ConstituencyPageHandler {
                     .map { it.toRenderable(mpFor) }
 
                 val summary = PollutionSummary.from(list)
+
+                val rivers2 = constituencyRivers(constituencyName)
+                val rivers =  rivers2   .take(5)
+                    .map { it.toRenderable() }
+
                 Response(Status.OK)
                     .with(
                         viewLens of ConstituencyPage(
@@ -203,7 +227,11 @@ object ConstituencyPageHandler {
                             constituencyName,
                             SocialShare(
                                 pageUriFrom(request),
-                                text = "$constituencyName had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year} - ${mpFor(constituencyName).handle}",
+                                text = "$constituencyName had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year} - ${
+                                    mpFor(
+                                        constituencyName
+                                    ).handle
+                                }",
                                 cta = "Share $constituencyName sewage horrors",
                                 tags = listOf("sewage"),
                                 via = "sewageuk",
@@ -212,20 +240,7 @@ object ConstituencyPageHandler {
                             summary,
                             constituencyBoundary(constituencyName),
                             list.map {
-                                RenderableCSOTotal(
-                                    it.constituency.toRenderable(),
-                                    it.cso.let {
-                                        RenderableCSO(
-                                            RenderableCompany.from(it.company),
-                                            it.sitename,
-                                            it.waterway.toRenderable(it.company),
-                                            it.location
-                                        )
-                                    },
-                                    it.count,
-                                    it.duration,
-                                    it.reporting
-                                )
+                                it.toRenderable()
                             },
                             renderableConstituencies,
                             if (liveAvailable.contains(constituencyName)) {
@@ -236,7 +251,8 @@ object ConstituencyPageHandler {
                                     )
                                 }
                             } else null,
-                            neighbours
+                            neighbours,
+                            rivers,
                         )
                     )
             }

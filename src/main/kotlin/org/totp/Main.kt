@@ -49,6 +49,7 @@ import org.totp.model.data.MediaAppearances
 import org.totp.model.data.RiverRankings
 import org.totp.model.data.WaterCompanies
 import org.totp.model.data.constituencyCSOs
+import org.totp.model.data.constituencyRivers
 import org.totp.model.data.waterwayCSOs
 import org.totp.pages.BadgesCompaniesHandler
 import org.totp.pages.BadgesConstituenciesHandler
@@ -250,6 +251,7 @@ fun main() {
                                 mpFor = mpFor,
                                 constituencyNeighbours = ConstituencyNeighbours(data2022),
                                 constituencyRank = constituencyRank,
+                                constituencyRivers = constituencyRivers(allSpills, riverRankings),
                             ),
                             "/company/{company}" bind CompanyPageHandler(
                                 renderer = renderer,

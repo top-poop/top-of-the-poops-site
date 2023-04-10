@@ -51,11 +51,11 @@ class ConstituencyName(value: String) : StringValue(value), ComparableValue<Cons
     companion object : StringValueFactory<ConstituencyName>(::ConstituencyName)
 }
 
-class WaterwayName(value: String) : StringValue(value), ComparableValue<ConstituencyName, String> {
+class WaterwayName(value: String) : StringValue(value), ComparableValue<WaterwayName, String> {
     companion object : StringValueFactory<WaterwayName>(::WaterwayName)
 }
 
-class CompanyName(value: String) : StringValue(value), ComparableValue<ConstituencyName, String> {
+class CompanyName(value: String) : StringValue(value), ComparableValue<CompanyName, String> {
     companion object : StringValueFactory<CompanyName>(::CompanyName)
 }
 
@@ -259,6 +259,19 @@ fun waterwayCSOs(source: () -> List<CSOTotals>) =
             .filter { company == CompanySlug.from(it.cso.company) }
         result
     }
+
+fun constituencyRivers(csos: () -> List<CSOTotals>, rivers: () -> List<RiverRank>) = { name: ConstituencyName ->
+    val waterways = csos()
+        .asSequence()
+        .filter { it.constituency == name }
+        .map { it.cso.company to it.cso.waterway }
+        .toSet()
+
+    rivers()
+        .filter { it.company to it.river in waterways }
+        .sortedBy { it.rank }
+}
+
 
 data class MediaAppearance(
     val title: String,
