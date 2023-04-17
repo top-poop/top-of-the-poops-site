@@ -3,4 +3,4 @@ select site_name                                                           as na
        st_npoints(st_simplifypreservetopology(geometry, 0.0001))   as points_reduced,
        st_asgeojson(st_forcepolygoncw(st_simplifypreservetopology(geometry, 0.0001))) as geometry
 from bathing_locations_view
-
+order by site_name

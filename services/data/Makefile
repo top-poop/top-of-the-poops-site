@@ -64,40 +64,25 @@ python: $(PYTHON)
 	touch $@
 
 
-DATA_2021_SQL=$(wildcard sql/v1/2021/*.sql)
-DATA_2021_GENERATED=$(foreach sql,$(DATA_2021_SQL),$(DATAFILES)/v1/2021/$(basename $(notdir $(sql))).json)
-
 DATA_2022_SQL=$(wildcard sql/v1/2022/*.sql)
 DATA_2022_GENERATED=$(foreach sql,$(DATA_2022_SQL),$(DATAFILES)/v1/2022/$(basename $(notdir $(sql))).json)
-
-GEO_2021_SQL=$(wildcard sql/v1/2021/geo/*.sql)
-GEO_2021_GENERATED=$(foreach sql,$(GEO_2021_SQL),$(DATAFILES)/v1/2021/geo/$(basename $(notdir $(sql))).json)
 
 GEO_2022_SQL=$(wildcard sql/v1/2022/geo/*.sql)
 GEO_2022_GENERATED=$(foreach sql,$(GEO_2022_SQL),$(DATAFILES)/v1/2022/geo/$(basename $(notdir $(sql))).json)
 
-PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAFILES)/v1/2021/geo/countries.json $(DATAFILES)/v1/2022/geo/countries.json
+PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAFILES)/v1/2022/geo/countries.json
 
-generated-data: generated-2021 generated-2022 generated-live $(DATAFILES)/constituencies/.uptodate $(PROVIDED)
+generated-data: generated-2022 generated-live $(DATAFILES)/constituencies/.uptodate $(DATAFILES)/beaches/.uptodate $(PROVIDED)
 
-generated-2021: $(DATA_2021_GENERATED) $(GEO_2021_GENERATED) $(PROVIDED)
 generated-2022: $(DATA_2022_GENERATED) $(GEO_2022_GENERATED) $(PROVIDED)
 
 .PHONY: generated-live
 generated-live:
 	$(PYTHON) thames-summary.py
 
-$(DATAFILES)/v1/2021/%.json: sql/v1/2021/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_JSON)
-	@mkdir -p $(dir $@)
-	$(PYTHON) $(SQL_TO_JSON) $< $@
-
 $(DATAFILES)/v1/2022/%.json: sql/v1/2022/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_JSON)
 	@mkdir -p $(dir $@)
 	$(PYTHON) $(SQL_TO_JSON) $< $@
-
-$(DATAFILES)/v1/2021/geo/%.json:  sql/v1/2021/geo/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_TEXT)
-	@mkdir -p $(dir $@)
-	$(PYTHON) $(SQL_TO_TEXT) $< | jq -r tostring > $@
 
 $(DATAFILES)/v1/2022/geo/%.json:  sql/v1/2022/geo/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_TEXT)
 	@mkdir -p $(dir $@)
@@ -122,20 +107,12 @@ $(DATAFILES)/media-appearances.json: provided/media-appearances.json
 $(DATAFILES)/water-companies.json: provided/water-companies.json
 	cp $< $@
 
-$(DATAFILES)/v1/2021/geo/countries.json: provided/countries.json
-	cp $< $@
-
 $(DATAFILES)/v1/2022/geo/countries.json: provided/countries.json
 	cp $< $@
-
-.PHONY: clean-2021
-clean-2021:
-	rm -rf datafiles/v1/2021
 
 .PHONY: clean-2022
 clean-2022:
 	rm -rf datafiles/v1/2022
-
 
 .PHONY: generated-2022-again
 generated-2022-again: clean-2022 generated-2022
