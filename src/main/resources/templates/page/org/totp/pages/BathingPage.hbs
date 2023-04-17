@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Top of the Poops | Constituency | {{ name }}</title>
+    <title>Top of the Poops | Bathing Area | {{ name }}</title>
     <meta name="description" content="Analysing sewage dumps by water companies at {{ name }}">
 
     {{> chunks/favicons }}
@@ -88,6 +88,24 @@
                     </div>
                 </div>
             </div>
+            {{#if constituencyRank}}
+            <div class="row">
+                <div class="col">
+                    <div class="card  mb-3">
+                        <div class="card-header">Local Constituency</div>
+                        <div class="card-body">
+                            <div class="card-text">
+                                <a href="{{constituencyRank.constituency.uri}}">
+                                    <button class="btn btn-primary mb-2">
+                                        {{constituencyRank.constituency.name}}<span class="badge badge-info ml-1">{{numberFormat constituencyRank.count.count}}</span>
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
         </div>
     </div>
 </div>
@@ -103,6 +121,7 @@
                 <p>Here are all the reported sewage overflow totals for {{ name.value }} in {{ summary.year }}.
                     Sometimes sewage can be being dumped for <b>months</b> at a time.</p>
 
+                <p>If the locations of the sewage outlets look a bit unusual, it is likely that the reporting of the data from the water company is in error. We rely on their data in order to draw these maps.</p>
                 <div class="table-responsive">
                     <table id="table-csos" class="table">
                         <thead>

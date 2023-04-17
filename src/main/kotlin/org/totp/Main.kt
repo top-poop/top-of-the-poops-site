@@ -246,7 +246,10 @@ fun main() {
                                 bathingCSOs = { wanted ->
                                     BathingCSOs(data2022)().filter { wanted == it.bathing.toSlug() }
                                 },
-                                beachBoundaries = beachBoundaries
+                                beachBoundaries = beachBoundaries,
+                                mpFor = mpFor,
+                                constituencyCsos = constituencyCSOs(allSpills),
+                                constituencyRank = constituencyRank
                             ),
                             "/rivers" bind RiversPageHandler(
                                 renderer = renderer,

@@ -18,6 +18,8 @@ import org.totp.model.data.BathingName
 import org.totp.model.data.BathingRank
 import org.totp.model.data.BathingSlug
 import org.totp.model.data.BeachName
+import org.totp.model.data.CSOTotals
+import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
 import org.totp.model.data.toSlug
@@ -33,6 +35,8 @@ class BathingPage(
     val rank: RenderableBathingRank,
     val csos: List<RenderableBathingCSO>,
     val geojson: GeoJSON?,
+    val constituencyRank: RenderableConstituencyRank?,
+    val constituencyCSOs: List<RenderableCSOTotal>,
 ) : PageViewModel(uri)
 
 fun List<BathingCSO>.summary(): PollutionSummary {
@@ -78,6 +82,9 @@ object BathingPageHandler {
         bathingRankings: () -> List<BathingRank>,
         bathingCSOs: (BathingSlug) -> List<BathingCSO>,
         beachBoundaries: (BeachName) -> GeoJSON?,
+        mpFor: (ConstituencyName) -> MP,
+        constituencyCsos: (ConstituencyName) -> List<CSOTotals>,
+        constituencyRank: (ConstituencyName) -> ConstituencyRank?,
     ): HttpHandler {
 
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
@@ -94,28 +101,34 @@ object BathingPageHandler {
             } else {
                 val numberFormat = NumberFormat.getIntegerInstance()
 
-                val name = csos.first().bathing
+                val first = csos.first()
+
+                val bathingAreaName = first.bathing
+                val constituencyName = first.constituency
 
                 val rank = bathingRankings().filter { it.beach.toSlug() == bathingArea }.first().toRenderable()
                 val geojson = csos.mapNotNull { it.beach }.firstOrNull()?.let { beachBoundaries(it) }
-
                 val summary = csos.summary()
+                val constituencyCsos = constituencyCsos(constituencyName).map { it.toRenderable() }
+
                 Response(Status.OK)
                     .with(
                         viewLens of BathingPage(
                             pageUriFrom(request),
-                            name,
+                            bathingAreaName,
                             summary = summary,
                             share = SocialShare(
                                 pageUriFrom(request),
-                                text = "$name had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year}",
-                                cta = "$name pollution",
+                                text = "$bathingAreaName had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year}",
+                                cta = "$bathingAreaName pollution",
                                 tags = listOf("sewage"),
                                 via = "sewageuk"
                             ),
                             rank,
                             csos.map { it.toRenderable() },
                             geojson,
+                            constituencyRank(constituencyName)?.toRenderable(mpFor),
+                            constituencyCsos
                         )
                     )
             }
