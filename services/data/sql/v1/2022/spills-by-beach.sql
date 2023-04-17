@@ -4,6 +4,6 @@ select this.*,
 from bathing_view this
          left join bathing_view as last on this.bathing = last.bathing and this.company_name = last.company_name
 where
-    this.reporting_year = 2021
-and last.reporting_year = 2020
+    this.reporting_year = 2022
+and last.reporting_year = 2021
 order by this.total_spill_hours desc

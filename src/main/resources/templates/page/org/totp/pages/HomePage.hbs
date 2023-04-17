@@ -113,7 +113,7 @@
 
                 {{#each beachRankings}}
                     <div>
-                        <b>{{this.rank}}.</b>{{this.company.name}} - {{this.beach}} {{numberFormat this.duration.hours}}
+                        <b>{{this.rank}}.</b>{{this.company.name}} - <a href="{{this.beach.uri}}">{{this.beach.name}}</a> {{numberFormat this.duration.hours}}
                         hours
                     </div>
                 {{/each}}

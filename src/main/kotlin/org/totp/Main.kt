@@ -35,7 +35,9 @@ import org.totp.extensions.Defect
 import org.totp.http4k.StandardFilters
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.AllSpills
-import org.totp.model.data.BeachRankings
+import org.totp.model.data.BathingRankings
+import org.totp.model.data.BeachBoundaries
+import org.totp.model.data.BathingCSOs
 import org.totp.model.data.CompanyAnnualSummaries
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyContact
@@ -45,21 +47,23 @@ import org.totp.model.data.ConstituencyLiveDataLoader
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencyNeighbours
 import org.totp.model.data.ConstituencyRankings
+import org.totp.model.data.ConstituencySlug
 import org.totp.model.data.MediaAppearances
 import org.totp.model.data.RiverRankings
 import org.totp.model.data.WaterCompanies
 import org.totp.model.data.constituencyCSOs
 import org.totp.model.data.constituencyRivers
+import org.totp.model.data.toSlug
 import org.totp.model.data.waterwayCSOs
 import org.totp.pages.BadgesCompaniesHandler
 import org.totp.pages.BadgesConstituenciesHandler
 import org.totp.pages.BadgesHomeHandler
 import org.totp.pages.BadgesRiversHandler
+import org.totp.pages.BathingPageHandler
 import org.totp.pages.BeachesPageHandler
 import org.totp.pages.CompanyPageHandler
 import org.totp.pages.ConstituenciesPageHandler
 import org.totp.pages.ConstituencyPageHandler
-import org.totp.pages.ConstituencySlug
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.HomepageHandler
 import org.totp.pages.HtmlPageErrorFilter
@@ -189,7 +193,7 @@ fun main() {
     val constituencyContacts = memoize(ConstituencyContacts(data2022))
     val allSpills = memoize(AllSpills(data2022))
     val riverRankings = memoize(RiverRankings(data2022))
-    val beachRankings = memoize(BeachRankings(data2022))
+    val beachRankings = memoize(BathingRankings(data2022))
 
     val constituencyRankings = memoize(ConstituencyRankings(data2022))
 
@@ -197,6 +201,10 @@ fun main() {
 
     val constituencyBoundaries = ConstituencyBoundaries(
         SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient)
+    )
+
+    val beachBoundaries = BeachBoundaries(
+        SetBaseUriFrom(Uri.of("/beaches")).then(dataClient)
     )
 
     val constituencyRank = { wanted: ConstituencyName ->
@@ -213,7 +221,7 @@ fun main() {
                             "/" bind HomepageHandler(
                                 renderer = renderer,
                                 constituencyRankings = constituencyRankings,
-                                beachRankings = beachRankings,
+                                bathingRankings = beachRankings,
                                 riverRankings = riverRankings,
                                 appearances = mediaAppearances,
                                 companies = waterCompanies,
@@ -230,7 +238,15 @@ fun main() {
                             ),
                             "/beaches" bind BeachesPageHandler(
                                 renderer = renderer,
-                                beachRankings = beachRankings
+                                bathingRankings = beachRankings
+                            ),
+                            "/beach/{bathing}" bind BathingPageHandler(
+                                renderer = renderer,
+                                bathingRankings = beachRankings,
+                                bathingCSOs = { wanted ->
+                                    BathingCSOs(data2022)().filter { wanted == it.bathing.toSlug() }
+                                },
+                                beachBoundaries = beachBoundaries
                             ),
                             "/rivers" bind RiversPageHandler(
                                 renderer = renderer,
@@ -258,7 +274,7 @@ fun main() {
                                 companySummaries = CompanyAnnualSummaries(data2022),
                                 waterCompanies = waterCompanies,
                                 riverRankings = riverRankings,
-                                beachRankings = beachRankings
+                                bathingRankings = beachRankings
                             ),
                             "/map.html" bind OldMapRedirectHandler(),
                             "/sitemap.xml" bind SitemapHandler(
@@ -282,7 +298,7 @@ fun main() {
                             "/private/badges/home" bind BadgesHomeHandler(
                                 renderer = renderer,
                                 constituencyRankings = constituencyRankings,
-                                beachRankings = beachRankings,
+                                bathingRankings = beachRankings,
                             ),
                             "/private/badges/rivers" bind BadgesRiversHandler(
                                 renderer = renderer,

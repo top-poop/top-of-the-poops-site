@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Top of the Poops | Waterway | {{ name }}</title>
-    <meta name="description" content="Mapping sewage pollution for { name }}">
+    <title>Top of the Poops | Constituency | {{ name }}</title>
+    <meta name="description" content="Analysing sewage dumps by water companies at {{ name }}">
 
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
@@ -12,7 +12,9 @@
     <link rel="stylesheet" href="/assets/css/leaflet.css"/>
     <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
 
-    {{> components/meta-opengraph title=(concat "Waterway | " name) }}
+    {{> components/meta-opengraph
+            title=(concat "Bathing Area | " name)
+    }}
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -36,12 +38,14 @@
                     &copy; <a href="https://top-of-the-poops.org">Top of the Poops</a> 2021-2023
                 </div>
             </div>
+            {{#if geojson}}
+                <div style="display: none" id="map-geojson">{{geojson}}</div>{{/if}}
         </div>
         <div class="col">
             <div class="row">
                 <div class="col">
                     <div class="card  mb-3">
-                        <div class="card-header">Totals for {{ name.value }} in {{summary.year}}</div>
+                        <div class="card-header">Totals for {{ name }} in {{summary.year}}</div>
                         <div class="card-body">
                             <h5 class="card-title">{{summary.locationCount}} Sites polluted by {{join summary.companies
                                                                                                       ', '}}</h5>
@@ -72,25 +76,6 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col">
-                    <div class="card  mb-3">
-                        <div class="card-header">Constituencies along {{name}}</div>
-                        <div class="card-body">
-                            <div class="card-text">
-                                {{#each constituencies}}
-                                    <a href="{{this.constituency.uri}}">
-                                        <button class="btn btn-primary mb-2">
-                                            {{this.constituency.name}}<span class="badge badge-info ml-1">{{numberFormat
-                                                this.count.count}}</span>
-                                        </button>
-                                    </a>
-                                {{/each}}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -106,11 +91,6 @@
                 <p>Here are all the reported sewage overflow totals for {{ name.value }} in {{ summary.year }}.
                     Sometimes sewage can be being dumped for <b>months</b> at a time.</p>
 
-                <p>These numbers are very slightly different from the <b>Rivers</b> page - This is because there is an
-                    invalid grid reference
-                    on the pollution consent - so we don't know where the CSO is. We're working on it.
-                </p>
-
                 <div class="table-responsive">
                     <table id="table-csos" class="table">
                         <thead>
@@ -125,17 +105,19 @@
                         </thead>
                         <tbody>
                         {{#each csos}}
-                            <tr data-class="cso" data-lat="{{this.cso.location.lat}}"
-                                data-lon="{{this.cso.location.lon}}">
-                                <td class="align-middle" data-company="{{this.cso.company.name}}"><a
-                                        href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a></td>
+                            <tr data-class="cso" data-lat="{{this.location.lat}}"
+                                data-lon="{{this.location.lon}}">
+                                <td class="align-middle" data-company="{{this.company.name}}">
+                                    <a href="{{this.company.uri}}">{{this.company.name}}</a>
+                                </td>
+                                <td class="align-middle" data-waterway="{{this.waterway.name}}">
+                                    <a href="{{this.waterway.uri}}">{{this.waterway.name}}</a>
+                                </td>
                                 <td class="align-middle"
-                                    data-waterway="{{this.cso.waterway.name}}">{{this.cso.waterway.name}}</td>
-                                <td class="align-middle"
-                                    data-sitename="{{this.cso.sitename}}">{{this.cso.sitename}}</td>
+                                    data-sitename="{{this.sitename}}">{{this.sitename}}</td>
                                 <td class="align-middle" data-count="{{this.count}}">{{numberFormat this.count}}</td>
-                                <td class="align-middle" data-duration="{{this.duration.toHours}}">{{numberFormat
-                                        this.duration.toHours}}</td>
+                                <td class="align-middle" data-duration="{{this.duration.hours}}">{{numberFormat
+                                        this.duration.hours}}</td>
                                 <td class="align-middle">{{numberFormat this.reporting}}</td>
                             </tr>
                         {{/each}}
@@ -154,14 +136,7 @@
 </div>
 
 {{> chunks/footer }}
-
 <script>
-
-    const ewBounds = [
-        [49.674737880665994, -6.064453125000001],
-        [56.029087419764366, 1.9555664062500002]
-    ];
-
     const myStyle = {
         "color": "#ff7800",
         "weight": 5,
@@ -183,6 +158,13 @@
     )
             .addTo(map);
 
+    var geoBounds = null
+    let bathingAreaElement = document.getElementById("map-geojson");
+    if (bathingAreaElement != null) {
+        const layer = L.geoJSON(JSON.parse(bathingAreaElement.textContent), {style: myStyle});
+        layer.addTo(map);
+        geoBounds = layer.getBounds();
+    }
 
     const attr = (a, tr) => {
         const attributeName = `data-${a}`
@@ -237,26 +219,20 @@
                     text: `${it.sitename}<br/>${it.waterway}<br/>${it.count} Dumps / ${it.duration} hours by ${it.company}`
                 }
             })
-            .map(it => L.marker([it.lat, it.lon], {icon: durationIcon(it.duration)}).bindTooltip(it.text));
+            .map(it => L.marker([it.lat, it.lon], {icon: durationIcon(it.duration)}).bindTooltip(it.text))
+
+
+    markers.forEach(it => it.addTo(map))
 
     const bounds = markers.reduce((acc, m) => {
         if (acc == null) {
-            return L.latLngBounds(m.getLatLng(), m.getLatLng())
+            return geoBounds != null ? geoBounds.extend(m.getLatLng()) : L.latLngBounds(m.getLatLng(), m.getLatLng());
         } else {
             return acc.extend(m.getLatLng())
         }
     }, null)
 
-    markers.forEach(it => {
-        it.addTo(map);
-    })
-
-    if (bounds) {
-        map.fitBounds(bounds)
-    } else {
-        map.fitBounds(ewBounds)
-    }
-
+    map.fitBounds(bounds)
 </script>
 
 
@@ -269,5 +245,6 @@
                         "<'row'<'col-sm-12 col-md-5'i>>"
             });
 </script>
+
 </body>
 </html>

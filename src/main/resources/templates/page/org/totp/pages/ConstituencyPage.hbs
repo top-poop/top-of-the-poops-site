@@ -227,7 +227,12 @@
         "opacity": 0.65
     };
 
-    const map = L.map("map", {scrollWheelZoom: false, dragging: !L.Browser.mobile, tap: !L.Browser.mobile});
+    const map = L.map("map", {
+        scrollWheelZoom: false,
+        dragging: !L.Browser.mobile,
+        tap: !L.Browser.mobile,
+        maxZoom: 15.5,
+    });
 
     L.tileLayer(
             'https://maps.top-of-the-poops.org/styles/v1/{z}/{x}/{y}.png',

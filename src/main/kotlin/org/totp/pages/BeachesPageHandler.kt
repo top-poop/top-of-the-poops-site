@@ -12,8 +12,11 @@ import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
-import org.totp.model.data.BeachRank
+import org.totp.model.data.BathingName
+import org.totp.model.data.BathingRank
+import org.totp.model.data.BathingSlug
 import org.totp.model.data.CompanyName
+import org.totp.model.data.toSlug
 import java.text.NumberFormat
 import java.time.Duration
 
@@ -26,6 +29,16 @@ class BeachesPage(
     val polluterRankings: List<BeachPolluter>,
     val share: SocialShare,
 ) : PageViewModel(uri)
+
+
+data class RenderableBathingName(val name: BathingName, val slug: BathingSlug, val uri: Uri) {
+    companion object {
+        fun from(name: BathingName): RenderableBathingName {
+            val slug = name.toSlug()
+            return RenderableBathingName(name, slug, slug.let { Uri.of("/beach/$it") })
+        }
+    }
+}
 
 data class RenderableCompany(val name: CompanyName, val slug: CompanySlug, val uri: Uri) {
     companion object {
@@ -42,26 +55,27 @@ data class BeachPolluter(
     val count: Int,
     val duration: Duration,
     val countDelta: DeltaValue,
-    val durationDelta: RenderableDurationDelta
+    val durationDelta: RenderableDurationDelta,
 )
+
 
 data class RenderableBeachRank(
     val rank: Int,
-    val beach: String,
+    val beach: RenderableBathingName,
     val company: RenderableCompany,
     val count: RenderableCount,
     val duration: RenderableDuration,
     val countDelta: DeltaValue,
-    val durationDelta: RenderableDurationDelta
+    val durationDelta: RenderableDurationDelta,
 )
 
-fun BeachRank.toRenderable(): RenderableBeachRank {
+fun BathingRank.toRenderable(): RenderableBeachRank {
     return RenderableBeachRank(
         rank,
-        beach,
+        RenderableBathingName.from(beach),
         RenderableCompany.from(company),
         RenderableCount(count),
-        RenderableDuration(duration),
+        duration.toRenderable(),
         countDelta,
         RenderableDurationDelta(durationDelta)
     )
@@ -71,13 +85,13 @@ fun BeachRank.toRenderable(): RenderableBeachRank {
 object BeachesPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
-        beachRankings: () -> List<BeachRank>,
+        bathingRankings: () -> List<BathingRank>,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
         return { request: Request ->
             val numberFormat = NumberFormat.getNumberInstance()
-            val rankings = beachRankings().sortedBy { it.rank }
+            val rankings = bathingRankings().sortedBy { it.rank }
             val polluters = rankings.groupBy { it.company }
                 .map {
                     BeachPolluter(
@@ -116,7 +130,7 @@ object BeachesPageHandler {
                             cta = "Take action. Tweet this to your followers",
                             listOf("sewage"),
                             via = "sewageuk",
-                            twitterImageUri=Uri.of("https://top-of-the-poops.org/badges/home/beaches.png")
+                            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/home/beaches.png")
                         )
 
                     )

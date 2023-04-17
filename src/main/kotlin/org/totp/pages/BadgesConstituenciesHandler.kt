@@ -14,6 +14,7 @@ import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.ConstituencyContact
 import org.totp.model.data.ConstituencyName
+import org.totp.model.data.ConstituencySlug
 import org.totp.model.data.GeoJSON
 
 class BadgesConstituenciesPage(
@@ -47,7 +48,7 @@ object BadgesConstituenciesHandler {
                                 it.constituencyName.toRenderable(),
                                 mpFor(it.constituencyName),
                                 RenderableCount(it.count),
-                                RenderableDuration(it.duration),
+                                it.duration.toRenderable(),
                                 countDelta = DeltaValue.of(it.countDelta),
                                 durationDelta = RenderableDurationDelta(it.durationDelta)
                             )

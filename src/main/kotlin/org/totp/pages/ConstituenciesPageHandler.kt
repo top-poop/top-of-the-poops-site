@@ -52,6 +52,8 @@ class RenderableDuration(value: Duration) {
     val hasYears = years > 1.0
 }
 
+fun Duration.toRenderable() = RenderableDuration(this)
+
 class RenderableDurationDelta(val value: Duration) : Delta {
     val hours = value.toHours()
 
@@ -150,7 +152,7 @@ fun ConstituencyRank.toRenderable(
     constituencyName.toRenderable(),
     mp(constituencyName),
     RenderableCount(count),
-    RenderableDuration(duration),
+    duration.toRenderable(),
     countDelta = DeltaValue.of(countDelta),
     durationDelta = RenderableDurationDelta(durationDelta)
 )

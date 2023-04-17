@@ -11,8 +11,7 @@ import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
-import org.totp.model.data.BeachRank
-import org.totp.model.data.ConstituencyContact
+import org.totp.model.data.BathingRank
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.MediaAppearance
 import org.totp.model.data.RiverRank
@@ -50,7 +49,7 @@ object HomepageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
         constituencyRankings: () -> List<ConstituencyRank>,
-        beachRankings: () -> List<BeachRank>,
+        bathingRankings: () -> List<BathingRank>,
         riverRankings: () -> List<RiverRank>,
         appearances: () -> List<MediaAppearance>,
         companies: () -> List<WaterCompany>,
@@ -78,7 +77,7 @@ object HomepageHandler {
                         totalDuration,
                         rankings.take(10).map { it.toRenderable(mpFor)},
                         companies(),
-                        beachRankings().take(10).map { it.toRenderable() },
+                        bathingRankings().take(10).map { it.toRenderable() },
                         rivers.map {
                             it.toRenderable()
                         },

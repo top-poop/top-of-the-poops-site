@@ -67,7 +67,7 @@ fun RiverRank.toRenderable(): RenderableRiverRank {
         river.toRenderable(company),
         RenderableCompany.from(company),
         RenderableCount(count),
-        RenderableDuration(duration),
+        duration.toRenderable(),
         countDelta,
         RenderableDurationDelta(durationDelta)
     )

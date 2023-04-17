@@ -10,7 +10,8 @@ import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.Address
-import org.totp.model.data.BeachRank
+import org.totp.model.data.BathingName
+import org.totp.model.data.BathingRank
 import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.MediaAppearance
@@ -62,10 +63,10 @@ class HomepageHandlerTest {
                     )
                 )
             },
-            beachRankings = {
-                listOf(BeachRank(
+            bathingRankings = {
+                listOf(BathingRank(
                     1,
-                    "beach",
+                    BathingName.of("beach"),
                     CompanyName.of("company"),
                     10,
                     Duration.ofHours(1),

@@ -11,7 +11,7 @@ import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
-import org.totp.model.data.BeachRank
+import org.totp.model.data.BathingRank
 import kotlin.math.floor
 
 class BadgesHomePage(
@@ -30,7 +30,7 @@ object BadgesHomeHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
         constituencyRankings: () -> List<ConstituencyRank>,
-        beachRankings: () -> List<BeachRank>,
+        bathingRankings: () -> List<BathingRank>,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -42,7 +42,7 @@ object BadgesHomeHandler {
 
             val totalDuration = rankings.map { it.duration }.reduce { acc, duration -> acc + duration }
 
-            val beaches = beachRankings()
+            val beaches = bathingRankings()
             val beachDuration = beaches.map { it.duration }.reduce { acc, duration -> acc + duration }
             val beachCount = beaches.map { it.count }.reduce { acc, count -> acc + count }
 
@@ -52,10 +52,10 @@ object BadgesHomeHandler {
                         pageUriFrom(request),
                         2022,
                         RenderableCount(totalSpillsRounded),
-                        RenderableDuration(totalDuration),
+                        totalDuration.toRenderable(),
 
                         beachCount = RenderableCount(beachCount),
-                        beachDuration = RenderableDuration(beachDuration),
+                        beachDuration = beachDuration.toRenderable(),
                         beaches = beaches.map {
                             it.toRenderable()
                         }

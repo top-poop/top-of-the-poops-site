@@ -114,5 +114,11 @@ $(DATAFILES)/v1/2022/geo/countries.json: provided/countries.json
 clean-2022:
 	rm -rf datafiles/v1/2022
 
+.PHONY: beaches-again
+beaches-again:
+	rm -rf datafiles/beaches
+	$(MAKE) generated-data
+
+
 .PHONY: generated-2022-again
 generated-2022-again: clean-2022 generated-2022
