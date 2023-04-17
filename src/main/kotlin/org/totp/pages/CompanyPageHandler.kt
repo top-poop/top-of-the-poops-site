@@ -17,7 +17,7 @@ import org.http4k.template.viewModel
 import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
-import org.totp.model.data.BeachRank
+import org.totp.model.data.BathingRank
 import org.totp.model.data.CompanyName
 import org.totp.model.data.RiverRank
 import org.totp.model.data.WaterCompany
@@ -66,7 +66,7 @@ fun CompanyAnnualSummary.toRenderable(): RenderableCompanyAnnualSummary {
         RenderableCompany.from(name),
         year,
         RenderableCount(spillCount),
-        RenderableDuration(duration),
+        duration.toRenderable(),
         locationCount
     )
 }
@@ -82,7 +82,7 @@ object CompanyPageHandler {
         companySummaries: () -> List<CompanyAnnualSummary>,
         waterCompanies: () -> List<WaterCompany>,
         riverRankings: () -> List<RiverRank>,
-        beachRankings: () -> List<BeachRank>,
+        bathingRankings: () -> List<BathingRank>,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
         val companySlug = Path.value(CompanySlug).of("company", "The company")
@@ -116,7 +116,7 @@ object CompanyPageHandler {
                             links = companies.map {
                                 WaterCompanyLink(it.name == name, it)
                             },
-                            beaches = beachRankings().filter { it.company == company.name }.take(6)
+                            beaches = bathingRankings().filter { it.company == company.name }.take(6)
                                 .map { it.toRenderable() },
                             rivers = riverRankings().filter { it.company == company.name }.take(6)
                                 .map { it.toRenderable() },

@@ -88,10 +88,10 @@
             {{#> components/section title=(concat "Beaches Polluted by " name)}}
                 <div class="row row-cols-1 row-cols-md-3">
                     {{#each beaches}}
-                        <a class="quiet-link" href="/beaches">
+                        <a class="quiet-link" href="{{this.beach.uri}}">
                             <div class="col mb-4">
                                 <div class="card h-100">
-                                    <div class="card-header">{{inc @index}}. {{this.beach}}</div>
+                                    <div class="card-header">{{inc @index}}. {{this.beach.name}}</div>
                                     <div class="card-body">
                                         <h5 class="card-title">{{numberFormat this.duration.hours}} hours</h5>
                                         <p class="card-text"><small class="text-muted">

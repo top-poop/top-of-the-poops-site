@@ -6,11 +6,8 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
-import org.totp.model.data.BeachRank
-import org.totp.model.data.CompanyName
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import java.time.Duration
 
 
 class BeachesPageHandlerTest {
@@ -18,7 +15,7 @@ class BeachesPageHandlerTest {
     val service = routes(
         "/" bind Method.GET to BeachesPageHandler(
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
-            beachRankings = {
+            bathingRankings = {
                 listOf(aBeach)
             },
         )

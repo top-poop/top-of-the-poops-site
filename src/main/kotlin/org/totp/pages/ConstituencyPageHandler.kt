@@ -1,7 +1,5 @@
 package org.totp.pages
 
-import dev.forkhandles.values.StringValue
-import dev.forkhandles.values.StringValueFactory
 import org.http4k.core.Body
 import org.http4k.core.ContentType
 import org.http4k.core.Filter
@@ -25,6 +23,7 @@ import org.totp.model.data.CSOTotals
 import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyLiveData
 import org.totp.model.data.ConstituencyName
+import org.totp.model.data.ConstituencySlug
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
 import org.totp.model.data.RiverRank
@@ -39,57 +38,43 @@ val constituencyNames = readCSV(
 ).toSortedSet(Comparator.comparing { it.value })
 
 
-class ConstituencySlug(value: String) : StringValue(value) {
-    companion object : StringValueFactory<ConstituencySlug>(::ConstituencySlug) {
-        fun from(name: ConstituencyName): ConstituencySlug {
-            return of(name.value.kebabCase())
-        }
-    }
-}
-
 val slugToConstituency = constituencyNames.associateBy { ConstituencySlug.from(it) }
+
 
 data class PollutionSummary(
     val year: Int,
     val locationCount: Int,
     val companies: List<CompanyName>,
     val count: RenderableCount,
-    val duration: RenderableDuration
+    val duration: RenderableDuration,
 ) {
 
     companion object {
-        fun from(csos: List<CSOTotals>): PollutionSummary {
-            return PollutionSummary(
-                year = 2022,
-                locationCount = csos
-                    .filter { it.count > 0 }
-                    .size,
-                companies = csos
-                    .map { it.cso.company }
-                    .toSet()
-                    .toList()
-                    .sortedBy { it.value },
-                count = csos
-                    .sumOf { it.count }
-                    .let { RenderableCount(it) },
-                duration = (csos
-                    .map { it.duration }
-                    .reduceOrNull { acc, duration -> acc.plus(duration) }
-                    ?: Duration.ZERO)
-                    .let {
-                        RenderableDuration(it)
-                    }
-            )
-        }
     }
 }
+
+fun List<CSOTotals>.summary(): PollutionSummary {
+    return PollutionSummary(
+        year = 2022,
+        locationCount = filter { it.count > 0 }.size,
+        companies = map { it.cso.company }.toSet().sorted(),
+        count = sumOf { it.count }.let { RenderableCount(it) },
+        duration = (map { it.duration }
+            .reduceOrNull { acc, duration -> acc.plus(duration) }
+            ?: Duration.ZERO)
+            .let {
+                it.toRenderable()
+            }
+    )
+}
+
 
 data class RenderableConstituency(
     val name: ConstituencyName,
     val current: Boolean,
     val slug: ConstituencySlug,
     val uri: Uri,
-    val live: Boolean
+    val live: Boolean,
 )
 
 data class SocialShare(
@@ -98,19 +83,19 @@ data class SocialShare(
     val cta: String,
     val tags: List<String>,
     val via: String,
-    val twitterImageUri: Uri? = null
+    val twitterImageUri: Uri? = null,
 )
 
 data class ConstituencyPageLiveData(
     val data: ConstituencyLiveData,
-    val uri: Uri
+    val uri: Uri,
 )
 
 data class RenderableCSO(
     val company: RenderableCompany,
     val sitename: String,
     val waterway: RenderableWaterway,
-    val location: Coordinates
+    val location: Coordinates,
 )
 
 data class RenderableCSOTotal(
@@ -118,7 +103,7 @@ data class RenderableCSOTotal(
     val cso: RenderableCSO,
     val count: Int,
     val duration: Duration,
-    val reporting: Number
+    val reporting: Number,
 )
 
 class ConstituencyPage(
@@ -214,10 +199,10 @@ object ConstituencyPageHandler {
                     .filterNotNull()
                     .map { it.toRenderable(mpFor) }
 
-                val summary = PollutionSummary.from(list)
+                val summary = list.summary()
 
                 val rivers2 = constituencyRivers(constituencyName)
-                val rivers =  rivers2   .take(5)
+                val rivers = rivers2.take(5)
                     .map { it.toRenderable() }
 
                 Response(Status.OK)

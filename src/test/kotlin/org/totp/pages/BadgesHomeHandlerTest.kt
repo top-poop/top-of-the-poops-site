@@ -27,7 +27,7 @@ class BadgesHomeHandlerTest {
                     )
                 )
             },
-            beachRankings = {
+            bathingRankings = {
                 listOf(aBeach)
             }
         )

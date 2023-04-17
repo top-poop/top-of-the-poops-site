@@ -1,15 +1,16 @@
 package org.totp.pages
 
-import org.totp.model.data.BeachRank
+import org.totp.model.data.BathingName
+import org.totp.model.data.BathingRank
 import org.totp.model.data.CompanyName
 import org.totp.model.data.RiverRank
 import org.totp.model.data.WaterwayName
 import java.time.Duration
 
 
-val aBeach = BeachRank(
+val aBeach = BathingRank(
     1,
-    "beach",
+    BathingName.of("beach"),
     CompanyName.of("company"),
     10,
     Duration.ofHours(1),

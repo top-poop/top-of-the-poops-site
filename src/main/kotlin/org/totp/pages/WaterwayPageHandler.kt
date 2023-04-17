@@ -79,7 +79,7 @@ object WaterwayPageHandler {
                         it.toRenderable(mpFor)
                     }
 
-                val summary = PollutionSummary.from(spills)
+                val summary = spills.summary()
 
                 Response(Status.OK)
                     .with(

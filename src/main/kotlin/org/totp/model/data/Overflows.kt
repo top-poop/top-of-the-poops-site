@@ -2,27 +2,19 @@ package org.totp.model.data
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import dev.forkhandles.values.ComparableValue
-import dev.forkhandles.values.StringValue
-import dev.forkhandles.values.StringValueFactory
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Uri
 import org.http4k.core.then
-import org.http4k.format.ConfigurableJackson
 import org.http4k.format.Jackson.asA
-import org.http4k.format.asConfigurable
 import org.http4k.format.value
-import org.http4k.format.withStandardMappings
+import org.totp.extensions.kebabCase
 import org.totp.extensions.readSimpleList
 import org.totp.pages.CompanyAnnualSummary
 import org.totp.pages.CompanySlug
 import org.totp.pages.ConstituencyRank
-import org.totp.pages.ConstituencySlug
 import org.totp.pages.DeltaValue
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.MP
@@ -35,46 +27,21 @@ data class CSOTotals(
     val cso: CSO,
     val count: Int,
     val duration: Duration,
-    val reporting: Number
+    val reporting: Number,
 )
 
 data class CSO(
     val company: CompanyName,
     val sitename: String,
     val waterway: WaterwayName,
-    val location: Coordinates
-)
-
-data class Coordinates(val lat: Number, val lon: Number)
-
-class ConstituencyName(value: String) : StringValue(value), ComparableValue<ConstituencyName, String> {
-    companion object : StringValueFactory<ConstituencyName>(::ConstituencyName)
-}
-
-class WaterwayName(value: String) : StringValue(value), ComparableValue<WaterwayName, String> {
-    companion object : StringValueFactory<WaterwayName>(::WaterwayName)
-}
-
-class CompanyName(value: String) : StringValue(value), ComparableValue<CompanyName, String> {
-    companion object : StringValueFactory<CompanyName>(::CompanyName)
-}
-
-
-object TotpJson : ConfigurableJackson(
-    KotlinModule.Builder().build()
-        .asConfigurable()
-        .withStandardMappings()
-        .value(ConstituencyName)
-        .done()
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .deactivateDefaultTyping()
+    val location: Coordinates,
 )
 
 data class LiveDataCSO(
     @JsonProperty("p") val site: String,
     @JsonProperty("cid") val permit: String,
     @JsonProperty("d") val date: LocalDate,
-    @JsonProperty("a") val category: String
+    @JsonProperty("a") val category: String,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -133,6 +100,21 @@ object ConstituencyBoundaries {
     }
 }
 
+object BeachBoundaries {
+    operator fun invoke(handler: HttpHandler): (BeachName) -> GeoJSON? {
+        return { name ->
+            val slug = name.value.kebabCase()
+            val uri = Uri.of("$slug.json")
+            val response = handler(Request(Method.GET, uri))
+            if (response.status.successful) {
+                GeoJSON(response.bodyString())
+            } else {
+                null
+            }
+        }
+    }
+}
+
 object ConstituencyRankings {
     operator fun invoke(handler: HttpHandler): () -> List<ConstituencyRank> {
         return {
@@ -155,9 +137,9 @@ object ConstituencyRankings {
 }
 
 
-data class BeachRank(
+data class BathingRank(
     val rank: Int,
-    val beach: String,
+    val beach: BathingName,
     val company: CompanyName,
     val count: Int,
     val duration: Duration,
@@ -165,16 +147,16 @@ data class BeachRank(
     val durationDelta: Duration,
 )
 
-object BeachRankings {
-    operator fun invoke(handler: HttpHandler): () -> List<BeachRank> {
+object BathingRankings {
+    operator fun invoke(handler: HttpHandler): () -> List<BathingRank> {
         return {
             val response = handler(Request(Method.GET, "spills-by-beach.json"))
 
             TotpJson.mapper.readSimpleList(response.bodyString())
                 .mapIndexed { r, it ->
-                    BeachRank(
+                    BathingRank(
                         rank = r + 1,
-                        beach = it["bathing"] as String,
+                        beach = BathingName(it["bathing"] as String),
                         company = CompanyName(it["company_name"] as String),
                         duration = fromEDMHours(it["total_spill_hours"] as Double),
                         count = (it["total_spill_count"] as Double).toInt(),
@@ -194,7 +176,7 @@ data class RiverRank(
     val count: Int,
     val duration: Duration,
     val countDelta: DeltaValue,
-    val durationDelta: Duration
+    val durationDelta: Duration,
 )
 
 object RiverRankings {
@@ -278,7 +260,7 @@ data class MediaAppearance(
     val publication: String,
     val date: LocalDate,
     val uri: Uri,
-    val imageUri: Uri
+    val imageUri: Uri,
 )
 
 object MediaAppearances {
@@ -310,7 +292,7 @@ data class WaterCompany(
     val uri: Uri,
     val imageUri: Uri,
     val linkUri: Uri,
-    val handle: String?
+    val handle: String?,
 )
 
 object WaterCompanies {
@@ -366,7 +348,7 @@ object CompanyAnnualSummaries {
 
 data class ConstituencyContact(
     val constituency: ConstituencyName,
-    val mp: MP
+    val mp: MP,
 )
 
 object ConstituencyContacts {
@@ -405,6 +387,46 @@ object ConstituencyNeighbours {
                 }
                 .map {
                     it.second
+                }
+        }
+    }
+}
+
+data class BathingCSO(
+    val year: Int,
+    val company: CompanyName,
+    val sitename: String,
+    val bathing: BathingName,
+    val count: Int,
+    val duration: Duration,
+    val reporting: Number,
+    val waterway: WaterwayName,
+    val location: Coordinates,
+    val constituency: ConstituencyName,
+    val beach: BeachName?,
+)
+
+
+object BathingCSOs {
+    operator fun invoke(handler: HttpHandler): () -> List<BathingCSO> {
+        val response = handler(Request(Method.GET, "csos-by-beach.json"))
+
+        return {
+            TotpJson.mapper.readSimpleList(response.bodyString())
+                .map {
+                    BathingCSO(
+                        year = it["reporting_year"] as Int,
+                        company = CompanyName(it["company_name"] as String),
+                        sitename = it["site_name"] as String,
+                        bathing = BathingName(it["bathing"] as String),
+                        count = (it["spill_count"] as Double).toInt(),
+                        duration = fromEDMHours(it["total_spill_hours"] as Double),
+                        reporting = it["reporting_pct"] as Double,
+                        waterway = WaterwayName(it["receiving_water"] as String),
+                        location = Coordinates(it["lat"] as Double, it["lon"] as Double),
+                        constituency = ConstituencyName(it["pcon20nm"] as String),
+                        beach = (it["beach_name"] as String?)?.let { BeachName(it) }
+                    )
                 }
         }
     }

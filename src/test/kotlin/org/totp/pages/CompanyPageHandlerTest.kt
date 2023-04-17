@@ -6,10 +6,13 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
+import org.totp.model.data.BathingName
+import org.totp.model.data.BathingRank
 import org.totp.model.data.CompanyName
 import strikt.api.expectThat
 import strikt.assertions.contains
 import strikt.assertions.isEqualTo
+import strikt.assertions.one
 import java.io.File
 import java.time.Duration
 
@@ -31,7 +34,19 @@ class CompanyPageHandlerTest {
                 )
             },
             waterCompanies = { listOf(aWaterCompany) },
-            beachRankings = { listOf(aBeach) },
+            bathingRankings = {
+                listOf(
+                    BathingRank(
+                        1,
+                        BathingName.of("beach"),
+                        CompanyName.of("Water Co"),
+                        10,
+                        Duration.ofHours(1),
+                        DeltaValue.of(10),
+                        Duration.ofSeconds(11)
+                    )
+                )
+            },
             riverRankings = { listOf(aRiver(1)) }
         )
     )
@@ -42,10 +57,15 @@ class CompanyPageHandlerTest {
         print(File(".").absolutePath)
 
         val response = service(Request(Method.GET, "/water-co"))
+
         val html = Html(response)
 
         expectThat(html).twitterImageUri()
             .isEqualTo("https://top-of-the-poops.org/badges/company/water-co.png")
+
+        expectThat(html.select("h3").map { it.text() })
+            .one { isEqualTo("Rivers Polluted by Water Co") }
+            .one { isEqualTo("Beaches Polluted By Water Co") }
 
         expectThat(response.bodyString()) {
             contains("1,234")
