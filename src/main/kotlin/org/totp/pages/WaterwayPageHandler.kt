@@ -109,7 +109,7 @@ object WaterwayPageHandler {
                                             )
                                         },
                                         it.count,
-                                        it.duration,
+                                        it.duration.toRenderable(),
                                         it.reporting
                                     )
                                 })
