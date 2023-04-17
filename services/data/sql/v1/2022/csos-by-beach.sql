@@ -12,7 +12,7 @@ select reporting_year,
        beach_name
 from edm_consent_view edm
          join grid_references grid on edm.effluent_grid_ref = grid.grid_reference
-         left join beach_mapping bm on edm.bathing = bm.edm_name
+         left join edm_bathing_to_beach_mapping bm on edm.bathing = bm.edm_name
 where reporting_year = 2022
   and bathing is not null
   and pcon20nm is not null

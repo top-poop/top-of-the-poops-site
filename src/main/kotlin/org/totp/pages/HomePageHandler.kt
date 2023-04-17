@@ -38,7 +38,7 @@ class HomePage(
     val totalDuration: Duration,
     val constituencyRankings: List<RenderableConstituencyRank>,
     val companies: List<WaterCompany>,
-    val beachRankings: List<RenderableBeachRank>,
+    val beachRankings: List<RenderableBathingRank>,
     val riverRankings: List<RenderableRiverRank>,
     val appearances: List<MediaAppearance>,
     val share: SocialShare
