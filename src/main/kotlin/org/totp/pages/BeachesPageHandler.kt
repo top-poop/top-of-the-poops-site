@@ -25,7 +25,7 @@ class BeachesPage(
     val year: Int,
     val totalCount: Int,
     val totalDuration: Duration,
-    val beachRankings: List<RenderableBeachRank>,
+    val beachRankings: List<RenderableBathingRank>,
     val polluterRankings: List<BeachPolluter>,
     val share: SocialShare,
 ) : PageViewModel(uri)
@@ -59,7 +59,7 @@ data class BeachPolluter(
 )
 
 
-data class RenderableBeachRank(
+data class RenderableBathingRank(
     val rank: Int,
     val beach: RenderableBathingName,
     val company: RenderableCompany,
@@ -69,8 +69,8 @@ data class RenderableBeachRank(
     val durationDelta: RenderableDurationDelta,
 )
 
-fun BathingRank.toRenderable(): RenderableBeachRank {
-    return RenderableBeachRank(
+fun BathingRank.toRenderable(): RenderableBathingRank {
+    return RenderableBathingRank(
         rank,
         RenderableBathingName.from(beach),
         RenderableCompany.from(company),

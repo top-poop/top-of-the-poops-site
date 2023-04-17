@@ -30,7 +30,7 @@ class BathingPage(
     val name: BathingName,
     val summary: PollutionSummary,
     val share: SocialShare,
-    val rank: List<BathingRank>,
+    val rank: RenderableBathingRank,
     val csos: List<RenderableBathingCSO>,
     val geojson: GeoJSON?,
 ) : PageViewModel(uri)
@@ -96,7 +96,7 @@ object BathingPageHandler {
 
                 val name = csos.first().bathing
 
-                val rank = bathingRankings().filter { it.beach.toSlug() == bathingArea }
+                val rank = bathingRankings().filter { it.beach.toSlug() == bathingArea }.first().toRenderable()
                 val geojson = csos.mapNotNull { it.beach }.firstOrNull()?.let { beachBoundaries(it) }
 
                 val summary = csos.summary()

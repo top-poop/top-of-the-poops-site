@@ -33,7 +33,7 @@ class CompanyPage(
     val company: WaterCompany,
     val links: List<WaterCompanyLink>,
     val rivers: List<RenderableRiverRank>,
-    val beaches: List<RenderableBeachRank>,
+    val beaches: List<RenderableBathingRank>,
     val share: SocialShare,
 ) : PageViewModel(uri)
 

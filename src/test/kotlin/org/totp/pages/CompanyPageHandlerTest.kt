@@ -65,7 +65,7 @@ class CompanyPageHandlerTest {
 
         expectThat(html.select("h3").map { it.text() })
             .one { isEqualTo("Rivers Polluted by Water Co") }
-            .one { isEqualTo("Beaches Polluted By Water Co") }
+            .one { isEqualTo("Beaches Polluted by Water Co") }
 
         expectThat(response.bodyString()) {
             contains("1,234")

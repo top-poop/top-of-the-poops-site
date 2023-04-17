@@ -22,7 +22,7 @@ class BadgesHomePage(
 
     val beachCount: RenderableCount,
     val beachDuration: RenderableDuration,
-    val beaches: List<RenderableBeachRank>,
+    val beaches: List<RenderableBathingRank>,
 ) : PageViewModel(uri)
 
 
