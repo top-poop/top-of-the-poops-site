@@ -20,7 +20,6 @@ import org.totp.model.data.BathingSlug
 import org.totp.model.data.BeachName
 import org.totp.model.data.CSOTotals
 import org.totp.model.data.ConstituencyName
-import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
 import org.totp.model.data.toSlug
 import java.text.NumberFormat
@@ -33,10 +32,9 @@ class BathingPage(
     val summary: PollutionSummary,
     val share: SocialShare,
     val rank: RenderableBathingRank,
-    val csos: List<RenderableBathingCSO>,
+    val csos: List<RenderableCSOTotal>,
     val geojson: GeoJSON?,
     val constituencyRank: RenderableConstituencyRank?,
-    val constituencyCSOs: List<RenderableCSOTotal>,
 ) : PageViewModel(uri)
 
 fun List<BathingCSO>.summary(): PollutionSummary {
@@ -51,27 +49,18 @@ fun List<BathingCSO>.summary(): PollutionSummary {
     )
 }
 
-data class RenderableBathingCSO(
-    val company: RenderableCompany,
-    val sitename: String,
-    val count: Int,
-    val duration: RenderableDuration,
-    val reporting: Number,
-    val waterway: RenderableWaterway,
-    val location: Coordinates,
-    val constituency: RenderableConstituency,
-)
-
-fun BathingCSO.toRenderable(): RenderableBathingCSO {
-    return RenderableBathingCSO(
-        RenderableCompany.from(company),
-        sitename,
-        count,
-        duration.toRenderable(),
-        reporting,
-        waterway = waterway.toRenderable(company),
-        location,
-        constituency = constituency.toRenderable()
+fun BathingCSO.toRenderable(): RenderableCSOTotal {
+    return RenderableCSOTotal(
+        constituency = constituency.toRenderable(),
+        cso = RenderableCSO(
+            company = RenderableCompany.from(company),
+            sitename,
+            waterway = waterway.toRenderable(company),
+            location,
+        ),
+        count = count,
+        duration = duration.toRenderable(),
+        reporting = reporting,
     )
 }
 
@@ -83,7 +72,6 @@ object BathingPageHandler {
         bathingCSOs: (BathingSlug) -> List<BathingCSO>,
         beachBoundaries: (BeachName) -> GeoJSON?,
         mpFor: (ConstituencyName) -> MP,
-        constituencyCsos: (ConstituencyName) -> List<CSOTotals>,
         constituencyRank: (ConstituencyName) -> ConstituencyRank?,
     ): HttpHandler {
 
@@ -109,7 +97,6 @@ object BathingPageHandler {
                 val rank = bathingRankings().filter { it.beach.toSlug() == bathingArea }.first().toRenderable()
                 val geojson = csos.mapNotNull { it.beach }.firstOrNull()?.let { beachBoundaries(it) }
                 val summary = csos.summary()
-                val constituencyCsos = constituencyCsos(constituencyName).map { it.toRenderable() }
 
                 Response(Status.OK)
                     .with(
@@ -128,7 +115,6 @@ object BathingPageHandler {
                             csos.map { it.toRenderable() },
                             geojson,
                             constituencyRank(constituencyName)?.toRenderable(mpFor),
-                            constituencyCsos
                         )
                     )
             }

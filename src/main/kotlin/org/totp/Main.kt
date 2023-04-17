@@ -248,7 +248,6 @@ fun main() {
                                 },
                                 beachBoundaries = beachBoundaries,
                                 mpFor = mpFor,
-                                constituencyCsos = constituencyCSOs(allSpills),
                                 constituencyRank = constituencyRank
                             ),
                             "/rivers" bind RiversPageHandler(

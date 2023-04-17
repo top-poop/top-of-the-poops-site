@@ -2,12 +2,13 @@ package org.totp.pages
 
 import org.http4k.core.Method
 import org.http4k.core.Request
+import org.http4k.core.Uri
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
-import org.totp.model.data.BathingName
 import org.totp.model.data.BathingCSO
+import org.totp.model.data.BathingName
 import org.totp.model.data.BathingRank
 import org.totp.model.data.BeachName
 import org.totp.model.data.CompanyName
@@ -22,17 +23,19 @@ class BathingPageHandlerTest {
     val service = routes(
         "/{bathing}" bind Method.GET to BathingPageHandler(
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
-            bathingRankings = { listOf(
-                BathingRank(
-                1,
-                BathingName.of("bob"),
-                CompanyName.of("company"),
-                10,
-                Duration.ofHours(1),
-                DeltaValue.of(10),
-                Duration.ofSeconds(11)
-            )
-            ) },
+            bathingRankings = {
+                listOf(
+                    BathingRank(
+                        1,
+                        BathingName.of("bob"),
+                        CompanyName.of("company"),
+                        10,
+                        Duration.ofHours(1),
+                        DeltaValue.of(10),
+                        Duration.ofSeconds(11)
+                    )
+                )
+            },
             bathingCSOs = {
                 listOf(
                     BathingCSO(
@@ -49,7 +52,9 @@ class BathingPageHandlerTest {
                     )
                 )
             },
-            beachBoundaries = { null }
+            beachBoundaries = { null },
+            mpFor = { MP("mp", "party", "example", Uri.of("http://example.com")) },
+            constituencyRank = { null }
         )
     )
 
