@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     with psycopg2.connect(host="localhost", database="gis", user="docker", password="docker") as conn:
 
-        with open(os.path.join(MYDIR, "constituencies.sql")) as f:
+        with open(os.path.join(MYDIR, "beaches.sql")) as f:
             sql = f.read()
 
         with conn.cursor() as cursor:
@@ -28,8 +28,8 @@ if __name__ == "__main__":
             columns = [desc[0] for desc in cursor.description]
 
             for row in iter_row(cursor, 20):
-                (constituency, first_name, last_name, screen_name, points_original, points_reduced, geom) = row
-                print(f"{constituency} orig={points_original} reduced={points_reduced}")
+                (beach_name, points_original, points_reduced, geom) = row
+                print(f"{beach_name} orig={points_original} reduced={points_reduced}")
 
-                with open(os.path.join(output_dir, f"{kebabcase(constituency)}.json"), "w") as fp:
+                with open(os.path.join(output_dir, f"{kebabcase(beach_name)}.json"), "w") as fp:
                     fp.write(geom)
