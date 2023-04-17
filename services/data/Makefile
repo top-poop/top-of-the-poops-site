@@ -110,6 +110,12 @@ $(DATAFILES)/constituencies/.uptodate: $(PYTHON) constituencies.py constituencie
 	$(PYTHON) constituencies.py $(DATAFILES)/constituencies
 	touch $@
 
+$(DATAFILES)/beaches/.uptodate: $(PYTHON) beaches.py beaches.sql
+	rm -rf $(DATAFILES)/beaches
+	@mkdir $(DATAFILES)/beaches
+	$(PYTHON) beaches.py $(DATAFILES)/beaches
+	touch $@
+
 $(DATAFILES)/media-appearances.json: provided/media-appearances.json
 	cp $< $@
 
