@@ -18,6 +18,7 @@ import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.BathingRank
+import org.totp.model.data.CSOTotals
 import org.totp.model.data.CompanyName
 import org.totp.model.data.RiverRank
 import org.totp.model.data.WaterCompany
@@ -34,6 +35,7 @@ class CompanyPage(
     val links: List<WaterCompanyLink>,
     val rivers: List<RenderableRiverRank>,
     val beaches: List<RenderableBathingRank>,
+    val worstCsos: List<RenderableCSOTotal>,
     val share: SocialShare,
 ) : PageViewModel(uri)
 
@@ -83,6 +85,7 @@ object CompanyPageHandler {
         waterCompanies: () -> List<WaterCompany>,
         riverRankings: () -> List<RiverRank>,
         bathingRankings: () -> List<BathingRank>,
+        csoTotals: () -> List<CSOTotals>,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
         val companySlug = Path.value(CompanySlug).of("company", "The company")
@@ -104,6 +107,12 @@ object CompanyPageHandler {
                 val name = mostRecent.company.name
 
                 val company = companies.first { it.name == name }
+                val worstCsos = csoTotals()
+                    .filter { it.cso.company == name }
+                    .sortedByDescending { it.duration }
+                    .take(6)
+                    .map { it.toRenderable() }
+
                 Response(Status.OK)
                     .with(
                         viewLens of CompanyPage(
@@ -120,6 +129,7 @@ object CompanyPageHandler {
                                 .map { it.toRenderable() },
                             rivers = riverRankings().filter { it.company == company.name }.take(6)
                                 .map { it.toRenderable() },
+                            worstCsos = worstCsos,
                             share = SocialShare(
                                 pageUriFrom(request),
                                 "$name - ${company.handle} - dumped #sewage into rivers,seas & bathing areas ${

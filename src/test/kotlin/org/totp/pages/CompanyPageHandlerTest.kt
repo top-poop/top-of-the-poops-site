@@ -8,7 +8,12 @@ import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.BathingName
 import org.totp.model.data.BathingRank
+import org.totp.model.data.CSO
+import org.totp.model.data.CSOTotals
 import org.totp.model.data.CompanyName
+import org.totp.model.data.ConstituencyName
+import org.totp.model.data.Coordinates
+import org.totp.model.data.WaterwayName
 import strikt.api.expectThat
 import strikt.assertions.contains
 import strikt.assertions.isEqualTo
@@ -18,6 +23,21 @@ import java.time.Duration
 
 
 class CompanyPageHandlerTest {
+
+    var summaries = listOf(
+        CSOTotals(
+            constituency = ConstituencyName("Water Co"),
+            cso = CSO(
+                company = CompanyName.of("Water Co"),
+                sitename = "Your House",
+                waterway = WaterwayName("Your River"),
+                location = Coordinates(lon = -0.12460789, lat = 51.49993385),
+            ),
+            count = 100,
+            duration = Duration.ofHours(100),
+            reporting = 0.0f
+        )
+    )
 
     val service = routes(
         "/{company}" bind Method.GET to CompanyPageHandler(
@@ -47,7 +67,8 @@ class CompanyPageHandlerTest {
                     )
                 )
             },
-            riverRankings = { listOf(aRiver(1)) }
+            riverRankings = { listOf(aRiver(1)) },
+            csoTotals = { summaries }
         )
     )
 

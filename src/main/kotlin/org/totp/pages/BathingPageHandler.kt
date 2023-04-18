@@ -57,7 +57,7 @@ fun BathingCSO.toRenderable(): RenderableCSOTotal {
             waterway = waterway.toRenderable(company),
             location,
         ),
-        count = count,
+        count = RenderableCount(count),
         duration = duration.toRenderable(),
         reporting = reporting,
     )
