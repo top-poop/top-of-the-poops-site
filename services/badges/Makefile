@@ -21,7 +21,7 @@ check-context:
 	@test $(shell docker context show) = default
 
 .PHONY: image
-image: check-context generated-data
+image: check-context
 	docker build -t $(LOCAL_NAME)  -t $(FULL_NAME) .
 
 .PHONY: run
