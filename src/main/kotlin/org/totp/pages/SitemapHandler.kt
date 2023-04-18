@@ -1,34 +1,55 @@
 package org.totp.pages
 
-import org.http4k.core.Body
 import org.http4k.core.ContentType
 import org.http4k.core.HttpHandler
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.Uri
 import org.http4k.core.with
-import org.http4k.template.TemplateRenderer
-import org.http4k.template.viewModel
-import org.totp.model.PageViewModel
+import org.http4k.lens.Header.CONTENT_TYPE
+import org.totp.model.data.BathingRank
 import org.totp.model.data.RiverRank
-
-class SitemapPage(uri: Uri, val uris: List<Uri>) : PageViewModel(uri)
+import java.io.StringWriter
+import javax.xml.XMLConstants
+import javax.xml.stream.XMLOutputFactory
 
 object SitemapHandler {
-    operator fun invoke(siteBaseUri: Uri, renderer: TemplateRenderer, uris: () -> List<Uri>): HttpHandler {
-        val viewLens = Body.viewModel(renderer, ContentType.TEXT_XML).toLens()
+    operator fun invoke(siteBaseUri: Uri, uris: () -> List<Uri>): HttpHandler {
+        val factory = XMLOutputFactory.newFactory().also {
+            it.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, true);
+        }
+
         return { request ->
+
+            val sw = StringWriter()
+            val writer = factory.createXMLStreamWriter(sw)
+
+            writer.writeStartDocument()
+            val nsURI = "http://www.sitemaps.org/schemas/sitemap/0.9"
+            writer.setDefaultNamespace(nsURI)
+            writer.writeStartElement(nsURI,"urlset",)
+
+            uris().map {
+                it
+                    .scheme(siteBaseUri.scheme)
+                    .host(siteBaseUri.host)
+                    .port(siteBaseUri.port)
+            }.forEach { uri ->
+                writer.writeStartElement("url")
+                writer.writeStartElement("loc")
+                writer.writeCharacters(uri.toString())
+                writer.writeEndElement()
+                writer.writeEndElement()
+            }
+
+            writer.writeEndElement()
+            writer.writeEndDocument()
+
             Response(Status.OK)
                 .with(
-                    viewLens of SitemapPage(
-                        siteBaseUri,
-                        uris().map {
-                            it
-                                .scheme(siteBaseUri.scheme)
-                                .host(siteBaseUri.host)
-                                .port(siteBaseUri.port)
-                        }
-                    )
+                    CONTENT_TYPE of ContentType.TEXT_XML
+                ).body(
+                    sw.toString()
                 )
         }
     }
@@ -38,6 +59,7 @@ object SitemapUris {
     operator fun invoke(
         constituencies: () -> List<ConstituencyRank>,
         riverRankings: () -> List<RiverRank>,
+        beachRankings: () -> List<BathingRank>
     ): () -> List<Uri> {
         return {
             listOf(
@@ -53,7 +75,12 @@ object SitemapUris {
                 riverRankings().flatMap {
                     it.toRenderable().let { listOf(it.river.uri, it.company.uri) }
                 }
-            ).toSet()
+            ).plus(
+                beachRankings().map {
+                    it.toRenderable().beach.uri
+                }
+            )
+                .toSet()
                 .toList()
         }
     }

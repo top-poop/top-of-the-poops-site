@@ -37,6 +37,15 @@ class BathingName(value: String) : StringValue(value), ComparableValue<BathingNa
     companion object : StringValueFactory<BathingName>(::BathingName)
 }
 
+/** name of a shellfish location as given in EDM file */
+class ShellfisheryName(value: String) : StringValue(value), ComparableValue<ShellfisheryName, String> {
+    companion object : StringValueFactory<ShellfisheryName>(::ShellfisheryName)
+}
+
+class ShellfishAreaName(value: String) : StringValue(value), ComparableValue<ShellfishAreaName, String> {
+    companion object : StringValueFactory<ShellfishAreaName>(::ShellfishAreaName)
+}
+
 fun BathingName.toSlug() = BathingSlug.of(value.kebabCase())
 
 class BathingSlug(value: String) : StringValue(value) {
