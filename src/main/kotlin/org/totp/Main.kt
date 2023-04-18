@@ -280,11 +280,11 @@ fun main() {
                             ),
                             "/map.html" bind OldMapRedirectHandler(),
                             "/sitemap.xml" bind SitemapHandler(
-                                renderer = renderer,
                                 siteBaseUri = Uri.of("https://top-of-the-poops.org"),
                                 uris = SitemapUris(
                                     constituencies = constituencyRankings,
-                                    riverRankings = riverRankings
+                                    riverRankings = riverRankings,
+                                    beachRankings = beachRankings,
                                 )
                             ),
                             "/private/badges/constituencies" bind BadgesConstituenciesHandler(

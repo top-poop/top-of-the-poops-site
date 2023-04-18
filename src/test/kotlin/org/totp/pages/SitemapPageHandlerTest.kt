@@ -28,7 +28,6 @@ class SitemapPageHandlerTest {
 
     val service = routes(
         "/sitemap.xml" bind Method.GET to SitemapHandler(
-            renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
             siteBaseUri = Uri.of("https://totp.example.com"),
             uris = {
                 listOf(
