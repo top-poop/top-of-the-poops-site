@@ -18,7 +18,6 @@ import org.totp.model.data.BathingName
 import org.totp.model.data.BathingRank
 import org.totp.model.data.BathingSlug
 import org.totp.model.data.BeachName
-import org.totp.model.data.CSOTotals
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.GeoJSON
 import org.totp.model.data.toSlug
@@ -33,7 +32,7 @@ class BathingPage(
     val share: SocialShare,
     val rank: RenderableBathingRank,
     val csos: List<RenderableCSOTotal>,
-    val geojson: GeoJSON?,
+    val boundaries: List<GeoJSON>,
     val constituencyRank: RenderableConstituencyRank?,
 ) : PageViewModel(uri)
 
@@ -64,6 +63,9 @@ fun BathingCSO.toRenderable(): RenderableCSOTotal {
     )
 }
 
+fun possibleBeachesFromBathingName(it: BathingName): List<BeachName> {
+    return listOf(BeachName.of(it.value)) + it.value.split(",", " and ").map { it.trim() }.map { BeachName.of(it) }
+}
 
 object BathingPageHandler {
     operator fun invoke(
@@ -95,7 +97,8 @@ object BathingPageHandler {
                 val constituencyName = first.constituency
 
                 val rank = bathingRankings().filter { it.beach.toSlug() == bathingArea }.first().toRenderable()
-                val geojson = csos.mapNotNull { it.beach }.firstOrNull()?.let { beachBoundaries(it) }
+                val beachNames = csos.mapNotNull { it.beach } + possibleBeachesFromBathingName(bathingAreaName)
+                val boundaries = beachNames.toSet().mapNotNull { beachBoundaries(it) }
                 val summary = csos.summary()
 
                 Response(Status.OK)
@@ -113,7 +116,7 @@ object BathingPageHandler {
                             ),
                             rank,
                             csos.map { it.toRenderable() },
-                            geojson,
+                            boundaries,
                             constituencyRank(constituencyName)?.toRenderable(mpFor),
                         )
                     )
