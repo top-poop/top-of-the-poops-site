@@ -135,6 +135,14 @@
 </script>
 
 <script type="module">
+
+    const toKebabCase = str =>
+            str &&
+            str
+                    .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
+                    .map(x => x.toLowerCase())
+                    .join('-');
+
     const myStyle = {
         "color": "#ff7800",
         "weight": 5,
@@ -161,6 +169,10 @@
     )
             .addTo(map);
 
+    const navigateToBathing = (bathing) => {
+        window.location = `/beach/${toKebabCase(bathing)}`;
+    }
+
     const response = await fetch("/data/v1/{{year}}/spills-by-beach.json")
     if (response.ok) {
         const beaches = await (response.json())
@@ -173,6 +185,7 @@
                             radius: 10,
                         })
                                 .bindTooltip(`${it.bathing} - ${it.total_spill_hours} hours`)
+                        .on("dblclick", e => navigateToBathing(it.bathing) )
                 )
                 .forEach(it => it.addTo(map))
     }
