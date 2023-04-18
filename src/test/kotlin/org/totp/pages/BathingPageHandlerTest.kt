@@ -15,6 +15,8 @@ import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
 import org.totp.model.data.WaterwayName
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
 import java.time.Duration
 
 class BathingPageHandlerTest {
@@ -62,4 +64,28 @@ class BathingPageHandlerTest {
     fun `renders a bathing area`() {
         Html(service(Request(Method.GET, "/bob").header("host", "bob.com")))
     }
+
+
+    @Test
+    fun `possible beach names from composite bathing name`() {
+
+        expectThat(possibleBeachesFromBathingName(BathingName("COWES, GURNARD")))
+            .isEqualTo(listOf(BeachName("COWES, GURNARD"), BeachName("COWES"), BeachName("GURNARD")))
+
+        expectThat(possibleBeachesFromBathingName(BathingName("Southport, St Annes Pier, St. Annes North and Blackpool South")))
+            .isEqualTo(
+                listOf(
+                    BeachName("Southport, St Annes Pier, St. Annes North and Blackpool South"),
+                    BeachName("Southport"),
+                    BeachName("St Annes Pier"),
+                    BeachName("St. Annes North"),
+                    BeachName("Blackpool South"),
+                )
+            )
+    }
+
+
 }
+
+
+
