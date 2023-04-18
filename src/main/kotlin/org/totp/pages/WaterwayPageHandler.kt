@@ -98,20 +98,7 @@ object WaterwayPageHandler {
                             csos = spills
                                 .sortedByDescending { it.duration }
                                 .map {
-                                    RenderableCSOTotal(
-                                        it.constituency.toRenderable(),
-                                        it.cso.let {
-                                            RenderableCSO(
-                                                RenderableCompany.from(it.company),
-                                                it.sitename,
-                                                it.waterway.toRenderable(it.company),
-                                                it.location
-                                            )
-                                        },
-                                        it.count,
-                                        it.duration.toRenderable(),
-                                        it.reporting
-                                    )
+                                    it.toRenderable()
                                 })
                     )
             }

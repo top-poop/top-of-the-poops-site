@@ -276,7 +276,8 @@ fun main() {
                                 companySummaries = CompanyAnnualSummaries(data2022),
                                 waterCompanies = waterCompanies,
                                 riverRankings = riverRankings,
-                                bathingRankings = beachRankings
+                                bathingRankings = beachRankings,
+                                csoTotals = allSpills,
                             ),
                             "/map.html" bind OldMapRedirectHandler(),
                             "/sitemap.xml" bind SitemapHandler(

@@ -101,7 +101,7 @@ data class RenderableCSO(
 data class RenderableCSOTotal(
     val constituency: RenderableConstituency,
     val cso: RenderableCSO,
-    val count: Int,
+    val count: RenderableCount,
     val duration: RenderableDuration,
     val reporting: Number,
 )
@@ -153,7 +153,7 @@ fun CSOTotals.toRenderable(): RenderableCSOTotal {
                 it.location
             )
         },
-        count,
+        RenderableCount(count),
         duration.toRenderable(),
         reporting
     )
