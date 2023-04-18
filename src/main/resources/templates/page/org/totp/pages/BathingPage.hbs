@@ -118,10 +118,11 @@
         <div class="col">
             {{#> components/section title=(concat "Pollution Summary " summary.year)}}
 
-                <p>Here are all the reported sewage overflow totals for {{ name.value }} in {{ summary.year }}.
-                    Sometimes sewage can be being dumped for <b>months</b> at a time.</p>
+                <p>Here are all the reported sewage overflow totals for {{ name }} in {{ summary.year }}.</p>
 
                 <p>If the locations of the sewage outlets look a bit unusual, it is likely that the reporting of the data from the water company is in error. We rely on their data in order to draw these maps.</p>
+
+                <p>Other CSOs may also be located nearby, however the water companies claim that these do not affect the water quality here.</p>
                 <div class="table-responsive">
                     <table id="table-csos" class="table">
                         <thead>
