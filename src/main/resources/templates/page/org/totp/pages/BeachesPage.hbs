@@ -38,6 +38,8 @@
                     &copy; <a href="https://top-of-the-poops.org">Top of the Poops</a> 2021-2023
                 </div>
             </div>
+            <small class="desktop-only">Double click on map to zoom. Double click on beach to see beach page</small>
+            <small class="mobile-only">Use two fingers to move the map. Double-tap on beach to see beach page</small>
         </div>
     </div>
 
@@ -135,6 +137,13 @@
 </script>
 
 <script type="module">
+
+    if ( L.Browser.mobile ) {
+        Array.from(document.getElementsByClassName("desktop-only")).forEach(it => it.remove())
+    }
+    else {
+        Array.from(document.getElementsByClassName("mobile-only")).forEach(it => it.remove())
+    }
 
     const toKebabCase = str =>
             str &&
