@@ -84,7 +84,7 @@ class BeachBadges:
         def beach_badge(beach):
             info = self.beaches.totals_for(beach)
             if info is None:
-                return bottle.Response(status=404)
+                response.status = 404
             else:
                 badge = self.badges.create_beach_badge(
                     beach=info["bathing"],
@@ -94,16 +94,16 @@ class BeachBadges:
                 )
 
                 buffer = BytesIO()
-                badge.save(buffer, "png", optimize=True)
+                badge.convert("RGB").save(buffer, "jpeg", optimize=True)
 
                 response.status = 200
-                response.content_type = 'image/png'
+                response.content_type = 'image/jpg'
                 return buffer.getvalue()
 
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 80))
-    data_uri = os.environ.get("DATA_URI", "http://data")
+    data_uri = os.environ.get("DATA_URI", "http://data/data")
 
     badges = Badges()
     beaches = Beaches(base_uri=data_uri)
