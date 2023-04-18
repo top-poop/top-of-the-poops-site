@@ -1,0 +1,6 @@
+pytest
+requests
+bottle
+gunicorn
+pillow==9.4.0
+
