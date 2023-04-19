@@ -53,7 +53,7 @@
     "where": "Central Bylines",
     "title": "Sewage central: how our region is being affected by the water scandal",
     "date": "2022-08-30",
-    "image":"https://centralbylines.co.uk/wp-content/uploads/2022/08/sewage-central.jpg"
+    "image": "https://centralbylines.co.uk/wp-content/uploads/2022/08/sewage-central.jpg"
   },
   {
     "href": "https://www.lynnnews.co.uk/news/sewage-dumped-into-west-norfolk-rivers-more-than-1-000-times-9270935/",
@@ -67,13 +67,13 @@
     "where": "Chronicle Live",
     "title": "Chi Onwurah slams Government after data reveals hundreds of sewage dumps have polluted Newcastle's waterways",
     "date": "2022-08-26",
-    "image":"https://i2-prod.mylondon.news/incoming/article22864182.ece/ALTERNATES/s1200/1_Official_portrait_of_Chi_Onwurah_MP_crop_2.jpg"
+    "image": "https://i2-prod.mylondon.news/incoming/article22864182.ece/ALTERNATES/s1200/1_Official_portrait_of_Chi_Onwurah_MP_crop_2.jpg"
   },
   {
     "href": "https://sotn.newstatesman.com/2022/04/mapped-sewage-dumps-and-spills-in-england-and-wales/",
     "where": "The New Statesman",
     "title": "Mapped: Sewage dumps and spills in England and Wales",
-    "date":"2022-04-01",
+    "date": "2022-04-01",
     "image": "https://www.newstatesman.com/wp-content/uploads/sites/2/2021/09/cropped-Ben-Walker-177x177.png?1679533206"
   },
   {
@@ -152,5 +152,68 @@
     "title": "Sheffield pollution: More than 2,000 sewage 'incidents' recorded on River Don",
     "date": "2023-02-21",
     "image": "https://www.thestar.co.uk/webimg/b25lY21zOmZlYzI3Y2VjLWUzOWItNDFkYS05ZGI4LTJmOTIwYjhkNjEwZDpiMWYxZjJmYi04YTc0LTQ1MmEtOGJiNS0zNGQ5MTdhZTFiYTg=.jpg?width=1200&amp;auto=webp&amp;quality=75&amp;crop=2:1,smart"
+  },
+  {
+    "href": "https://www.theguardian.com/environment/2023/apr/06/ministers-treating-coastal-areas-like-open-sewers-says-labour",
+    "where": "The Guardian",
+    "title": "Ministers treating coastal areas like ‘open sewers’, says Labour",
+    "image": "https://i.guim.co.uk/img/media/d33e3ebf2d92dc7f8c5b18ea033e5e5e9b481765/0_31_6708_4025/master/6708.jpg?width=1200&height=630&quality=85&auto=format&fit=crop&overlay-align=bottom%2Cleft&overlay-width=100p&overlay-base64=L2ltZy9zdGF0aWMvb3ZlcmxheXMvdGctZGVmYXVsdC5wbmc&enable=upscale&s=4ad19ad9f4836ad1efcb8844cf3cfa32",
+    "date": "2023-04-06"
+  },
+  {
+    "href": "https://www.mirror.co.uk/news/uk-news/new-sewage-scandal-data-shows-29641300",
+    "where": "The Mirror",
+    "title": "New sewage scandal as data shows waste is dumped on to coast every three minutes",
+    "image": "https://i2-prod.mirror.co.uk/incoming/article29641291.ece/ALTERNATES/s1200/0_AGP_MDM_250822WORTHING_001JPG.jpg",
+    "date": "2023-04-05"
+  },
+  {
+    "href": "https://www.westwaleschronicle.co.uk/blog/2023/04/03/west-wales-rivers-are-some-of-the-most-sewage-filled-in-the-uk/",
+    "where": "West Wales Chronicle",
+    "title": "West Wales’ Rivers Are Some Of The Most Sewage Filled In The UK",
+    "image": "https://top-of-the-poops.org/aseets/poop.png",
+    "date": "2023-04-03"
+  },
+  {
+    "href": "https://nation.cymru/news/sewage-dumped-on-wales-blue-flag-beaches-579-times-say-welsh-lib-dems/",
+    "where": "nation.cymru",
+    "title": "Sewage dumped on Wales’ Blue Flag beaches 579 times, say Welsh Lib-Dems",
+    "image": "https://s3.eu-west-2.amazonaws.com/nation.cymru/wp-content/uploads/2022/11/28140843/sewage-beaches-canva.jpg",
+    "date": "2022-11-28"
+  },
+  {
+    "href": "https://www.manchestereveningnews.co.uk/news/greater-manchester-news/its-covered-human-waste-mps-26650213",
+    "where": "Manchester Evening News",
+    "title": "'It's covered in human waste' - MPs fume over state of south Manchester river",
+    "image": "https://i2-prod.manchestereveningnews.co.uk/news/greater-manchester-news/article26650218.ece/ALTERNATES/s1200/0_McMahon.jpg",
+    "date": "2023-04-06"
+  },
+  {
+    "href": "https://www.cambrian-news.co.uk/news/environment/ceredigion-river-and-sea-pollution-among-worst-in-wales-and-england-606009",
+    "where": "Cambrian News",
+    "title": "Ceredigion river and sea pollution among worst in Wales and England",
+    "image": "https://www.cambrian-news.co.uk/tindle-static/image/2023/04/05/13/so1204%20River%20Teifi%20credit%20Nathan%20Walton.jpg?width=1200&crop=16:9,smart&quality=75",
+    "date": "2023-04-10"
+  },
+  {
+    "href": "https://www.thetimes.co.uk/article/sewage-pumped-into-sea-for-one-million-hours-in-2022-clean-it-up-mwtpkzhrg",
+    "where": "The Times",
+    "title": "Sewage discharged in coastal areas for one million hours in 2022",
+    "image": "https://www.thetimes.co.uk/imageserver/image/%2Fmethode%2Ftimes%2Fprod%2Fweb%2Fbin%2F66f0d7e8-d3ed-11ed-b1cd-5223fe349502.jpg?crop=5646%2C3176%2C57%2C332&resize=1200",
+    "date": "2023-04-05"
+  },
+  {
+    "href": "https://www.examinerlive.co.uk/news/local-news/two-filthy-rivers-pumped-fetid-26258633",
+    "where": "Yorkshire Live",
+    "title": "Two filthy rivers pumped with fetid sewage by Yorkshire Water more than 8,000 times",
+    "image": "https://i2-prod.leeds-live.co.uk/news/leeds-news/article23189186.ece/ALTERNATES/s1200/2_River-Aire-Mickeltown.jpg",
+    "date": "2023-02-17"
+  },
+  {
+    "href": "https://www.theboltonnews.co.uk/news/23440662.united-utilities-bolton-areas-top-2-sewage-waterways/",
+    "where": "The Bolton News",
+    "title": "United Utilities: Bolton areas are top 2 for sewage in waterways",
+    "image": "https://www.theboltonnews.co.uk/resources/images/16643656/?type=og-image",
+    "date": "2023-04-11"
   }
 ]
