@@ -5,6 +5,7 @@ COPY datafiles/constituencies/ /data/constituencies
 COPY datafiles/live/ /data/live
 COPY datafiles/v1/ /data/v1
 COPY datafiles/beaches/ /data/beaches
+COPY datafiles/shellfisheries/ /data/shellfisheries
 
 COPY datafiles/*.json /data
 

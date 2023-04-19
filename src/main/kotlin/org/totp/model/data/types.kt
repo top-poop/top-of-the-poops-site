@@ -17,12 +17,10 @@ class ConstituencyName(value: String) : StringValue(value), ComparableValue<Cons
 }
 
 class ConstituencySlug(value: String) : StringValue(value) {
-    companion object : StringValueFactory<ConstituencySlug>(::ConstituencySlug) {
-        fun from(name: ConstituencyName): ConstituencySlug {
-            return of(name.value.kebabCase())
-        }
-    }
+    companion object : StringValueFactory<ConstituencySlug>(::ConstituencySlug)
 }
+
+fun ConstituencyName.toSlug(): ConstituencySlug = ConstituencySlug.of(value.kebabCase())
 
 class WaterwayName(value: String) : StringValue(value), ComparableValue<WaterwayName, String> {
     companion object : StringValueFactory<WaterwayName>(::WaterwayName)
@@ -67,6 +65,5 @@ class CompanySlug(value: String) : StringValue(value) {
     companion object : StringValueFactory<CompanySlug>(::CompanySlug)
 }
 
-fun CompanyName.toSlug(): CompanySlug {
-    return CompanySlug.of(value.kebabCase())
-}
+fun CompanyName.toSlug(): CompanySlug = CompanySlug.of(value.kebabCase())
+

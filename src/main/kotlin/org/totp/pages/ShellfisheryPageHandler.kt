@@ -15,6 +15,7 @@ import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.ConstituencyName
+import org.totp.model.data.GeoJSON
 import org.totp.model.data.ShellfishCSO
 import org.totp.model.data.ShellfishRank
 import org.totp.model.data.ShellfishSlug
@@ -32,6 +33,7 @@ class ShellfisheryPage(
     val summary: PollutionSummary,
     val rank: RenderableShellfishRank,
     val constituencies: List<RenderableConstituencyRank>,
+    val boundaries: List<GeoJSON>,
     val csos: List<RenderableCSOTotal>,
 ) :
     PageViewModel(uri)
@@ -68,6 +70,7 @@ object ShellfisheryPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
         shellfishRankings: () -> List<ShellfishRank>,
+        shellfisheryBoundaries: (ShellfisheryName) -> GeoJSON?,
         shellfishSpills: (ShellfishSlug) -> List<ShellfishCSO>,
         mpFor: (ConstituencyName) -> MP,
         constituencyRank: (ConstituencyName) -> ConstituencyRank?,
@@ -90,6 +93,8 @@ object ShellfisheryPageHandler {
                 val name = spills.first().shellfishery
 
                 val rank = shellfishRankings().filter { it.shellfishery.toSlug() == area }.first().toRenderable()
+
+                val boundaries = listOf(name).mapNotNull { shellfisheryBoundaries(it) }
 
                 val constituencies = spills
                     .map { it.constituency }
@@ -115,11 +120,13 @@ object ShellfisheryPageHandler {
                                 text = "$name had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year}",
                                 cta = "$name pollution",
                                 tags = listOf("sewage"),
-                                via = "sewageuk"
+                                via = "sewageuk",
+                                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/shellfishery/${area}")
                             ),
                             summary = summary,
                             constituencies = constituencies,
                             rank = rank,
+                            boundaries = boundaries,
                             csos = spills
                                 .sortedByDescending { it.duration }
                                 .map {

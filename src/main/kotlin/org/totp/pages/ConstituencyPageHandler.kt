@@ -28,6 +28,7 @@ import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
 import org.totp.model.data.RenderableCompany
 import org.totp.model.data.RiverRank
+import org.totp.model.data.toSlug
 import org.totp.model.data.toRenderable
 import org.totp.text.csv.readCSV
 import java.text.NumberFormat
@@ -40,7 +41,7 @@ val constituencyNames = readCSV(
 ).toSortedSet(Comparator.comparing { it.value })
 
 
-val slugToConstituency = constituencyNames.associateBy { ConstituencySlug.from(it) }
+val slugToConstituency = constituencyNames.associateBy { it.toSlug() }
 
 
 data class PollutionSummary(
@@ -245,7 +246,7 @@ object ConstituencyPageHandler {
 }
 
 fun ConstituencyName.toRenderable(current: Boolean = false, live: Boolean = false): RenderableConstituency {
-    val slug = ConstituencySlug.from(this)
+    val slug = this.toSlug()
     return RenderableConstituency(
         name = this,
         current = current,
