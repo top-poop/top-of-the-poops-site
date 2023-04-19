@@ -38,6 +38,7 @@ class CompanyPage(
     val beaches: List<RenderableBathingRank>,
     val worstCsos: List<RenderableCSOTotal>,
     val share: SocialShare,
+    val liveDataUri: Uri?,
 ) : PageViewModel(uri)
 
 
@@ -80,6 +81,7 @@ object CompanyPageHandler {
         riverRankings: () -> List<RiverRank>,
         bathingRankings: () -> List<BathingRank>,
         csoTotals: () -> List<CSOTotals>,
+        companyLiveDataAvailable: (CompanyName) -> Uri?
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
         val companySlug = Path.value(CompanySlug).of("company", "The company")
@@ -124,6 +126,7 @@ object CompanyPageHandler {
                             rivers = riverRankings().filter { it.company == company.name }.take(6)
                                 .map { it.toRenderable() },
                             worstCsos = worstCsos,
+                            liveDataUri = companyLiveDataAvailable(name),
                             share = SocialShare(
                                 pageUriFrom(request),
                                 "$name - ${company.handle} - dumped #sewage into rivers,seas & bathing areas ${
