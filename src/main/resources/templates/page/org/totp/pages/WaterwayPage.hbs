@@ -81,7 +81,7 @@
                                 {{#each constituencies}}
                                     <a href="{{this.constituency.uri}}">
                                         <button class="btn btn-primary mb-2">
-                                            {{this.constituency.name}}<span class="badge badge-info ml-1">{{numberFormat
+                                            {{this.constituency.name}}<span class="badge bg-dark ms-1">{{numberFormat
                                                 this.count.count}}</span>
                                         </button>
                                     </a>
@@ -112,7 +112,7 @@
                 </p>
 
                 <div class="table-responsive">
-                    <table id="table-csos" class="table">
+                    <table id="table-csos" class="table table-spills table-striped">
                         <thead>
                         <tr>
                             <th>Company</th>

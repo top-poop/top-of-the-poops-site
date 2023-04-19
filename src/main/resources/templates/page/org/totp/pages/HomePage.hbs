@@ -20,7 +20,7 @@
 {{> chunks/title }}
 
 {{#> components/jumbotron }}
-    Preliminary analysis shows <em>{{numberFormat totalCount}}</em> "sewage spills"
+    At least <em>{{numberFormat totalCount}}</em> "sewage spills"
     into waterways in {{year}}, lasting
     {{numberFormat totalDuration.toHours}} hours
 {{/components/jumbotron}}
@@ -210,18 +210,7 @@
             {{#> components/section title="Top of the Poops in the Media" }}
                 <div class="row row-cols-1 row-cols-md-4">
                     {{#each appearances}}
-                        <div class="col mb-4">
-                            <div class="card h-100">
-                                <a href="{{this.uri}}"><img src="{{this.imageUri}}" class="card-img-top"
-                                                            alt="Article image for {{this.publication}}"></a>
-                                <div class="card-body">
-                                    <h5 class="card-title">{{this.publication}}</h5>
-                                    <p class="card-text">{{this.title}}</p>
-                                    <p class="card-text"><small class="text-muted">{{dateFormat this.date}}</small>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                        {{>components/card-media this}}
                     {{/each}}
                 </div>
 

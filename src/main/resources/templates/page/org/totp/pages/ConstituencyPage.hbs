@@ -52,7 +52,7 @@
                     <form>
                         <div class="form-group">
                             <label class="form-label">Constituency</label>
-                            <select class="custom-select custom-select-lg" name="constituency" id="constituency-select">
+                            <select class="form-select form-select-lg" name="constituency" id="constituency-select">
                                 {{#each constituencies}}
                                     <option value="{{this.uri}}" {{#if this.current}}selected{{/if}}>{{#if this.live}}
                                         ✔ {{else}}- {{/if}}{{this.name}}</option>
@@ -110,7 +110,7 @@
                                 {{#each neighbours}}
                                     <a href="{{this.constituency.uri}}">
                                         <button class="btn btn-primary mb-2">
-                                            {{this.constituency.name}}<span class="badge badge-info ml-1">{{numberFormat this.count.count}}</span>
+                                            {{this.constituency.name}}<span class="badge bg-dark ms-1">{{numberFormat this.count.count}}</span>
                                         </button>
                                     </a>
                                 {{/each}}
@@ -128,7 +128,7 @@
                                 {{#each rivers}}
                                     <a href="{{this.river.uri}}">
                                         <button class="btn btn-primary mb-2">
-                                            {{this.river.name}}<span class="badge badge-info ml-1">{{numberFormat this.count.count}}</span>
+                                            {{this.river.name}}<span class="badge bg-dark ms-1">{{numberFormat this.count.count}}</span>
                                         </button>
                                     </a>
                                 {{/each}}
@@ -142,7 +142,7 @@
 </div>
 
 {{#if live}}
-    <div class="container container-fluid">
+    <div class="container-fluid">
         <div class="row">
             <div class="col">
                 <div class="card">
@@ -176,7 +176,7 @@
                     Sometimes sewage can be being dumped for <b>months</b> at a time.</p>
 
                 <div class="table-responsive">
-                    <table id="table-csos" class="table">
+                    <table id="table-csos" class="table table-spills table-striped">
                         <thead>
                         <tr>
                             <th>Company</th>
