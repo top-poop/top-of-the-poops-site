@@ -23,8 +23,12 @@ import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.TotpHandlebars.numberFormat
 import org.totp.model.data.CompanyName
+import org.totp.model.data.CompanySlug
+import org.totp.model.data.RenderableCompany
 import org.totp.model.data.RiverRank
 import org.totp.model.data.WaterwayName
+import org.totp.model.data.toRenderable
+import org.totp.model.data.toSlug
 import java.time.Duration
 
 class RiversPage(
@@ -65,7 +69,7 @@ fun RiverRank.toRenderable(): RenderableRiverRank {
     return RenderableRiverRank(
         rank,
         river.toRenderable(company),
-        RenderableCompany.from(company),
+        company.toRenderable(),
         RenderableCount(count),
         duration.toRenderable(),
         countDelta,
@@ -75,22 +79,9 @@ fun RiverRank.toRenderable(): RenderableRiverRank {
 
 fun WaterwayName.toRenderable(companyName: CompanyName): RenderableWaterway {
     val waterwaySlug = WaterwaySlug.from(this)
-    val companySlug = CompanySlug.from(companyName)
+    val companySlug = companyName.toSlug()
     return RenderableWaterway(this, waterwaySlug, Uri.of("/waterway/$companySlug/$waterwaySlug"))
 }
-
-
-/*
-    <tr>
-        <td>{{this.rank}}</td>
-        <td><a href="{{this.river.uri}}">{{this.river.name}}</a></td>
-        <td><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
-        <td>{{numberFormat this.count.count}}</td>
-        <td class="align-middle {{#if this.countDelta.positive}}delta-positive {{else}}delta-negative {{/if}}">{{numberFormat this.countDelta.value}}</td>
-        <td>{{numberFormat this.duration.hours}}</td>
-        <td class="align-middle {{#if this.countDelta.positive}}delta-positive {{else}}delta-negative {{/if}}">{{numberFormat this.durationDelta.hours}}</td>
-    </tr>
- */
 
 fun classesFor(d: Delta): Set<String> {
     if (d.isNegative()) {

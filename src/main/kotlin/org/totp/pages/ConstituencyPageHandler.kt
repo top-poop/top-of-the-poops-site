@@ -26,7 +26,9 @@ import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencySlug
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
+import org.totp.model.data.RenderableCompany
 import org.totp.model.data.RiverRank
+import org.totp.model.data.toRenderable
 import org.totp.text.csv.readCSV
 import java.text.NumberFormat
 import java.time.Duration
@@ -47,11 +49,7 @@ data class PollutionSummary(
     val companies: List<CompanyName>,
     val count: RenderableCount,
     val duration: RenderableDuration,
-) {
-
-    companion object {
-    }
-}
+)
 
 fun List<CSOTotals>.summary(): PollutionSummary {
     return PollutionSummary(
@@ -147,7 +145,7 @@ fun CSOTotals.toRenderable(): RenderableCSOTotal {
         constituency.toRenderable(),
         cso.let {
             RenderableCSO(
-                RenderableCompany.from(it.company),
+                it.company.toRenderable(),
                 it.sitename,
                 it.waterway.toRenderable(it.company),
                 it.location

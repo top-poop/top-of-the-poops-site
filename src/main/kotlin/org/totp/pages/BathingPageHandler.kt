@@ -20,6 +20,7 @@ import org.totp.model.data.BathingSlug
 import org.totp.model.data.BeachName
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.GeoJSON
+import org.totp.model.data.toRenderable
 import org.totp.model.data.toSlug
 import java.text.NumberFormat
 import java.time.Duration
@@ -52,7 +53,7 @@ fun BathingCSO.toRenderable(): RenderableCSOTotal {
     return RenderableCSOTotal(
         constituency = constituency.toRenderable(),
         cso = RenderableCSO(
-            company = RenderableCompany.from(company),
+            company = company.toRenderable(),
             sitename,
             waterway = waterway.toRenderable(company),
             location,

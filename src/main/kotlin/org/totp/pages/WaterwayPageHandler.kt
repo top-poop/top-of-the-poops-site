@@ -18,6 +18,7 @@ import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.CSOTotals
+import org.totp.model.data.CompanySlug
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.WaterwayName
 import java.text.NumberFormat

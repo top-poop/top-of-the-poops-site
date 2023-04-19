@@ -71,25 +71,6 @@ class RenderableConstituencyRank(
     val durationDelta: RenderableDurationDelta
 )
 
-/*
-                        {{#each constituencyRankings}}
-                            <tr>
-                                <td class="align-middle">{{this.rank}}</td>
-                                <td class="align-middle"><a
-                                        href="{{this.constituency.uri}}">{{this.constituency.name}}</a></td>
-                                <td class="align-middle"><a href="{{this.mp.uri}}">{{this.mp.name}}</a></td>
-                                <td class="align-middle">{{this.mp.party}}</td>
-                                <td class="align-middle">{{numberFormat this.count.count}}</td>
-                                <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat
-                                        this.countDelta.value}}</td>
-                                <td class="align-middle">{{numberFormat this.duration.hours}}</td>
-                                <td class="align-middle {{>components/class-delta this.durationDelta}}">{{numberFormat
-                                        this.durationDelta.hours}}</td>
-                            </tr>
-                        {{/each}}
- */
-
-
 fun tableRows(items: List<RenderableConstituencyRank>): String {
     val nf = TotpHandlebars.numberFormat()
 

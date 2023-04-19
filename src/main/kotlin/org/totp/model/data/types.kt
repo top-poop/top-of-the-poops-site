@@ -42,8 +42,14 @@ class ShellfisheryName(value: String) : StringValue(value), ComparableValue<Shel
     companion object : StringValueFactory<ShellfisheryName>(::ShellfisheryName)
 }
 
+fun ShellfisheryName.toSlug() = ShellfishSlug.of(value.kebabCase())
+
 class ShellfishAreaName(value: String) : StringValue(value), ComparableValue<ShellfishAreaName, String> {
     companion object : StringValueFactory<ShellfishAreaName>(::ShellfishAreaName)
+}
+
+class ShellfishSlug(value: String) : StringValue(value) {
+    companion object : StringValueFactory<ShellfishSlug>(::ShellfishSlug)
 }
 
 fun BathingName.toSlug() = BathingSlug.of(value.kebabCase())
@@ -57,5 +63,10 @@ class BeachName(value: String) : StringValue(value), ComparableValue<BeachName, 
     companion object : StringValueFactory<BeachName>(::BeachName)
 }
 
+class CompanySlug(value: String) : StringValue(value) {
+    companion object : StringValueFactory<CompanySlug>(::CompanySlug)
+}
 
-
+fun CompanyName.toSlug(): CompanySlug {
+    return CompanySlug.of(value.kebabCase())
+}
