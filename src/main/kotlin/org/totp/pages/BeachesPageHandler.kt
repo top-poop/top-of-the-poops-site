@@ -12,11 +12,10 @@ import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
-import org.totp.model.data.BathingName
 import org.totp.model.data.BathingRank
-import org.totp.model.data.BathingSlug
-import org.totp.model.data.CompanyName
-import org.totp.model.data.toSlug
+import org.totp.model.data.RenderableBathingName
+import org.totp.model.data.RenderableCompany
+import org.totp.model.data.toRenderable
 import java.text.NumberFormat
 import java.time.Duration
 
@@ -30,24 +29,6 @@ class BeachesPage(
     val share: SocialShare,
 ) : PageViewModel(uri)
 
-
-data class RenderableBathingName(val name: BathingName, val slug: BathingSlug, val uri: Uri) {
-    companion object {
-        fun from(name: BathingName): RenderableBathingName {
-            val slug = name.toSlug()
-            return RenderableBathingName(name, slug, slug.let { Uri.of("/beach/$it") })
-        }
-    }
-}
-
-data class RenderableCompany(val name: CompanyName, val slug: CompanySlug, val uri: Uri) {
-    companion object {
-        fun from(companyName: CompanyName): RenderableCompany {
-            val slug = CompanySlug.from(companyName)
-            return RenderableCompany(companyName, slug, slug.let { Uri.of("/company/$it") })
-        }
-    }
-}
 
 data class BeachPolluter(
     val rank: Int,
@@ -72,8 +53,8 @@ data class RenderableBathingRank(
 fun BathingRank.toRenderable(): RenderableBathingRank {
     return RenderableBathingRank(
         rank,
-        RenderableBathingName.from(beach),
-        RenderableCompany.from(company),
+        beach.toRenderable(),
+        company.toRenderable(),
         RenderableCount(count),
         duration.toRenderable(),
         countDelta,
@@ -96,7 +77,7 @@ object BeachesPageHandler {
                 .map {
                     BeachPolluter(
                         0,
-                        RenderableCompany.from(it.key),
+                        it.key.toRenderable(),
                         count = it.value.sumOf { it.count },
                         duration = it.value.map { it.duration }.reduce { acc, duration -> acc + duration },
                         countDelta = it.value.map { it.countDelta }

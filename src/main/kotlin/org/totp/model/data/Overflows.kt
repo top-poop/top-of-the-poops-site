@@ -13,7 +13,6 @@ import org.http4k.format.value
 import org.totp.extensions.kebabCase
 import org.totp.extensions.readSimpleList
 import org.totp.pages.CompanyAnnualSummary
-import org.totp.pages.CompanySlug
 import org.totp.pages.ConstituencyRank
 import org.totp.pages.DeltaValue
 import org.totp.pages.EnsureSuccessfulResponse
@@ -179,6 +178,16 @@ data class RiverRank(
     val durationDelta: Duration,
 )
 
+data class ShellfishRank(
+    val rank: Int,
+    val shellfishery: ShellfisheryName,
+    val company: CompanyName,
+    val count: Int,
+    val duration: Duration,
+    val countDelta: DeltaValue,
+    val durationDelta: Duration,
+)
+
 object RiverRankings {
     operator fun invoke(handler: HttpHandler): () -> List<RiverRank> {
         return {
@@ -238,7 +247,7 @@ fun waterwayCSOs(source: () -> List<CSOTotals>) =
     { name: WaterwaySlug, company: CompanySlug ->
         val result = source()
             .filter { name == WaterwaySlug.from(it.cso.waterway) }
-            .filter { company == CompanySlug.from(it.cso.company) }
+            .filter { company == it.cso.company.toSlug() }
         result
     }
 
@@ -303,7 +312,7 @@ object WaterCompanies {
             TotpJson.mapper.readSimpleList(response.bodyString())
                 .map {
                     val name = CompanyName.of(it["name"] as String)
-                    val slug = CompanySlug.from(name)
+                    val slug = name.toSlug()
                     WaterCompany(
                         name = name,
                         (it["address"] as Map<String, String?>).let {

@@ -14,8 +14,12 @@ import org.totp.model.PageViewModel
 import org.totp.model.data.BathingRank
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.MediaAppearance
+import org.totp.model.data.RenderableCompany
+import org.totp.model.data.RenderableShellfishName
 import org.totp.model.data.RiverRank
+import org.totp.model.data.ShellfishRank
 import org.totp.model.data.WaterCompany
+import org.totp.model.data.toRenderable
 import java.time.Duration
 import kotlin.math.floor
 
@@ -27,8 +31,32 @@ data class ConstituencyRank(
     val count: Int,
     val duration: Duration,
     val countDelta: Int,
-    val durationDelta: Duration
+    val durationDelta: Duration,
 )
+
+
+data class RenderableShellfishRank(
+    val rank: Int,
+    val river: RenderableShellfishName,
+    val company: RenderableCompany,
+    val count: RenderableCount,
+    val duration: RenderableDuration,
+    val countDelta: DeltaValue,
+    val durationDelta: RenderableDurationDelta,
+)
+
+fun ShellfishRank.toRenderable(): RenderableShellfishRank {
+    return RenderableShellfishRank(
+        rank,
+        shellfishery.toRenderable(),
+        company.toRenderable(),
+        RenderableCount(count),
+        duration.toRenderable(),
+        countDelta,
+        RenderableDurationDelta(durationDelta)
+    )
+}
+
 
 @Suppress("unused")
 class HomePage(
@@ -40,8 +68,9 @@ class HomePage(
     val companies: List<WaterCompany>,
     val beachRankings: List<RenderableBathingRank>,
     val riverRankings: List<RenderableRiverRank>,
+    val shellRankings: List<RenderableShellfishRank>,
     val appearances: List<MediaAppearance>,
-    val share: SocialShare
+    val share: SocialShare,
 ) : PageViewModel(uri)
 
 object HomepageHandler {
@@ -57,6 +86,8 @@ object HomepageHandler {
     ): HttpHandler {
 
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
+
+        val shellfishRankings = { listOf<ShellfishRank>() }
 
         return { request ->
 
@@ -75,12 +106,13 @@ object HomepageHandler {
                         year = 2022,
                         totalSpillsRounded,
                         totalDuration,
-                        rankings.take(10).map { it.toRenderable(mpFor)},
+                        rankings.take(10).map { it.toRenderable(mpFor) },
                         companies(),
                         bathingRankings().take(10).map { it.toRenderable() },
                         rivers.map {
                             it.toRenderable()
                         },
+                        shellfishRankings().take(10).map { it.toRenderable() },
                         appearances().sortedByDescending { it.date }.take(8),
                         SocialShare(
                             pageUriFrom(request),
@@ -88,7 +120,7 @@ object HomepageHandler {
                             cta = "Take action. Tweet this to your followers",
                             listOf("sewage"),
                             via = "sewageuk",
-                            twitterImageUri=Uri.of("https://top-of-the-poops.org/badges/home/home.png")
+                            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/home/home.png")
                         )
                     )
                 )
