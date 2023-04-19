@@ -16,7 +16,7 @@ class RetrieivingOGInformation {
     @Disabled("not a test")
     fun `getting og information`() {
 
-        val uri = "https://www.theboltonnews.co.uk/news/23440662.united-utilities-bolton-areas-top-2-sewage-waterways/"
+        val uri = "https://www.stokesentinel.co.uk/news/stoke-on-trent-news/top-poops-river-trent-named-8163671"
         val html = Html(client(org.http4k.core.Request(Method.GET, Uri.of(uri))))
 
         val title = html.selectFirst("title")?.text()

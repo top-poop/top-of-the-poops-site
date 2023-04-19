@@ -362,9 +362,6 @@
             const dates = new Array(...new Set(data.cso.map(it => it.d))).map(it => new Date(it))
             const count = new Set(data.cso.map(it => it.p)).size + 1
 
-            console.log(dates);
-            console.log(count);
-
             return Plot.plot({
                 marginLeft: 150,
                 width: Math.max(1150, vw - 50),

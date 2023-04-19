@@ -288,6 +288,15 @@ fun main() {
                                 riverRankings = riverRankings,
                                 bathingRankings = beachRankings,
                                 csoTotals = allSpills,
+                                companyLiveDataAvailable =
+                                { name ->
+                                    val uri = Uri.of("/v1/2022/spills-live-summary-${name.toSlug()}.json")
+                                    val response = dataClient(org.http4k.core.Request(Method.GET, uri))
+                                    when {
+                                        response.status.successful -> Uri.of("/data/v1/2022/spills-live-summary-${name.toSlug()}.json")
+                                        else -> null
+                                    }
+                                },
                             ),
                             "/shellfisheries" bind ShellfisheriesPageHandler(
                                 renderer = renderer,

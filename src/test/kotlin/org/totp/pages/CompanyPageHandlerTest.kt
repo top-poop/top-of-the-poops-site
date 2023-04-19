@@ -2,6 +2,7 @@ package org.totp.pages
 
 import org.http4k.core.Method
 import org.http4k.core.Request
+import org.http4k.core.Uri
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
@@ -20,7 +21,6 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.one
 import java.io.File
 import java.time.Duration
-
 
 class CompanyPageHandlerTest {
 
@@ -68,7 +68,8 @@ class CompanyPageHandlerTest {
                 )
             },
             riverRankings = { listOf(aRiver(1)) },
-            csoTotals = { summaries }
+            csoTotals = { summaries },
+            companyLiveDataAvailable = { Uri.of("https://top-of-the-poops.org/data/v1/2022/spills-live-summary-thames-water.json")}
         )
     )
 
