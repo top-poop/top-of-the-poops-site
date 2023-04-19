@@ -152,7 +152,7 @@
                             radius: 10,
                         })
                                 .bindTooltip(`${it.shellfishery} - ${it.total_spill_hours} hours`)
-                                .on("dblclick", e => navigateToShellfish(it.bathing) )
+                                .on("dblclick", e => navigateToShellfish(it.shellfishery) )
                 )
                 .forEach(it => it.addTo(map))
     }
