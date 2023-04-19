@@ -72,7 +72,7 @@ GEO_2022_GENERATED=$(foreach sql,$(GEO_2022_SQL),$(DATAFILES)/v1/2022/geo/$(base
 
 PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAFILES)/v1/2022/geo/countries.json
 
-generated-data: generated-2022 generated-live $(DATAFILES)/constituencies/.uptodate $(DATAFILES)/beaches/.uptodate $(PROVIDED)
+generated-data: generated-2022 generated-live $(DATAFILES)/constituencies/.uptodate $(DATAFILES)/beaches/.uptodate $(DATAFILES)/shellfisheries/.uptodate $(PROVIDED)
 
 generated-2022: $(DATA_2022_GENERATED) $(GEO_2022_GENERATED) $(PROVIDED)
 
@@ -89,17 +89,24 @@ $(DATAFILES)/v1/2022/geo/%.json:  sql/v1/2022/geo/$(basename $(notdir %)).sql $(
 	$(PYTHON) $(SQL_TO_TEXT) $< | jq -r tostring > $@
 
 
-$(DATAFILES)/constituencies/.uptodate: $(PYTHON) constituencies.py constituencies.sql
+$(DATAFILES)/constituencies/.uptodate: $(PYTHON) geometry.py constituencies.sql
 	rm -rf $(DATAFILES)/constituencies
 	@mkdir $(DATAFILES)/constituencies
-	$(PYTHON) constituencies.py $(DATAFILES)/constituencies
+	$(PYTHON) geometry.py constituencies.sql $(DATAFILES)/constituencies
 	touch $@
 
-$(DATAFILES)/beaches/.uptodate: $(PYTHON) beaches.py beaches.sql
+$(DATAFILES)/beaches/.uptodate: $(PYTHON) geometry.py beaches.sql
 	rm -rf $(DATAFILES)/beaches
 	@mkdir $(DATAFILES)/beaches
-	$(PYTHON) beaches.py $(DATAFILES)/beaches
+	$(PYTHON) geometry.py beaches.sql $(DATAFILES)/beaches
 	touch $@
+
+$(DATAFILES)/shellfisheries/.uptodate: $(PYTHON) geometry.py shellfisheries.sql
+	rm -rf $(DATAFILES)/shellfisheries
+	@mkdir $(DATAFILES)/shellfisheries
+	$(PYTHON) geometry.py shellfisheries.sql $(DATAFILES)/shellfisheries
+	touch $@
+
 
 $(DATAFILES)/media-appearances.json: provided/media-appearances.json
 	cp $< $@

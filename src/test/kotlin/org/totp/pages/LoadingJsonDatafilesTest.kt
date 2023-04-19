@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test
 import org.totp.model.data.AllSpills
 import org.totp.model.data.BathingCSOs
 import org.totp.model.data.BathingRankings
+import org.totp.model.data.Boundaries
 import org.totp.model.data.CompanyAnnualSummaries
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyContacts
@@ -78,7 +79,7 @@ class LoadingJsonDatafilesTest {
     @Test
     fun `loading constituency boundaries`() {
         val handler = routes("/aberavon.json" bind { _: Request -> Response(Status.OK).body("hi") })
-        val boundaries = ConstituencyBoundaries(handler)
+        val boundaries = ConstituencyBoundaries(Boundaries(handler))
         expectThat(boundaries(ConstituencyName("Aberavon"))).isEqualTo(GeoJSON("hi"))
     }
 

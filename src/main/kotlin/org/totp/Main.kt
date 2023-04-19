@@ -38,6 +38,7 @@ import org.totp.model.data.AllSpills
 import org.totp.model.data.BathingCSOs
 import org.totp.model.data.BathingRankings
 import org.totp.model.data.BeachBoundaries
+import org.totp.model.data.Boundaries
 import org.totp.model.data.CompanyAnnualSummaries
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyContact
@@ -47,9 +48,9 @@ import org.totp.model.data.ConstituencyLiveDataLoader
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencyNeighbours
 import org.totp.model.data.ConstituencyRankings
-import org.totp.model.data.ConstituencySlug
 import org.totp.model.data.MediaAppearances
 import org.totp.model.data.RiverRankings
+import org.totp.model.data.ShellfishBoundaries
 import org.totp.model.data.ShellfishCSOs
 import org.totp.model.data.ShellfishRankings
 import org.totp.model.data.WaterCompanies
@@ -113,7 +114,7 @@ object OldMapRedirectHandler {
             val selected = constituency(request)
 
             if (selected != null && constituencyNames.contains(selected)) {
-                val slug = ConstituencySlug.from(selected)
+                val slug = selected.toSlug()
                 Response(Status.TEMPORARY_REDIRECT).with(LOCATION of Uri.of("/constituency/$slug"))
             } else {
                 Response(Status.TEMPORARY_REDIRECT).with(LOCATION of Uri.of("/constituencies"))
@@ -192,25 +193,27 @@ fun main() {
 
     val data2022 = SetBaseUriFrom(Uri.of("/v1/2022")).then(EnsureSuccessfulResponse()).then(dataClient)
 
-    val mediaAppearances = MediaAppearances(dataClient)
-    val waterCompanies = WaterCompanies(dataClient)
+    val mediaAppearances = memoize(MediaAppearances(dataClient))
+    val waterCompanies = memoize(WaterCompanies(dataClient))
     val constituencyContacts = memoize(ConstituencyContacts(data2022))
     val allSpills = memoize(AllSpills(data2022))
     val riverRankings = memoize(RiverRankings(data2022))
     val beachRankings = memoize(BathingRankings(data2022))
-
     val shellfishRankings = memoize(ShellfishRankings(data2022))
-
     val constituencyRankings = memoize(ConstituencyRankings(data2022))
 
     val mpFor = mpForConstituency(constituencyContacts)
 
     val constituencyBoundaries = ConstituencyBoundaries(
-        SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient)
+        Boundaries(SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient))
     )
 
     val beachBoundaries = BeachBoundaries(
-        SetBaseUriFrom(Uri.of("/beaches")).then(dataClient)
+        Boundaries(SetBaseUriFrom(Uri.of("/beaches")).then(dataClient))
+    )
+
+    val shellfisheryBoundaries = ShellfishBoundaries(
+        Boundaries(SetBaseUriFrom(Uri.of("/shellfisheries")).then(dataClient))
     )
 
     val constituencyRank = { wanted: ConstituencyName ->
@@ -297,7 +300,8 @@ fun main() {
                                     ShellfishCSOs(data2022)().filter { wanted == it.shellfishery.toSlug() }
                                 },
                                 mpFor = mpFor,
-                                constituencyRank = constituencyRank
+                                constituencyRank = constituencyRank,
+                                shellfisheryBoundaries = shellfisheryBoundaries
                             ),
                             "/map.html" bind OldMapRedirectHandler(),
                             "/sitemap.xml" bind SitemapHandler(

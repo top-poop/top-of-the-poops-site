@@ -10,6 +10,7 @@ import org.totp.model.TotpHandlebars
 import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
+import org.totp.model.data.GeoJSON
 import org.totp.model.data.ShellfishCSO
 import org.totp.model.data.ShellfishRank
 import org.totp.model.data.ShellfisheryName
@@ -50,7 +51,8 @@ class ShellfisheryPageHandlerTest {
                 )
             },
             mpFor = { MP("mp", "party", "example", Uri.of("http://example.com")) },
-            constituencyRank = { null }
+            constituencyRank = { null },
+            shellfisheryBoundaries = { GeoJSON.of("geojson") }
         )
     )
 

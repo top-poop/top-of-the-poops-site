@@ -18,6 +18,7 @@ import org.totp.pages.DeltaValue
 import org.totp.pages.EnsureSuccessfulResponse
 import org.totp.pages.MP
 import org.totp.pages.WaterwaySlug
+import java.io.IOException
 import java.time.Duration
 import java.time.LocalDate
 
@@ -69,7 +70,7 @@ data class ConstituencyLiveData(val constituencyName: ConstituencyName, val date
 object ConstituencyLiveDataLoader {
     operator fun invoke(handler: HttpHandler): (ConstituencyName) -> ConstituencyLiveData? {
         return { name ->
-            val uri = ConstituencySlug.from(name).let { Uri.of("/live/constituencies/$it.json") }
+            val uri = name.toSlug().let { Uri.of("/live/constituencies/$it.json") }
             val response = handler(Request(Method.GET, uri))
 
             if (response.status.successful) {
@@ -89,21 +90,29 @@ object ConstituencyLiveDataLoader {
 }
 
 object ConstituencyBoundaries {
-    operator fun invoke(handler: HttpHandler): (ConstituencyName) -> GeoJSON {
-        val handler = EnsureSuccessfulResponse().then(handler)
+    operator fun invoke(handler: (String) -> GeoJSON?): (ConstituencyName) -> GeoJSON {
         return { name ->
-            val slug = ConstituencySlug.from(name)
-            val uri = Uri.of("$slug.json")
-            GeoJSON(handler(Request(Method.GET, uri)).bodyString())
+            handler(name.toSlug().value) ?: throw IOException("can't find constituency boundary for $name")
         }
     }
 }
 
 object BeachBoundaries {
-    operator fun invoke(handler: HttpHandler): (BeachName) -> GeoJSON? {
+    operator fun invoke(handler: (String) -> GeoJSON?): (BeachName) -> GeoJSON? {
+        return { name -> handler(name.value.kebabCase()) }
+    }
+}
+
+object ShellfishBoundaries {
+    operator fun invoke(handler: (String) -> GeoJSON?): (ShellfisheryName) -> GeoJSON? {
+        return { name -> handler(name.value.kebabCase()) }
+    }
+}
+
+object Boundaries {
+    operator fun invoke(handler: HttpHandler): (String) -> GeoJSON? {
         return { name ->
-            val slug = name.value.kebabCase()
-            val uri = Uri.of("$slug.json")
+            val uri = Uri.of("$name.json")
             val response = handler(Request(Method.GET, uri))
             if (response.status.successful) {
                 GeoJSON(response.bodyString())
@@ -113,6 +122,7 @@ object BeachBoundaries {
         }
     }
 }
+
 
 object ConstituencyRankings {
     operator fun invoke(handler: HttpHandler): () -> List<ConstituencyRank> {

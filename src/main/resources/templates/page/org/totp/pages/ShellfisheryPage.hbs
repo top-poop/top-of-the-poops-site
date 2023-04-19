@@ -14,6 +14,7 @@
 
     {{> components/meta-opengraph
             title=(concat "Shellfish Area | " name)
+            twitterImageUri=share.twitterImageUri
     }}
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -123,6 +124,9 @@
 
                 <p><b>Accuracy Warning</b> We use data from the water companies, but we are seeing many anomalies, that make us believe that
                      location information is quite poor. The situation is likely <b>far worse</b> than reported here.</p>
+
+                <p><b>In particular:</b> Totals on this page can differ from totals in the Ranked Shellfish page - number on this page are higher - this is due to a lack of standardization
+                on shellfish area names. This page more accurately counts the differing names. For example "Solway" and "SOLWAY" are counted as different in the rankings, but correctly aggregated here.</p>
 
                 <p>Other CSOs may also be located nearby, however the water companies claim that these do not affect the water quality here.</p>
                 <div class="table-responsive">
