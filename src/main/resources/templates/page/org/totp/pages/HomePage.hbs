@@ -100,7 +100,7 @@
                 <p>Most, if not actually all, of the beaches and designated coastal bathing locations around England
                     and Wales are regular recipients of a good layer of sewage.</p>
 
-                <p><b>Accuracy Warning</b> We use data from the water companies, but we are seeing many anomaliies, that make us believe that
+                <p><b>Accuracy Warning</b> We use data from the water companies, but we are seeing many anomalies, that make us believe that
                 bathing location information is quite poor. The situation is likely <b>far worse</b> than reported here.</p>
 
                 <p>Water companies have a duty to report on the summer bathing season separately, and this made grim
@@ -156,6 +156,35 @@
             <img style="width: 100%; height: auto" src="/assets/images/top-of-the-poops-rivers-2021.png"/>
         </div>
     </div>
+
+
+    <div class="row justify-content-md-center align-items-center">
+        <div class="col-md-6   offset-md-1">
+            <div id="map-shellfish" class="sewage-map"></div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="display-4">Sewage in the food chain?</div>
+
+            <div class="mb-4">
+                <p>Shellfish are sensitive to the quality of water that surrounds them, and as they filter the water, they can become contaminated
+                with bacteria from the water around them.</p>
+
+                <h4>Top of The Poops - Shellfish</h4>
+
+                {{#each shellfishRankings}}
+                    <div>
+                        <b>{{this.rank}}.</b>{{this.company.name}} - <a href="{{this.shellfish.uri}}">{{this.shellfish.name}}</a> {{numberFormat this.duration.hours}}
+                        hours
+                    </div>
+                {{/each}}
+            </div>
+            <a href="/shellfisheries">
+                <button type="button" class="btn btn-primary">See all shellfish rankings</button>
+            </a>
+        </div>
+    </div>
+
 </div>
 
 <div class="container">
@@ -307,6 +336,62 @@
         chart(await beaches.json(), await countries.json())
     }
 </script>
+
+
+<script type="module">
+    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
+
+    const chart = (data, countries) => document.getElementById("map-shellfish").appendChild(
+            Plot.plot(
+                    {
+                        projection: {
+                            type: "mercator",
+                            domain: {
+                                type: "MultiPoint",
+                                coordinates: [[-6, 49.9], [1.8, 55.9]],
+                            },
+                        },
+                        width: 800,
+                        r: {range: [10, 45], domain: [100, 8700]},
+                        color: {
+                            type: "linear",
+                            range: ["#8e2353", "#b47846"] // uses d3.interpolateRgb
+                        },
+                        marks: [
+                            Plot.geo(
+                                    countries,
+                                    {
+                                        fill: "rgb(77,5,118)",
+                                        fillOpacity: 0.1,
+                                        stroke: "#000000",
+                                        strokeWidth: 2,
+                                        strokeOpacity: 0.2,
+                                    }
+                            ),
+                            Plot.dot(
+                                    data,
+                                    {
+                                        x: "lon",
+                                        y: "lat",
+                                        r: "total_spill_hours",
+                                        fill: "total_spill_hours",
+                                        opacity: 0.5,
+                                        mixBlendMode: "multiply",
+                                        title: d => `${d.shellfishery} - ${d.total_spill_hours} hours of sewage in {{year}}`,
+                                    }
+                            )
+                        ]
+                    }
+            )
+    )
+
+    const shellfish = await fetch("/data/v1/{{year}}/spills-by-shellfish.json");
+    const countries = await fetch("/data/v1/{{year}}/geo/countries.json")
+    if (shellfish.ok && countries.ok) {
+        chart(await shellfish.json(), await countries.json())
+    }
+</script>
+
 
 </body>
 </html>
