@@ -35,9 +35,9 @@ import org.totp.extensions.Defect
 import org.totp.http4k.StandardFilters
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.AllSpills
+import org.totp.model.data.BathingCSOs
 import org.totp.model.data.BathingRankings
 import org.totp.model.data.BeachBoundaries
-import org.totp.model.data.BathingCSOs
 import org.totp.model.data.CompanyAnnualSummaries
 import org.totp.model.data.ConstituencyBoundaries
 import org.totp.model.data.ConstituencyContact
@@ -50,6 +50,8 @@ import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.ConstituencySlug
 import org.totp.model.data.MediaAppearances
 import org.totp.model.data.RiverRankings
+import org.totp.model.data.ShellfishCSOs
+import org.totp.model.data.ShellfishRankings
 import org.totp.model.data.WaterCompanies
 import org.totp.model.data.constituencyCSOs
 import org.totp.model.data.constituencyRivers
@@ -70,6 +72,8 @@ import org.totp.pages.HtmlPageErrorFilter
 import org.totp.pages.MP
 import org.totp.pages.MediaPageHandler
 import org.totp.pages.RiversPageHandler
+import org.totp.pages.ShellfisheriesPageHandler
+import org.totp.pages.ShellfisheryPageHandler
 import org.totp.pages.SitemapHandler
 import org.totp.pages.SitemapUris
 import org.totp.pages.WaterwayPageHandler
@@ -195,6 +199,8 @@ fun main() {
     val riverRankings = memoize(RiverRankings(data2022))
     val beachRankings = memoize(BathingRankings(data2022))
 
+    val shellfishRankings = memoize(ShellfishRankings(data2022))
+
     val constituencyRankings = memoize(ConstituencyRankings(data2022))
 
     val mpFor = mpForConstituency(constituencyContacts)
@@ -226,6 +232,7 @@ fun main() {
                                 appearances = mediaAppearances,
                                 companies = waterCompanies,
                                 mpFor = mpFor,
+                                shellfishRankings = shellfishRankings,
                             ),
                             "/media" bind MediaPageHandler(
                                 renderer = renderer,
@@ -278,6 +285,19 @@ fun main() {
                                 riverRankings = riverRankings,
                                 bathingRankings = beachRankings,
                                 csoTotals = allSpills,
+                            ),
+                            "/shellfisheries" bind ShellfisheriesPageHandler(
+                                renderer = renderer,
+                                shellfishRankings = shellfishRankings
+                            ),
+                            "/shellfishery/{area}" bind ShellfisheryPageHandler(
+                                renderer = renderer,
+                                shellfishRankings = shellfishRankings,
+                                shellfishSpills = { wanted ->
+                                    ShellfishCSOs(data2022)().filter { wanted == it.shellfishery.toSlug() }
+                                },
+                                mpFor = mpFor,
+                                constituencyRank = constituencyRank
                             ),
                             "/map.html" bind OldMapRedirectHandler(),
                             "/sitemap.xml" bind SitemapHandler(

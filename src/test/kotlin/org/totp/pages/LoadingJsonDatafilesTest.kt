@@ -6,6 +6,7 @@ import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.Uri
+import org.http4k.core.then
 import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.routes
@@ -23,6 +24,8 @@ import org.totp.model.data.ConstituencyRankings
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
 import org.totp.model.data.RiverRankings
+import org.totp.model.data.ShellfishCSOs
+import org.totp.model.data.ShellfishRankings
 import org.totp.model.data.WaterCompanies
 import strikt.api.expectThat
 import strikt.assertions.get
@@ -169,10 +172,13 @@ class LoadingJsonDatafilesTest {
 
     fun uriHavingFileContent(uri: Uri, file: File): RoutingHttpHandler {
         expectThat(uri.path).isNotBlank()
+        if ( ! file.exists() ) {
+            throw IllegalArgumentException("given files does not exist  $file" )
+        }
         val handler: HttpHandler = { Response(Status.OK).body(file.readText()) }
-        return routes(
-            uri.path bind Method.GET to handler
-        )
+        return EnsureSuccessfulResponse().then(routes(
+            uri.path bind Method.GET to handler,
+        ))
     }
 
     @Test
@@ -227,12 +233,32 @@ class LoadingJsonDatafilesTest {
     }
 
     @Test
+    fun `loading  shellfish 2022`() {
+        val remote = uriHavingFileContent(
+            Uri.of("spills-by-shellfish.json"),
+            File("services/data/datafiles/v1/2022/spills-by-shellfish.json")
+        )
+        val service = ShellfishRankings(remote)
+        expectThat(service()).size.isGreaterThan(3)
+    }
+
+    @Test
     fun `loading  bathing csos 2022`() {
         val remote = uriHavingFileContent(
             Uri.of("csos-by-beach.json"),
             File("services/data/datafiles/v1/2022/csos-by-beach.json")
         )
         val service = BathingCSOs(remote)
+        expectThat(service()).size.isGreaterThan(3)
+    }
+
+    @Test
+    fun `loading  shellfish csos 2022`() {
+        val remote = uriHavingFileContent(
+            Uri.of("csos-by-shellfish.json"),
+            File("services/data/datafiles/v1/2022/csos-by-shellfish.json")
+        )
+        val service = ShellfishCSOs(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 

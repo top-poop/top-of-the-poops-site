@@ -17,6 +17,8 @@ import org.totp.model.data.ConstituencyName
 import org.totp.model.data.MediaAppearance
 import org.totp.model.data.MediaAppearances
 import org.totp.model.data.RiverRank
+import org.totp.model.data.ShellfishRank
+import org.totp.model.data.ShellfisheryName
 import org.totp.model.data.WaterCompany
 import org.totp.model.data.WaterwayName
 import strikt.api.expectThat
@@ -33,7 +35,7 @@ val aWaterCompany = WaterCompany(
     Uri.of(""),
     Uri.of("http://example.com/company"),
     Uri.of("http://example.com/image"),
-    linkUri=Uri.of("http://example.com/link"),
+    linkUri = Uri.of("http://example.com/link"),
     "@bob"
 )
 
@@ -64,26 +66,43 @@ class HomepageHandlerTest {
                 )
             },
             bathingRankings = {
-                listOf(BathingRank(
-                    1,
-                    BathingName.of("beach"),
-                    CompanyName.of("company"),
-                    10,
-                    Duration.ofHours(1),
-                    DeltaValue.of(10),
-                    Duration.ofSeconds(11)
-                ))
+                listOf(
+                    BathingRank(
+                        1,
+                        BathingName.of("beach"),
+                        CompanyName.of("company"),
+                        10,
+                        Duration.ofHours(1),
+                        DeltaValue.of(10),
+                        Duration.ofSeconds(11)
+                    )
+                )
+            },
+            shellfishRankings = {
+                listOf(
+                    ShellfishRank(
+                        1,
+                        ShellfisheryName.of("shellfish"),
+                        CompanyName.of("company"),
+                        10,
+                        Duration.ofHours(1),
+                        DeltaValue.of(10),
+                        Duration.ofSeconds(11)
+                    )
+                )
             },
             riverRankings = {
-                listOf(RiverRank(
-                    1,
-                    WaterwayName("river"),
-                    CompanyName("company"),
-                    20,
-                    Duration.ofHours(22),
-                    DeltaValue.of(10),
-                    Duration.ofHours(10)
-                ))
+                listOf(
+                    RiverRank(
+                        1,
+                        WaterwayName("river"),
+                        CompanyName("company"),
+                        20,
+                        Duration.ofHours(22),
+                        DeltaValue.of(10),
+                        Duration.ofHours(10)
+                    )
+                )
             },
             appearances = {
                 listOf(
@@ -138,6 +157,4 @@ class HomepageHandlerTest {
             }
         }
     }
-
-
 }

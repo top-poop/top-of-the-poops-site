@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Top of the Poops | Bathing Area | {{ name }}</title>
+    <title>Top of the Poops | Shellfish Area | {{ name }}</title>
     <meta name="description" content="Analysing sewage dumps by water companies at {{ name }}">
 
     {{> chunks/favicons }}
@@ -13,8 +13,7 @@
     <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
 
     {{> components/meta-opengraph
-            title=(concat "Bathing Area | " name)
-            twitterImageUri=share.twitterImageUri
+            title=(concat "Shellfish Area | " name)
     }}
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -71,7 +70,7 @@
                         <div class="card-header">How does {{name}} compare?</div>
                         <div class="card-body">
                             <div class="card-text">
-                                <p>{{name}} was the #{{rank.rank}} most polluted bathing area in England & Wales, by duration of sewage overflows, as reported by the water companies</p>
+                                <p>{{name}} was the #{{rank.rank}} most polluted shellfish area in England & Wales, by duration of sewage overflows, as reported by the water companies</p>
                             </div>
                         </div>
                     </div>
@@ -122,10 +121,8 @@
 
                 <p>Here are all the reported sewage overflow totals for {{ name }} in {{ summary.year }}.</p>
 
-                <p>If the locations of the sewage outlets look a bit unusual, it is likely that the reporting of the data from the water company is in error. We rely on their data in order to draw these maps.</p>
-
                 <p><b>Accuracy Warning</b> We use data from the water companies, but we are seeing many anomalies, that make us believe that
-                    bathing location information is quite poor. The situation is likely <b>far worse</b> than reported here.</p>
+                     location information is quite poor. The situation is likely <b>far worse</b> than reported here.</p>
 
                 <p>Other CSOs may also be located nearby, however the water companies claim that these do not affect the water quality here.</p>
                 <div class="table-responsive">

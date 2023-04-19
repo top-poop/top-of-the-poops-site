@@ -168,6 +168,28 @@ object BathingRankings {
 }
 
 
+object ShellfishRankings {
+    operator fun invoke(handler: HttpHandler): () -> List<ShellfishRank> {
+        return {
+            val response = handler(Request(Method.GET, "spills-by-shellfish.json"))
+
+            TotpJson.mapper.readSimpleList(response.bodyString())
+                .mapIndexed { r, it ->
+                    ShellfishRank(
+                        rank = r + 1,
+                        shellfishery = ShellfisheryName(it["shellfishery"] as String),
+                        company = CompanyName(it["company_name"] as String),
+                        duration = fromEDMHours(it["total_spill_hours"] as Double),
+                        count = (it["total_count"] as Double).toInt(),
+                        countDelta = DeltaValue.of((it["spills_increase"] as Double).toInt()),
+                        durationDelta = fromEDMHours(it["hours_increase"] as Double)
+                    )
+                }
+        }
+    }
+}
+
+
 data class RiverRank(
     val rank: Int,
     val river: WaterwayName,
@@ -435,6 +457,45 @@ object BathingCSOs {
                         location = Coordinates(it["lat"] as Double, it["lon"] as Double),
                         constituency = ConstituencyName(it["pcon20nm"] as String),
                         beach = (it["beach_name"] as String?)?.let { BeachName(it) }
+                    )
+                }
+        }
+    }
+}
+
+
+data class ShellfishCSO(
+    val year: Int,
+    val company: CompanyName,
+    val sitename: String,
+    val shellfishery: ShellfisheryName,
+    val count: Int,
+    val duration: Duration,
+    val reporting: Number,
+    val waterway: WaterwayName,
+    val location: Coordinates,
+    val constituency: ConstituencyName,
+)
+
+
+object ShellfishCSOs {
+    operator fun invoke(handler: HttpHandler): () -> List<ShellfishCSO> {
+        val response = handler(Request(Method.GET, "csos-by-shellfish.json"))
+
+        return {
+            TotpJson.mapper.readSimpleList(response.bodyString())
+                .map {
+                    ShellfishCSO(
+                        year = it["reporting_year"] as Int,
+                        company = CompanyName(it["company_name"] as String),
+                        sitename = it["site_name"] as String,
+                        shellfishery = ShellfisheryName(it["shellfishery"] as String),
+                        count = (it["spill_count"] as Double).toInt(),
+                        duration = fromEDMHours(it["total_spill_hours"] as Double),
+                        reporting = it["reporting_pct"] as Double,
+                        waterway = WaterwayName(it["receiving_water"] as String),
+                        location = Coordinates(it["lat"] as Double, it["lon"] as Double),
+                        constituency = ConstituencyName(it["pcon20nm"] as String),
                     )
                 }
         }

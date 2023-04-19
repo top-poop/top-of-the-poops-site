@@ -10,7 +10,7 @@ data class RenderableCompany(val name: CompanyName, val slug: CompanySlug, val u
 
 fun ShellfisheryName.toRenderable(): RenderableShellfishName {
     val slug = toSlug()
-    return RenderableShellfishName(this, slug, slug.let { Uri.of("/shellfish/$it") })
+    return RenderableShellfishName(this, slug, slug.let { Uri.of("/shellfishery/$it") })
 }
 
 fun CompanyName.toRenderable(): RenderableCompany {

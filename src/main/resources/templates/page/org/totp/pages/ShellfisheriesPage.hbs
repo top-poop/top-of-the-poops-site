@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Top of the Poops | Shellfish Areas</title>
+    <meta name="description" content="Analysing sewage dumps by water companies">
+
+    {{> chunks/favicons }}
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
+    <link rel="stylesheet" href="/assets/css/leaflet.css"/>
+    <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
+
+    {{> components/meta-opengraph title="Shellfish Areas" }}
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+{{> chunks/title }}
+
+{{#> components/jumbotron }}
+    There were at least <em>{{numberFormat totalCount}}</em> "sewage spills"
+    into shellfish areas in {{year}}, lasting an almost unbelievable
+    {{numberFormat totalDuration.toHours}} hours
+{{/components/jumbotron}}
+
+<div class="container">
+    <div class="row">
+        <div class="col ">
+            <div id="map" class="map">
+                <div style="display:none" data-map-attribution>
+                    &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors <br/>
+                    Contains OS Data &copy; Crown copyright &amp; database right 2021-2023<br/>
+                    &copy; <a href="https://top-of-the-poops.org">Top of the Poops</a> 2021-2023
+                </div>
+            </div>
+            <small class="desktop-only">Double click on map to zoom. Double click on shellfish area to see shellfish page</small>
+            <small class="mobile-only">Use two fingers to move the map. Double-tap on shellfish area to see shellfish page</small>
+        </div>
+    </div>
+
+    {{>chunks/horrible-nav}}
+
+    <div class="row">
+        <div class="col">
+            {{#> components/section title=(concat "Shellfish Areas Ranked for " year)}}
+
+                <p>Here are all the shellfish areas in England and Wales that had sewage overflows in {{year}}.</p>
+
+                <div class="table-responsive">
+                    <table id="table-shellfish" data-id="river" class="table table-striped mt-3">
+                        <thead>
+                        <tr>
+                            <td>Rank</td>
+                            <td>Shellfish Area</td>
+                            <td>Company</td>
+                            <td>Sewage Dumps</td>
+                            <td>Change</td>
+                            <td>Duration (Hours)</td>
+                            <td>Change</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{#each shellfishRankings}}
+                            <tr>
+                                <td class="align-middle">{{this.rank}}</td>
+                                <td class="align-middle"><a href="{{this.shellfish.uri}}">{{this.shellfish.name}}</a></td>
+                                <td class="align-middle"><a href="{{this.company.uri}}">{{this.company.name}}</a></td>
+                                <td class="align-middle">{{numberFormat this.count.count}}</td>
+                                <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat
+                                        this.countDelta.value}}</td>
+                                <td class="align-middle">{{numberFormat this.duration.hours}}</td>
+                                <td class="align-middle {{>components/class-delta this.durationDelta}}">{{numberFormat
+                                        this.durationDelta.hours}}</td>
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            {{/components/section}}
+        </div>
+    </div>
+</div>
+
+<script>
+    new DataTable('#table-shellfish',
+            {
+                pageLength: 20,
+                dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row'<'col-sm-12 col-md-5'i>>"
+            });
+</script>
+
+<script type="module">
+
+    if ( L.Browser.mobile ) {
+        Array.from(document.getElementsByClassName("desktop-only")).forEach(it => it.remove())
+    }
+    else {
+        Array.from(document.getElementsByClassName("mobile-only")).forEach(it => it.remove())
+    }
+
+    const toKebabCase = str =>
+            str &&
+            str
+                    .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
+                    .map(x => x.toLowerCase())
+                    .join('-');
+
+    const myStyle = {
+        "color": "#ff7800",
+        "weight": 5,
+        "opacity": 0.65
+    };
+
+    const map = L.map("map", {
+        scrollWheelZoom: false,
+        dragging: !L.Browser.mobile,
+        tap: !L.Browser.mobile,
+        maxZoom: 15.5,
+    });
+
+    map.fitBounds([
+        [49.674737880665994, -6.064453125000001],
+        [56.029087419764366, 1.9555664062500002]
+    ])
+
+    L.tileLayer(
+            'https://maps.top-of-the-poops.org/styles/v1/{z}/{x}/{y}.png',
+            {
+                attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
+            }
+    )
+            .addTo(map);
+
+    const navigateToShellfish = (bathing) => {
+        window.location = `/shellfishery/${toKebabCase(bathing)}`;
+    }
+
+    const response = await fetch("/data/v1/{{year}}/spills-by-shellfish.json")
+    if (response.ok) {
+        const shellfish = await (response.json())
+        shellfish
+                .map(it => L.circleMarker([it.lat, it.lon], {
+                            color: "#498940",
+                            fillColor: "#942c2c",
+                            fillOpacity: 0.5,
+                            mixBlendMode: "multiply",
+                            radius: 10,
+                        })
+                                .bindTooltip(`${it.shellfishery} - ${it.total_spill_hours} hours`)
+                                .on("dblclick", e => navigateToShellfish(it.bathing) )
+                )
+                .forEach(it => it.addTo(map))
+    }
+</script>
+
+<div class="container">
+    <div class="row">
+        <div class="col">{{> chunks/data-sources }}</div>
+    </div>
+</div>
+
+{{> chunks/footer }}
+
+</body>
+</html>

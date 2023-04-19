@@ -37,7 +37,7 @@ data class ConstituencyRank(
 
 data class RenderableShellfishRank(
     val rank: Int,
-    val river: RenderableShellfishName,
+    val shellfish: RenderableShellfishName,
     val company: RenderableCompany,
     val count: RenderableCount,
     val duration: RenderableDuration,
@@ -68,7 +68,7 @@ class HomePage(
     val companies: List<WaterCompany>,
     val beachRankings: List<RenderableBathingRank>,
     val riverRankings: List<RenderableRiverRank>,
-    val shellRankings: List<RenderableShellfishRank>,
+    val shellfishRankings: List<RenderableShellfishRank>,
     val appearances: List<MediaAppearance>,
     val share: SocialShare,
 ) : PageViewModel(uri)
@@ -80,14 +80,13 @@ object HomepageHandler {
         constituencyRankings: () -> List<ConstituencyRank>,
         bathingRankings: () -> List<BathingRank>,
         riverRankings: () -> List<RiverRank>,
+        shellfishRankings: () -> List<ShellfishRank>,
         appearances: () -> List<MediaAppearance>,
         companies: () -> List<WaterCompany>,
         mpFor: (ConstituencyName) -> MP,
     ): HttpHandler {
 
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
-
-        val shellfishRankings = { listOf<ShellfishRank>() }
 
         return { request ->
 

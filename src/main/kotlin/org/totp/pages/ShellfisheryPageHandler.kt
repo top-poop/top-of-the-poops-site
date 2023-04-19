@@ -1,7 +1,5 @@
 package org.totp.pages
 
-import dev.forkhandles.values.StringValue
-import dev.forkhandles.values.StringValueFactory
 import org.http4k.core.Body
 import org.http4k.core.ContentType
 import org.http4k.core.HttpHandler
@@ -14,57 +12,84 @@ import org.http4k.lens.Path
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
-import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
-import org.totp.model.data.CSOTotals
-import org.totp.model.data.CompanySlug
 import org.totp.model.data.ConstituencyName
-import org.totp.model.data.WaterwayName
+import org.totp.model.data.ShellfishCSO
+import org.totp.model.data.ShellfishRank
+import org.totp.model.data.ShellfishSlug
+import org.totp.model.data.ShellfisheryName
+import org.totp.model.data.toRenderable
+import org.totp.model.data.toSlug
 import java.text.NumberFormat
+import java.time.Duration
 
 
-class WaterwayPage(
+class ShellfisheryPage(
     uri: Uri,
-    val name: WaterwayName,
+    val name: ShellfisheryName,
     val share: SocialShare,
     val summary: PollutionSummary,
+    val rank: RenderableShellfishRank,
     val constituencies: List<RenderableConstituencyRank>,
     val csos: List<RenderableCSOTotal>,
 ) :
     PageViewModel(uri)
 
 
-class WaterwaySlug(value: String) : StringValue(value) {
-    companion object : StringValueFactory<WaterwaySlug>(::WaterwaySlug) {
-        fun from(name: WaterwayName): WaterwaySlug {
-            return of(name.value.kebabCase())
-        }
-    }
+fun List<ShellfishCSO>.summary(): PollutionSummary {
+    return PollutionSummary(
+        year = 2022,
+        locationCount = filter { it.count > 0 }.size,
+        companies = map { it.company }.toSet().sorted(),
+        count = sumOf { it.count }.let { RenderableCount(it) },
+        duration = (map { it.duration }
+            .reduceOrNull { acc, duration -> acc.plus(duration) }
+            ?: Duration.ZERO).toRenderable()
+    )
 }
 
-object WaterwayPageHandler {
+fun ShellfishCSO.toRenderable(): RenderableCSOTotal {
+    return RenderableCSOTotal(
+        constituency = constituency.toRenderable(),
+        cso = RenderableCSO(
+            company = company.toRenderable(),
+            sitename,
+            waterway = waterway.toRenderable(company),
+            location,
+        ),
+        count = RenderableCount(count),
+        duration = duration.toRenderable(),
+        reporting = reporting,
+    )
+}
+
+object ShellfisheryPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
-        waterwaySpills: (WaterwaySlug, CompanySlug) -> List<CSOTotals>,
+        shellfishRankings: () -> List<ShellfishRank>,
+        shellfishSpills: (ShellfishSlug) -> List<ShellfishCSO>,
         mpFor: (ConstituencyName) -> MP,
-        constituencyRank: (ConstituencyName) -> ConstituencyRank?
+        constituencyRank: (ConstituencyName) -> ConstituencyRank?,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
-        val waterwaySlug = Path.value(WaterwaySlug).of("waterway", "The waterway")
-        val companySlug = Path.value(CompanySlug).of("company", "The company")
+        val shellfishSlug = Path.value(ShellfishSlug).of("area", "The shellfish area")
 
         return { request: Request ->
+
             val numberFormat = NumberFormat.getIntegerInstance()
 
-            val spills = waterwaySpills(waterwaySlug(request), companySlug(request))
+            val area = shellfishSlug(request)
+            val spills = shellfishSpills(area)
 
             if (spills.isEmpty()) {
                 Response(Status.NOT_FOUND)
             } else {
 
-                val name = spills.first().cso.waterway
+                val name = spills.first().shellfishery
+
+                val rank = shellfishRankings().filter { it.shellfishery.toSlug() == area }.first().toRenderable()
 
                 val constituencies = spills
                     .map { it.constituency }
@@ -82,7 +107,7 @@ object WaterwayPageHandler {
 
                 Response(Status.OK)
                     .with(
-                        viewLens of WaterwayPage(
+                        viewLens of ShellfisheryPage(
                             pageUriFrom(request),
                             name,
                             SocialShare(
@@ -94,6 +119,7 @@ object WaterwayPageHandler {
                             ),
                             summary = summary,
                             constituencies = constituencies,
+                            rank = rank,
                             csos = spills
                                 .sortedByDescending { it.duration }
                                 .map {
