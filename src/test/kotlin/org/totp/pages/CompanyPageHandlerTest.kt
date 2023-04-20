@@ -69,7 +69,7 @@ class CompanyPageHandlerTest {
             },
             riverRankings = { listOf(aRiver(1)) },
             csoTotals = { summaries },
-            companyLiveDataAvailable = { Uri.of("https://top-of-the-poops.org/data/v1/2022/spills-live-summary-thames-water.json")}
+            companyLiveDataAvailable = { true }
         )
     )
 

@@ -63,14 +63,17 @@ python: $(PYTHON)
 	$(PIP) install -r $<
 	touch $@
 
+DATAFILES_2022=$(DATAFILES)/v1/2022
 
 DATA_2022_SQL=$(wildcard sql/v1/2022/*.sql)
-DATA_2022_GENERATED=$(foreach sql,$(DATA_2022_SQL),$(DATAFILES)/v1/2022/$(basename $(notdir $(sql))).json)
+DATA_2022_GENERATED=$(foreach sql,$(DATA_2022_SQL),$(DATAFILES_2022)/$(basename $(notdir $(sql))).json)
+
+DATA_2022_LIVE=$(DATAFILES_2022)/spills-live-overflows-by-rainfall-thames-water.json $(DATAFILES_2022)/spills-live-summary-thames-water.json
 
 GEO_2022_SQL=$(wildcard sql/v1/2022/geo/*.sql)
-GEO_2022_GENERATED=$(foreach sql,$(GEO_2022_SQL),$(DATAFILES)/v1/2022/geo/$(basename $(notdir $(sql))).json)
+GEO_2022_GENERATED=$(foreach sql,$(GEO_2022_SQL),$(DATAFILES_2022)/geo/$(basename $(notdir $(sql))).json)
 
-PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAFILES)/v1/2022/geo/countries.json
+PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAFILES_2022)/geo/countries.json
 
 generated-data: generated-2022 generated-live $(DATAFILES)/constituencies/.uptodate $(DATAFILES)/beaches/.uptodate $(DATAFILES)/shellfisheries/.uptodate $(PROVIDED)
 
@@ -79,6 +82,12 @@ generated-2022: $(DATA_2022_GENERATED) $(GEO_2022_GENERATED) $(PROVIDED)
 .PHONY: generated-live
 generated-live:
 	$(PYTHON) thames-summary.py
+
+
+.PHONY: .FORCE
+.FORCE:
+
+$(DATA_2022_LIVE): .FORCE
 
 $(DATAFILES)/v1/2022/%.json: sql/v1/2022/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_JSON)
 	@mkdir -p $(dir $@)
