@@ -42,6 +42,12 @@
     .plot-chart {
         height: 200px;
     }
+    #spill-correlation g[aria-label='text'] {
+        display: none;
+    }
+    #spill-correlation g[aria-label='y-axis tick label'] text:nth-child(even) {
+        display: none;
+    }
 }
 
 @media screen and (min-width: 961px) {

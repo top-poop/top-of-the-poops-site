@@ -292,10 +292,7 @@ fun main() {
                                 { name ->
                                     val uri = Uri.of("/v1/2022/spills-live-summary-${name.toSlug()}.json")
                                     val response = dataClient(org.http4k.core.Request(Method.GET, uri))
-                                    when {
-                                        response.status.successful -> Uri.of("/data/v1/2022/spills-live-summary-${name.toSlug()}.json")
-                                        else -> null
-                                    }
+                                    response.status.successful
                                 },
                             ),
                             "/shellfisheries" bind ShellfisheriesPageHandler(
