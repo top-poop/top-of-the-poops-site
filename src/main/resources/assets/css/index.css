@@ -15,10 +15,6 @@
     text-align: center;
 }
 
-.hero .title a {
-    color: #4A4A4A;
-}
-
 .hero .title a:link {
     text-decoration: none;
 }
