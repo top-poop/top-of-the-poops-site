@@ -1,6 +1,4 @@
 
-$nm: "../node_modules/bootstrap/scss";
-
 @import "../node_modules/bootstrap/scss/mixins/banner";
 @include bsBanner("");
 
@@ -9,8 +7,8 @@ $nm: "../node_modules/bootstrap/scss";
 // Configuration
 @import "../node_modules/bootstrap/scss/functions";
 
-
 // Customisation
+$font-family-sans-serif:      "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
 $primary: #543D01;
 $secondary: #828356;
@@ -25,6 +23,13 @@ $gray-700: #373737 !default;
 $gray-800: #232525 !default;
 $gray-900: #212529 !default;
 
+@font-face {
+  font-family: 'Schibsted Grotesk';
+  src: url('assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf') format('woff2') tech('variations'),
+  url('assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf') format('woff2-variations');
+  font-weight: 100 1000;
+  font-stretch: 25% 151%;
+}
 
 @import "../node_modules/bootstrap/scss/variables";
 @import "../node_modules/bootstrap/scss/maps";
