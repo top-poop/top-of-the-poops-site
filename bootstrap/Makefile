@@ -14,3 +14,12 @@ node_modules/.uptodate: package.json
 	npm install
 	touch $@
 
+
+.PHONY: watch
+watch:
+	$(MAKE) it
+	while true; \
+	do \
+			inotifywait -r scss; \
+			$(MAKE) it; \
+	done
