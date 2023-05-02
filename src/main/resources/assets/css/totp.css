@@ -8441,14 +8441,15 @@ textarea.form-control-lg {
     color: #866206; }
   .company-card .logo {
     min-height: 150px;
-    place-content: center;
-    display: grid; }
+    display: flex;
+    justify-content: center;
+    align-items: center; }
   .company-card a {
     width: 100%;
     height: 100%; }
   .company-card img {
     max-height: 150px;
-    width: 95%; }
+    width: 80%; }
   .company-card:hover {
     box-shadow: 2px 4px 8px rgba(159, 159, 125, 0.2), 20px 20px 40px rgba(159, 159, 125, 0.15); }
 /*# sourceMappingURL=totp.css.map */
