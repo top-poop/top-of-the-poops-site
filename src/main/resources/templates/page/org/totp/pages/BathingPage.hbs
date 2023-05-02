@@ -21,7 +21,7 @@
 
 </head>
 <body>
-{{> chunks/title }}
+{{> chunks/navbar }}
 
 {{#> components/jumbotron }}
     {{ name.value }} polluted by sewage {{numberFormat summary.count.count}} times in {{summary.year}} - lasting
@@ -113,9 +113,6 @@
 </div>
 
 <div class="container">
-
-    {{>chunks/horrible-nav}}
-
     <div class="row">
         <div class="col">
             {{#> components/section title=(concat "Pollution Summary " summary.year)}}
