@@ -1,35 +1,3 @@
-.hero {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.hero img {
-    height: 100px;
-}
-
-.hero .title {
-    font-size: 60pt;
-    margin: 0 0 10px;
-    text-align: center;
-}
-
-.hero .title a:link {
-    text-decoration: none;
-}
-
-.hero .title a:visited {
-    text-decoration: none;
-}
-
-.hero .title a:hover {
-    text-decoration: none;
-}
-
-.hero .title a:active {
-    text-decoration: none;
-}
 
 @media screen and (max-width: 961px) {
     .sewage-map {
@@ -119,44 +87,4 @@ table.table-spills tbody td {
 
 .media-card img {
     height: 153px;
-}
-
-.footer {
-    background: #f9f7ef;
-    color: black;
-}
-
-.footer .links ul {
-    list-style-type: none;
-}
-
-.footer .links li a {
-    /*color: black;*/
-    transition: color 0.2s;
-}
-
-.footer .links li a:hover {
-    text-decoration: none;
-    color: #4180CB;
-}
-
-.footer .about i {
-    font-size: 25px;
-}
-
-.footer .about a {
-    color: black;
-    transition: color 0.2s;
-}
-
-.footer .about a:hover {
-    color: #4180CB;
-}
-
-.footer .location i {
-    font-size: 18px;
-}
-
-.footer .copyright {
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
 }

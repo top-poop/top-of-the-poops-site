@@ -8452,4 +8452,30 @@ textarea.form-control-lg {
     width: 80%; }
   .company-card:hover {
     box-shadow: 2px 4px 8px rgba(159, 159, 125, 0.2), 20px 20px 40px rgba(159, 159, 125, 0.15); }
+
+.footer {
+  color: white;
+  background: #866206; }
+  .footer ul {
+    font-weight: bold;
+    line-height: 2;
+    list-style-type: none; }
+  .footer a {
+    color: white; }
+    .footer a:hover {
+      color: #e2dac2; }
+  .footer g {
+    color: white; }
+
+.footer-data {
+  font-size: 16px;
+  color: white;
+  background: #232525; }
+  .footer-data .copyright {
+    margin-top: 0.5rem;
+    text-align: center; }
+  .footer-data a {
+    color: white; }
+    .footer-data a:hover {
+      color: #e2dac2; }
 /*# sourceMappingURL=totp.css.map */
