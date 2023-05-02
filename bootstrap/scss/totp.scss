@@ -1,5 +1,5 @@
-
 @import "../node_modules/bootstrap/scss/mixins/banner";
+
 @include bsBanner("");
 
 
@@ -8,7 +8,7 @@
 @import "../node_modules/bootstrap/scss/functions";
 
 // Customisation
-$font-family-sans-serif:      "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+$font-family-sans-serif: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
 $primary: #543D01;
 $secondary: #828356;
@@ -88,7 +88,6 @@ $nav-link-font-weight: 500;
 
 
 .company-card {
-
   border-radius: 8px;
 
   .title {
@@ -121,3 +120,44 @@ $nav-link-font-weight: 500;
   }
 }
 
+
+.footer {
+  color: white;
+  background: $primary-500;
+  ul {
+    font-weight: bold;
+    line-height: 2;
+    list-style-type: none;
+  }
+
+  a {
+    color: white;
+
+    &:hover {
+      color: $primary-100;
+    }
+  }
+
+  g {
+    color: white;
+  }
+}
+
+.footer-data {
+  font-size: 16px;
+  color: white;
+  background: $gray-800;
+
+  .copyright {
+    margin-top: $spacer * 0.5;
+    text-align: center;
+  }
+  a {
+    color: white;
+
+    &:hover {
+      color: $primary-100;
+    }
+  }
+
+}
