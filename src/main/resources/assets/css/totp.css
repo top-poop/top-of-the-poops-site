@@ -6,7 +6,7 @@
    */
 @font-face {
   font-family: 'Schibsted Grotesk';
-  src: url("assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf") format("woff2") tech("variations"), url("assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf") format("woff2-variations");
+  src: url("/assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf") format("woff2") tech("variations"), url("/assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf") format("woff2-variations");
   font-weight: 100 1000;
   font-stretch: 25% 151%; }
 
@@ -8434,4 +8434,21 @@ textarea.form-control-lg {
     display: inline-flex !important; }
   .d-print-none {
     display: none !important; } }
+
+.company-card {
+  border-radius: 8px; }
+  .company-card .title {
+    color: #866206; }
+  .company-card .logo {
+    min-height: 150px;
+    place-content: center;
+    display: grid; }
+  .company-card a {
+    width: 100%;
+    height: 100%; }
+  .company-card img {
+    max-height: 150px;
+    width: 95%; }
+  .company-card:hover {
+    box-shadow: 2px 4px 8px rgba(159, 159, 125, 0.2), 20px 20px 40px rgba(159, 159, 125, 0.15); }
 /*# sourceMappingURL=totp.css.map */

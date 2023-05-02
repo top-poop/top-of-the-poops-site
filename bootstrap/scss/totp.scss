@@ -13,20 +13,27 @@ $font-family-sans-serif:      "Schibsted Grotesk", system-ui, -apple-system, "Se
 $primary: #543D01;
 $secondary: #828356;
 
-$gray-100: #f6f6f7 !default;
-$gray-200: #ececec !default;
-$gray-300: #cccfcf !default;
-$gray-400: #727677 !default;
-$gray-500: #646464 !default;
-$gray-600: #4a4a4a !default;
-$gray-700: #373737 !default;
-$gray-800: #232525 !default;
-$gray-900: #212529 !default;
+$primary-600: #543d01;
+$primary-500: #866206;
+$primary-400: #a38333;
+$primary-300: #b0985a;
+$primary-200: #c1ab72;
+$primary-100: #e2dac2;
+
+$gray-100: #f6f6f7;
+$gray-200: #ececec;
+$gray-300: #cccfcf;
+$gray-400: #727677;
+$gray-500: #646464;
+$gray-600: #4a4a4a;
+$gray-700: #373737;
+$gray-800: #232525;
+$gray-900: #212529;
 
 @font-face {
   font-family: 'Schibsted Grotesk';
-  src: url('assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf') format('woff2') tech('variations'),
-  url('assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf') format('woff2-variations');
+  src: url('/assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf') format('woff2') tech('variations'),
+  url('/assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf') format('woff2-variations');
   font-weight: 100 1000;
   font-stretch: 25% 151%;
 }
@@ -75,4 +82,38 @@ $gray-900: #212529 !default;
 // Utilities
 @import "../node_modules/bootstrap/scss/utilities/api";
 // scss-docs-end import-stack
+
+
+.company-card {
+
+  border-radius: 8px;
+
+  .title {
+    color: $primary-500;
+  }
+
+  .logo {
+    min-height: 150px;
+    place-content: center;
+    display: grid;
+  }
+
+  a {
+    width: 100%;
+    height: 100%;
+  }
+
+  img {
+    max-height: 150px;
+    width: 95%;
+  }
+
+  &:hover {
+    box-shadow: 2px 4px 8px rgba(159, 159, 125, 0.2), 20px 20px 40px rgba(159, 159, 125, 0.15);
+  }
+
+  &:active {
+
+  }
+}
 

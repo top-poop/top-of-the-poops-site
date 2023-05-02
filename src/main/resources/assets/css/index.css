@@ -117,14 +117,6 @@ table.table-spills tbody td {
     color: #282626;
 }
 
-.company-card {
-    overflow-x: clip;
-}
-
-.company-card img {
-    height: 80px;
-}
-
 .media-card img {
     height: 153px;
 }
