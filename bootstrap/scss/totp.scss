@@ -94,8 +94,9 @@ $gray-900: #212529;
 
   .logo {
     min-height: 150px;
-    place-content: center;
-    display: grid;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   a {
@@ -105,7 +106,7 @@ $gray-900: #212529;
 
   img {
     max-height: 150px;
-    width: 95%;
+    width: 80%;
   }
 
   &:hover {
