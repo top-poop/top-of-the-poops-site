@@ -1,5 +1,11 @@
 
-it: ../src/main/resources/assets/css/totp.css ../src/main/resources/assets/css/totp.css.map
+it: ../src/main/resources/assets/css/totp.css ../src/main/resources/assets/css/totp.css.map ../src/main/resources/assets/js/bootstrap.min.js ../src/main/resources/assets/js/bootstrap.min.js.map
+
+../src/main/resources/assets/js/bootstrap.min.js: node_modules/bootstrap/dist/js/bootstrap.min.js
+	cp $< $@
+
+../src/main/resources/assets/js/bootstrap.min.js.map: node_modules/bootstrap/dist/js/bootstrap.min.js.map
+	cp $< $@
 
 ../src/main/resources/assets/css/totp.css: assets/css/totp.css
 	cp $< $@

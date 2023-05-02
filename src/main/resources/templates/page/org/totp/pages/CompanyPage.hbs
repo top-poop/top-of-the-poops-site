@@ -20,7 +20,7 @@
 
 </head>
 <body>
-{{> chunks/title }}
+{{> chunks/navbar }}
 
 <div class="container-fluid">
     <div class="row justify-content-md-center  align-items-center">
@@ -290,14 +290,6 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                {{>chunks/horrible-nav}}
-            </div>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="row">
-            <div class="col">
                 {{#> components/section title="Water Companies" }}
                 {{/components/section}}
             </div>
@@ -317,6 +309,7 @@
             <div class="col">{{> chunks/data-sources }}</div>
         </div>
     </div>
+</div>
 
 {{> chunks/footer }}
 

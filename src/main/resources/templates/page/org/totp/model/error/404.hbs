@@ -3,20 +3,15 @@
 <head>
     <meta charset="utf-8"/>
     <title>Top of the Poops | Page Not Found</title>
+    {{> chunks/favicons }}
     {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
 </head>
 <body>
 
-{{> chunks/title }}
+{{> chunks/navbar }}
 
 {{#> components/jumbotron }}Page not found{{/components/jumbotron}}
 
-<div class="container">
-    <div class="row">
-        <div class="col ">
-            {{> chunks/horrible-nav }}
-        </div>
-    </div>
-</div>
 </body>
 </html>

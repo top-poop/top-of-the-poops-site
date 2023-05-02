@@ -30,6 +30,9 @@ $gray-700: #373737;
 $gray-800: #232525;
 $gray-900: #212529;
 
+$nav-link-color: $gray-600;
+$nav-link-font-weight: 500;
+
 @font-face {
   font-family: 'Schibsted Grotesk';
   src: url('/assets/fonts/SchibstedGrotesk-VariableFont_wght.ttf') format('woff2') tech('variations'),
