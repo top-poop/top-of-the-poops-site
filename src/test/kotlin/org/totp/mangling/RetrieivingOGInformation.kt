@@ -7,21 +7,29 @@ import org.http4k.format.Jackson
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.totp.pages.Html
+import java.time.Instant
+import java.time.ZonedDateTime
 
 class RetrieivingOGInformation {
 
     val client = OkHttp()
 
     @Test
-    @Disabled("not a test")
     fun `getting og information`() {
 
-        val uri = "https://www.stokesentinel.co.uk/news/stoke-on-trent-news/top-poops-river-trent-named-8163671"
+        val uri = "https://www.bbc.co.uk/news/articles/cy9008ezyn5o"
         val html = Html(client(org.http4k.core.Request(Method.GET, Uri.of(uri))))
 
         val title = html.selectFirst("title")?.text()
         val ogImage = html.selectFirst("meta[property='og:image']")
         val image = ogImage?.attr("content")
+        val publishDate = html
+            .selectFirst("meta[property='article:published_time']")
+            ?.attr("content")
+            ?.let { ZonedDateTime.parse(it) }
+            ?.toLocalDate()
+            ?.toString()
+            ?: ""
 
         val json = Jackson.mapper.writeValueAsString(
             mapOf(
@@ -29,7 +37,7 @@ class RetrieivingOGInformation {
                 "where" to "xxx",
                 "title" to title,
                 "image" to image,
-                "date" to "",
+                "date" to publishDate,
             )
         )
 
