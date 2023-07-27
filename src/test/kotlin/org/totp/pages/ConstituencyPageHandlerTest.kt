@@ -10,6 +10,7 @@ import org.http4k.routing.routes
 import org.http4k.strikt.header
 import org.http4k.strikt.status
 import org.junit.jupiter.api.Test
+import org.totp.LastModified
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.CSO
 import org.totp.model.data.CSOTotals
@@ -25,6 +26,7 @@ import strikt.assertions.first
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFailure
 import java.time.Duration
+import java.time.Instant
 
 val anMP = MP("bob", "con", null, Uri.of("http://example.com"))
 
@@ -67,7 +69,8 @@ class ConstituencyPageHandlerTest {
                     Duration.ZERO
                 )
             },
-            constituencyRivers = { listOf(aRiver(1)) }
+            constituencyRivers = { listOf(aRiver(1)) },
+            pollutionGeoJson = { LastModified(GeoJSON.of(""), Instant.now()) }
         )
     )
 

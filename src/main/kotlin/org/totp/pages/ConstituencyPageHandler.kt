@@ -1,38 +1,22 @@
 package org.totp.pages
 
-import org.http4k.core.Body
-import org.http4k.core.ContentType
-import org.http4k.core.Filter
-import org.http4k.core.HttpHandler
-import org.http4k.core.Request
-import org.http4k.core.Response
-import org.http4k.core.Status
-import org.http4k.core.Uri
-import org.http4k.core.then
-import org.http4k.core.with
+import org.http4k.core.*
 import org.http4k.lens.Header.LOCATION
 import org.http4k.lens.Path
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.LastModified
 import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.http4k.removeQuery
 import org.totp.model.PageViewModel
-import org.totp.model.data.CSOTotals
-import org.totp.model.data.CompanyName
-import org.totp.model.data.ConstituencyLiveData
-import org.totp.model.data.ConstituencyName
-import org.totp.model.data.ConstituencySlug
-import org.totp.model.data.Coordinates
-import org.totp.model.data.GeoJSON
-import org.totp.model.data.RenderableCompany
-import org.totp.model.data.RiverRank
-import org.totp.model.data.toSlug
-import org.totp.model.data.toRenderable
+import org.totp.model.data.*
 import org.totp.text.csv.readCSV
 import java.text.NumberFormat
 import java.time.Duration
+import java.time.Instant
+import java.time.OffsetDateTime
 
 
 val constituencyNames = readCSV(
@@ -57,13 +41,10 @@ fun List<CSOTotals>.summary(): PollutionSummary {
         year = 2022,
         locationCount = filter { it.count > 0 }.size,
         companies = map { it.cso.company }.toSet().sorted(),
-        count = sumOf { it.count }.let { RenderableCount(it) },
+        count = RenderableCount(sumOf { it.count }),
         duration = (map { it.duration }
             .reduceOrNull { acc, duration -> acc.plus(duration) }
-            ?: Duration.ZERO)
-            .let {
-                it.toRenderable()
-            }
+            ?: Duration.ZERO).toRenderable()
     )
 }
 
@@ -116,6 +97,7 @@ class ConstituencyPage(
     val live: ConstituencyPageLiveData?,
     val neighbours: List<RenderableConstituencyRank>,
     val rivers: List<RenderableRiverRank>,
+    val livePollution: LastModified<GeoJSON>?
 ) :
     PageViewModel(uri)
 
@@ -169,6 +151,7 @@ object ConstituencyPageHandler {
         constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
         constituencyRank: (ConstituencyName) -> ConstituencyRank?,
         constituencyRivers: (ConstituencyName) -> List<RiverRank>,
+        pollutionGeoJson: (ConstituencyName) -> LastModified<GeoJSON>?
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -204,6 +187,10 @@ object ConstituencyPageHandler {
                 val rivers = rivers2.take(5)
                     .map { it.toRenderable() }
 
+                val livePollution = pollutionGeoJson(constituencyName)?.takeIf {
+                    it.modified.isAfter(Instant.now().minus(Duration.ofHours(4)))
+                }
+
                 Response(Status.OK)
                     .with(
                         viewLens of ConstituencyPage(
@@ -227,7 +214,7 @@ object ConstituencyPageHandler {
                                 it.toRenderable()
                             },
                             renderableConstituencies,
-                            if (liveAvailable.contains(constituencyName)) {
+                            live = if (liveAvailable.contains(constituencyName)) {
                                 constituencyLiveData(constituencyName)?.let {
                                     ConstituencyPageLiveData(
                                         it,
@@ -235,8 +222,9 @@ object ConstituencyPageHandler {
                                     )
                                 }
                             } else null,
-                            neighbours,
-                            rivers,
+                            livePollution = livePollution,
+                            neighbours = neighbours,
+                            rivers = rivers,
                         )
                     )
             }

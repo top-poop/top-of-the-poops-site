@@ -4,25 +4,15 @@ import com.google.common.base.Suppliers
 import org.http4k.client.OkHttp
 import org.http4k.cloudnative.env.Environment
 import org.http4k.cloudnative.env.EnvironmentKey
-import org.http4k.core.HttpHandler
-import org.http4k.core.Method
-import org.http4k.core.Response
-import org.http4k.core.Status
-import org.http4k.core.Uri
-import org.http4k.core.then
-import org.http4k.core.with
+import org.http4k.core.*
 import org.http4k.events.AutoMarshallingEvents
 import org.http4k.events.EventFilters
 import org.http4k.events.then
 import org.http4k.filter.ClientFilters
 import org.http4k.filter.ClientFilters.SetBaseUriFrom
 import org.http4k.format.Jackson
+import org.http4k.lens.*
 import org.http4k.lens.Header.LOCATION
-import org.http4k.lens.Query
-import org.http4k.lens.boolean
-import org.http4k.lens.int
-import org.http4k.lens.uri
-import org.http4k.lens.value
 import org.http4k.routing.ResourceLoader
 import org.http4k.routing.bind
 import org.http4k.routing.routes
@@ -34,52 +24,12 @@ import org.totp.events.ServerStartedEvent
 import org.totp.extensions.Defect
 import org.totp.http4k.StandardFilters
 import org.totp.model.TotpHandlebars
-import org.totp.model.data.AllSpills
-import org.totp.model.data.BathingCSOs
-import org.totp.model.data.BathingRankings
-import org.totp.model.data.BeachBoundaries
-import org.totp.model.data.Boundaries
-import org.totp.model.data.CompanyAnnualSummaries
-import org.totp.model.data.ConstituencyBoundaries
-import org.totp.model.data.ConstituencyContact
-import org.totp.model.data.ConstituencyContacts
-import org.totp.model.data.ConstituencyLiveAvailability
-import org.totp.model.data.ConstituencyLiveDataLoader
-import org.totp.model.data.ConstituencyName
-import org.totp.model.data.ConstituencyNeighbours
-import org.totp.model.data.ConstituencyRankings
-import org.totp.model.data.MediaAppearances
-import org.totp.model.data.RiverRankings
-import org.totp.model.data.ShellfishBoundaries
-import org.totp.model.data.ShellfishCSOs
-import org.totp.model.data.ShellfishRankings
-import org.totp.model.data.WaterCompanies
-import org.totp.model.data.constituencyCSOs
-import org.totp.model.data.constituencyRivers
-import org.totp.model.data.toSlug
-import org.totp.model.data.waterwayCSOs
-import org.totp.pages.BadgesCompaniesHandler
-import org.totp.pages.BadgesConstituenciesHandler
-import org.totp.pages.BadgesHomeHandler
-import org.totp.pages.BadgesRiversHandler
-import org.totp.pages.BathingPageHandler
-import org.totp.pages.BeachesPageHandler
-import org.totp.pages.CompanyPageHandler
-import org.totp.pages.ConstituenciesPageHandler
-import org.totp.pages.ConstituencyPageHandler
-import org.totp.pages.EnsureSuccessfulResponse
-import org.totp.pages.HomepageHandler
-import org.totp.pages.HtmlPageErrorFilter
-import org.totp.pages.MP
-import org.totp.pages.MediaPageHandler
-import org.totp.pages.RiversPageHandler
-import org.totp.pages.ShellfisheriesPageHandler
-import org.totp.pages.ShellfisheryPageHandler
-import org.totp.pages.SitemapHandler
-import org.totp.pages.SitemapUris
-import org.totp.pages.WaterwayPageHandler
-import org.totp.pages.constituencyNames
+import org.totp.model.data.*
+import org.totp.pages.*
 import java.time.Clock
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
 import java.util.concurrent.TimeUnit
 
 
@@ -142,12 +92,16 @@ fun mpForConstituency(contacts: () -> List<ConstituencyContact>): (ConstituencyN
     return { name -> cache()[name]?.mp ?: throw Defect("We don't have the MP for $name") }
 }
 
+data class LastModified<T>(val data: T, val modified: Instant)
+
+val LAST_MODIFIED = Header.offsetDateTime(RFC_1123_DATE_TIME).required("last-modified")
 
 fun main() {
 
     val isDevelopment =
         EnvironmentKey.boolean().required("DEVELOPMENT_MODE", "Use fake data server (local files) & hot reload")
     val dataServiceUri = EnvironmentKey.uri().required("DATA_SERVICE_URI", "URI for Data Service")
+    val pollutionServiceUri = EnvironmentKey.uri().required("POLLUTION_SERVICE_URI", "URI for Pollution Service")
     val debugging = EnvironmentKey.boolean().required("DEBUG_MODE", "Print all request and response")
     val port = EnvironmentKey.int().required("PORT", "Listen Port")
     val hotReloadingTemplates = EnvironmentKey.boolean().required("HOT_TEMPLATES")
@@ -156,6 +110,7 @@ fun main() {
         isDevelopment of false,
         debugging of false,
         dataServiceUri of Uri.of("http://data"),
+        pollutionServiceUri of Uri.of("http://pollution"),
         port of 80,
         hotReloadingTemplates of false
     )
@@ -182,13 +137,21 @@ fun main() {
     val inboundFilters = StandardFilters.incoming(events, debugging(environment))
     val outboundFilters = StandardFilters.outgoing(events)
 
+    val outboundHttp = outboundFilters.then(OkHttp())
+
+    val pollutionClient = if (isDevelopmentEnvironment) {
+        SetBaseUriFrom(pollutionServiceUri(environment))
+    } else {
+        SetBaseUriFrom(Uri.of("/pollution/thames"))
+            .then(ClientFilters.SetHostFrom(pollutionServiceUri(environment)))
+    }.then(outboundHttp)
+
     val dataClient = if (isDevelopmentEnvironment) {
         outboundFilters.then(static(ResourceLoader.Directory("services/data/datafiles")))
     } else {
         SetBaseUriFrom(Uri.of("/data"))
             .then(ClientFilters.SetHostFrom(dataServiceUri(environment)))
-            .then(outboundFilters)
-            .then(OkHttp())
+            .then(outboundHttp)
     }
 
     val data2022 = SetBaseUriFrom(Uri.of("/v1/2022")).then(EnsureSuccessfulResponse()).then(dataClient)
@@ -218,6 +181,18 @@ fun main() {
 
     val constituencyRank = { wanted: ConstituencyName ->
         constituencyRankings().firstOrNull { it.constituencyName == wanted }
+    }
+
+    val constituencyLiveData = ConstituencyLiveDataLoader(dataClient)
+
+    val pollutionLiveData = { it: ConstituencyName ->
+        constituencyLiveData(it)?.let {
+            pollutionClient(Request(Method.GET, Uri.of("/now/now.geojson")))
+                .takeIf { it.status.successful }
+                ?.let {
+                    LastModified(GeoJSON.of(it.bodyString()), LAST_MODIFIED(it).toInstant())
+                }
+        }
     }
 
     val server = Undertow(port = port(environment)).toServer(
@@ -274,12 +249,13 @@ fun main() {
                                 renderer = renderer,
                                 constituencySpills = constituencyCSOs(allSpills),
                                 constituencyBoundary = constituencyBoundaries,
-                                constituencyLiveData = ConstituencyLiveDataLoader(dataClient),
+                                constituencyLiveData = constituencyLiveData,
                                 constituencyLiveAvailable = ConstituencyLiveAvailability(dataClient),
                                 mpFor = mpFor,
                                 constituencyNeighbours = ConstituencyNeighbours(data2022),
                                 constituencyRank = constituencyRank,
                                 constituencyRivers = constituencyRivers(allSpills, riverRankings),
+                                pollutionGeoJson = pollutionLiveData,
                             ),
                             "/company/{company}" bind CompanyPageHandler(
                                 renderer = renderer,
@@ -291,7 +267,7 @@ fun main() {
                                 companyLiveDataAvailable =
                                 { name ->
                                     val uri = Uri.of("/v1/2022/spills-live-summary-${name.toSlug()}.json")
-                                    val response = dataClient(org.http4k.core.Request(Method.GET, uri))
+                                    val response = dataClient(Request(Method.GET, uri))
                                     response.status.successful
                                 },
                             ),
