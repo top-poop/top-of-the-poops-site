@@ -53,6 +53,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-html:0.8.1")
 
+    implementation("org.ocpsoft.prettytime:prettytime:5.0.7.Final")
+
+
     testImplementation(platform('org.junit:junit-bom:5.9.2'))
     testImplementation('org.junit.jupiter:junit-jupiter')
     testImplementation "org.http4k:http4k-testing-strikt"

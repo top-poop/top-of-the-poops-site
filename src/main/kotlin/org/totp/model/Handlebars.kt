@@ -7,7 +7,14 @@ import org.http4k.core.Uri
 import org.http4k.template.HandlebarsTemplates
 import org.http4k.template.ViewModel
 import org.http4k.urlEncoded
+import org.ocpsoft.prettytime.PrettyTime
 import java.text.NumberFormat
+import java.time.Clock
+import java.time.Duration
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.temporal.Temporal
+import java.time.temporal.TemporalAccessor
 
 
 open class PageViewModel(val uri: Uri) : ViewModel {
@@ -27,6 +34,14 @@ object TotpHandlebars {
                 throw IllegalArgumentException(
                     "Missing value for: " + options.helperName
                 )
+            }
+            it.registerHelper("ago") { context: Any, _: Options ->
+                if ( context is Instant) {
+                    PrettyTime(Instant.now()).format(context)
+                }
+                else {
+                    throw IllegalArgumentException("Expected instant not $context")
+                }
             }
             StringHelpers.join.registerHelper(it)
             StringHelpers.dateFormat.registerHelper(it)
