@@ -8,6 +8,7 @@ import org.http4k.core.then
 import org.http4k.core.toParameters
 import org.http4k.events.Events
 import org.http4k.events.HttpEvent
+import org.http4k.events.plus
 import org.http4k.filter.ClientFilters
 import org.http4k.filter.DebuggingFilters
 import org.http4k.filter.ResponseFilters
@@ -26,7 +27,9 @@ object StandardFilters {
     fun outgoing(events: Events): Filter {
         return ClientFilters.RequestTracing()
             .then(ResponseFilters.ReportHttpTransaction {
-                events(HttpEvent.Outgoing(it))
+                events(HttpEvent.Outgoing(it).plus(
+                    "last-modified" to (it.request.header("last-modified") ?: "none")
+                ))
             })
     }
 }

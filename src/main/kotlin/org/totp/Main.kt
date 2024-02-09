@@ -28,9 +28,10 @@ import org.totp.model.data.*
 import org.totp.pages.*
 import java.time.Clock
 import java.time.Instant
-import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
 import java.util.concurrent.TimeUnit
+import java.util.logging.Level
+import java.util.logging.LogManager
 
 
 object Resources {
@@ -321,7 +322,14 @@ fun main() {
         )
     )
 
+    silenceUndertowLogging()
+
     server.start()
     events(ServerStartedEvent(Uri.of("http://localhost:" + server.port()), isDevelopmentEnvironment))
     server.block()
 }
+
+fun silenceUndertowLogging() {
+    LogManager.getLogManager().getLogger("").level = Level.WARNING
+}
+
