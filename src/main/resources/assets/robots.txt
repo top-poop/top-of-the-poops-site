@@ -10,3 +10,11 @@ Disallow: /
 User-agent: Yandex
 Disallow: /
 
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: dotbot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
