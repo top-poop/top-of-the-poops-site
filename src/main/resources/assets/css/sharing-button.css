@@ -162,3 +162,14 @@
     background-color: #2795e9;
     border-color: #2795e9;
 }
+
+
+
+
+.resp-sharing-button--insta {
+    background-color: #C13584
+}
+
+.resp-sharing-button--insta:hover {
+    background-color: #E1306C
+}
