@@ -1,275 +1,235 @@
-[
-  {
-    "href": "https://sas.org.uk/waterquality2022/sewage-pollution/sas-x-top-of-the-poops/",
-    "where": "Surfers Against Sewage",
-    "title": "Water Quality Report 2022",
-    "date": "2022-10-30",
-    "image": "https://sas.org.uk/waterquality2022/wp-content/uploads/2022/11/Social-banners-sewagepollution-1.jpg"
-  },
-  {
-    "href": "https://www.greenmatters.com/p/sewage-discharge-map-uk",
-    "where": "GreenMatters",
-    "title": "U.K. Water Companies Discharged Scary Amounts of Raw Sewage Into Water in 2021",
-    "date": "2022-05-02",
-    "image": "https://media.greenmatters.com/brand-img/geUUoV30y/1200x628/sewage-discharge-map-uk-1651512296972.jpg"
-  },
-  {
-    "href": "https://inews.co.uk/news/save-our-rivers-uk-firms-pump-raw-sewage-2143269",
-    "where": "inews",
-    "title": "Only 6% of Britain’s rivers on course to be healthy by 2027 as UK’s firms pump more raw sewage",
-    "date": "2023-02-10",
-    "image": "https://wp.inews.co.uk/wp-content/uploads/2023/02/SEI_143516744-1-1200x630-pl-save-britains-rivers.jpg"
-  },
-  {
-    "href": "https://www.birminghammail.co.uk/black-country/top-poops-beloved-midlands-river-26284830",
-    "where": "Birmingham Live",
-    "title": "Top of the poops - Beloved Midlands river pumped with more sewage than any other",
-    "date": "2023-02-20",
-    "image": "https://i2-prod.birminghammail.co.uk/incoming/article25913706.ece/ALTERNATES/s1200/0_JRR_BEM_6-1-23_shrop02.jpg"
-  },
-  {
-    "href": "https://www.bbc.co.uk/news/uk-england-leeds-64745380",
-    "where": "BBC News",
-    "title": "Yorkshire rivers among worst for sewage discharge, figures show",
-    "date": "2023-02-23",
-    "image": "https://ichef.bbci.co.uk/news/1024/branded_news/6FA6/production/_128728582_gettyimages-950679732.jpg"
-  },
-  {
-    "href": "https://www.itv.com/news/wales/2023-02-20/two-welsh-tourist-hotspots-named-in-worst-sewage-polluted-list",
-    "where": "ITV News",
-    "title": "Rhyl and Morfa Nefyn among the worst areas for sewage pollution",
-    "date": "2023-02-23",
-    "image": "https://images.ctfassets.net/pjshm78m9jt4/246629_0/d8d1197d709f5961512238eedf9f27e1/importedImage246629_0"
-  },
-  {
-    "href": "https://www.mirror.co.uk/news/uk-news/your-river-top-poops-20-29222405",
-    "where": "The Mirror",
-    "title": "UK's 20 most polluted rivers revealed in Top of the Poops league table",
-    "date": "2023-02-16",
-    "image": "https://i2-prod.mirror.co.uk/incoming/article29222933.ece/ALTERNATES/s1200/0_Industrial-and-factory-waste-water-discharge-pipe-into-the-canal-and-sea.jpg"
-  },
-  {
-    "href": "https://centralbylines.co.uk/sewage-central-how-our-region-is-being-affected-by-the-water-scandal/",
-    "where": "Central Bylines",
-    "title": "Sewage central: how our region is being affected by the water scandal",
-    "date": "2022-08-30",
-    "image": "https://centralbylines.co.uk/wp-content/uploads/2022/08/sewage-central.jpg"
-  },
-  {
-    "href": "https://www.lynnnews.co.uk/news/sewage-dumped-into-west-norfolk-rivers-more-than-1-000-times-9270935/",
-    "where": "Lynn News",
-    "title": "Sewage dumped into West Norfolk rivers by Anglian Water more than 1,000 times in 2021",
-    "date": "2022-08-26",
-    "image": "https://www.lynnnews.co.uk/_media/img/QLR6SV726YC05FKVUO2A.jpg"
-  },
-  {
-    "href": "https://www.chroniclelive.co.uk/news/north-east-news/chi-onwurah-government-newcastle-sewage-24855226",
-    "where": "Chronicle Live",
-    "title": "Chi Onwurah slams Government after data reveals hundreds of sewage dumps have polluted Newcastle's waterways",
-    "date": "2022-08-26",
-    "image": "https://i2-prod.mylondon.news/incoming/article22864182.ece/ALTERNATES/s1200/1_Official_portrait_of_Chi_Onwurah_MP_crop_2.jpg"
-  },
-  {
-    "href": "https://sotn.newstatesman.com/2022/04/mapped-sewage-dumps-and-spills-in-england-and-wales/",
-    "where": "The New Statesman",
-    "title": "Mapped: Sewage dumps and spills in England and Wales",
-    "date": "2022-04-01",
-    "image": "https://www.newstatesman.com/wp-content/uploads/sites/2/2021/09/cropped-Ben-Walker-177x177.png?1679533206"
-  },
-  {
-    "href": "https://www.theguardian.com/environment/2022/may/02/untreated-sewage-discharge-england-coastal-bathing-waters-2021",
-    "where": "The Guardian",
-    "title": "Raw sewage ‘pumped into English bathing waters 25,000 times in 2021’",
-    "date": "2022-05-02",
-    "image": "https://i.guim.co.uk/img/media/a90e553b18d840bb2c734cef4f0d881e23571cbb/0_101_3000_1800/master/3000.jpg?width=1200&height=630&quality=85&auto=format&fit=crop&overlay-align=bottom%2Cleft&overlay-width=100p&overlay-base64=L2ltZy9zdGF0aWMvb3ZlcmxheXMvdGctZGVmYXVsdC5wbmc&s=b3cd366cad4e763bf1d47a7f66e33d48"
-  },
-  {
-    "href": "https://www.bbc.co.uk/news/uk-england-61194173",
-    "where": "BBC News",
-    "title": "Protests over water firms dumping sewage in rivers",
-    "date": "2022-04-23",
-    "image": "https://ichef.bbci.co.uk/news/1024/branded_news/95CA/production/_124264383_mermaids.jpg"
-  },
-  {
-    "href": "https://www.independent.co.uk/news/uk/home-news/sewage-shellfish-pollution-england-uk-b1963688.html",
-    "where": "The Independent",
-    "title": "Shellfish areas polluted by sewage tens of thousands of times last year",
-    "date": "2021-11-25",
-    "image": "https://static.independent.co.uk/2021/11/24/20/newFile-1.jpg?quality=75&width=1200&auto=webp"
-  },
-  {
-    "href": "https://www.bbc.co.uk/news/uk-wales-64813436",
-    "where": "BBC News",
-    "title": "Rhyl seawater quality 'sufficient', despite sewage listing",
-    "date": "2023-03-01",
-    "image": "https://ichef.bbci.co.uk/news/1024/branded_news/18115/production/_128818589_rhylbeachgeograph-5636651-by-david-purchase-1.jpg"
-  },
-  {
-    "href": "https://www.cambrian-news.co.uk/news/environment/alarm-as-regional-levels-of-sewage-pollution-among-worst-in-england-and-wales-605313",
-    "where": "Cambrian News",
-    "title": "Alarm as regional levels of sewage pollution among worst in England and Wales",
-    "date": "2023-04-03",
-    "image": "https://www.cambrian-news.co.uk/tindle-static/image/2022/12/08/17/CSO%20in%20Llanduysal%20park.jpg?width=724&amp;crop=16:9,smart&amp;quality=75"
-  },
-  {
-    "href": "https://www.walesonline.co.uk/news/wales-news/welsh-rivers-pumped-sewage-named-26272448",
-    "where": "Wales Online",
-    "title": "Welsh rivers pumped with sewage named among UK's most polluted",
-    "date": "2023-02-19",
-    "image": "https://i2-prod.walesonline.co.uk/incoming/article24378693.ece/ALTERNATES/s1200/0_JS243648750.jpg"
-  },
-  {
-    "href": "https://www.timeout.com/uk/news/revealed-these-are-the-20-most-polluted-rivers-in-the-uk-022023",
-    "where": "Time Out",
-    "title": "Revealed: these are the 20 most polluted rivers in the UK",
-    "date": "2023-02-20",
-    "image": "https://media.timeout.com/images/105979117/image.jpg"
-  },
-  {
-    "href": "https://inews.co.uk/news/environment/uk-rivers-20-high-risk-pollution-chemicals-sewage-plastic-wildlife-trusts-2174378",
-    "where": "i News",
-    "title": "UK rivers: 20 waterways at high risk from wildlife-killing pollution, from sewage to chemicals",
-    "date": "2023-02-27",
-    "image": "https://wp.inews.co.uk/wp-content/uploads/2023/03/SEI_147526931-1200x630-pl-save-britains-rivers.jpg"
-  },
-  {
-    "href": "https://kenilworth.nub.news/news/local-news/enough-is-enough-local-mp-calls-for-action-on-sewage-discharge-into-local-rivers-148485",
-    "where": "Kenilworth Nub News",
-    "title": "'Enough is enough' local MP calls for action on sewage discharge into local rivers",
-    "date": "2022-09-13",
-    "image": "https://storage.googleapis.com/nub-news-files/nub-news-file-storage/376241/conversions/text-article.jpg"
-  },
-  {
-    "href": "https://bylines.cymru/environment/sewage-dumping-welsh-rivers/",
-    "where": "Bylines Cymru",
-    "title": "Welsh rivers see some of the worst sewage dumping in the UK",
-    "date": "2023-04-03",
-    "image": "https://bylines.cymru/wp-content/uploads/2023/04/Murky-waters-1.jpeg"
-  },
-  {
-    "href": "https://www.thestar.co.uk/news/environment/sheffield-pollution-more-than-2000-sewage-incidents-recorded-on-river-don-4035470",
-    "where": "The Star",
-    "title": "Sheffield pollution: More than 2,000 sewage 'incidents' recorded on River Don",
-    "date": "2023-02-21",
-    "image": "https://www.thestar.co.uk/webimg/b25lY21zOmZlYzI3Y2VjLWUzOWItNDFkYS05ZGI4LTJmOTIwYjhkNjEwZDpiMWYxZjJmYi04YTc0LTQ1MmEtOGJiNS0zNGQ5MTdhZTFiYTg=.jpg?width=1200&amp;auto=webp&amp;quality=75&amp;crop=2:1,smart"
-  },
-  {
-    "href": "https://www.theguardian.com/environment/2023/apr/06/ministers-treating-coastal-areas-like-open-sewers-says-labour",
-    "where": "The Guardian",
-    "title": "Ministers treating coastal areas like ‘open sewers’, says Labour",
-    "image": "https://i.guim.co.uk/img/media/d33e3ebf2d92dc7f8c5b18ea033e5e5e9b481765/0_31_6708_4025/master/6708.jpg?width=1200&height=630&quality=85&auto=format&fit=crop&overlay-align=bottom%2Cleft&overlay-width=100p&overlay-base64=L2ltZy9zdGF0aWMvb3ZlcmxheXMvdGctZGVmYXVsdC5wbmc&enable=upscale&s=4ad19ad9f4836ad1efcb8844cf3cfa32",
-    "date": "2023-04-06"
-  },
-  {
-    "href": "https://www.mirror.co.uk/news/uk-news/new-sewage-scandal-data-shows-29641300",
-    "where": "The Mirror",
-    "title": "New sewage scandal as data shows waste is dumped on to coast every three minutes",
-    "image": "https://i2-prod.mirror.co.uk/incoming/article29641291.ece/ALTERNATES/s1200/0_AGP_MDM_250822WORTHING_001JPG.jpg",
-    "date": "2023-04-05"
-  },
-  {
-    "href": "https://www.westwaleschronicle.co.uk/blog/2023/04/03/west-wales-rivers-are-some-of-the-most-sewage-filled-in-the-uk/",
-    "where": "West Wales Chronicle",
-    "title": "West Wales’ Rivers Are Some Of The Most Sewage Filled In The UK",
-    "image": "https://top-of-the-poops.org/assets/poop.png",
-    "date": "2023-04-03"
-  },
-  {
-    "href": "https://nation.cymru/news/sewage-dumped-on-wales-blue-flag-beaches-579-times-say-welsh-lib-dems/",
-    "where": "nation.cymru",
-    "title": "Sewage dumped on Wales’ Blue Flag beaches 579 times, say Welsh Lib-Dems",
-    "image": "https://s3.eu-west-2.amazonaws.com/nation.cymru/wp-content/uploads/2022/11/28140843/sewage-beaches-canva.jpg",
-    "date": "2022-11-28"
-  },
-  {
-    "href": "https://www.manchestereveningnews.co.uk/news/greater-manchester-news/its-covered-human-waste-mps-26650213",
-    "where": "Manchester Evening News",
-    "title": "'It's covered in human waste' - MPs fume over state of south Manchester river",
-    "image": "https://i2-prod.manchestereveningnews.co.uk/news/greater-manchester-news/article26650218.ece/ALTERNATES/s1200/0_McMahon.jpg",
-    "date": "2023-04-06"
-  },
-  {
-    "href": "https://www.cambrian-news.co.uk/news/environment/ceredigion-river-and-sea-pollution-among-worst-in-wales-and-england-606009",
-    "where": "Cambrian News",
-    "title": "Ceredigion river and sea pollution among worst in Wales and England",
-    "image": "https://www.cambrian-news.co.uk/tindle-static/image/2023/04/05/13/so1204%20River%20Teifi%20credit%20Nathan%20Walton.jpg?width=1200&crop=16:9,smart&quality=75",
-    "date": "2023-04-10"
-  },
-  {
-    "href": "https://www.thetimes.co.uk/article/sewage-pumped-into-sea-for-one-million-hours-in-2022-clean-it-up-mwtpkzhrg",
-    "where": "The Times",
-    "title": "Sewage discharged in coastal areas for one million hours in 2022",
-    "image": "https://www.thetimes.co.uk/imageserver/image/%2Fmethode%2Ftimes%2Fprod%2Fweb%2Fbin%2F66f0d7e8-d3ed-11ed-b1cd-5223fe349502.jpg?crop=5646%2C3176%2C57%2C332&resize=1200",
-    "date": "2023-04-05"
-  },
-  {
-    "href": "https://www.examinerlive.co.uk/news/local-news/two-filthy-rivers-pumped-fetid-26258633",
-    "where": "Yorkshire Live",
-    "title": "Two filthy rivers pumped with fetid sewage by Yorkshire Water more than 8,000 times",
-    "image": "https://i2-prod.leeds-live.co.uk/news/leeds-news/article23189186.ece/ALTERNATES/s1200/2_River-Aire-Mickeltown.jpg",
-    "date": "2023-02-17"
-  },
-  {
-    "href": "https://www.theboltonnews.co.uk/news/23440662.united-utilities-bolton-areas-top-2-sewage-waterways/",
-    "where": "The Bolton News",
-    "title": "United Utilities: Bolton areas are top 2 for sewage in waterways",
-    "image": "https://www.theboltonnews.co.uk/resources/images/16643656/?type=og-image",
-    "date": "2023-04-11"
-  },
-  {
-    "href": "https://www.stokesentinel.co.uk/news/stoke-on-trent-news/top-poops-river-trent-named-8163671",
-    "where": "Stoke-on-Trent Live",
-    "title": "'Top of the poops' - River Trent named among most polluted in England",
-    "image": "https://i2-prod.stokesentinel.co.uk/incoming/article2504020.ece/ALTERNATES/s1200/1_AGR_STO_020219Page23wkdwww_03.jpg",
-    "date": "2023-02-18"
-  },
-  {
-    "href": "https://yorkshirebylines.co.uk/news/environment/profits-over-pollution-why-britain-is-losing-its-battle-to-save-its-rivers/",
-    "where": "Yorkshire Bylines",
-    "title": "Profits over pollution: why Britain is losing its battle to save its rivers",
-    "image": "https://yorkshirebylines.co.uk/wp-content/uploads/2023/05/river-calder-g7e5793a79_1280.jpg",
-    "date": "2023-05-30"
-  },
-  {
-    "href": "https://bradford.greenparty.org.uk/2023/05/30/yorkshire-water-should-be-apologising-for-higher-bills/",
-    "where": "Bradford District Green Party",
-    "title": "Yorkshire Water should be apologising for higher bills",
-    "image": "https://bradford.greenparty.org.uk/wp-content/uploads/sites/78/2023/05/Sewage-scaled.jpeg",
-    "date": "2023-05-30"
-  },
-  {
-    "href": "https://www.mirror.co.uk/news/uk-news/brits-warned-avoid-83-beaches-29461331",
-    "where": "The Mirror",
-    "title": "Brits warned to avoid 83 beaches across country after sewage leaks including 'UK's best' - Mirror Online",
-    "image": "https://i2-prod.mirror.co.uk/incoming/article29461395.ece/ALTERNATES/s1200/0_dumped.jpg",
-    "date": "2023-03-15"
-  },
-  {
-    "href": "https://www.birkenhead.news/new-brighton-coastal-bathing-area-most-polluted-in-country/",
-    "where": "Birkenhead News",
-    "title": "New Brighton coastal bathing area most polluted in country",
-    "image": "https://www.birkenhead.news/wp-content/uploads/2023/05/New-Brighton.webp",
-    "date": "2023-05-18"
-  },
-  {
-    "href": "https://www.bbc.co.uk/news/uk-england-leeds-65625859",
-    "where": "BBC News",
-    "title": "Yorkshire Water boss apologises for sewage discharges into rivers",
-    "image": "https://ichef.bbci.co.uk/news/1024/branded_news/17E5/production/_129771160_yorkshirewater.jpg.jpg",
-    "date": "2023-05-18"
-  },
-  {
-    "href": "https://www.bbc.co.uk/news/articles/cy9008ezyn5o",
-    "where": "BBC News",
-    "title": "Yorkshire Water boss declines bonus after criticism",
-    "image": "https://ichef.bbci.co.uk/news/1024/branded_news/08b6/live/1d4a87a0-ee88-11ed-a142-ab0e42bfd9c3.jpg",
-    "date": "2023-05-18"
-  },
-  {
-    "href": "https://www.bbc.co.uk/news/articles/cy9008ezyn5o",
-    "where": "BBC News",
-    "title": "Yorkshire Water boss declines bonus after criticism",
-    "image": "https://ichef.bbci.co.uk/news/1024/branded_news/08b6/live/1d4a87a0-ee88-11ed-a142-ab0e42bfd9c3.jpg",
-    "date": "2023-05-18"
-  }
-]
+[ {
+  "href" : "https://sas.org.uk/waterquality2022/sewage-pollution/sas-x-top-of-the-poops/",
+  "where" : "Surfers Against Sewage",
+  "title" : "Water Quality Report 2022",
+  "date" : "2022-10-30",
+  "image" : "https://sas.org.uk/waterquality2022/wp-content/uploads/2022/11/Social-banners-sewagepollution-1.jpg"
+}, {
+  "href" : "https://www.greenmatters.com/p/sewage-discharge-map-uk",
+  "where" : "GreenMatters",
+  "title" : "U.K. Water Companies Discharged Scary Amounts of Raw Sewage Into Water in 2021",
+  "date" : "2022-05-02",
+  "image" : "https://media.greenmatters.com/brand-img/geUUoV30y/1200x628/sewage-discharge-map-uk-1651512296972.jpg"
+}, {
+  "href" : "https://inews.co.uk/news/save-our-rivers-uk-firms-pump-raw-sewage-2143269",
+  "where" : "inews",
+  "title" : "Only 6% of Britain’s rivers on course to be healthy by 2027 as UK’s firms pump more raw sewage",
+  "date" : "2023-02-10",
+  "image" : "https://wp.inews.co.uk/wp-content/uploads/2023/02/SEI_143516744-1-1200x630-pl-save-britains-rivers.jpg"
+}, {
+  "href" : "https://www.birminghammail.co.uk/black-country/top-poops-beloved-midlands-river-26284830",
+  "where" : "Birmingham Live",
+  "title" : "Top of the poops - Beloved Midlands river pumped with more sewage than any other",
+  "date" : "2023-02-20",
+  "image" : "https://i2-prod.birminghammail.co.uk/incoming/article25913706.ece/ALTERNATES/s1200/0_JRR_BEM_6-1-23_shrop02.jpg"
+}, {
+  "href" : "https://www.bbc.co.uk/news/uk-england-leeds-64745380",
+  "where" : "BBC News",
+  "title" : "Yorkshire rivers among worst for sewage discharge, figures show",
+  "date" : "2023-02-23",
+  "image" : "https://ichef.bbci.co.uk/news/1024/branded_news/6FA6/production/_128728582_gettyimages-950679732.jpg"
+}, {
+  "href" : "https://www.itv.com/news/wales/2023-02-20/two-welsh-tourist-hotspots-named-in-worst-sewage-polluted-list",
+  "where" : "ITV News",
+  "title" : "Rhyl and Morfa Nefyn among the worst areas for sewage pollution",
+  "date" : "2023-02-23",
+  "image" : "https://images.ctfassets.net/pjshm78m9jt4/246629_0/d8d1197d709f5961512238eedf9f27e1/importedImage246629_0"
+}, {
+  "href" : "https://www.mirror.co.uk/news/uk-news/your-river-top-poops-20-29222405",
+  "where" : "The Mirror",
+  "title" : "UK's 20 most polluted rivers revealed in Top of the Poops league table",
+  "date" : "2023-02-16",
+  "image" : "https://i2-prod.mirror.co.uk/incoming/article29222933.ece/ALTERNATES/s1200/0_Industrial-and-factory-waste-water-discharge-pipe-into-the-canal-and-sea.jpg"
+}, {
+  "href" : "https://centralbylines.co.uk/sewage-central-how-our-region-is-being-affected-by-the-water-scandal/",
+  "where" : "Central Bylines",
+  "title" : "Sewage central: how our region is being affected by the water scandal",
+  "date" : "2022-08-30",
+  "image" : "https://centralbylines.co.uk/wp-content/uploads/2022/08/sewage-central.jpg"
+}, {
+  "href" : "https://www.lynnnews.co.uk/news/sewage-dumped-into-west-norfolk-rivers-more-than-1-000-times-9270935/",
+  "where" : "Lynn News",
+  "title" : "Sewage dumped into West Norfolk rivers by Anglian Water more than 1,000 times in 2021",
+  "date" : "2022-08-26",
+  "image" : "https://www.lynnnews.co.uk/_media/img/QLR6SV726YC05FKVUO2A.jpg"
+}, {
+  "href" : "https://www.chroniclelive.co.uk/news/north-east-news/chi-onwurah-government-newcastle-sewage-24855226",
+  "where" : "Chronicle Live",
+  "title" : "Chi Onwurah slams Government after data reveals hundreds of sewage dumps have polluted Newcastle's waterways",
+  "date" : "2022-08-26",
+  "image" : "https://i2-prod.mylondon.news/incoming/article22864182.ece/ALTERNATES/s1200/1_Official_portrait_of_Chi_Onwurah_MP_crop_2.jpg"
+}, {
+  "href" : "https://sotn.newstatesman.com/2022/04/mapped-sewage-dumps-and-spills-in-england-and-wales/",
+  "where" : "The New Statesman",
+  "title" : "Mapped: Sewage dumps and spills in England and Wales",
+  "date" : "2022-04-01",
+  "image" : "https://www.newstatesman.com/wp-content/uploads/sites/2/2021/09/cropped-Ben-Walker-177x177.png?1679533206"
+}, {
+  "href" : "https://www.theguardian.com/environment/2022/may/02/untreated-sewage-discharge-england-coastal-bathing-waters-2021",
+  "where" : "The Guardian",
+  "title" : "Raw sewage ‘pumped into English bathing waters 25,000 times in 2021’",
+  "date" : "2022-05-02",
+  "image" : "https://i.guim.co.uk/img/media/a90e553b18d840bb2c734cef4f0d881e23571cbb/0_101_3000_1800/master/3000.jpg?width=1200&height=630&quality=85&auto=format&fit=crop&overlay-align=bottom%2Cleft&overlay-width=100p&overlay-base64=L2ltZy9zdGF0aWMvb3ZlcmxheXMvdGctZGVmYXVsdC5wbmc&s=b3cd366cad4e763bf1d47a7f66e33d48"
+}, {
+  "href" : "https://www.bbc.co.uk/news/uk-england-61194173",
+  "where" : "BBC News",
+  "title" : "Protests over water firms dumping sewage in rivers",
+  "date" : "2022-04-23",
+  "image" : "https://ichef.bbci.co.uk/news/1024/branded_news/95CA/production/_124264383_mermaids.jpg"
+}, {
+  "href" : "https://www.independent.co.uk/news/uk/home-news/sewage-shellfish-pollution-england-uk-b1963688.html",
+  "where" : "The Independent",
+  "title" : "Shellfish areas polluted by sewage tens of thousands of times last year",
+  "date" : "2021-11-25",
+  "image" : "https://static.independent.co.uk/2021/11/24/20/newFile-1.jpg?quality=75&width=1200&auto=webp"
+}, {
+  "href" : "https://www.bbc.co.uk/news/uk-wales-64813436",
+  "where" : "BBC News",
+  "title" : "Rhyl seawater quality 'sufficient', despite sewage listing",
+  "date" : "2023-03-01",
+  "image" : "https://ichef.bbci.co.uk/news/1024/branded_news/18115/production/_128818589_rhylbeachgeograph-5636651-by-david-purchase-1.jpg"
+}, {
+  "href" : "https://www.cambrian-news.co.uk/news/environment/alarm-as-regional-levels-of-sewage-pollution-among-worst-in-england-and-wales-605313",
+  "where" : "Cambrian News",
+  "title" : "Alarm as regional levels of sewage pollution among worst in England and Wales",
+  "date" : "2023-04-03",
+  "image" : "https://www.cambrian-news.co.uk/tindle-static/image/2022/12/08/17/CSO%20in%20Llanduysal%20park.jpg?width=724&amp;crop=16:9,smart&amp;quality=75"
+}, {
+  "href" : "https://www.walesonline.co.uk/news/wales-news/welsh-rivers-pumped-sewage-named-26272448",
+  "where" : "Wales Online",
+  "title" : "Welsh rivers pumped with sewage named among UK's most polluted",
+  "date" : "2023-02-19",
+  "image" : "https://i2-prod.walesonline.co.uk/incoming/article24378693.ece/ALTERNATES/s1200/0_JS243648750.jpg"
+}, {
+  "href" : "https://www.timeout.com/uk/news/revealed-these-are-the-20-most-polluted-rivers-in-the-uk-022023",
+  "where" : "Time Out",
+  "title" : "Revealed: these are the 20 most polluted rivers in the UK",
+  "date" : "2023-02-20",
+  "image" : "https://media.timeout.com/images/105979117/image.jpg"
+}, {
+  "href" : "https://inews.co.uk/news/environment/uk-rivers-20-high-risk-pollution-chemicals-sewage-plastic-wildlife-trusts-2174378",
+  "where" : "i News",
+  "title" : "UK rivers: 20 waterways at high risk from wildlife-killing pollution, from sewage to chemicals",
+  "date" : "2023-02-27",
+  "image" : "https://wp.inews.co.uk/wp-content/uploads/2023/03/SEI_147526931-1200x630-pl-save-britains-rivers.jpg"
+}, {
+  "href" : "https://kenilworth.nub.news/news/local-news/enough-is-enough-local-mp-calls-for-action-on-sewage-discharge-into-local-rivers-148485",
+  "where" : "Kenilworth Nub News",
+  "title" : "'Enough is enough' local MP calls for action on sewage discharge into local rivers",
+  "date" : "2022-09-13",
+  "image" : "https://storage.googleapis.com/nub-news-files/nub-news-file-storage/376241/conversions/text-article.jpg"
+}, {
+  "href" : "https://bylines.cymru/environment/sewage-dumping-welsh-rivers/",
+  "where" : "Bylines Cymru",
+  "title" : "Welsh rivers see some of the worst sewage dumping in the UK",
+  "date" : "2023-04-03",
+  "image" : "https://bylines.cymru/wp-content/uploads/2023/04/Murky-waters-1.jpeg"
+}, {
+  "href" : "https://www.thestar.co.uk/news/environment/sheffield-pollution-more-than-2000-sewage-incidents-recorded-on-river-don-4035470",
+  "where" : "The Star",
+  "title" : "Sheffield pollution: More than 2,000 sewage 'incidents' recorded on River Don",
+  "date" : "2023-02-21",
+  "image" : "https://www.thestar.co.uk/webimg/b25lY21zOmZlYzI3Y2VjLWUzOWItNDFkYS05ZGI4LTJmOTIwYjhkNjEwZDpiMWYxZjJmYi04YTc0LTQ1MmEtOGJiNS0zNGQ5MTdhZTFiYTg=.jpg?width=1200&amp;auto=webp&amp;quality=75&amp;crop=2:1,smart"
+}, {
+  "href" : "https://www.theguardian.com/environment/2023/apr/06/ministers-treating-coastal-areas-like-open-sewers-says-labour",
+  "where" : "The Guardian",
+  "title" : "Ministers treating coastal areas like ‘open sewers’, says Labour",
+  "date" : "2023-04-06",
+  "image" : "https://i.guim.co.uk/img/media/d33e3ebf2d92dc7f8c5b18ea033e5e5e9b481765/0_31_6708_4025/master/6708.jpg?width=1200&height=630&quality=85&auto=format&fit=crop&overlay-align=bottom%2Cleft&overlay-width=100p&overlay-base64=L2ltZy9zdGF0aWMvb3ZlcmxheXMvdGctZGVmYXVsdC5wbmc&enable=upscale&s=4ad19ad9f4836ad1efcb8844cf3cfa32"
+}, {
+  "href" : "https://www.mirror.co.uk/news/uk-news/new-sewage-scandal-data-shows-29641300",
+  "where" : "The Mirror",
+  "title" : "New sewage scandal as data shows waste is dumped on to coast every three minutes",
+  "date" : "2023-04-05",
+  "image" : "https://i2-prod.mirror.co.uk/incoming/article29641291.ece/ALTERNATES/s1200/0_AGP_MDM_250822WORTHING_001JPG.jpg"
+}, {
+  "href" : "https://www.westwaleschronicle.co.uk/blog/2023/04/03/west-wales-rivers-are-some-of-the-most-sewage-filled-in-the-uk/",
+  "where" : "West Wales Chronicle",
+  "title" : "West Wales’ Rivers Are Some Of The Most Sewage Filled In The UK",
+  "date" : "2023-04-03",
+  "image" : "https://top-of-the-poops.org/assets/poop.png"
+}, {
+  "href" : "https://nation.cymru/news/sewage-dumped-on-wales-blue-flag-beaches-579-times-say-welsh-lib-dems/",
+  "where" : "nation.cymru",
+  "title" : "Sewage dumped on Wales’ Blue Flag beaches 579 times, say Welsh Lib-Dems",
+  "date" : "2022-11-28",
+  "image" : "https://s3.eu-west-2.amazonaws.com/nation.cymru/wp-content/uploads/2022/11/28140843/sewage-beaches-canva.jpg"
+}, {
+  "href" : "https://www.manchestereveningnews.co.uk/news/greater-manchester-news/its-covered-human-waste-mps-26650213",
+  "where" : "Manchester Evening News",
+  "title" : "'It's covered in human waste' - MPs fume over state of south Manchester river",
+  "date" : "2023-04-06",
+  "image" : "https://i2-prod.manchestereveningnews.co.uk/news/greater-manchester-news/article26650218.ece/ALTERNATES/s1200/0_McMahon.jpg"
+}, {
+  "href" : "https://www.cambrian-news.co.uk/news/environment/ceredigion-river-and-sea-pollution-among-worst-in-wales-and-england-606009",
+  "where" : "Cambrian News",
+  "title" : "Ceredigion river and sea pollution among worst in Wales and England",
+  "date" : "2023-04-10",
+  "image" : "https://www.cambrian-news.co.uk/tindle-static/image/2023/04/05/13/so1204%20River%20Teifi%20credit%20Nathan%20Walton.jpg?width=1200&crop=16:9,smart&quality=75"
+}, {
+  "href" : "https://www.thetimes.co.uk/article/sewage-pumped-into-sea-for-one-million-hours-in-2022-clean-it-up-mwtpkzhrg",
+  "where" : "The Times",
+  "title" : "Sewage discharged in coastal areas for one million hours in 2022",
+  "date" : "2023-04-05",
+  "image" : "https://www.thetimes.co.uk/imageserver/image/%2Fmethode%2Ftimes%2Fprod%2Fweb%2Fbin%2F66f0d7e8-d3ed-11ed-b1cd-5223fe349502.jpg?crop=5646%2C3176%2C57%2C332&resize=1200"
+}, {
+  "href" : "https://www.examinerlive.co.uk/news/local-news/two-filthy-rivers-pumped-fetid-26258633",
+  "where" : "Yorkshire Live",
+  "title" : "Two filthy rivers pumped with fetid sewage by Yorkshire Water more than 8,000 times",
+  "date" : "2023-02-17",
+  "image" : "https://i2-prod.leeds-live.co.uk/news/leeds-news/article23189186.ece/ALTERNATES/s1200/2_River-Aire-Mickeltown.jpg"
+}, {
+  "href" : "https://www.theboltonnews.co.uk/news/23440662.united-utilities-bolton-areas-top-2-sewage-waterways/",
+  "where" : "The Bolton News",
+  "title" : "United Utilities: Bolton areas are top 2 for sewage in waterways",
+  "date" : "2023-04-11",
+  "image" : "https://www.theboltonnews.co.uk/resources/images/16643656/?type=og-image"
+}, {
+  "href" : "https://www.stokesentinel.co.uk/news/stoke-on-trent-news/top-poops-river-trent-named-8163671",
+  "where" : "Stoke-on-Trent Live",
+  "title" : "'Top of the poops' - River Trent named among most polluted in England",
+  "date" : "2023-02-18",
+  "image" : "https://i2-prod.stokesentinel.co.uk/incoming/article2504020.ece/ALTERNATES/s1200/1_AGR_STO_020219Page23wkdwww_03.jpg"
+}, {
+  "href" : "https://yorkshirebylines.co.uk/news/environment/profits-over-pollution-why-britain-is-losing-its-battle-to-save-its-rivers/",
+  "where" : "Yorkshire Bylines",
+  "title" : "Profits over pollution: why Britain is losing its battle to save its rivers",
+  "date" : "2023-05-30",
+  "image" : "https://yorkshirebylines.co.uk/wp-content/uploads/2023/05/river-calder-g7e5793a79_1280.jpg"
+}, {
+  "href" : "https://bradford.greenparty.org.uk/2023/05/30/yorkshire-water-should-be-apologising-for-higher-bills/",
+  "where" : "Bradford District Green Party",
+  "title" : "Yorkshire Water should be apologising for higher bills",
+  "date" : "2023-05-30",
+  "image" : "https://bradford.greenparty.org.uk/wp-content/uploads/sites/78/2023/05/Sewage-scaled.jpeg"
+}, {
+  "href" : "https://www.mirror.co.uk/news/uk-news/brits-warned-avoid-83-beaches-29461331",
+  "where" : "The Mirror",
+  "title" : "Brits warned to avoid 83 beaches across country after sewage leaks including 'UK's best' - Mirror Online",
+  "date" : "2023-03-15",
+  "image" : "https://i2-prod.mirror.co.uk/incoming/article29461395.ece/ALTERNATES/s1200/0_dumped.jpg"
+}, {
+  "href" : "https://www.birkenhead.news/new-brighton-coastal-bathing-area-most-polluted-in-country/",
+  "where" : "Birkenhead News",
+  "title" : "New Brighton coastal bathing area most polluted in country",
+  "date" : "2023-05-18",
+  "image" : "https://www.birkenhead.news/wp-content/uploads/2023/05/New-Brighton.webp"
+}, {
+  "href" : "https://www.bbc.co.uk/news/uk-england-leeds-65625859",
+  "where" : "BBC News",
+  "title" : "Yorkshire Water boss apologises for sewage discharges into rivers",
+  "date" : "2023-05-18",
+  "image" : "https://ichef.bbci.co.uk/news/1024/branded_news/17E5/production/_129771160_yorkshirewater.jpg.jpg"
+}, {
+  "href" : "https://www.bbc.co.uk/news/articles/cy9008ezyn5o",
+  "where" : "BBC News",
+  "title" : "Yorkshire Water boss declines bonus after criticism",
+  "date" : "2023-05-18",
+  "image" : "https://ichef.bbci.co.uk/news/1024/branded_news/08b6/live/1d4a87a0-ee88-11ed-a142-ab0e42bfd9c3.jpg"
+}, {
+  "href" : "https://www.bbc.co.uk/news/articles/cy9008ezyn5o",
+  "where" : "BBC News",
+  "title" : "Yorkshire Water boss declines bonus after criticism",
+  "date" : "2023-05-18",
+  "image" : "https://ichef.bbci.co.uk/news/1024/branded_news/08b6/live/1d4a87a0-ee88-11ed-a142-ab0e42bfd9c3.jpg"
+} ]
