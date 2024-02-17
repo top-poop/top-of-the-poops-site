@@ -79,6 +79,8 @@ generated-data: generated-2022 generated-live $(DATAFILES)/constituencies/.uptod
 
 generated-2022: $(DATA_2022_GENERATED) $(GEO_2022_GENERATED) $(PROVIDED)
 
+provided: $(PROVIDED)
+
 .PHONY: generated-live
 generated-live:
 	$(PYTHON) thames-summary.py
