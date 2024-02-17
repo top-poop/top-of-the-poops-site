@@ -112,7 +112,7 @@ object HomepageHandler {
                             it.toRenderable()
                         },
                         shellfishRankings().take(10).map { it.toRenderable() },
-                        appearances().sortedByDescending { it.date }.take(8),
+                        appearances().sortedByDescending { it.date },
                         SocialShare(
                             pageUriFrom(request),
                             "Water companies are dumping #sewage into rivers and bathing areas all over the UK - over ${totalSpillsRounded} times in 2022 - it needs to be stopped",

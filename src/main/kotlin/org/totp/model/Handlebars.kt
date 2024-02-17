@@ -67,6 +67,15 @@ object TotpHandlebars {
             it.registerHelper("maybe") { context: Any?, _: Options -> context?.let { it.toString() } ?: "" }
             it.registerHelper("urlencode") { context: Any, _: Options -> context.toString().urlEncoded() }
             it.registerHelper("concat") { context: Any, options -> (listOf(context) + options.params).joinToString("") }
+            it.registerHelper("take") {
+                context: Any, options ->
+                when ( context ) {
+                    is Iterable<*> -> {
+                        options.apply(options.fn, context.take(options.hash<Int?>("n").toInt()))
+                    }
+                    else -> error("not iterable")
+                }
+            }
         }
     }
 
