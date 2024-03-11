@@ -38,10 +38,10 @@ push: check-context
 
 .PHONY: deploy
 deploy:
-	@test $(shell docker context show) = "totp"
+	@test $(shell docker context show) = $(TOTP_CONTEXT)
 	docker service create --with-registry-auth --name $(SERVICE) --network overlay-net $(FULL_NAME)
 
 .PHONY: upgrade
 upgrade:
-	@test $(shell docker context show) = "totp"
+	@test $(shell docker context show) = $(TOTP_CONTEXT)
 	docker service update --with-registry-auth --image $(FULL_NAME) $(SERVICE)
