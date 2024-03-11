@@ -86,8 +86,8 @@ class CompanyPageHandlerTest {
             .isEqualTo("https://top-of-the-poops.org/badges/company/water-co.png")
 
         expectThat(html.select("h3").map { it.text() })
-            .one { isEqualTo("Rivers Polluted by Water Co") }
-            .one { isEqualTo("Beaches Polluted by Water Co") }
+            .one { isEqualTo("2022 - Rivers Polluted by Water Co") }
+            .one { isEqualTo("2022 - Beaches Polluted by Water Co") }
 
         expectThat(response.bodyString()) {
             contains("1,234")

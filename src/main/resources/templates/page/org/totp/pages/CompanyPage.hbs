@@ -55,7 +55,7 @@
 
 {{#if liveDataAvailable}}
     <div class="container">
-    {{#> components/section title="Percentage of all EDMs overflowing" }}
+    {{#> components/section title="2023 - Percentage of all EDMs overflowing" }}
         <div class="row">
             <div class="col">
                 <div class="row">
@@ -80,15 +80,8 @@
                 </div>
                 <div class="row mt-2">
                     <div class="col">
-
                         <p>Here we can see a plot of the number of days across the {{company.name}} area that CSOs overflowed,
                         correlated with the amount of local rainfall, as reported by the Environment Agency Rainfall Monitoring Stations.</p>
-
-                        <p>We take the 75th percentile of all the rainfall monitoring stations in or near the constituency where the CSO is located, and
-                        plot that against how long each CSO overflowed.</p>
-                        <div id="spill-correlation" class="plot-chart"
-                             data-uri="/data/v1/2022/spills-live-overflows-by-rainfall-{{company.slug}}.json">
-                        </div>
                     </div>
                 </div>
             </div>
@@ -192,7 +185,7 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                {{#> components/section title=(concat "Worst Locations " company.name)}}
+                {{#> components/section title=(concat "2022 - Worst Locations " company.name)}}
                     <div class="row row-cols-1 row-cols-md-3">
                         {{#each worstCsos}}
                             <div class="col mb-4">
@@ -225,7 +218,7 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                {{#> components/section title=(concat "Rivers Polluted by " company.name)}}
+                {{#> components/section title=(concat "2022 - Rivers Polluted by " company.name)}}
                     <div class="row row-cols-1 row-cols-md-3">
                         {{#each rivers}}
                             <a class="quiet-link" href="{{this.river.uri}}">
@@ -259,7 +252,7 @@
         <div class="container">
             <div class="row">
                 <div class="col">
-                    {{#> components/section title=(concat "Beaches Polluted by " company.name)}}
+                    {{#> components/section title=(concat "2022 - Beaches Polluted by " company.name)}}
                         <div class="row row-cols-1 row-cols-md-3">
                             {{#each beaches}}
                                 <a class="quiet-link" href="{{this.beach.uri}}">
