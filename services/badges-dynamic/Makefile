@@ -6,6 +6,7 @@ __check_defined = \
       $(error Undefined $1$(if $2, ($2))))
 
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
+$(call check_defined, TOTP_CONTEXT, context)
 
 SERVICE=badges-dynamic
 SERVICE_VERSION=$(shell ../../bin/content-hash.sh Dockerfile assets requirements.txt *.py)
@@ -35,10 +36,10 @@ push: check-context
 
 .PHONY: deploy
 deploy:
-	@test $(shell docker context show) = "totp"
+	@test $(shell docker context show) = $(TOTP_CONTEXT)
 	docker service create --with-registry-auth --name $(SERVICE) --network overlay-net $(FULL_NAME)
 
 .PHONY: upgrade
 upgrade:
-	@test $(shell docker context show) = "totp"
+	@test $(shell docker context show) = $(TOTP_CONTEXT)
 	docker service update --with-registry-auth --image $(FULL_NAME) $(SERVICE)

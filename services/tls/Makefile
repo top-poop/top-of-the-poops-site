@@ -6,9 +6,13 @@ __check_defined = \
       $(error Undefined $1$(if $2, ($2))))
 
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
+$(call check_defined, TOTP_CONTEXT, context)
+
 
 SERVICE=tls
 SERVICE_VERSION=$(shell ../../bin/content-hash.sh nginx.conf Dockerfile docker-compose.yml)
+
+CURL=curl --verbose --fail --silent
 
 IMAGE_NAME=totp-$(SERVICE)
 
@@ -19,6 +23,18 @@ FULL_NAME=$(DOCKER_HUB_ORG)/$(IMAGE_NAME):$(SERVICE_VERSION)
 check-context:
 	@echo "Current docker context (expect 'default'):" $(shell docker context show)
 	@test $(shell docker context show) = default
+
+
+.geoip.dat.gz:
+	$(CURL) -o $@ http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
+
+.geoip.dat: .geoip.dat.gz
+	rm -f $@
+	zcat $< > $@
+
+geoip.dat: .geoip.dat
+	mv $< $@
+
 
 .PHONY: image
 image: check-context
@@ -35,7 +51,7 @@ push: check-context
 
 .PHONY: deploy
 deploy:
-	@test $(shell docker context show) = "totp"
+	@test $(shell docker context show) = $(TOTP_CONTEXT)
 	SERVICE_FULL_NAME=$(FULL_NAME) docker compose up -d tls
 
 .PHONY: upgrade
