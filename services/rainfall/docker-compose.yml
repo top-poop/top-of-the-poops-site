@@ -12,7 +12,7 @@ services:
     deploy:
       labels:
         - "swarm.cronjob.enable=true"
-        - "swarm.cronjob.schedule=* * * * *"
+        - "swarm.cronjob.schedule=15 6 * * *"
         - "swarm.cronjob.skip-running=true"
       restart_policy:
         condition: none

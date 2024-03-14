@@ -6,6 +6,8 @@ __check_defined = \
       $(error Undefined $1$(if $2, ($2))))
 
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
+$(call check_defined, TOTP_CONTEXT, context)
+
 
 BUILD=./gradlew
 
