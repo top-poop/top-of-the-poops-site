@@ -3,6 +3,7 @@ import dataclasses
 import datetime
 import gzip
 import io
+import os
 import pathlib
 import re
 import requests
@@ -96,8 +97,13 @@ class EnvironmentAgencyAPI:
             )
             response.raise_for_status()
             text = response.text
-            with io.TextIOWrapper(gzip.open(cache_file, "wb")) as g:
+
+            temp_file = self.cache_dir / f"{date.isoformat()}.csv.gz.part"
+
+            with io.TextIOWrapper(gzip.open(temp_file, "wb")) as g:
                 g.write(text)
+
+            os.rename(temp_file, cache_file)
 
         csv_file = csv.DictReader(text.split("\n"))
         for row in csv_file:
