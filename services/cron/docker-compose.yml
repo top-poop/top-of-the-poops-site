@@ -1,0 +1,15 @@
+version: "3.2"
+
+services:
+  swarm-cronjob:
+    image: crazymax/swarm-cronjob@sha256:a59371562e88f8f86dd3853ba07ff3142f8c60d5fa2135192d5daa3516578b80
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - "TZ=Europe/London"
+      - "LOG_LEVEL=info"
+      - "LOG_JSON=true"
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager

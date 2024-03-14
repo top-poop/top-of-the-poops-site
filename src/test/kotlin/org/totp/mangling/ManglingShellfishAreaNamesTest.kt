@@ -2,6 +2,7 @@ package org.totp.mangling
 
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.totp.db.*
 import org.totp.extensions.kebabCase
 import org.totp.model.data.ShellfishAreaName
 import org.totp.model.data.ShellfisheryName
