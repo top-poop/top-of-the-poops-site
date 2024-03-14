@@ -1,4 +1,4 @@
-package org.totp.mangling
+package org.totp.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -38,14 +38,9 @@ class HikariWithConnection(private val dataSource: Lazy<DataSource>) : WithConne
     private fun <T> executeInNewTransaction(block: Connection.() -> T): T {
         return dataSource.value.connection.use { connection ->
             try {
-                val t:T = block(connection)
-
-                connection.commit()
-
-                t
-            }
-            catch (ex:Exception) {
-                if ( ! connection.isClosed ) {
+                block(connection).also { connection.commit() }
+            } catch (ex: Exception) {
+                if (!connection.isClosed) {
                     connection.rollback()
                 }
                 throw ex
@@ -54,8 +49,8 @@ class HikariWithConnection(private val dataSource: Lazy<DataSource>) : WithConne
     }
 }
 
-fun hikariConnectionConfig(): HikariConfig = hikariConfig().also {
-    it.jdbcUrl = "jdbc:postgresql://localhost:5432/gis"
+fun hikariConnectionConfig(host: String = "localhost"): HikariConfig = hikariConfig().also {
+    it.jdbcUrl = "jdbc:postgresql://${host}:5432/gis"
     it.driverClassName = org.postgresql.Driver::class.java.name
     it.username = "docker"
     it.password = "docker"
