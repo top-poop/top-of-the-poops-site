@@ -1,0 +1,23 @@
+version: "3.2"
+
+services:
+  rainfall:
+    image: ${SERVICE_FULL_NAME}
+    networks:
+      - overlay-net
+    volumes:
+      - type: bind
+        source: /data/rainfall/cache
+        target: /root/.gis-cache
+    deploy:
+      labels:
+        - "swarm.cronjob.enable=true"
+        - "swarm.cronjob.schedule=* * * * *"
+        - "swarm.cronjob.skip-running=true"
+      restart_policy:
+        condition: none
+
+
+networks:
+  overlay-net:
+    external: true

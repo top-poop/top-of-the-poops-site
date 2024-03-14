@@ -61,8 +61,8 @@ dependencies {
     testImplementation "org.http4k:http4k-testing-strikt"
     testImplementation "org.jsoup:jsoup:1.15.4"
 
-    testImplementation "org.postgresql:postgresql:42.6.0"
-    testImplementation "com.zaxxer:HikariCP:5.0.0"
+    implementation "org.postgresql:postgresql:42.6.0"
+    implementation "com.zaxxer:HikariCP:5.0.0"
 }
 
 test {
