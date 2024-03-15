@@ -1,0 +1,28 @@
+version: "3.2"
+
+services:
+  thames:
+    image: ${SERVICE_FULL_NAME}
+    networks:
+      - overlay-net
+    secrets:
+      - tw_client_id
+      - tw_client_secret
+    deploy:
+      labels:
+        - "swarm.cronjob.enable=true"
+        - "swarm.cronjob.schedule=15,45 * * * *"
+        - "swarm.cronjob.skip-running=true"
+      restart_policy:
+        condition: none
+
+
+networks:
+  overlay-net:
+    external: true
+
+secrets:
+  tw_client_id:
+    external: true
+  tw_client_secret:
+    external: true
