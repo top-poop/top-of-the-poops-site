@@ -8,8 +8,8 @@ __check_defined = \
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 $(call check_defined, TOTP_CONTEXT, context)
 
-SERVICE=rainfall
-SERVICE_VERSION=$(shell ../../bin/content-hash.sh *.py requirements.txt Dockerfile)
+SERVICE=thames
+SERVICE_VERSION=$(shell ../../bin/content-hash.sh *.py requirements.txt entrypoint.sh Dockerfile)
 
 IMAGE_NAME=totp-$(SERVICE)
 

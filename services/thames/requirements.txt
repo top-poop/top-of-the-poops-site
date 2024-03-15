@@ -1,0 +1,4 @@
+psycopg2-binary==2.9.9
+requests==2.31.0
+python-statemachine[diagrams]==2.1.2
+
