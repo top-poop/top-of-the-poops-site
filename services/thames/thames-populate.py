@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import datetime
 import os
@@ -82,6 +84,7 @@ if __name__ == "__main__":
     with psycopg2.connect(host=db_host, database="gis", user="docker", password="docker") as conn:
 
         if args.update:
+            print("Getting last date....")
             d: datetime.datetime = select_one(conn, "select max(date_time) from events_thames")[0]
             if d is not None:
                 start_date = d.date()
