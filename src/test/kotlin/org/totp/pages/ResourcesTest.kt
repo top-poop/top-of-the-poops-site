@@ -3,7 +3,6 @@ package org.totp.pages
 import org.http4k.template.ViewModel
 import org.junit.jupiter.api.Test
 import org.totp.Resources
-import org.totp.model.TotpHandlebars
 import strikt.api.expectThat
 import strikt.assertions.isNotNull
 
@@ -12,7 +11,7 @@ class ResourcesTest {
     @Test
     fun `loading templates in prod mode`() {
 
-        val renderer = Resources.templates(TotpHandlebars.templates(), hotReload = false)
+        val renderer = Resources.templates(devMode = false)
 
         renderer(object : ViewModel { override fun template(): String = "chunks/copyright" })
     }
@@ -20,7 +19,7 @@ class ResourcesTest {
     @Test
     fun `loading templates in dev mode`() {
 
-        val renderer = Resources.templates(TotpHandlebars.templates(), hotReload = true)
+        val renderer = Resources.templates(devMode = true)
 
         renderer(object : ViewModel { override fun template(): String = "chunks/copyright" })
     }
