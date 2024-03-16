@@ -5,6 +5,8 @@ import org.totp.model.data.ConstituencyName
 import strikt.api.expectThat
 import strikt.assertions.contains
 import strikt.assertions.isEqualTo
+import strikt.assertions.isGreaterThan
+import strikt.assertions.size
 import java.time.LocalDate
 
 class ThamesWaterTest {
@@ -20,6 +22,13 @@ class ThamesWaterTest {
             startDate = LocalDate.parse("2024-01-01"),
             endDate = LocalDate.parse("2024-02-01")
         )
+    }
+
+    @Test
+    fun infrastructure() {
+        val x = tw.infrastructureSummary()
+
+        expectThat(x).size.isGreaterThan(100)
     }
 
     @Test

@@ -7,12 +7,6 @@ import java.time.LocalDate
 
 class ThamesWater(private val connection: WithConnection) {
 
-    data class CSOSummary(
-        val permit_id: String,
-        val site_name: String,
-        val pcon20nm: ConstituencyName,
-        val overflowing: Duration
-    )
 
     fun haveLiveDataFor(): Set<ConstituencyName> {
         return connection.execute(block("have-live-data") {
@@ -32,13 +26,20 @@ class ThamesWater(private val connection: WithConnection) {
         }).toSet()
     }
 
-    data class CSODateSummary(val date: LocalDate, val edm_count: Int, val overflowing: Int, val offline: Int)
+    data class DatedOverflow(
+        val date: LocalDate,
+        val edm_count: Int,
+        val overflowing: Int,
+        val overflowingSeconds: Int,
+        val offline: Int
+    )
 
-    fun infrastructureSummary(): List<CSODateSummary> {
+    fun infrastructureSummary(): List<DatedOverflow> {
         return connection.execute(block("infrastructureSummary") {
             query(
                 sql = """select date,
        count(*) as edm_count,
+       extract(epoch from sum(overflowing)) as overflowingSeconds, 
        count(case when overflowing > interval '30m' then 1 end) as overflowing,
        count(case when offline > interval '30m' then 1 end) as offline
 from summary_thames
@@ -46,10 +47,11 @@ group by date
 order by date
 """,
                 mapper = {
-                    CSODateSummary(
+                    DatedOverflow(
                         it.getDate("date").toLocalDate(),
                         it.getInt("edm_count"),
                         it.getInt("overflowing"),
+                        it.getInt("overflowingSeconds"),
                         it.getInt("offline")
                     )
                 }
@@ -57,6 +59,13 @@ order by date
         })
     }
 
+
+    data class CSOSummary(
+        val permit_id: String,
+        val site_name: String,
+        val pcon20nm: ConstituencyName,
+        val overflowing: Duration
+    )
 
     fun worstCSOsInPeriod(startDate: LocalDate, endDate: LocalDate): List<CSOSummary> {
         return connection.execute(NamedQueryBlock("") {

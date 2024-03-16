@@ -12,7 +12,7 @@ $(call check_defined, TOTP_CONTEXT, context)
 BUILD=./gradlew
 
 SERVICE=pages
-SERVICE_VERSION=$(shell bin/content-hash.sh bin src Makefile *gradle*)
+SERVICE_VERSION=$(shell bin/content-hash.sh bin src *gradle*)
 
 IMAGE_NAME=totp-$(SERVICE)
 
@@ -52,3 +52,8 @@ test-deploy:
 upgrade:
 	@test $(shell docker context show) = $(TOTP_CONTEXT)
 	docker service update --with-registry-auth --image $(FULL_NAME) $(SERVICE)
+
+.PHONY: upgrade
+test-upgrade:
+	@test $(shell docker context show) = $(TOTP_CONTEXT)
+	docker service update --with-registry-auth --image $(FULL_NAME) $(SERVICE)-test
