@@ -53,20 +53,54 @@
     </div>
 </div>
 
-{{#if liveDataAvailable}}
+{{#if live}}
     <div class="container">
+
+    {{#if live.overflowing}}
+        {{#> components/section
+                title=(concat company.name " has " live.overflowing.length " CSOs dumping sewage right now") }}
+
+                <div class="row">
+                    <div class="col">
+                        <p>Here are the ones that have been overflowing for the longest, without interruption</p>
+                    </div>
+                </div>
+
+            <div id="live-csos" class="row row-cols-1 row-cols-md-3">
+            {{#each (take live.overflowing n=9)}}
+                    <div class="col mb-4" >
+                    <div class="card h-100">
+                        <!-- {{this.permit}} -->
+                        <div class="card-header">{{inc @index}}. {{this.sitename}}</div>
+                        <div class="events  card-body">
+                            <p class="card-title">
+                                <a href="{{this.constituency.uri}}">{{this.constituency.name}}</a>
+                                into {{this.waterway.name}}
+                            </p>
+                            <p class="card-text"><small class="text-muted">Started {{ago this.started}}</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {{/each}}
+            </div>
+        {{/components/section}}
+    {{/if}}
     {{#> components/section title="How many Sewage Overflows are dumping sewage?" }}
         <div class="row">
             <div class="col">
                 <div class="row">
                     <div class="col">
-                        <p>We have live data for {{company.name}} so we can track what happens every day - given that
+                        <p>We have live data for {{company.name}} so we can track what happens every day - given
+                            that
                             overflows are supposed to happen on an 'exceptional' basis only - does the chart
                             indicate that?</p>
 
-                        <p>The red line indicates the number of CSOs that overflowed for at least 30mins, the grey, the
+                        <p>The red line indicates the number of CSOs that overflowed for at least 30mins, the grey,
+                            the
                             number of CSOs
-                            that were offline for at least 30mins, and the blue line is the total number of CSOs that we can get information for.</p>
+                            that were offline for at least 30mins, and the blue line is the total number of CSOs
+                            that we can get information for.</p>
 
                         <p>There is daily updated information on all constituencies covered by {{company.name}}</p>
                     </div>
@@ -82,101 +116,136 @@
         </div>
     {{/components/section}}
     </div>
-        <script type="module">
-            import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.4/+esm";
+    <script type="module">
+        import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.4/+esm";
 
-            const PlotDailyEDM = (data, width, height) => Plot.plot({
-                marginLeft: 40,
-                marginBottom: 30,
-                width: width,
-                height: height,
-                y: {
-                    grid: true,
-                    label: "Number of CSOs ↑",
-                },
-                x: {
-                    grid: false,
-                },
-                marks: [
-                    Plot.lineY(
-                            data,
-                            {
-                                x: d => new Date(d.date),
-                                y: d => d.edm_count,
-                                stroke: '#44beff'
-                            }
-                    ),
-                    Plot.lineY(
-                            data,
-                            {
-                                x: d => new Date(d.date),
-                                y: d => d.overflowing,
-                                stroke: '#ff4444'
-                            }
-                    ),
-                    Plot.lineY(
-                            data,
-                            {
-                                x: d => new Date(d.date),
-                                y: d => d.offline,
-                                stroke: '#bbbbbb'
-                            }
-                    ),
-                ]
-            })
+        const PlotDailyEDM = (data, width, height) => Plot.plot({
+            marginLeft: 40,
+            marginBottom: 30,
+            width: width,
+            height: height,
+            y: {
+                grid: true,
+                label: "Number of CSOs ↑",
+            },
+            x: {
+                grid: false,
+            },
+            marks: [
+                Plot.lineY(
+                        data,
+                        {
+                            x: d => new Date(d.date),
+                            y: d => d.edm_count,
+                            stroke: '#44beff'
+                        }
+                ),
+                Plot.lineY(
+                        data,
+                        {
+                            x: d => new Date(d.date),
+                            y: d => d.overflowing,
+                            stroke: '#ff4444'
+                        }
+                ),
+                Plot.lineY(
+                        data,
+                        {
+                            x: d => new Date(d.date),
+                            y: d => d.offline,
+                            stroke: '#bbbbbb'
+                        }
+                ),
+            ]
+        })
 
-            const div = document.getElementById("edm-spills");
-            const rect = div.getBoundingClientRect()
-            const response = await fetch(div.attributes["data-uri"].value);
-            if (response.ok) {
-                div.appendChild(PlotDailyEDM(await response.json(), rect.width, rect.height))
-            }
-        </script>
+        const div = document.getElementById("edm-spills");
+        const rect = div.getBoundingClientRect()
+        const response = await fetch(div.attributes["data-uri"].value);
+        if (response.ok) {
+            div.appendChild(PlotDailyEDM(await response.json(), rect.width, rect.height))
+        }
+    </script>
+
 {{/if}}
 
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                {{#> components/section title=(concat "2022 - Worst Locations " company.name)}}
-                    <div class="row row-cols-1 row-cols-md-3">
-                        {{#each worstCsos}}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            {{#> components/section title=(concat "2022 - Worst Locations " company.name)}}
+                <div class="row row-cols-1 row-cols-md-3">
+                    {{#each worstCsos}}
+                        <div class="col mb-4">
+                            <div class="card h-100">
+                                <div class="card-header">{{inc @index}}. {{this.cso.sitename}}</div>
+                                <div class="card-body">
+                                    <p class="card-title">
+                                        <a href="{{this.constituency.uri}}">{{this.constituency.name}}</a> polluted
+                                        for
+                                        {{numberFormat this.duration.hours}} hours, into <a
+                                            href="{{this.cso.waterway.uri}}">{{this.cso.waterway.name}}</a>
+                                    </p>
+                                    <p class="card-text">{{numberFormat this.count.count}} incidents</p>
+
+                                    <p class="card-text"><small
+                                            class="text-muted"> {{> chunks/explain-duration this.duration}} </small>
+                                    </p>
+                                    <p class="card-text"><small
+                                            class="text-muted"> {{> chunks/explain-count this.count}} </small></p>
+                                </div>
+                            </div>
+                        </div>
+                    {{/each}}
+                </div>
+            {{/components/section}}
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            {{#> components/section title=(concat "2022 - Rivers Polluted by " company.name)}}
+                <div class="row row-cols-1 row-cols-md-3">
+                    {{#each rivers}}
+                        <a class="quiet-link" href="{{this.river.uri}}">
                             <div class="col mb-4">
                                 <div class="card h-100">
-                                    <div class="card-header">{{inc @index}}. {{this.cso.sitename}}</div>
+                                    <div class="card-header">{{inc @index}}. {{this.river.name}}</div>
                                     <div class="card-body">
-                                        <p class="card-title">
-                                            <a href="{{this.constituency.uri}}">{{this.constituency.name}}</a> polluted
-                                            for
-                                            {{numberFormat this.duration.hours}} hours, into <a
-                                                href="{{this.cso.waterway.uri}}">{{this.cso.waterway.name}}</a>
-                                        </p>
+                                        <h5 class="card-title">{{numberFormat this.duration.hours}} hours</h5>
+                                        <p class="card-text"><small class="text-muted">
+                                            {{> chunks/explain-duration this.duration}}
+                                        </small></p>
                                         <p class="card-text">{{numberFormat this.count.count}} incidents</p>
-
-                                        <p class="card-text"><small
-                                                class="text-muted"> {{> chunks/explain-duration this.duration}} </small>
-                                        </p>
-                                        <p class="card-text"><small
-                                                class="text-muted"> {{> chunks/explain-count this.count}} </small></p>
+                                        <p class="card-text"><small class="text-muted">
+                                            {{> chunks/explain-count this.count}}
+                                        </small></p>
                                     </div>
                                 </div>
                             </div>
-                        {{/each}}
-                    </div>
-                {{/components/section}}
-            </div>
+                        </a>
+                    {{/each}}
+                </div>
+            {{/components/section}}
         </div>
     </div>
+</div>
 
+
+
+
+{{#if beaches}}
     <div class="container">
         <div class="row">
             <div class="col">
-                {{#> components/section title=(concat "2022 - Rivers Polluted by " company.name)}}
+                {{#> components/section title=(concat "2022 - Beaches Polluted by " company.name)}}
                     <div class="row row-cols-1 row-cols-md-3">
-                        {{#each rivers}}
-                            <a class="quiet-link" href="{{this.river.uri}}">
+                        {{#each beaches}}
+                            <a class="quiet-link" href="{{this.beach.uri}}">
                                 <div class="col mb-4">
                                     <div class="card h-100">
-                                        <div class="card-header">{{inc @index}}. {{this.river.name}}</div>
+                                        <div class="card-header">{{inc @index}}. {{this.beach.name}}</div>
                                         <div class="card-body">
                                             <h5 class="card-title">{{numberFormat this.duration.hours}} hours</h5>
                                             <p class="card-text"><small class="text-muted">
@@ -196,64 +265,30 @@
             </div>
         </div>
     </div>
-
-
-
-
-{{#if beaches}}
-        <div class="container">
-            <div class="row">
-                <div class="col">
-                    {{#> components/section title=(concat "2022 - Beaches Polluted by " company.name)}}
-                        <div class="row row-cols-1 row-cols-md-3">
-                            {{#each beaches}}
-                                <a class="quiet-link" href="{{this.beach.uri}}">
-                                    <div class="col mb-4">
-                                        <div class="card h-100">
-                                            <div class="card-header">{{inc @index}}. {{this.beach.name}}</div>
-                                            <div class="card-body">
-                                                <h5 class="card-title">{{numberFormat this.duration.hours}} hours</h5>
-                                                <p class="card-text"><small class="text-muted">
-                                                    {{> chunks/explain-duration this.duration}}
-                                                </small></p>
-                                                <p class="card-text">{{numberFormat this.count.count}} incidents</p>
-                                                <p class="card-text"><small class="text-muted">
-                                                    {{> chunks/explain-count this.count}}
-                                                </small></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            {{/each}}
-                        </div>
-                    {{/components/section}}
-                </div>
-            </div>
-        </div>
 {{/if}}
 
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                {{#> components/section title="Water Companies" }}
-                {{/components/section}}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            {{#> components/section title="Water Companies" }}
+            {{/components/section}}
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-4">
+        {{#each links}}
+            <div class="col-sm-4 col-lg-3 mb-4">
+                {{> components/card-company this.company}}
             </div>
-        </div>
-
-        <div class="row row-cols-1 row-cols-md-4">
-            {{#each links}}
-                <div class="col-sm-4 col-lg-3 mb-4">
-                    {{> components/card-company this.company}}
-                </div>
-            {{/each}}
-        </div>
+        {{/each}}
     </div>
+</div>
 
-    <div class="container">
-        <div class="row">
-            <div class="col">{{> chunks/data-sources }}</div>
-        </div>
+<div class="container">
+    <div class="row">
+        <div class="col">{{> chunks/data-sources }}</div>
     </div>
+</div>
 </div>
 
 {{> chunks/footer }}

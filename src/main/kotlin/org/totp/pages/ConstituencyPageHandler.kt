@@ -64,7 +64,8 @@ data class SocialShare(
 )
 
 data class ConstituencyPageLiveData(
-    val uri: Uri,
+    val csoUri: Uri,
+    val rainfallUri: Uri
 )
 
 data class RenderableCSO(
@@ -156,7 +157,7 @@ object ConstituencyPageHandler {
 
             slugToConstituency[slug]?.let { constituencyName ->
 
-                val liveAvailable = constituencyLiveAvailable().toSet()
+                val liveAvailable = constituencyLiveAvailable()
 
                 val renderableConstituencies = slugToConstituency
                     .map {
@@ -205,7 +206,8 @@ object ConstituencyPageHandler {
                             renderableConstituencies,
                             live = if (liveAvailable.contains(constituencyName)) {
                                 ConstituencyPageLiveData(
-                                    Uri.of("/data/live/constituencies/$slug.json")
+                                    csoUri = Uri.of("/live/thames-water/events/constituency/$slug"),
+                                    rainfallUri = Uri.of("/live/environment-agency/rainfall/$slug"),
                                 )
                             } else null,
                             neighbours = neighbours,

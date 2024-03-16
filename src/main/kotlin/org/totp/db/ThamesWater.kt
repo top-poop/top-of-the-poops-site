@@ -2,8 +2,12 @@ package org.totp.db
 
 import org.totp.db.NamedQueryBlock.Companion.block
 import org.totp.model.data.ConstituencyName
+import org.totp.model.data.WaterwayName
+import java.sql.ResultSet
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
+import kotlin.math.ceil
 
 class ThamesWater(private val connection: WithConnection) {
 
@@ -59,6 +63,148 @@ order by date
         })
     }
 
+    data class CSOLiveOverflow(
+        val started: Instant,
+        val pcon20nm: ConstituencyName,
+        val waterwayName: WaterwayName,
+        val site_name: String,
+        val permit_id: String,
+    )
+
+    fun overflowingRightNow(): List<CSOLiveOverflow> {
+        return connection.execute(NamedQueryBlock("overflowing-right-now") {
+            query(sql = """                
+with overflowing as (
+    SELECT * FROM (
+                      SELECT *, ROW_NUMBER() OVER (PARTITION BY reference_consent_id ORDER BY date_time DESC) rn
+                      FROM events_thames
+                      join consent_map cm on permit_number = cm.consent_id
+                  ) tmp WHERE rn = 1 and alert_type = 'Start'
+)
+select pcon20nm, discharge_site_name, receiving_water, st.* from overflowing as st
+    join consents_unique_view c on st.reference_consent_id = c.permit_number
+    join grid_references g on c.effluent_grid_ref = g.grid_reference
+order by date_time
+            """.trimIndent(),
+                mapper = {
+                    CSOLiveOverflow(
+                        pcon20nm = it.get(ConstituencyName, "pcon20nm"),
+                        site_name = it.getString("discharge_site_name"),
+                        waterwayName = it.get(WaterwayName, "receiving_water"),
+                        permit_id = it.getString("permit_number"),
+                        started = it.getTimestamp("date_time").toInstant()
+                    )
+                }
+            )
+        })
+    }
+
+//    {
+//        "p": "ALDERSHOT STW",
+//        "cid": "CTCR.1974",
+//        "d": "2022-12-03",
+//        "a": "u-24"
+//    },
+
+    data class Bucket(
+        val online: Int,
+        val offline: Int,
+        val overflowing: Int,
+        val unknown: Int,
+        val potentially_overflowing: Int
+    )
+
+    data class Thing(val p: String, val cid: String, val d: LocalDate, val a: String)
+
+
+    fun _key(c: String, td: Int): String {
+        val s = (ceil((td / 3600.0) / 4.0) * 4.0).toInt()
+        return "${c}-${s}"
+    }
+
+    private fun codeFrom(total: Bucket): String {
+        if (total.overflowing > 0) return _key("o", total.overflowing)
+        if (total.potentially_overflowing > 0) return _key("p", total.potentially_overflowing)
+        if (total.offline > 0) return _key("z", total.offline)
+        if (total.unknown > 0) return _key("u", total.unknown)
+        return _key("a", total.online)
+    }
+
+    fun eventSummaryForConstituency(constituencyName: ConstituencyName, startDate: LocalDate, endDate: LocalDate): List<Thing> {
+        return connection.execute(NamedQueryBlock("event-summary-for") {
+            query(
+                sql = """
+                    select
+                        permit_id,
+                        discharge_site_name,
+                        st.date,
+                        extract(epoch from online) as online,
+                        extract(epoch from offline) as offline,
+                        extract(epoch from overflowing) as overflowing,
+                        extract(epoch from unknown) as unknown,
+                        extract(epoch from potentially_overflowing) as potentially_overflowing
+                    from summary_thames st
+                             join consents_unique_view c on st.permit_id = c.permit_number
+                             join grid_references g on c.effluent_grid_ref = g.grid_reference
+                    where g.pcon20nm = ? and date >= ? and date <= ?
+                    order by st.date
+                """.trimIndent(),
+                bind = {
+                    it.set(1, constituencyName)
+                    it.set(2, startDate)
+                    it.set(3, endDate)
+                },
+                mapper = {
+                    thing(it)
+                }
+            )
+        })
+    }
+
+    fun eventSummaryForCSO(permit_id: String, startDate: LocalDate, endDate: LocalDate): List<Thing> {
+        return connection.execute(NamedQueryBlock("event-summary-for") {
+            query(
+                sql = """
+                    select
+                        permit_id,
+                        discharge_site_name,
+                        st.date,
+                        extract(epoch from online) as online,
+                        extract(epoch from offline) as offline,
+                        extract(epoch from overflowing) as overflowing,
+                        extract(epoch from unknown) as unknown,
+                        extract(epoch from potentially_overflowing) as potentially_overflowing
+                    from summary_thames st
+                             join consents_unique_view c on st.permit_id = c.permit_number
+                    where permit_id = ? and date >= ? and date <= ?
+                    order by st.date
+                """.trimIndent(),
+                bind = {
+                    it.set(1, permit_id)
+                    it.set(2, startDate)
+                    it.set(3, endDate)
+                },
+                mapper = {
+                    thing(it)
+                }
+            )
+        })
+    }
+
+    private fun thing(it: ResultSet) = Thing(
+        p = it.getString("discharge_site_name"),
+        cid = it.getString("permit_id"),
+        d = it.getDate("date").toLocalDate(),
+        a = codeFrom(
+            Bucket(
+                online = it.getInt("online"),
+                offline = it.getInt("offline"),
+                overflowing = it.getInt("overflowing"),
+                unknown = it.getInt("unknown"),
+                potentially_overflowing = it.getInt("potentially_overflowing"),
+            )
+        )
+    )
 
     data class CSOSummary(
         val permit_id: String,

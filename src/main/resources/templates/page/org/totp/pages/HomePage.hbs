@@ -209,11 +209,9 @@
         <div class="col">
             {{#> components/section title="Top of the Poops in the Media" }}
                 <div class="row row-cols-1 row-cols-md-4">
-                    {{#take appearances n=8}}
-                        {{#each}}
+                        {{#each (take appearances n=8)}}
                             {{>components/card-media this}}
                         {{/each}}
-                    {{/take}}
                 </div>
 
                 <div class="row mt3 justify-content-end">

@@ -123,7 +123,11 @@ def aggregate_thames_events(connection):
 
     for event in select_many(
             connection=connection,
-            sql="select * from events_thames where date_trunc('day', date_time) >= %s order by permit_number, date_time, case alert_type when 'Offline start' then 1 else 2 end",
+            sql="""
+            select location_name, cm.reference_consent_id, location_grid_reference, x, y, alert_type, date_time from events_thames et
+            join consent_map cm on et.permit_number = cm.consent_id
+            where date_trunc('day', date_time) >= %s 
+            order by cm.reference_consent_id, date_time, case alert_type when 'Offline start' then 1 else 2 end""",
             params=(start_date,),
             f=row_to_event):
         stream.event(event)

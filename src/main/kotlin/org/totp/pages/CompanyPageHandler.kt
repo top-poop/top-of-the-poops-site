@@ -1,30 +1,49 @@
 package org.totp.pages
 
-import org.http4k.core.Body
-import org.http4k.core.ContentType
-import org.http4k.core.HttpHandler
-import org.http4k.core.Request
-import org.http4k.core.Response
-import org.http4k.core.Status
-import org.http4k.core.Uri
-import org.http4k.core.with
+import org.http4k.core.*
 import org.http4k.lens.Path
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.db.ThamesWater
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
-import org.totp.model.data.BathingRank
-import org.totp.model.data.CSOTotals
-import org.totp.model.data.CompanyName
-import org.totp.model.data.CompanySlug
-import org.totp.model.data.RenderableCompany
-import org.totp.model.data.RiverRank
-import org.totp.model.data.WaterCompany
-import org.totp.model.data.toSlug
-import org.totp.model.data.toRenderable
+import org.totp.model.data.*
 import java.text.NumberFormat
 import java.time.Duration
+import java.time.Instant
+
+class CSOLiveData(
+    val overflowing: List<ThamesWater.CSOLiveOverflow>
+)
+
+data class RenderableCSOLiveOverflow(
+    val started: Instant,
+    val constituency: RenderableConstituency,
+    val waterway: RenderableWaterway,
+    val sitename: String,
+    val permit: String,
+)
+
+class RenderableCSOLiveData(
+    val overflowing: List<RenderableCSOLiveOverflow>
+) {
+    companion object {
+        fun from(it: CSOLiveData, company: CompanyName): RenderableCSOLiveData {
+            return RenderableCSOLiveData(
+                overflowing = it.overflowing.map {
+                    RenderableCSOLiveOverflow(
+                        started = it.started,
+                        constituency = it.pcon20nm.toRenderable(),
+                        waterway = it.waterwayName.toRenderable(company),
+                        sitename = it.site_name,
+                        permit = it.permit_id
+                    )
+                }
+            )
+        }
+    }
+}
 
 class CompanyPage(
     uri: Uri,
@@ -38,7 +57,7 @@ class CompanyPage(
     val beaches: List<RenderableBathingRank>,
     val worstCsos: List<RenderableCSOTotal>,
     val share: SocialShare,
-    val liveDataAvailable: Boolean,
+    val live: RenderableCSOLiveData?,
 ) : PageViewModel(uri)
 
 
@@ -81,7 +100,7 @@ object CompanyPageHandler {
         riverRankings: () -> List<RiverRank>,
         bathingRankings: () -> List<BathingRank>,
         csoTotals: () -> List<CSOTotals>,
-        companyLiveDataAvailable: (CompanyName) -> Boolean
+        companyLivedata: (CompanyName) -> CSOLiveData?
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
         val companySlug = Path.value(CompanySlug).of("company", "The company")
@@ -126,7 +145,7 @@ object CompanyPageHandler {
                             rivers = riverRankings().filter { it.company == company.name }.take(6)
                                 .map { it.toRenderable() },
                             worstCsos = worstCsos,
-                            liveDataAvailable = companyLiveDataAvailable(name),
+                            live = companyLivedata(name)?.let { RenderableCSOLiveData.from(it, company.name) },
                             share = SocialShare(
                                 pageUriFrom(request),
                                 "$name - ${company.handle} - dumped #sewage into rivers,seas & bathing areas ${
