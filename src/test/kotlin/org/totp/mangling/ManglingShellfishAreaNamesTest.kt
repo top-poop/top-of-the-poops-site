@@ -22,14 +22,14 @@ class ManglingShellfishAreaNamesTest {
             val names = query(
                 sql = "select distinct shellfishery from edm_consent_view where shellfishery is not null",
                 mapper = {
-                    it.get("shellfishery", ::ShellfisheryName)
+                    it.get(ShellfisheryName,"shellfishery")
                 }
             )
 
             val actual = query(
                 sql = "select distinct name from shellfish_view",
                 mapper = {
-                    it.get("name", ::ShellfishAreaName)
+                    it.get(ShellfishAreaName, "name")
                 }
             ).associateBy { it.value.kebabCase() }
                 .toSortedMap()

@@ -3,15 +3,14 @@ package org.totp.db
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.forkhandles.values.Value
+import dev.forkhandles.values.ValueFactory
+import org.postgresql.util.PGInterval
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.sql.Connection
-import java.sql.Date
-import java.sql.PreparedStatement
-import java.sql.ResultSet
-import java.sql.Types
+import java.sql.*
 import java.time.Duration
 import java.time.LocalDate
+import java.time.Period
 import java.util.concurrent.TimeUnit
 import javax.sql.DataSource
 
@@ -91,9 +90,8 @@ inline fun <reified T : Enum<T>> ResultSet.getEnum(n: String): T {
     return enumValueOf(getString(n))
 }
 
-@JvmName("getStringValue")
-inline fun <reified T : Value<String>> ResultSet.get(n: String, f: (String) -> T): T {
-    return f(getString(n))
+inline fun <reified T : Value<String>> ResultSet.get(vf: ValueFactory<T, String>, n: String): T {
+    return vf.of(this.getString(n))
 }
 
 @JvmName("getNullableStringValue")
@@ -116,18 +114,18 @@ inline fun <reified T : Value<Int>> ResultSet.get(n: String, f: (Int) -> T): T {
 }
 
 @JvmName("getBigDecimalValue")
-inline fun <reified T : Value<BigDecimal>> ResultSet.get(n: String, f: (BigDecimal) -> T): T {
-    return f(getBigDecimal(n))
+inline fun <reified T : Value<BigDecimal>> ResultSet.get(vf: ValueFactory<T, BigDecimal>, n: String): T {
+    return vf.of(getBigDecimal(n))
 }
 
 @JvmName("getBigIntegerValue")
-inline fun <reified T : Value<BigInteger>> ResultSet.get(n: String, f: (BigInteger) -> T): T {
-    return f(getBigDecimal(n).toBigInteger())
+inline fun <reified T : Value<BigInteger>> ResultSet.get(vf: ValueFactory<T, BigInteger>, n: String): T {
+    return vf.of(getBigDecimal(n).toBigInteger())
 }
 
 @JvmName("getLocalDateValue")
-inline fun <reified T : Value<LocalDate>> ResultSet.get(n: String, f: (LocalDate) -> T): T {
-    return f(getDate(n).toLocalDate())
+inline fun <reified T : Value<LocalDate>> ResultSet.get(vf: ValueFactory<T, LocalDate>, n: String): T {
+    return vf.of(getDate(n).toLocalDate())
 }
 
 fun PreparedStatement.set(n: Int, s: String?) {
@@ -140,40 +138,36 @@ fun PreparedStatement.set(n: Int, s: String?) {
 
 @JvmName("setLocalDateValue")
 fun PreparedStatement.set(n: Int, v: Value<LocalDate>?) {
-    if ( v == null ) {
+    if (v == null) {
         setNull(n, Types.DATE)
-    }
-    else {
+    } else {
         set(n, v.value)
     }
 }
 
 @JvmName("setStringValue")
 fun PreparedStatement.set(n: Int, v: Value<String>?) {
-    if ( v == null ) {
+    if (v == null) {
         setNull(n, Types.VARCHAR)
-    }
-    else {
+    } else {
         set(n, v.value)
     }
 }
 
 @JvmName("setBigDecimalValue")
 fun PreparedStatement.set(n: Int, v: Value<BigDecimal>?) {
-    if ( v == null ) {
+    if (v == null) {
         setNull(n, Types.DECIMAL)
-    }
-    else {
+    } else {
         set(n, v.value)
     }
 }
 
 @JvmName("setBigIntegerValue")
 fun PreparedStatement.set(n: Int, v: Value<BigInteger>?) {
-    if ( v == null ) {
+    if (v == null) {
         setNull(n, Types.BIGINT)
-    }
-    else {
+    } else {
         set(n, v.value)
     }
 }
@@ -233,20 +227,24 @@ fun <T> Connection.query(sql: String, bind: (PreparedStatement) -> Unit = {}, ma
     }
 }
 
-fun Connection.update(sql: String, bind: (PreparedStatement) -> Unit ): Int {
+fun Connection.update(sql: String, bind: (PreparedStatement) -> Unit): Int {
     return prepareStatement(sql).use {
         bind(it)
         it.executeUpdate()
     }
 }
 
-fun Connection.update(sql: String, bind: (PreparedStatement) -> Unit, follow: Connection.(ResultSet) -> Unit = {} ): Int {
+fun Connection.update(
+    sql: String,
+    bind: (PreparedStatement) -> Unit,
+    follow: Connection.(ResultSet) -> Unit = {}
+): Int {
     return prepareStatement(sql).use {
         bind(it)
         val hasResultSet = it.execute()
-        if ( hasResultSet ) {
+        if (hasResultSet) {
             val rs = it.resultSet
-            if ( rs.next() ) {
+            if (rs.next()) {
                 follow(rs)
             }
         }

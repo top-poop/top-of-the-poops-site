@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.8.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.22'
     id 'application'
     id 'com.google.cloud.tools.jib' version '3.3.1'
 }
@@ -8,7 +8,7 @@ group = 'org.totp'
 applicationName = 'pages'
 application.mainClassName = "org.totp.MainKt"
 
-jib.from.image="eclipse-temurin:17-jre-alpine@sha256:f59c1acc26975859545eabb2051f4b9a41d5ef278aad9dfe42bdb0aff5611613"
+jib.from.image="eclipse-temurin:21-jre-alpine@sha256:98963ed09c4fd82e128c6cc9e64d71798239b824164276626d79b8f9e666ac0e"
 jib.to.image = "totp-pages"  // same as IMAGE in Makefile
 jib.container.jvmFlags = [
         "-XX:+AlwaysActAsServerClassMachine",
