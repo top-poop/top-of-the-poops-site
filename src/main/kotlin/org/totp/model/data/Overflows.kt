@@ -2,21 +2,17 @@ package org.totp.model.data
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.module.kotlin.readValue
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Uri
 import org.http4k.core.then
-import org.http4k.format.Jackson.asA
-import org.http4k.format.value
 import org.totp.extensions.kebabCase
 import org.totp.extensions.readSimpleList
 import org.totp.pages.CompanyAnnualSummary
 import org.totp.pages.ConstituencyRank
 import org.totp.pages.DeltaValue
 import org.totp.pages.EnsureSuccessfulResponse
-import org.totp.pages.MP
 import org.totp.pages.WaterwaySlug
 import java.io.IOException
 import java.time.Duration
@@ -52,42 +48,6 @@ fun fromEDMHours(hours: Double): Duration {
     return Duration.ofSeconds(seconds.toLong())
 }
 
-
-object ConstituencyLiveAvailability {
-    operator fun invoke(handler: HttpHandler): () -> List<ConstituencyName> {
-        return {
-            val uri = Uri.of("/live/constituencies/constituencies-available.json")
-            val response = handler(Request(Method.GET, uri))
-
-            TotpJson.mapper.readValue(response.bodyString())
-        }
-    }
-}
-
-
-data class ConstituencyLiveData(val constituencyName: ConstituencyName, val dates: Int, val csos: Int)
-
-object ConstituencyLiveDataLoader {
-    operator fun invoke(handler: HttpHandler): (ConstituencyName) -> ConstituencyLiveData? {
-        return { name ->
-            val uri = name.toSlug().let { Uri.of("/live/constituencies/$it.json") }
-            val response = handler(Request(Method.GET, uri))
-
-            if (response.status.successful) {
-                val value = response.bodyString().asA(LiveData::class)
-                value.let {
-                    ConstituencyLiveData(
-                        name,
-                        csos = it.cso.map { it.site }.toSet().size,
-                        dates = it.cso.map { it.date }.toSet().size
-                    )
-                }
-            } else {
-                null
-            }
-        }
-    }
-}
 
 object ConstituencyBoundaries {
     operator fun invoke(handler: (String) -> GeoJSON?): (ConstituencyName) -> GeoJSON {
@@ -381,32 +341,6 @@ object CompanyAnnualSummaries {
                         (it["count"] as Double).toInt(),
                         fromEDMHours(it["hours"] as Double),
                         it["location_count"] as Int
-                    )
-                }
-        }
-    }
-}
-
-data class ConstituencyContact(
-    val constituency: ConstituencyName,
-    val mp: MP,
-)
-
-object ConstituencyContacts {
-    operator fun invoke(handler: HttpHandler): () -> List<ConstituencyContact> {
-        return {
-            val response = handler(Request(Method.GET, "constituency-social.json"))
-
-            TotpJson.mapper.readSimpleList(response.bodyString())
-                .map {
-                    ConstituencyContact(
-                        ConstituencyName.of(it["constituency"] as String),
-                        mp = MP(
-                            name = it["mp_name"] as String,
-                            party = it["mp_party"] as String,
-                            handle = it["twitter_handle"] as String?,
-                            uri = Uri.of(it["mp_uri"] as String)
-                        ),
                     )
                 }
         }

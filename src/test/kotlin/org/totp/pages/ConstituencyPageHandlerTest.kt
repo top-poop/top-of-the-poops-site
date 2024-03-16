@@ -10,12 +10,10 @@ import org.http4k.routing.routes
 import org.http4k.strikt.header
 import org.http4k.strikt.status
 import org.junit.jupiter.api.Test
-import org.totp.LastModified
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.CSO
 import org.totp.model.data.CSOTotals
 import org.totp.model.data.CompanyName
-import org.totp.model.data.ConstituencyLiveData
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
@@ -26,7 +24,6 @@ import strikt.assertions.first
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFailure
 import java.time.Duration
-import java.time.Instant
 
 val anMP = MP("bob", "con", null, Uri.of("http://example.com"))
 
@@ -53,11 +50,10 @@ class ConstituencyPageHandlerTest {
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
             constituencySpills = { summaries },
             constituencyBoundary = { GeoJSON.of("some geojson") },
-            constituencyLiveData = { ConstituencyLiveData(ConstituencyName.of("a"), 1, 2) },
             mpFor = {
                 anMP
             },
-            constituencyLiveAvailable = { listOf(ConstituencyName("bob")) },
+            constituencyLiveAvailable = { setOf(ConstituencyName("bob")) },
             constituencyNeighbours = { listOf(ConstituencyName("c"), ConstituencyName("d")) },
             constituencyRank = {
                 ConstituencyRank(

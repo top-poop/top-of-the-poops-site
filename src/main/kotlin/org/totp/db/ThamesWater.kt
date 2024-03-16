@@ -1,5 +1,6 @@
 package org.totp.db
 
+import org.totp.db.NamedQueryBlock.Companion.block
 import org.totp.model.data.ConstituencyName
 import java.time.Duration
 import java.time.LocalDate
@@ -12,6 +13,50 @@ class ThamesWater(private val connection: WithConnection) {
         val pcon20nm: ConstituencyName,
         val overflowing: Duration
     )
+
+    fun haveLiveDataFor(): Set<ConstituencyName> {
+        return connection.execute(block("have-live-data") {
+            query(
+                sql = """
+     with permits as (select distinct(permit_id) from summary_thames)
+             select
+                 distinct(g.pcon20nm) as constituency
+             from permits
+                      join consents_unique_view c on permit_id = c.permit_number
+                      join grid_references g on c.effluent_grid_ref = g.grid_reference
+                """.trimIndent(),
+                mapper = {
+                    it.get(ConstituencyName, "constituency")
+                }
+            )
+        }).toSet()
+    }
+
+    data class CSODateSummary(val date: LocalDate, val edm_count: Int, val overflowing: Int, val offline: Int)
+
+    fun infrastructureSummary(): List<CSODateSummary> {
+        return connection.execute(block("infrastructureSummary") {
+            query(
+                sql = """select date,
+       count(*) as edm_count,
+       count(case when overflowing > interval '30m' then 1 end) as overflowing,
+       count(case when offline > interval '30m' then 1 end) as offline
+from summary_thames
+group by date
+order by date
+""",
+                mapper = {
+                    CSODateSummary(
+                        it.getDate("date").toLocalDate(),
+                        it.getInt("edm_count"),
+                        it.getInt("overflowing"),
+                        it.getInt("offline")
+                    )
+                }
+            )
+        })
+    }
+
 
     fun worstCSOsInPeriod(startDate: LocalDate, endDate: LocalDate): List<CSOSummary> {
         return connection.execute(NamedQueryBlock("") {

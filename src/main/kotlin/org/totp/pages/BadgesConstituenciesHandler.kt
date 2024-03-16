@@ -9,10 +9,8 @@ import org.http4k.core.Uri
 import org.http4k.core.with
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
-import org.totp.extensions.Defect
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
-import org.totp.model.data.ConstituencyContact
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencySlug
 import org.totp.model.data.GeoJSON

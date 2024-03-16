@@ -19,6 +19,7 @@ import org.http4k.routing.routes
 import org.http4k.routing.static
 import org.http4k.server.Undertow
 import org.http4k.template.TemplateRenderer
+import org.totp.db.*
 import org.totp.events.ServerStartedEvent
 import org.totp.extensions.Defect
 import org.totp.http4k.StandardFilters
@@ -26,8 +27,6 @@ import org.totp.model.TotpHandlebars
 import org.totp.model.data.*
 import org.totp.pages.*
 import java.time.Clock
-import java.time.Instant
-import java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 import java.util.logging.LogManager
@@ -95,10 +94,6 @@ fun mpForConstituency(contacts: () -> List<ConstituencyContact>): (ConstituencyN
     return { name -> cache()[name]?.mp ?: throw Defect("We don't have the MP for $name") }
 }
 
-data class LastModified<T>(val data: T, val modified: Instant)
-
-val LAST_MODIFIED = Header.offsetDateTime(RFC_1123_DATE_TIME).required("last-modified")
-
 fun main() {
 
     val isDevelopment =
@@ -106,6 +101,7 @@ fun main() {
     val dataServiceUri = EnvironmentKey.uri().required("DATA_SERVICE_URI", "URI for Data Service")
     val pollutionServiceUri = EnvironmentKey.uri().required("POLLUTION_SERVICE_URI", "URI for Pollution Service")
     val debugging = EnvironmentKey.boolean().required("DEBUG_MODE", "Print all request and response")
+    val dbHost = EnvironmentKey.string().defaulted("DB_HOST", "localhost", "Print all request and response")
     val port = EnvironmentKey.int().required("PORT", "Listen Port")
 
     val defaultConfig = Environment.defaults(
@@ -136,13 +132,6 @@ fun main() {
 
     val outboundHttp = outboundFilters.then(OkHttp())
 
-    val pollutionClient = if (isDevelopmentEnvironment) {
-        SetBaseUriFrom(pollutionServiceUri(environment))
-    } else {
-        SetBaseUriFrom(Uri.of("/pollution/thames"))
-            .then(ClientFilters.SetHostFrom(pollutionServiceUri(environment)))
-    }.then(outboundHttp)
-
     val dataClient = if (isDevelopmentEnvironment) {
         outboundFilters.then(static(ResourceLoader.Directory("services/data/datafiles")))
     } else {
@@ -151,18 +140,25 @@ fun main() {
             .then(outboundHttp)
     }
 
+    val connection = EventsWithConnection(
+        Clock.systemUTC(),
+        events,
+        HikariWithConnection(lazy { datasource(dbHost(environment)) })
+    )
+
+    val referenceData = ReferenceData(connection)
+
     val data2022 = SetBaseUriFrom(Uri.of("/v1/2022")).then(EnsureSuccessfulResponse()).then(dataClient)
 
     val mediaAppearances = memoize(MediaAppearances(dataClient))
     val waterCompanies = memoize(WaterCompanies(dataClient))
-    val constituencyContacts = memoize(ConstituencyContacts(data2022))
     val allSpills = memoize(AllSpills(data2022))
     val riverRankings = memoize(RiverRankings(data2022))
     val beachRankings = memoize(BathingRankings(data2022))
     val shellfishRankings = memoize(ShellfishRankings(data2022))
     val constituencyRankings = memoize(ConstituencyRankings(data2022))
 
-    val mpFor = mpForConstituency(constituencyContacts)
+    val mpFor = mpForConstituency(referenceData::mps)
 
     val constituencyBoundaries = ConstituencyBoundaries(
         Boundaries(SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient))
@@ -180,7 +176,7 @@ fun main() {
         constituencyRankings().firstOrNull { it.constituencyName == wanted }
     }
 
-    val constituencyLiveData = ConstituencyLiveDataLoader(dataClient)
+    val thamesWater = ThamesWater(connection)
 
     val server = Undertow(port = port(environment)).toServer(
 
@@ -236,8 +232,7 @@ fun main() {
                                 renderer = renderer,
                                 constituencySpills = constituencyCSOs(allSpills),
                                 constituencyBoundary = constituencyBoundaries,
-                                constituencyLiveData = constituencyLiveData,
-                                constituencyLiveAvailable = ConstituencyLiveAvailability(dataClient),
+                                constituencyLiveAvailable = memoize(thamesWater::haveLiveDataFor),
                                 mpFor = mpFor,
                                 constituencyNeighbours = ConstituencyNeighbours(data2022),
                                 constituencyRank = constituencyRank,

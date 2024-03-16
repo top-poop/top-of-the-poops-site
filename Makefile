@@ -41,7 +41,12 @@ push: check-context
 .PHONY: deploy
 deploy:
 	@test $(shell docker context show) = $(TOTP_CONTEXT)
-	docker service create --with-registry-auth --name $(SERVICE) --network overlay-net $(FULL_NAME)
+	docker service create --with-registry-auth --name $(SERVICE) --network overlay-net --env DB_HOST=postgres $(FULL_NAME)
+
+.PHONY: test-deploy
+test-deploy:
+	@test $(shell docker context show) = $(TOTP_CONTEXT)
+	docker service create --with-registry-auth --name $(SERVICE)-test --network overlay-net --env DB_HOST=postgres $(FULL_NAME)
 
 .PHONY: upgrade
 upgrade:

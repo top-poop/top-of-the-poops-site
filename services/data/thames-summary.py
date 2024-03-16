@@ -89,8 +89,7 @@ select
 from summary_thames st
          join consents_unique_view c on st.permit_id = c.permit_number
          join grid_references g on c.effluent_grid_ref = g.grid_reference
-         order by g.pcon20nm, st.date
-         
+         order by g.pcon20nm, st.date         
 """
 
 
