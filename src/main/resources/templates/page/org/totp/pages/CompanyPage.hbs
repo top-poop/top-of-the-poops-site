@@ -81,25 +81,6 @@
             </div>
         </div>
     {{/components/section}}
-    {{#> components/section title="But they only overflow in exceptional circumstances?" }}
-            <div class="row mt-2">
-                <div class="col">
-                    <p>Here we can see a plot of the number of days across the {{company.name}} area that CSOs overflowed,
-                    correlated with the amount of local rainfall, as reported by the Environment Agency Rainfall Monitoring Stations.</p>
-
-                    <p>On the 'y' axis we show how much it rained in mm locally - whereever the CSO is located. Then across the other axis we show
-                    how long the CSO was spilling sewage.</p>
-
-                    <p>We can then see how many times a </p>
-
-                    <p>We take the 75th percentile of all the rainfall monitoring stations in or near the constituency where the CSO is located, and
-                        plot that against how long each CSO overflowed.</p>
-                    <div id="spill-correlation" class="plot-chart"
-                         data-uri="/data/v1/2022/spills-live-overflows-by-rainfall-{{company.slug}}.json">
-                    </div>
-                </div>
-            </div>
-    {{/components/section}}
     </div>
         <script type="module">
             import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.4/+esm";
@@ -149,54 +130,6 @@
             const response = await fetch(div.attributes["data-uri"].value);
             if (response.ok) {
                 div.appendChild(PlotDailyEDM(await response.json(), rect.width, rect.height))
-            }
-        </script>
-
-        <script type="module">
-            import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.4/+esm";
-
-            const PlotOverflowCorrelation = (data, width, height) => Plot.plot({
-                marginLeft: 40,
-                marginBottom: 30,
-                width: width,
-                height: height,
-                color: {
-                    type: "log",
-                    scheme: "Oranges",
-                },
-                y: {
-                    grid: true,
-                    reverse: true,
-                    label: "Local Rainfall (mm) 75pct ↑",
-                },
-                x: {
-                    grid: false,
-                    label: "Overflowing Hours",
-                },
-                marks: [
-                    Plot.cell(
-                            data,
-                            {
-                                x: "overflowing",
-                                y: "pct_75",
-                                fill: "count",
-                                title: "count"
-                            }
-                    ),
-                    Plot.text(data, {
-                        x: "overflowing",
-                        y: "pct_75",
-                        text: "count",
-                        fill: '#ffffff',
-                    })
-                ]
-            })
-
-            const div = document.getElementById("spill-correlation");
-            const rect = div.getBoundingClientRect()
-            const response = await fetch(div.attributes["data-uri"].value);
-            if (response.ok) {
-                div.appendChild(PlotOverflowCorrelation(await response.json(), rect.width, rect.height))
             }
         </script>
 {{/if}}
