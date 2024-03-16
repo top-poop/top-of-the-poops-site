@@ -55,7 +55,7 @@
 
 {{#if liveDataAvailable}}
     <div class="container">
-    {{#> components/section title="2023 - Percentage of all EDMs overflowing" }}
+    {{#> components/section title="How many Sewage Overflows are dumping sewage?" }}
         <div class="row">
             <div class="col">
                 <div class="row">
@@ -66,7 +66,7 @@
 
                         <p>The red line indicates the number of CSOs that overflowed for at least 30mins, the grey, the
                             number of CSOs
-                            that were offline for at least 30mins</p>
+                            that were offline for at least 30mins, and the blue line is the total number of CSOs that we can get information for.</p>
 
                         <p>There is daily updated information on all constituencies covered by {{company.name}}</p>
                     </div>
@@ -74,7 +74,7 @@
                 <div class="row">
                     <div class="col">
                         <div id="edm-spills" class="plot-chart"
-                             data-uri="/data/v1/2022/spills-live-summary-{{company.slug}}.json">
+                             data-uri="/live/{{company.slug}}/overflow-summary">
                         </div>
                     </div>
                 </div>
@@ -99,8 +99,7 @@
                 height: height,
                 y: {
                     grid: true,
-                    domain: [0, 100],
-                    label: "% of monitored CSOs ↑",
+                    label: "Number of CSOs ↑",
                 },
                 x: {
                     grid: false,
@@ -110,7 +109,15 @@
                             data,
                             {
                                 x: d => new Date(d.date),
-                                y: d => (d.overflowing / d.edm_count) * 100,
+                                y: d => d.edm_count,
+                                stroke: '#44beff'
+                            }
+                    ),
+                    Plot.lineY(
+                            data,
+                            {
+                                x: d => new Date(d.date),
+                                y: d => d.overflowing,
                                 stroke: '#ff4444'
                             }
                     ),
@@ -118,7 +125,7 @@
                             data,
                             {
                                 x: d => new Date(d.date),
-                                y: d => (d.offline / d.edm_count) * 100,
+                                y: d => d.offline,
                                 stroke: '#bbbbbb'
                             }
                     ),

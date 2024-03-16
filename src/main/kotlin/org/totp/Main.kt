@@ -94,6 +94,23 @@ fun mpForConstituency(contacts: () -> List<ConstituencyContact>): (ConstituencyN
     return { name -> cache()[name]?.mp ?: throw Defect("We don't have the MP for $name") }
 }
 
+
+
+//   {
+//    "date": "2022-12-01",
+//    "edm_count": 444,
+//    "overflowing": 0,
+//    "offline": 1
+//  },
+class ThamesWaterSummary(val thamesWater: ThamesWater): HttpHandler {
+
+    val response = TotpJson.autoBody<List<ThamesWater.DatedOverflow>>().toLens()
+
+    override fun invoke(request: Request): Response {
+        return Response(Status.OK).with(response of thamesWater.infrastructureSummary())
+    }
+}
+
 fun main() {
 
     val isDevelopment =
@@ -265,6 +282,9 @@ fun main() {
                                 mpFor = mpFor,
                                 constituencyRank = constituencyRank,
                                 shellfisheryBoundaries = shellfisheryBoundaries
+                            ),
+                            "/live/thames-water/overflow-summary" bind ThamesWaterSummary(
+                                thamesWater
                             ),
                             "/map.html" bind OldMapRedirectHandler(),
                             "/sitemap.xml" bind SitemapHandler(
