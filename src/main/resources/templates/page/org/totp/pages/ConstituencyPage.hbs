@@ -43,7 +43,6 @@
                 </div>
             </div>
             <div style="display: none" id="map-geojson">{{geojson}}</div>
-            {{#if livePollution}}<div style="display: none" id="live-pollution">{{livePollution.data}}</div>{{/if}}
         </div>
         <div class="col">
             <div class="row">
@@ -144,20 +143,6 @@
 
 {{#if live}}
     <div class="container-fluid">
-        {{#if livePollution}}
-        <div class="row mb-2">
-            <div class="col">
-                <div class="card">
-                    <div class="card-header">Live River Pollution Information (Updated {{ago livePollution.modified}})</div>
-                    <div class="card-body">
-                        On the map above you can see live river pollution information. Rivers likely to be impacted by sewage pollution are marked in brown.
-                        This is based on Thames Water live data API, and modelling by <a href="https://www.merton.ox.ac.uk/people/dr-alexander-lipp">Dr Alex Lipp</a> at Merton College, Oxford. More details on the methodology will be added soon.
-                    </div>
-                </div>
-            </div>
-        </div>
-        {{/if}}
-
         <div class="row">
             <div class="col">
                 <div class="card">

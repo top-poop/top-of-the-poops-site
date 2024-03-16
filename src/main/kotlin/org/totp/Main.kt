@@ -182,16 +182,6 @@ fun main() {
 
     val constituencyLiveData = ConstituencyLiveDataLoader(dataClient)
 
-    val pollutionLiveData = { it: ConstituencyName ->
-        constituencyLiveData(it)?.let {
-            pollutionClient(Request(Method.GET, Uri.of("/now/now.geojson")))
-                .takeIf { it.status.successful }
-                ?.let {
-                    LastModified(GeoJSON.of(it.bodyString()), LAST_MODIFIED(it).toInstant())
-                }
-        }
-    }
-
     val server = Undertow(port = port(environment)).toServer(
 
         routes(
@@ -252,7 +242,6 @@ fun main() {
                                 constituencyNeighbours = ConstituencyNeighbours(data2022),
                                 constituencyRank = constituencyRank,
                                 constituencyRivers = constituencyRivers(allSpills, riverRankings),
-                                pollutionGeoJson = pollutionLiveData,
                             ),
                             "/company/{company}" bind CompanyPageHandler(
                                 renderer = renderer,

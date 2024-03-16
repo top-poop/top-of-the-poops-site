@@ -70,7 +70,6 @@ class ConstituencyPageHandlerTest {
                 )
             },
             constituencyRivers = { listOf(aRiver(1)) },
-            pollutionGeoJson = { LastModified(GeoJSON.of(""), Instant.now()) }
         )
     )
 
