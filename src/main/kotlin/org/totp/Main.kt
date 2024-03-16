@@ -18,7 +18,6 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.routing.static
 import org.http4k.server.Undertow
-import org.http4k.template.HandlebarsTemplates
 import org.http4k.template.TemplateRenderer
 import org.totp.events.ServerStartedEvent
 import org.totp.extensions.Defect
@@ -39,8 +38,11 @@ object Resources {
     private val resourceBase = java.nio.file.Path.of("src/main/resources")
 
     //not very keen on dev mode, but good enough for now.
-    fun templates(templates: HandlebarsTemplates, hotReload: Boolean): TemplateRenderer {
-        return if (hotReload) {
+    fun templates(devMode: Boolean): TemplateRenderer {
+
+        val templates = TotpHandlebars.templates()
+
+        return if (devMode) {
             templates.HotReload(resourceBase.resolve("templates/page/org/totp").toString())
         } else {
             templates.CachingClasspath("templates.page.org.totp")
@@ -105,7 +107,6 @@ fun main() {
     val pollutionServiceUri = EnvironmentKey.uri().required("POLLUTION_SERVICE_URI", "URI for Pollution Service")
     val debugging = EnvironmentKey.boolean().required("DEBUG_MODE", "Print all request and response")
     val port = EnvironmentKey.int().required("PORT", "Listen Port")
-    val hotReloadingTemplates = EnvironmentKey.boolean().required("HOT_TEMPLATES")
 
     val defaultConfig = Environment.defaults(
         isDevelopment of false,
@@ -113,7 +114,6 @@ fun main() {
         dataServiceUri of Uri.of("http://data"),
         pollutionServiceUri of Uri.of("http://pollution"),
         port of 80,
-        hotReloadingTemplates of false
     )
 
     val environment = Environment.JVM_PROPERTIES overrides
@@ -129,11 +129,7 @@ fun main() {
             .then(EventFilters.AddServiceName("pages"))
             .then(AutoMarshallingEvents(Jackson))
 
-
-    val renderer = Resources.templates(
-        templates = TotpHandlebars.templates(),
-        hotReload = hotReloadingTemplates(environment)
-    )
+    val renderer = Resources.templates(devMode = isDevelopmentEnvironment)
 
     val inboundFilters = StandardFilters.incoming(events, debugging(environment))
     val outboundFilters = StandardFilters.outgoing(events)
