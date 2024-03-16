@@ -4,10 +4,13 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.forkhandles.values.Value
 import dev.forkhandles.values.ValueFactory
+import org.http4k.events.Event
+import org.http4k.events.Events
 import org.postgresql.util.PGInterval
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.sql.*
+import java.time.Clock
 import java.time.Duration
 import java.time.LocalDate
 import java.time.Period
@@ -22,9 +25,27 @@ class NamedQueryBlock<T>(val name: String?, val block: Connection.() -> T) {
     fun prefixedWith(prefix: String): NamedQueryBlock<T> {
         return NamedQueryBlock(prefix + "_" + (name ?: "unnamed"), block)
     }
+
+    companion object {
+        fun <T> block(name: String, block: Connection.() -> T)  = NamedQueryBlock(name, block)
+    }
 }
 
-fun datasource() = HikariDataSource(hikariConnectionConfig())
+fun datasource(host: String = "localhost") = HikariDataSource(hikariConnectionConfig(host))
+
+data class QueryEvent(val name: String, val durationMillis: Long): Event
+
+class EventsWithConnection(private val clock: Clock, private val events: Events, private val delegate: WithConnection) : WithConnection {
+    override fun <T> execute(block: NamedQueryBlock<T>): T {
+        val start = clock.instant()
+        try {
+            return delegate.execute(block)
+        }
+        finally {
+            events(QueryEvent(block.name ?: "unknown", Duration.between(start, clock.instant()).toMillis()))
+        }
+    }
+}
 
 class HikariWithConnection(private val dataSource: Lazy<DataSource>) : WithConnection {
 

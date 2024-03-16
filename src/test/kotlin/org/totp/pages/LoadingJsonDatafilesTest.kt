@@ -17,8 +17,6 @@ import org.totp.model.data.BathingRankings
 import org.totp.model.data.Boundaries
 import org.totp.model.data.CompanyAnnualSummaries
 import org.totp.model.data.ConstituencyBoundaries
-import org.totp.model.data.ConstituencyContacts
-import org.totp.model.data.ConstituencyLiveDataLoader
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencyNeighbours
 import org.totp.model.data.ConstituencyRankings
@@ -34,7 +32,6 @@ import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import strikt.assertions.isGreaterThan
 import strikt.assertions.isNotBlank
-import strikt.assertions.isNotNull
 import strikt.assertions.size
 import java.io.File
 import java.time.Duration
@@ -140,36 +137,6 @@ class LoadingJsonDatafilesTest {
     }
 
 
-    @Test
-    fun `loading constituency live data`() {
-        val text = """{
-  "cso": [
-    {
-      "p": "Sandhurst",
-      "cid": "TEMP.2881",
-      "d": "2022-12-01",
-      "a": "u-24"
-    },
-    {
-      "p": "ALDERSHOT STW",
-      "cid": "CTCR.1974",
-      "d": "2022-12-01",
-      "a": "u-24"
-    }]}"""
-
-        val livedata = ConstituencyLiveDataLoader(
-            routes("/live/constituencies/aldershot.json" bind { _: Request -> Response(Status.OK).body(text) })
-        )
-
-        val name = ConstituencyName.of("Aldershot")
-
-        expectThat(livedata(name)).isNotNull().and {
-            get { constituencyName }.isEqualTo(name)
-            get { dates }.isEqualTo(1)
-            get { csos }.isEqualTo(2)
-        }
-    }
-
 
     fun uriHavingFileContent(uri: Uri, file: File): RoutingHttpHandler {
         expectThat(uri.path).isNotBlank()
@@ -181,17 +148,6 @@ class LoadingJsonDatafilesTest {
             uri.path bind Method.GET to handler,
         ))
     }
-
-    @Test
-    fun `loading actual live data`() {
-        val remote = uriHavingFileContent(
-            Uri.of("/live/constituencies/bob.json"),
-            File("services/data/datafiles/live/constituencies/aldershot.json")
-        )
-        val service = ConstituencyLiveDataLoader(remote)
-        service(ConstituencyName.of("bob"))
-    }
-
 
     @Test
     fun `loading river rankings 2022`() {
@@ -210,16 +166,6 @@ class LoadingJsonDatafilesTest {
             File("services/data/datafiles/v1/2022/spills-by-company.json")
         )
         val service = CompanyAnnualSummaries(remote)
-        expectThat(service()).size.isGreaterThan(3)
-    }
-
-    @Test
-    fun `loading constituency socials 2022`() {
-        val remote = uriHavingFileContent(
-            Uri.of("constituency-social.json"),
-            File("services/data/datafiles/v1/2022/constituency-social.json")
-        )
-        val service = ConstituencyContacts(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 

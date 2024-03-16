@@ -62,7 +62,7 @@
                                 document.getElementById("constituency-select")
                                         .onchange = (e) => window.location = e.target.value;
                             </script>
-                            <div class="form-text">✔ means we have experimental daily data for 2023</div>
+                            <div class="form-text">✔ means we have experimental daily data since 2023</div>
                         </div>
                     </form>
                 </div>
@@ -146,7 +146,7 @@
         <div class="row">
             <div class="col">
                 <div class="card">
-                    <div class="card-header">Daily Data for 2023</div>
+                    <div class="card-header">Daily Data Since 2023</div>
                     <div class="card-body">
                         <div class="plot-live observable-plot-container" id="live-data" data-uri="{{live.uri}}"></div>
                         <span style="background-color: #28A64580">&nbsp;&nbsp;&nbsp;&nbsp;</span><span> Monitoring Online </span>
@@ -242,19 +242,6 @@
     const layer = L.geoJSON(JSON.parse(document.getElementById("map-geojson").textContent), {style: myStyle});
     layer.addTo(map);
     map.fitBounds(layer.getBounds())
-
-
-    const livePollution = document.getElementById("live-pollution");
-    if ( livePollution != null ) {
-        const pollutionStyle = {
-            "color": "#724c01",
-            "weight": 5,
-            "opacity": 0.4
-        }
-
-        L.geoJSON(JSON.parse(livePollution.textContent), {style: pollutionStyle}).addTo(map);
-    }
-
 
     const attr = (a, tr) => {
         const attributeName = `data-${a}`

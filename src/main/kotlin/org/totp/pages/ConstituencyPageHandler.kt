@@ -64,7 +64,6 @@ data class SocialShare(
 )
 
 data class ConstituencyPageLiveData(
-    val data: ConstituencyLiveData,
     val uri: Uri,
 )
 
@@ -142,8 +141,7 @@ object ConstituencyPageHandler {
         constituencySpills: (ConstituencyName) -> List<CSOTotals>,
         mpFor: (ConstituencyName) -> MP,
         constituencyBoundary: (ConstituencyName) -> GeoJSON,
-        constituencyLiveData: (ConstituencyName) -> ConstituencyLiveData?,
-        constituencyLiveAvailable: () -> List<ConstituencyName>,
+        constituencyLiveAvailable: () -> Set<ConstituencyName>,
         constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
         constituencyRank: (ConstituencyName) -> ConstituencyRank?,
         constituencyRivers: (ConstituencyName) -> List<RiverRank>,
@@ -206,12 +204,9 @@ object ConstituencyPageHandler {
                             },
                             renderableConstituencies,
                             live = if (liveAvailable.contains(constituencyName)) {
-                                constituencyLiveData(constituencyName)?.let {
-                                    ConstituencyPageLiveData(
-                                        it,
-                                        Uri.of("/data/live/constituencies/$slug.json")
-                                    )
-                                }
+                                ConstituencyPageLiveData(
+                                    Uri.of("/data/live/constituencies/$slug.json")
+                                )
                             } else null,
                             neighbours = neighbours,
                             rivers = rivers,
