@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test
 import org.totp.model.data.ConstituencyName
 import strikt.api.expectThat
 import strikt.assertions.contains
-import strikt.assertions.isEqualTo
 import strikt.assertions.isGreaterThan
 import strikt.assertions.size
 import java.time.LocalDate
@@ -29,6 +28,22 @@ class ThamesWaterTest {
         val x = tw.infrastructureSummary()
 
         expectThat(x).size.isGreaterThan(100)
+    }
+
+    @Test
+    fun eventSummaryForCSO() {
+        val x = tw.eventSummaryForCSO("TEMP.2900", LocalDate.parse("2023-01-01"), LocalDate.parse("2024-01-01"))
+    }
+    @Test
+    fun eventSummaryForConstituency() {
+        val x = tw.eventSummaryForConstituency(ConstituencyName.of("Aldershot"), LocalDate.parse("2023-01-01"), LocalDate.parse("2024-01-01"))
+    }
+
+    @Test
+    fun rightNow() {
+        val x = tw.overflowingRightNow()
+
+        expectThat(x).size.isGreaterThan(1)
     }
 
     @Test

@@ -110,7 +110,8 @@
                                 {{#each neighbours}}
                                     <a href="{{this.constituency.uri}}">
                                         <button class="btn btn-primary mb-2">
-                                            {{this.constituency.name}}<span class="badge bg-dark ms-1">{{numberFormat this.count.count}}</span>
+                                            {{this.constituency.name}}<span class="badge bg-dark ms-1">{{numberFormat
+                                                this.count.count}}</span>
                                         </button>
                                     </a>
                                 {{/each}}
@@ -128,7 +129,8 @@
                                 {{#each rivers}}
                                     <a href="{{this.river.uri}}">
                                         <button class="btn btn-primary mb-2">
-                                            {{this.river.name}}<span class="badge bg-dark ms-1">{{numberFormat this.count.count}}</span>
+                                            {{this.river.name}}<span class="badge bg-dark ms-1">{{numberFormat
+                                                this.count.count}}</span>
                                         </button>
                                     </a>
                                 {{/each}}
@@ -148,7 +150,11 @@
                 <div class="card">
                     <div class="card-header">Daily Data Since 2023</div>
                     <div class="card-body">
-                        <div class="plot-live observable-plot-container" id="live-data" data-uri="{{live.uri}}"></div>
+                        <div class="plot-live observable-plot-container"
+                             id="live-data"
+                             cso-data-uri="{{live.csoUri}}"
+                             rainfall-data-uri="{{live.rainfallUri}}">
+                        </div>
                         <span style="background-color: #28A64580">&nbsp;&nbsp;&nbsp;&nbsp;</span><span> Monitoring Online </span>
                         <span style="background-color: #333333">&nbsp;&nbsp;&nbsp;&nbsp;</span><span> Monitoring Offline </span>
                         <span style="background-color: #842904">&nbsp;&nbsp;&nbsp;&nbsp;</span><span> Polluting </span>
@@ -196,7 +202,8 @@
                                 </td>
                                 <td class="align-middle"
                                     data-sitename="{{this.cso.sitename}}">{{this.cso.sitename}}</td>
-                                <td class="align-middle" data-count="{{this.count.count}}">{{numberFormat this.count.count}}</td>
+                                <td class="align-middle" data-count="{{this.count.count}}">{{numberFormat
+                                        this.count.count}}</td>
                                 <td class="align-middle" data-duration="{{this.duration.hours}}">{{numberFormat
                                         this.duration.hours}}</td>
                                 <td class="align-middle">{{numberFormat this.reporting}}</td>
@@ -448,11 +455,15 @@
         const width = window.innerWidth
 
         const element = document.getElementById("live-data");
-        const uri = element.attributes["data-uri"].value
+        const cso_data = await fetch(element.attributes["cso-data-uri"].value);
+        const rainfall_data = await fetch(element.attributes["rainfall-data-uri"].value);
+        if (cso_data.ok) {
 
-        const response = await fetch(uri);
-        const data = await (response.json())
-        if (response.ok) {
+            const data = {
+                "cso": await (cso_data.json()),
+                "rainfall": await (rainfall_data.json()),
+            }
+
             if (height > (width * 1.4)) {
                 element.appendChild(LiveDataVerticalPlot(data));
                 element.classList.add("vertical")

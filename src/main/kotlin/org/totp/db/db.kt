@@ -6,14 +6,12 @@ import dev.forkhandles.values.Value
 import dev.forkhandles.values.ValueFactory
 import org.http4k.events.Event
 import org.http4k.events.Events
-import org.postgresql.util.PGInterval
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.sql.*
 import java.time.Clock
 import java.time.Duration
 import java.time.LocalDate
-import java.time.Period
 import java.util.concurrent.TimeUnit
 import javax.sql.DataSource
 
@@ -21,9 +19,9 @@ interface WithConnection {
     fun <T> execute(block: NamedQueryBlock<T>): T
 }
 
-class NamedQueryBlock<T>(val name: String?, val block: Connection.() -> T) {
+class NamedQueryBlock<T>(val queryName: String?, val block: Connection.() -> T) {
     fun prefixedWith(prefix: String): NamedQueryBlock<T> {
-        return NamedQueryBlock(prefix + "_" + (name ?: "unnamed"), block)
+        return NamedQueryBlock(prefix + "_" + (queryName ?: "unnamed"), block)
     }
 
     companion object {
@@ -42,7 +40,7 @@ class EventsWithConnection(private val clock: Clock, private val events: Events,
             return delegate.execute(block)
         }
         finally {
-            events(QueryEvent(block.name ?: "unknown", Duration.between(start, clock.instant()).toMillis()))
+            events(QueryEvent(block.queryName ?: "unknown", Duration.between(start, clock.instant()).toMillis()))
         }
     }
 }

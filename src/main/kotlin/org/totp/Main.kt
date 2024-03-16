@@ -95,22 +95,6 @@ fun mpForConstituency(contacts: () -> List<ConstituencyContact>): (ConstituencyN
 }
 
 
-
-//   {
-//    "date": "2022-12-01",
-//    "edm_count": 444,
-//    "overflowing": 0,
-//    "offline": 1
-//  },
-class ThamesWaterSummary(val thamesWater: ThamesWater): HttpHandler {
-
-    val response = TotpJson.autoBody<List<ThamesWater.DatedOverflow>>().toLens()
-
-    override fun invoke(request: Request): Response {
-        return Response(Status.OK).with(response of thamesWater.infrastructureSummary())
-    }
-}
-
 fun main() {
 
     val isDevelopment =
@@ -135,8 +119,10 @@ fun main() {
 
     val isDevelopmentEnvironment = isDevelopment(environment)
 
+    val clock = Clock.systemUTC()
+
     val events =
-        EventFilters.AddTimestamp(Clock.systemUTC())
+        EventFilters.AddTimestamp(clock)
             .then(EventFilters.AddEventName())
             .then(EventFilters.AddZipkinTraces())
             .then(EventFilters.AddServiceName("pages"))
@@ -158,7 +144,7 @@ fun main() {
     }
 
     val connection = EventsWithConnection(
-        Clock.systemUTC(),
+        clock,
         events,
         HikariWithConnection(lazy { datasource(dbHost(environment)) })
     )
@@ -262,11 +248,12 @@ fun main() {
                                 riverRankings = riverRankings,
                                 bathingRankings = beachRankings,
                                 csoTotals = allSpills,
-                                companyLiveDataAvailable =
+                                companyLivedata =
                                 { name ->
-                                    val uri = Uri.of("/v1/2022/spills-live-summary-${name.toSlug()}.json")
-                                    val response = dataClient(Request(Method.GET, uri))
-                                    response.status.successful
+                                    when (name) {
+                                        CompanyName("Thames Water") -> CSOLiveData(thamesWater.overflowingRightNow())
+                                        else -> null
+                                    }
                                 },
                             ),
                             "/shellfisheries" bind ShellfisheriesPageHandler(
@@ -283,9 +270,10 @@ fun main() {
                                 constituencyRank = constituencyRank,
                                 shellfisheryBoundaries = shellfisheryBoundaries
                             ),
-                            "/live/thames-water/overflow-summary" bind ThamesWaterSummary(
-                                thamesWater
-                            ),
+                            "/live/thames-water/overflow-summary" bind ThamesWaterSummary(thamesWater),
+                            "/live/thames-water/events/cso/{permit}" bind ThamesWaterPermitEvents(clock, thamesWater),
+                            "/live/thames-water/events/constituency/{constituency}" bind ThamesWaterConstituencyEvents(clock, thamesWater),
+                            "/live/environment-agency/rainfall/{constituency}" bind EnvironmentAgencyRainfall(clock, EnvironmentAgency(connection)),
                             "/map.html" bind OldMapRedirectHandler(),
                             "/sitemap.xml" bind SitemapHandler(
                                 siteBaseUri = Uri.of("https://top-of-the-poops.org"),

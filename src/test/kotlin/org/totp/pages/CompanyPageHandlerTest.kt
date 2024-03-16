@@ -69,7 +69,7 @@ class CompanyPageHandlerTest {
             },
             riverRankings = { listOf(aRiver(1)) },
             csoTotals = { summaries },
-            companyLiveDataAvailable = { true }
+            companyLivedata = { CSOLiveData(overflowing = listOf()) }
         )
     )
 
