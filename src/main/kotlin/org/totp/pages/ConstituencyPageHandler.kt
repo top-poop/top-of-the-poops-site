@@ -6,7 +6,6 @@ import org.http4k.lens.Path
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
-import org.totp.LastModified
 import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.http4k.removeQuery
@@ -15,8 +14,6 @@ import org.totp.model.data.*
 import org.totp.text.csv.readCSV
 import java.text.NumberFormat
 import java.time.Duration
-import java.time.Instant
-import java.time.OffsetDateTime
 
 
 val constituencyNames = readCSV(
@@ -96,8 +93,7 @@ class ConstituencyPage(
     val constituencies: List<RenderableConstituency>,
     val live: ConstituencyPageLiveData?,
     val neighbours: List<RenderableConstituencyRank>,
-    val rivers: List<RenderableRiverRank>,
-    val livePollution: LastModified<GeoJSON>?
+    val rivers: List<RenderableRiverRank>
 ) :
     PageViewModel(uri)
 
@@ -151,7 +147,6 @@ object ConstituencyPageHandler {
         constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
         constituencyRank: (ConstituencyName) -> ConstituencyRank?,
         constituencyRivers: (ConstituencyName) -> List<RiverRank>,
-        pollutionGeoJson: (ConstituencyName) -> LastModified<GeoJSON>?
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -187,10 +182,6 @@ object ConstituencyPageHandler {
                 val rivers = rivers2.take(5)
                     .map { it.toRenderable() }
 
-                val livePollution = pollutionGeoJson(constituencyName)?.takeIf {
-                    it.modified.isAfter(Instant.now().minus(Duration.ofHours(4)))
-                }
-
                 Response(Status.OK)
                     .with(
                         viewLens of ConstituencyPage(
@@ -222,7 +213,6 @@ object ConstituencyPageHandler {
                                     )
                                 }
                             } else null,
-                            livePollution = livePollution,
                             neighbours = neighbours,
                             rivers = rivers,
                         )
