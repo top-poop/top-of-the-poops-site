@@ -137,7 +137,8 @@
                         {
                             x: d => new Date(d.date),
                             y: d => d.edm_count,
-                            stroke: '#44beff'
+                            stroke: '#44beff',
+                            title: d => `${d.date}: ${d.edm_count} CSOs Monitored`,
                         }
                 ),
                 Plot.lineY(
@@ -145,7 +146,8 @@
                         {
                             x: d => new Date(d.date),
                             y: d => d.overflowing,
-                            stroke: '#ff4444'
+                            stroke: '#ff4444',
+                            title: d => `${d.date}: ${d.overflowing} CSOs Overflowed for 30 mins or more`,
                         }
                 ),
                 Plot.lineY(
@@ -153,7 +155,8 @@
                         {
                             x: d => new Date(d.date),
                             y: d => d.offline,
-                            stroke: '#bbbbbb'
+                            stroke: '#bbbbbb',
+                            title: d => `${d.date}: ${d.offline} CSOs Offline for 30 mins or more`,
                         }
                 ),
             ]
