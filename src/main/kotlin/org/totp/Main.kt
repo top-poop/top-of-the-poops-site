@@ -94,6 +94,22 @@ fun mpForConstituency(contacts: () -> List<ConstituencyContact>): (ConstituencyN
     return { name -> cache()[name]?.mp ?: throw Defect("We don't have the MP for $name") }
 }
 
+class EDMAnnualSummary(val edm: EDM) : HttpHandler {
+
+    val data = TotpJson.autoBody<List<EDM.ConstituencyAnnualSummary>>().toLens()
+    val constituency = Path.value(ConstituencySlug).of("constituency")
+    override fun invoke(request: Request): Response {
+
+        val constituencyName = slugToConstituency[constituency(request)]
+
+        return if (constituencyName == null) {
+            Response(Status.NOT_FOUND)
+        } else {
+            val annual = edm.annualSummariesForConstituency(constituencyName)
+            Response(Status.OK).with(data of annual)
+        }
+    }
+}
 
 fun main() {
 
@@ -270,19 +286,6 @@ fun main() {
                                 constituencyRank = constituencyRank,
                                 shellfisheryBoundaries = shellfisheryBoundaries
                             ),
-                            "/live/thames-water/overflow-summary" bind ThamesWaterSummary(thamesWater),
-                            "/live/thames-water/events/cso/{permit}" bind ThamesWaterPermitEvents(clock, thamesWater),
-                            "/live/thames-water/events/constituency/{constituency}" bind ThamesWaterConstituencyEvents(clock, thamesWater),
-                            "/live/environment-agency/rainfall/{constituency}" bind EnvironmentAgencyRainfall(clock, EnvironmentAgency(connection)),
-                            "/map.html" bind OldMapRedirectHandler(),
-                            "/sitemap.xml" bind SitemapHandler(
-                                siteBaseUri = Uri.of("https://top-of-the-poops.org"),
-                                uris = SitemapUris(
-                                    constituencies = constituencyRankings,
-                                    riverRankings = riverRankings,
-                                    beachRankings = beachRankings,
-                                )
-                            ),
                             "/private/badges/constituencies" bind BadgesConstituenciesHandler(
                                 renderer = renderer,
                                 constituencyRankings = constituencyRankings,
@@ -304,6 +307,30 @@ fun main() {
                             )
                         )
                     )
+            ),
+            "/live/thames-water/overflow-summary" bind ThamesWaterSummary(thamesWater),
+            "/live/thames-water/events/cso/{permit}" bind ThamesWaterPermitEvents(clock, thamesWater),
+            "/live/thames-water/events/constituency/{constituency}" bind ThamesWaterConstituencyEvents(
+                clock,
+                thamesWater
+            ),
+            "/live/environment-agency/rainfall/{constituency}" bind EnvironmentAgencyRainfall(
+                clock,
+                EnvironmentAgency(connection)
+            ),
+            "/data-new/constituency/{constituency}/annual-pollution" bind EDMAnnualSummary(
+                EDM(
+                    connection
+                )
+            ),
+            "/map.html" bind OldMapRedirectHandler(),
+            "/sitemap.xml" bind SitemapHandler(
+                siteBaseUri = Uri.of("https://top-of-the-poops.org"),
+                uris = SitemapUris(
+                    constituencies = constituencyRankings,
+                    riverRankings = riverRankings,
+                    beachRankings = beachRankings,
+                )
             ),
             "/data" bind static(ResourceLoader.Directory("services/data/datafiles")),
             "/assets" bind static(Resources.assets(isDevelopmentEnvironment)),

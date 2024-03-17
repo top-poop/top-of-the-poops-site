@@ -85,7 +85,7 @@ data class RenderableCSOTotal(
 
 class ConstituencyPage(
     uri: Uri,
-    val name: ConstituencyName,
+    val constituency: RenderableConstituency,
     val share: SocialShare,
     val summary: PollutionSummary,
     val geojson: GeoJSON,
@@ -185,7 +185,7 @@ object ConstituencyPageHandler {
                     .with(
                         viewLens of ConstituencyPage(
                             pageUriFrom(request).removeQuery(),
-                            constituencyName,
+                            constituencyName.toRenderable(current = true),
                             SocialShare(
                                 pageUriFrom(request),
                                 text = "$constituencyName had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year} - ${
