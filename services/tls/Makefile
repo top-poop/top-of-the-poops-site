@@ -7,17 +7,21 @@ __check_defined = \
 
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 $(call check_defined, TOTP_CONTEXT, context)
-
+$(call check_defined, MAXMIND_ACCOUNT_ID, maxmind id)
+$(call check_defined, MAXMIND_LICENSE_KEY, maxmind key)
 
 SERVICE=tls
-SERVICE_VERSION=$(shell ../../bin/content-hash.sh nginx.conf Dockerfile docker-compose.yml)
+SERVICE_VERSION=$(shell ../../bin/content-hash.sh nginx.conf Dockerfile docker-compose.yml nginx-files)
 
-CURL=curl --verbose --fail --silent
+CURL=curl --fail
+PYTHON=python3
 
 IMAGE_NAME=totp-$(SERVICE)
 
 LOCAL_NAME=$(IMAGE_NAME):$(SERVICE_VERSION)
 FULL_NAME=$(DOCKER_HUB_ORG)/$(IMAGE_NAME):$(SERVICE_VERSION)
+
+DATE=$(shell date +%Y%m%d)
 
 .PHONY: check-context
 check-context:
@@ -25,19 +29,21 @@ check-context:
 	@test $(shell docker context show) = default
 
 
-.geoip.dat.gz:
-	$(CURL) -o $@ http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
+.maxmind-country-$(DATE).tar.gz:
+	$(CURL) -L -u $(MAXMIND_ACCOUNT_ID):$(MAXMIND_LICENSE_KEY) -o $@ 'https://download.maxmind.com/geoip/databases/GeoLite2-Country/download?suffix=tar.gz'
 
-.geoip.dat: .geoip.dat.gz
-	rm -f $@
-	zcat $< > $@
+.maxmind-country-$(DATE).mmdb:  .maxmind-country-$(DATE).tar.gz
+	$(eval T := $(shell mktemp -d))
+	tar -C $(T) -zxf $(shell pwd)/.maxmind-country-$(DATE).tar.gz
+	cp $(T)/GeoLite2-Country_*/GeoLite2-Country.mmdb $@
 
-geoip.dat: .geoip.dat
-	mv $< $@
+GeoLite2-Country.mmdb: .maxmind-country-$(DATE).mmdb
+	cp $< $@
 
 
 .PHONY: image
-image: check-context
+image: check-context GeoLite2-Country.mmdb
+	docker build -t nginx-totp:latest -f nginx-files/Dockerfile nginx-files
 	docker build -t $(LOCAL_NAME)  -t $(FULL_NAME) .
 
 .PHONY: run
