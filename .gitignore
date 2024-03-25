@@ -8,6 +8,10 @@ build/
 .env
 .env-*
 
+notes.md
+main.http
+
+
 ### IntelliJ IDEA ###
 .idea
 .idea/modules.xml
