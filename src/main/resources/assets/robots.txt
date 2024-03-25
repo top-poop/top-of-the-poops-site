@@ -25,3 +25,5 @@ Disallow: /
 User-agent: DataForSeoBot
 Disallow: /
 
+User-agent: ChatGPT-User
+Disallow: /
