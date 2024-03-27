@@ -31,6 +31,9 @@ data class PollutionSummary(
     val companies: List<CompanyName>,
     val count: RenderableCount,
     val duration: RenderableDuration,
+    val csoCount: Int,
+    val lowReportingCount: Int,
+    val zeroReportingCount: Int,
 )
 
 fun List<CSOTotals>.summary(): PollutionSummary {
@@ -41,7 +44,10 @@ fun List<CSOTotals>.summary(): PollutionSummary {
         count = RenderableCount(sumOf { it.count }),
         duration = (map { it.duration }
             .reduceOrNull { acc, duration -> acc.plus(duration) }
-            ?: Duration.ZERO).toRenderable()
+            ?: Duration.ZERO).toRenderable(),
+        csoCount = size,
+        lowReportingCount = count { it.reporting.toDouble() < 0.5 },
+        zeroReportingCount = count { it.reporting.toDouble() == 0.0 }
     )
 }
 

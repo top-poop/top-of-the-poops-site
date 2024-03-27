@@ -25,7 +25,7 @@
 
 {{#> components/jumbotron }}
     {{ name.value }} polluted by sewage {{numberFormat summary.count.count}} times in {{summary.year}} - lasting
-    {{numberFormat summary.duration.hours}} hours
+    {{numberFormat summary.duration.hours}} hours {{#if summary.zeroReportingCount gt 0}}<br/> - but monitoring was disabled in some locations, so could be more{{else if summary.lowReportingCount gt 0}}<br/> - but monitoring fell below 50% in some locations so could be more{{/if}}
 {{/components/jumbotron}}
 
 
@@ -152,7 +152,7 @@
                                 <td class="align-middle" data-count="{{this.count.count}}">{{numberFormat this.count.count}}</td>
                                 <td class="align-middle" data-duration="{{this.duration.hours}}">{{numberFormat
                                         this.duration.hours}}</td>
-                                <td class="align-middle">{{numberFormat this.reporting}}</td>
+                                <td class="align-middle{{#if this.reporting lt 0.5}}reporting-low{{/if}}" data-reporting="{{this.reporting}}">{{numberFormat this.reporting}}</td>
                             </tr>
                         {{/each}}
                         </tbody>

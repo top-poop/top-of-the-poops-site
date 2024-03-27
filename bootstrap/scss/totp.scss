@@ -159,5 +159,12 @@ $nav-link-font-weight: 500;
       color: $primary-100;
     }
   }
+}
 
+.reporting-zero {
+  background: $red-600
+}
+
+.reporting-low {
+  background: $red-300
 }

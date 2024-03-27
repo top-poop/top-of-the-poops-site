@@ -45,7 +45,10 @@ fun List<BathingCSO>.summary(): PollutionSummary {
         count = sumOf { it.count }.let { RenderableCount(it) },
         duration = (map { it.duration }
             .reduceOrNull { acc, duration -> acc.plus(duration) }
-            ?: Duration.ZERO).toRenderable()
+            ?: Duration.ZERO).toRenderable(),
+        csoCount = size,
+        lowReportingCount = count { it.reporting.toDouble() < 0.5 },
+        zeroReportingCount = count { it.reporting.toDouble() == 0.0 }
     )
 }
 

@@ -122,8 +122,9 @@ object CompanyPageHandler {
                 val name = mostRecent.company.name
 
                 val company = companies.first { it.name == name }
-                val worstCsos = csoTotals()
-                    .filter { it.cso.company == name }
+                val companyCsos = csoTotals().filter { it.cso.company == name }
+
+                val worstCsos = companyCsos
                     .sortedByDescending { it.duration }
                     .take(6)
                     .map { it.toRenderable() }
