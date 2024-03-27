@@ -136,10 +136,9 @@
 
 <script type="module">
 
-    if ( L.Browser.mobile ) {
+    if (L.Browser.mobile) {
         Array.from(document.getElementsByClassName("desktop-only")).forEach(it => it.remove())
-    }
-    else {
+    } else {
         Array.from(document.getElementsByClassName("mobile-only")).forEach(it => it.remove())
     }
 
@@ -164,8 +163,8 @@
     });
 
     map.fitBounds([
-        [49.674737880665994, -6.064453125000001],
-        [56.029087419764366, 1.9555664062500002]
+        [54.00366, -2.547855],
+        [54.00366, -2.547855]
     ])
 
     L.tileLayer(
@@ -183,18 +182,31 @@
     const response = await fetch("/data/v1/{{year}}/spills-by-beach.json")
     if (response.ok) {
         const beaches = await (response.json())
-        beaches
-                .map(it => L.circleMarker([it.lat, it.lon], {
-                            color: "#498940",
-                            fillColor: "#942c2c",
-                            fillOpacity: 0.5,
-                            mixBlendMode: "multiply",
-                            radius: 10,
-                        })
-                                .bindTooltip(`${it.bathing} - ${it.total_spill_hours} hours`)
-                        .on("dblclick", e => navigateToBathing(it.bathing) )
-                )
-                .forEach(it => it.addTo(map))
+        const markers = beaches.map(it => L.circleMarker([it.lat, it.lon], {
+                    color: "#498940",
+                    fillColor: "#942c2c",
+                    fillOpacity: 0.5,
+                    mixBlendMode: "multiply",
+                    radius: 10,
+                })
+                        .bindTooltip(`${it.bathing} - ${it.total_spill_hours} hours`)
+                        .on("dblclick", e => navigateToBathing(it.bathing))
+        )
+
+        markers.forEach(it => it.addTo(map))
+
+        const geoBounds = map.getBounds();
+
+        const bounds = markers.reduce((acc, m) => {
+            if (acc == null) {
+                return geoBounds != null ? geoBounds.extend(m.getLatLng()) : L.latLngBounds(m.getLatLng(), m.getLatLng());
+            } else {
+                return acc.extend(m.getLatLng())
+            }
+        }, null)
+
+        map.fitBounds(bounds)
+
     }
 </script>
 

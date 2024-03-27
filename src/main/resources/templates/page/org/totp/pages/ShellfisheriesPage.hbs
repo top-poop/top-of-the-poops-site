@@ -122,8 +122,8 @@
     });
 
     map.fitBounds([
-        [49.674737880665994, -6.064453125000001],
-        [56.029087419764366, 1.9555664062500002]
+        [54.00366, -2.547855],
+        [54.00366, -2.547855]
     ])
 
     L.tileLayer(
@@ -141,7 +141,7 @@
     const response = await fetch("/data/v1/{{year}}/spills-by-shellfish.json")
     if (response.ok) {
         const shellfish = await (response.json())
-        shellfish
+        const markers = shellfish
                 .map(it => L.circleMarker([it.lat, it.lon], {
                             color: "#498940",
                             fillColor: "#942c2c",
@@ -152,7 +152,20 @@
                                 .bindTooltip(`${it.shellfishery} - ${it.total_spill_hours} hours`)
                                 .on("dblclick", e => navigateToShellfish(it.shellfishery) )
                 )
-                .forEach(it => it.addTo(map))
+
+        markers.forEach(it => it.addTo(map))
+
+        const geoBounds = map.getBounds();
+
+        const bounds = markers.reduce((acc, m) => {
+            if (acc == null) {
+                return geoBounds != null ? geoBounds.extend(m.getLatLng()) : L.latLngBounds(m.getLatLng(), m.getLatLng());
+            } else {
+                return acc.extend(m.getLatLng())
+            }
+        }, null)
+
+        map.fitBounds(bounds)
     }
 </script>
 
