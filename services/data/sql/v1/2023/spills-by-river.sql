@@ -4,7 +4,7 @@ with reports_last as (
            coalesce(sum(spill_count), 0)       as total_count,
            coalesce(sum(total_spill_hours), 0) as total_hours
     from edm_consent_view
-    where reporting_year = 2021 and rec_env_code_description in ( 'Canal', 'Estuary/Tidal River', 'Freshwater river')
+    where reporting_year = 2022 and rec_env_code_description in ( 'Canal', 'Estuary/Tidal River', 'Freshwater river')
     group by reporting_year, company_name, river_name
 ),
      reports_this as (
@@ -13,7 +13,7 @@ with reports_last as (
                 coalesce(sum(spill_count), 0)       as total_count,
                 coalesce(sum(total_spill_hours), 0) as total_hours
          from edm_consent_view
-         where reporting_year = 2022  and rec_env_code_description in ( 'Canal', 'Estuary/Tidal River', 'Freshwater river')
+         where reporting_year = 2023  and rec_env_code_description in ( 'Canal', 'Estuary/Tidal River', 'Freshwater river')
          group by reporting_year, company_name, river_name
      )
 select reports_this.*,

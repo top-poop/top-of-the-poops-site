@@ -114,7 +114,7 @@ object ConstituenciesPageHandler {
                 .with(
                     viewLens of ConstituenciesPage(
                         pageUriFrom(request),
-                        year = 2022,
+                        year = 2023,
                         tableRows(
                             constituencyRankings().sortedBy { it.rank }.map {
                                 it.toRenderable(mpFor)

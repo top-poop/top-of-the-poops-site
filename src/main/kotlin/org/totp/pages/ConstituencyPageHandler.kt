@@ -38,7 +38,7 @@ data class PollutionSummary(
 
 fun List<CSOTotals>.summary(): PollutionSummary {
     return PollutionSummary(
-        year = 2022,
+        year = 2023,
         locationCount = filter { it.count > 0 }.size,
         companies = map { it.cso.company }.toSet().sorted(),
         count = RenderableCount(sumOf { it.count }),

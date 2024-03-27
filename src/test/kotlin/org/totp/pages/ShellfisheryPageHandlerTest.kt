@@ -25,7 +25,7 @@ class ShellfisheryPageHandlerTest {
             shellfishSpills = {
                 listOf(
                     ShellfishCSO(
-                        2022, CompanyName.of("Company"),
+                        2023, CompanyName.of("Company"),
                         sitename = "site name",
                         shellfishery = ShellfisheryName.of("shellfishery"),
                         count = 10,

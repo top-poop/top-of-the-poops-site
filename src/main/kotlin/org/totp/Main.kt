@@ -167,15 +167,15 @@ fun main() {
 
     val referenceData = ReferenceData(connection)
 
-    val data2022 = SetBaseUriFrom(Uri.of("/v1/2022")).then(EnsureSuccessfulResponse()).then(dataClient)
+    val data2023 = SetBaseUriFrom(Uri.of("/v1/2023")).then(EnsureSuccessfulResponse()).then(dataClient)
 
     val mediaAppearances = memoize(MediaAppearances(dataClient))
     val waterCompanies = memoize(WaterCompanies(dataClient))
-    val allSpills = memoize(AllSpills(data2022))
-    val riverRankings = memoize(RiverRankings(data2022))
-    val beachRankings = memoize(BathingRankings(data2022))
-    val shellfishRankings = memoize(ShellfishRankings(data2022))
-    val constituencyRankings = memoize(ConstituencyRankings(data2022))
+    val allSpills = memoize(AllSpills(data2023))
+    val riverRankings = memoize(RiverRankings(data2023))
+    val beachRankings = memoize(BathingRankings(data2023))
+    val shellfishRankings = memoize(ShellfishRankings(data2023))
+    val constituencyRankings = memoize(ConstituencyRankings(data2023))
 
     val mpFor = mpForConstituency(referenceData::mps)
 
@@ -231,7 +231,7 @@ fun main() {
                                 renderer = renderer,
                                 bathingRankings = beachRankings,
                                 bathingCSOs = { wanted ->
-                                    BathingCSOs(data2022)().filter { wanted == it.bathing.toSlug() }
+                                    BathingCSOs(data2023)().filter { wanted == it.bathing.toSlug() }
                                 },
                                 beachBoundaries = beachBoundaries,
                                 mpFor = mpFor,
@@ -253,13 +253,13 @@ fun main() {
                                 constituencyBoundary = constituencyBoundaries,
                                 constituencyLiveAvailable = memoize(thamesWater::haveLiveDataFor),
                                 mpFor = mpFor,
-                                constituencyNeighbours = ConstituencyNeighbours(data2022),
+                                constituencyNeighbours = ConstituencyNeighbours(data2023),
                                 constituencyRank = constituencyRank,
                                 constituencyRivers = constituencyRivers(allSpills, riverRankings),
                             ),
                             "/company/{company}" bind CompanyPageHandler(
                                 renderer = renderer,
-                                companySummaries = CompanyAnnualSummaries(data2022),
+                                companySummaries = CompanyAnnualSummaries(data2023),
                                 waterCompanies = waterCompanies,
                                 riverRankings = riverRankings,
                                 bathingRankings = beachRankings,
@@ -280,7 +280,7 @@ fun main() {
                                 renderer = renderer,
                                 shellfishRankings = shellfishRankings,
                                 shellfishSpills = { wanted ->
-                                    ShellfishCSOs(data2022)().filter { wanted == it.shellfishery.toSlug() }
+                                    ShellfishCSOs(data2023)().filter { wanted == it.shellfishery.toSlug() }
                                 },
                                 mpFor = mpFor,
                                 constituencyRank = constituencyRank,
@@ -294,7 +294,7 @@ fun main() {
                             ),
                             "/private/badges/companies" bind BadgesCompaniesHandler(
                                 renderer = renderer,
-                                companySummaries = CompanyAnnualSummaries(data2022),
+                                companySummaries = CompanyAnnualSummaries(data2023),
                             ),
                             "/private/badges/home" bind BadgesHomeHandler(
                                 renderer = renderer,

@@ -36,15 +36,15 @@ class Data:
             return None
 
     def totals_for_beach(self, beach_slug) -> Optional[dict]:
-        uri = f"{self.base_uri}/v1/2022/spills-by-beach.json"
+        uri = f"{self.base_uri}/v1/2023/spills-by-beach.json"
 
         def matching(d):
-            return d["reporting_year"] == 2022 and kebabcase(d["bathing"]) == beach_slug
+            return d["reporting_year"] == 2023 and kebabcase(d["bathing"]) == beach_slug
 
         return self._find_matching(uri, matching)
 
     def totals_for_shellfishery(self, shellfish_slug) -> Optional[dict]:
-        uri = f"{self.base_uri}/v1/2022/spills-by-shellfish.json"
+        uri = f"{self.base_uri}/v1/2023/spills-by-shellfish.json"
 
         def matching(d):
             return kebabcase(d["shellfishery"]) == shellfish_slug
@@ -146,7 +146,7 @@ class BadgeApp:
                         shellfishery=info["shellfishery"],
                         spills=int(info["total_count"]),
                         company=info["company_name"],
-                        year=2022
+                        year=2023
                     )
                 )
 

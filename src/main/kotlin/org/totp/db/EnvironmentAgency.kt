@@ -8,7 +8,7 @@ import kotlin.math.min
 class EnvironmentAgency(private val connection: WithConnection) {
 
 
-    //    "d": "2022-12-01",
+    //    "d": "2023-12-01",
 //    "c": 0.2,
 //    "r": "r-1",
 //    "n": 2

@@ -41,7 +41,7 @@ class BathingPageHandlerTest {
             bathingCSOs = {
                 listOf(
                     BathingCSO(
-                        2022, CompanyName.of("company"),
+                        2023, CompanyName.of("company"),
                         sitename = "site name",
                         bathing = BathingName.of("bathing"),
                         count = 10,

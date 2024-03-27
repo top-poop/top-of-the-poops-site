@@ -13,7 +13,7 @@ with reports_last as (select pcon20nm                                as constitu
                              count(*)                                as cso_count
                       from edm_consent_view edm
                                join grid_references on edm.effluent_grid_ref = grid_references.grid_reference
-                      where reporting_year = 2022
+                      where reporting_year = 2023
                         and pcon20nm is not null
                       group by reporting_year, pcon20nm),
      wanted as (select con.pcon20nm                                                                       as constituency,

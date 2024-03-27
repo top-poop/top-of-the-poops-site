@@ -98,7 +98,7 @@ object BeachesPageHandler {
                 .with(
                     viewLens of BeachesPage(
                         pageUriFrom(request),
-                        year = 2022,
+                        year = 2023,
                         totalCount,
                         totalDuration,
                         rankings.map {
@@ -107,7 +107,7 @@ object BeachesPageHandler {
                         polluterRankings = polluters,
                         SocialShare(
                             pageUriFrom(request),
-                            "Are the beaches safe for swimming? - ${numberFormat.format(totalCount)} sewage pollution incidents in 2022",
+                            "Are the beaches safe for swimming? - ${numberFormat.format(totalCount)} sewage pollution incidents in 2023",
                             cta = "Take action. Tweet this to your followers",
                             listOf("sewage"),
                             via = "sewageuk",

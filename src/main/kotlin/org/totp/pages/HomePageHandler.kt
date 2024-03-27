@@ -102,7 +102,7 @@ object HomepageHandler {
                 .with(
                     viewLens of HomePage(
                         pageUriFrom(request),
-                        year = 2022,
+                        year = 2023,
                         totalSpillsRounded,
                         totalDuration,
                         rankings.take(10).map { it.toRenderable(mpFor) },
@@ -115,7 +115,7 @@ object HomepageHandler {
                         appearances().sortedByDescending { it.date },
                         SocialShare(
                             pageUriFrom(request),
-                            "Water companies are dumping #sewage into rivers and bathing areas all over the UK - over ${totalSpillsRounded} times in 2022 - it needs to be stopped",
+                            "Water companies are dumping #sewage into rivers and bathing areas all over the UK - over ${totalSpillsRounded} times in 2023 - it needs to be stopped",
                             cta = "Take action. Tweet this to your followers",
                             listOf("sewage"),
                             via = "sewageuk",

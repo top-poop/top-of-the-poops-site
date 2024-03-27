@@ -41,7 +41,7 @@ class ShellfisheryPage(
 
 fun List<ShellfishCSO>.summary(): PollutionSummary {
     return PollutionSummary(
-        year = 2022,
+        year = 2023,
         locationCount = filter { it.count > 0 }.size,
         companies = map { it.company }.toSet().sorted(),
         count = sumOf { it.count }.let { RenderableCount(it) },
