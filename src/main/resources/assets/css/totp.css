@@ -8478,4 +8478,10 @@ textarea.form-control-lg {
     color: white; }
     .footer-data a:hover {
       color: #e2dac2; }
+
+.reporting-zero {
+  background: #b02a37; }
+
+.reporting-low {
+  background: #ea868f; }
 /*# sourceMappingURL=totp.css.map */

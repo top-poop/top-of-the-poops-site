@@ -25,7 +25,7 @@
 
 {{#> components/jumbotron }}
     Designated shellfish area '{{ name.value }}' polluted by sewage {{numberFormat summary.count.count}} times in {{summary.year}} - lasting
-    {{numberFormat summary.duration.hours}} hours
+    {{numberFormat summary.duration.hours}} hours {{#if summary.zeroReportingCount gt 0}}<br/> - but monitoring was disabled in some locations, so could be more{{else if summary.lowReportingCount gt 0}}<br/> - but monitoring fell below 50% in some locations so could be more{{/if}}
 {{/components/jumbotron}}
 
 

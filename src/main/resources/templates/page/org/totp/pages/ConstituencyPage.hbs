@@ -28,7 +28,7 @@
 
 {{#> components/jumbotron }}
     {{ constituency.name }} polluted by sewage {{numberFormat summary.count.count}} times in {{summary.year}} - lasting
-    {{numberFormat summary.duration.hours}} hours
+    {{numberFormat summary.duration.hours}} hours {{#if summary.zeroReportingCount gt 0}}<br/> - but monitoring was disabled in some locations, so could be more{{else if summary.lowReportingCount gt 0}}<br/> - but monitoring fell below 50% in some locations so could be more{{/if}}
 {{/components/jumbotron}}
 
 
@@ -128,6 +128,7 @@
                     </div>
                 </div>
             </div>
+            {{#if rivers }}
             <div class="row">
                 <div class="col">
                     <div class="card  mb-3">
@@ -147,6 +148,7 @@
                     </div>
                 </div>
             </div>
+            {{/if}}
         </div>
     </div>
 </div>
@@ -186,6 +188,10 @@
                 <p>Here are all the reported sewage overflow totals for {{ constituency.name }} in {{ summary.year }}.
                     Sometimes sewage can be being dumped for <b>months</b> at a time.</p>
 
+                <p>Reporting refers to how much of the time the monitoring was active.
+                    In this constituency {{summary.lowReportingCount}} of the total {{summary.csoCount}} CSO locations had reporting enabled for less than
+                half the year, of which <strong>{{summary.zeroReportingCount}}</strong> had <em>zero</em> reporting.</p>
+
                 <div class="table-responsive">
                     <table id="table-csos" class="table table-spills table-striped">
                         <thead>
@@ -214,7 +220,7 @@
                                         this.count.count}}</td>
                                 <td class="align-middle" data-duration="{{this.duration.hours}}">{{numberFormat
                                         this.duration.hours}}</td>
-                                <td class="align-middle">{{numberFormat this.reporting}}</td>
+                                <td class="align-middle" data-reporting="{{this.reporting}}">{{numberFormat this.reporting}}</td>
                             </tr>
                         {{/each}}
                         </tbody>
@@ -277,6 +283,12 @@
 </script>
 
 <script>
+
+    const formatNumber = (n, m) => n.toLocaleString(undefined, {
+        minimumFractionDigits: m ? m : 0,
+        maximumFractionDigits: m ? m : 0
+    });
+
     const myStyle = {
         "color": "#ff7800",
         "weight": 5,
@@ -325,8 +337,17 @@
 
     const markerBlue = markerIcon("blue")
     const markerRed = markerIcon("red")
+    const markerGrey = markerIcon("grey")
 
-    const durationIcon = (n) => n > 700 ? markerRed : markerBlue;
+    const durationIcon = (n, r) => {
+        console.log(`${n} ${r}`)
+        if ( r < 0.5 ) {
+            return markerGrey
+        }
+        else {
+            return n > 700 ? markerRed : markerBlue;
+        }
+    }
 
     const lat = attr("lat", Number)
     const lon = attr("lon", Number)
@@ -336,6 +357,7 @@
     const waterway = attr("waterway")
     const count = attr("count", Number)
     const duration = attr("duration", Number)
+    const reporting = attr("reporting", Number)
 
     Array.from(document.getElementById("table-csos").querySelectorAll("tr[data-class='cso']"))
             .map(it => {
@@ -346,17 +368,18 @@
                     waterway: waterway(it.querySelector("[data-waterway]")),
                     sitename: sitename(it.querySelector("[data-sitename]")),
                     count: count(it.querySelector("[data-count]")),
-                    duration: duration(it.querySelector("[data-duration]"))
+                    duration: duration(it.querySelector("[data-duration]")),
+                    reporting: reporting(it.querySelector("[data-reporting]")),
                 }
             })
-            .map(it => {
-                return {
-                    lat: it.lat, lon: it.lon, duration: it.duration,
-                    text: `${it.sitename}<br/>${it.waterway}<br/>${it.count} Dumps / ${it.duration} hours by ${it.company}`
-                }
+            .forEach(it => {
+                L.marker(
+                    [it.lat, it.lon],
+                        {icon: durationIcon(it.duration, it.reporting)}
+                ).bindTooltip(
+                        `${it.sitename}<br/>${it.waterway}<br/>${formatNumber(it.count)} Dumps / ${formatNumber(it.duration)} hours by ${it.company}<br/>Reporting was ${formatNumber(it.reporting,2)}%`
+                ).addTo(map)
             })
-            .map(it => L.marker([it.lat, it.lon], {icon: durationIcon(it.duration)}).bindTooltip(it.text))
-            .forEach(it => it.addTo(map))
 </script>
 
 
