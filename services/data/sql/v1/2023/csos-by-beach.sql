@@ -13,7 +13,7 @@ select reporting_year,
 from edm_consent_view edm
          join grid_references grid on edm.effluent_grid_ref = grid.grid_reference
          left join edm_bathing_to_beach_mapping bm on edm.bathing = bm.edm_name
-where reporting_year = 2022
+where reporting_year = 2023
   and bathing is not null
   and pcon20nm is not null
 /* todo - one cso for beach is not mapped to constituency properly */

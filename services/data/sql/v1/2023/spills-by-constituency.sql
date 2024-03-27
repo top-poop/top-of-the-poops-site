@@ -4,7 +4,7 @@ with reports_last as (
            coalesce(sum(edm.total_spill_hours), 0) as total_hours
     from edm_consent_view edm
              join grid_references on edm.effluent_grid_ref = grid_references.grid_reference
-    where reporting_year = 2021
+    where reporting_year = 2022
       and pcon20nm is not null
     group by reporting_year, pcon20nm
 ),
@@ -14,7 +14,7 @@ with reports_last as (
                 coalesce(sum(edm.total_spill_hours), 0) as total_hours
          from edm_consent_view edm
                   join grid_references on edm.effluent_grid_ref = grid_references.grid_reference
-         where reporting_year = 2022
+         where reporting_year = 2023
            and pcon20nm is not null
          group by reporting_year, pcon20nm
      )

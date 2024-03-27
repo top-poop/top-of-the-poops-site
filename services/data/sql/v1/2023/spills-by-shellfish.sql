@@ -9,7 +9,7 @@ with reports_last as (
     from edm_consent_view edm
              join grid_references as grid on edm.effluent_grid_ref = grid.grid_reference
     where shellfishery is not null
-      and reporting_year = 2021
+      and reporting_year = 2022
     group by company_name, shellfishery
 ),
      reports_this as (
@@ -23,7 +23,7 @@ with reports_last as (
          from edm_consent_view edm
                   join grid_references as grid on edm.effluent_grid_ref = grid.grid_reference
          where shellfishery is not null
-           and reporting_year = 2022
+           and reporting_year = 2023
          group by company_name, shellfishery
      )
 select reports_this.*,

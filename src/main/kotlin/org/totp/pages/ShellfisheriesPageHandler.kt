@@ -42,7 +42,7 @@ object ShellfisheriesPageHandler {
                 .with(
                     viewLens of ShellfisheriesPage(
                         pageUriFrom(request),
-                        year = 2022,
+                        year = 2023,
                         totalCount,
                         totalDuration,
                         rankings.map { it.toRenderable() },

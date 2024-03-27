@@ -36,7 +36,7 @@ object BadgesRiversHandler {
                 .with(
                     viewLens of BadgesRiversPage(
                         pageUriFrom(request),
-                        2022,
+                        2023,
                         rankings,
                     ),
                 )

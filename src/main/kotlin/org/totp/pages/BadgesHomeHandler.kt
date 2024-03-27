@@ -50,7 +50,7 @@ object BadgesHomeHandler {
                 .with(
                     viewLens of BadgesHomePage(
                         pageUriFrom(request),
-                        2022,
+                        2023,
                         RenderableCount(totalSpillsRounded),
                         totalDuration.toRenderable(),
 

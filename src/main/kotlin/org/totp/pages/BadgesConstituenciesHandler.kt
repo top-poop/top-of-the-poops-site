@@ -39,7 +39,7 @@ object BadgesConstituenciesHandler {
                 .with(
                     viewLens of BadgesConstituenciesPage(
                         pageUriFrom(request),
-                        2022,
+                        2023,
                         rankings.sortedBy { it.constituencyName }.map {
                             RenderableConstituencyRank(
                                 it.rank,

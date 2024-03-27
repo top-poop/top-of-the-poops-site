@@ -153,7 +153,7 @@ object RiversPageHandler {
                 .with(
                     viewLens of RiversPage(
                         pageUriFrom(request),
-                        year = 2022,
+                        year = 2023,
                         totalCount,
                         totalDuration,
                         showingSummary = !showAll,

@@ -64,21 +64,21 @@ python: $(PYTHON)
 	$(PIP) install -r $<
 	touch $@
 
-DATAFILES_2022=$(DATAFILES)/v1/2022
+DATAFILES_2023=$(DATAFILES)/v1/2023
 
-DATA_2022_SQL=$(wildcard sql/v1/2022/*.sql)
-DATA_2022_GENERATED=$(foreach sql,$(DATA_2022_SQL),$(DATAFILES_2022)/$(basename $(notdir $(sql))).json)
+DATA_2023_SQL=$(wildcard sql/v1/2023/*.sql)
+DATA_2023_GENERATED=$(foreach sql,$(DATA_2023_SQL),$(DATAFILES_2023)/$(basename $(notdir $(sql))).json)
 
-DATA_2022_LIVE=$(DATAFILES_2022)/spills-live-overflows-by-rainfall-thames-water.json $(DATAFILES_2022)/spills-live-summary-thames-water.json
+DATA_2023_LIVE=$(DATAFILES_2023)/spills-live-overflows-by-rainfall-thames-water.json $(DATAFILES_2023)/spills-live-summary-thames-water.json
 
-GEO_2022_SQL=$(wildcard sql/v1/2022/geo/*.sql)
-GEO_2022_GENERATED=$(foreach sql,$(GEO_2022_SQL),$(DATAFILES_2022)/geo/$(basename $(notdir $(sql))).json)
+GEO_2023_SQL=$(wildcard sql/v1/2023/geo/*.sql)
+GEO_2023_GENERATED=$(foreach sql,$(GEO_2023_SQL),$(DATAFILES_2023)/geo/$(basename $(notdir $(sql))).json)
 
-PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAFILES_2022)/geo/countries.json
+PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAFILES_2023)/geo/countries.json
 
-generated-data: generated-2022 generated-live $(DATAFILES)/constituencies/.uptodate $(DATAFILES)/beaches/.uptodate $(DATAFILES)/shellfisheries/.uptodate $(PROVIDED)
+generated-data: generated-2023 generated-live $(DATAFILES)/constituencies/.uptodate $(DATAFILES)/beaches/.uptodate $(DATAFILES)/shellfisheries/.uptodate $(PROVIDED)
 
-generated-2022: $(DATA_2022_GENERATED) $(GEO_2022_GENERATED) $(PROVIDED)
+generated-2023: $(DATA_2023_GENERATED) $(GEO_2023_GENERATED) $(PROVIDED)
 
 provided: $(PROVIDED)
 
@@ -90,13 +90,13 @@ generated-live:
 .PHONY: .FORCE
 .FORCE:
 
-$(DATA_2022_LIVE): .FORCE
+$(DATA_2023_LIVE): .FORCE
 
-$(DATAFILES)/v1/2022/%.json: sql/v1/2022/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_JSON)
+$(DATAFILES)/v1/2023/%.json: sql/v1/2023/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_JSON)
 	@mkdir -p $(dir $@)
 	$(PYTHON) $(SQL_TO_JSON) $< $@
 
-$(DATAFILES)/v1/2022/geo/%.json:  sql/v1/2022/geo/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_TEXT)
+$(DATAFILES)/v1/2023/geo/%.json:  sql/v1/2023/geo/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_TEXT)
 	@mkdir -p $(dir $@)
 	$(PYTHON) $(SQL_TO_TEXT) $< | jq -r tostring > $@
 
@@ -126,12 +126,12 @@ $(DATAFILES)/media-appearances.json: provided/media-appearances.json
 $(DATAFILES)/water-companies.json: provided/water-companies.json
 	cp $< $@
 
-$(DATAFILES)/v1/2022/geo/countries.json: provided/countries.json
+$(DATAFILES)/v1/2023/geo/countries.json: provided/countries.json
 	cp $< $@
 
-.PHONY: clean-2022
-clean-2022:
-	rm -rf datafiles/v1/2022
+.PHONY: clean-2023
+clean-2023:
+	rm -rf datafiles/v1/2023
 
 .PHONY: beaches-again
 beaches-again:
@@ -139,5 +139,5 @@ beaches-again:
 	$(MAKE) generated-data
 
 
-.PHONY: generated-2022-again
-generated-2022-again: clean-2022 generated-2022
+.PHONY: generated-2023-again
+generated-2023-again: clean-2023 generated-2023

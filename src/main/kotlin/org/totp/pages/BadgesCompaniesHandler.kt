@@ -30,13 +30,13 @@ object BadgesCompaniesHandler {
 
             val summaries = companySummaries()
 
-            val applicable = summaries.filter { it.year == 2022 }
+            val applicable = summaries.filter { it.year == 2023 }
 
             Response(Status.OK)
                 .with(
                     viewLens of BadgesCompaniesPage(
                         pageUriFrom(request),
-                        2022,
+                        2023,
                         companies = applicable.map { it.toRenderable() }
                     ),
                 )
