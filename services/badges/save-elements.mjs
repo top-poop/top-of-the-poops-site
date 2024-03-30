@@ -13,7 +13,6 @@ const captureScreenshotsOfElements = async (path, elements) => {
     for (const element of elements) {
 
         const name = await element.evaluate(it => it.id)
-
         const filepath = `${path}/${name}.png`
 
         const directory = fpath.dirname(filepath);
@@ -23,9 +22,6 @@ const captureScreenshotsOfElements = async (path, elements) => {
         }
 
         console.log(filepath);
-
-
-
         await element.screenshot({ path: filepath });
         i += 1;
     }
@@ -36,7 +32,7 @@ async function run(url, path) {
     const browser = await pup.launch({
         executablePath: "/opt/google/chrome/google-chrome",
         defaultViewport: null,
-        ignoreDefaultArgs: ['--disable-dev-shm-usage']
+        ignoreDefaultArgs: ['--disable-dev-shm-usage'],
     })
 
     const pages = await browser.pages();

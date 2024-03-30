@@ -111,7 +111,9 @@ generate-company-badges:
 
 generate-constituency-badges:
 	@mkdir -p $(TMP_CON_ORIG)
-	$(NPM) run save-elements http://localhost:8000/private/badges/constituencies $(TMP_CON_ORIG)
+	for letter in a b c d e f g h i j k l m n o p q r s t u v w x y z; do \
+		$(NPM) run save-elements http://localhost:8000/private/badges/constituencies/$${letter} $(TMP_CON_ORIG); \
+	done
 
 generate-home-badges:
 	@mkdir -p $(TMP_HOME_ORIG)

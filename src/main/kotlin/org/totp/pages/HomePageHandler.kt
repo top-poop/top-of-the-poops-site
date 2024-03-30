@@ -119,7 +119,7 @@ object HomepageHandler {
                             cta = "Take action. Tweet this to your followers",
                             listOf("sewage"),
                             via = "sewageuk",
-                            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/home/home.png")
+                            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/home/home-2023.png")
                         )
                     )
                 )

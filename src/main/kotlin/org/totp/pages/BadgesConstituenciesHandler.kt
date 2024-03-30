@@ -7,6 +7,7 @@ import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.Uri
 import org.http4k.core.with
+import org.http4k.lens.Path
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
@@ -32,8 +33,13 @@ object BadgesConstituenciesHandler {
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
+        val letter = Path.of("letter")
+
         return { request ->
-            val rankings = constituencyRankings()
+            val startLetter = letter(request)
+            val rankings = constituencyRankings().filter {
+                it.constituencyName.value.lowercase().startsWith(startLetter)
+            }
 
             Response(Status.OK)
                 .with(

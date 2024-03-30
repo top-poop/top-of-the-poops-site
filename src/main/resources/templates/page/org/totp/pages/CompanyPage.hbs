@@ -56,9 +56,9 @@
 {{#if live}}
     <div class="container">
 
-    {{#if live.overflowing}}
-        {{#> components/section
-                title=(concat company.name " has " live.overflowing.length " CSOs dumping sewage right now") }}
+        {{#if live.overflowing}}
+            {{#> components/section
+                    title=(concat company.name " has " live.overflowing.length " CSOs dumping sewage right now") }}
 
                 <div class="row">
                     <div class="col">
@@ -66,58 +66,58 @@
                     </div>
                 </div>
 
-            <div id="live-csos" class="row row-cols-1 row-cols-md-3">
-            {{#each (take live.overflowing n=9)}}
-                    <div class="col mb-4" >
-                    <div class="card h-100">
-                        <!-- {{this.permit}} -->
-                        <div class="card-header">{{inc @index}}. {{this.sitename}}</div>
-                        <div class="events  card-body">
-                            <p class="card-title">
-                                <a href="{{this.constituency.uri}}">{{this.constituency.name}}</a>
-                                into {{this.waterway.name}}
-                            </p>
-                            <p class="card-text"><small class="text-muted">Started {{ago this.started}}</small>
-                            </p>
+                <div id="live-csos" class="row row-cols-1 row-cols-md-3">
+                    {{#each (take live.overflowing n=9)}}
+                        <div class="col mb-4">
+                            <div class="card h-100">
+                                <!-- {{this.permit}} -->
+                                <div class="card-header">{{inc @index}}. {{this.sitename}}</div>
+                                <div class="events  card-body">
+                                    <p class="card-title">
+                                        <a href="{{this.constituency.uri}}">{{this.constituency.name}}</a>
+                                        into {{this.waterway.name}}
+                                    </p>
+                                    <p class="card-text"><small class="text-muted">Started {{ago this.started}}</small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {{/each}}
+                </div>
+            {{/components/section}}
+        {{/if}}
+        {{#> components/section title="How many Sewage Overflows are dumping sewage?" }}
+            <div class="row">
+                <div class="col">
+                    <div class="row">
+                        <div class="col">
+                            <p>We have live data for {{company.name}} so we can track what happens every day - given
+                                that
+                                overflows are supposed to happen on an 'exceptional' basis only - does the chart
+                                indicate that?</p>
+
+                            <p>The red line indicates the number of CSOs that overflowed for at least 30mins, the grey,
+                                the
+                                number of CSOs
+                                that were offline for at least 30mins, and the blue line is the total number of CSOs
+                                that we can get information for.</p>
+
+                            <p>There is daily updated information on all constituencies covered by {{company.name}}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div id="edm-spills" class="plot-chart"
+                                 data-uri="/live/{{company.slug}}/overflow-summary">
+                            </div>
                         </div>
                     </div>
                 </div>
-            {{/each}}
             </div>
         {{/components/section}}
-    {{/if}}
-    {{#> components/section title="How many Sewage Overflows are dumping sewage?" }}
-        <div class="row">
-            <div class="col">
-                <div class="row">
-                    <div class="col">
-                        <p>We have live data for {{company.name}} so we can track what happens every day - given
-                            that
-                            overflows are supposed to happen on an 'exceptional' basis only - does the chart
-                            indicate that?</p>
-
-                        <p>The red line indicates the number of CSOs that overflowed for at least 30mins, the grey,
-                            the
-                            number of CSOs
-                            that were offline for at least 30mins, and the blue line is the total number of CSOs
-                            that we can get information for.</p>
-
-                        <p>There is daily updated information on all constituencies covered by {{company.name}}</p>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <div id="edm-spills" class="plot-chart"
-                             data-uri="/live/{{company.slug}}/overflow-summary">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {{/components/section}}
     </div>
     <script type="module">
-        import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.4/+esm";
+        import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/+esm";
 
         const PlotDailyEDM = (data, width, height) => Plot.plot({
             marginLeft: 40,
@@ -175,6 +175,50 @@
 <div class="container">
     <div class="row">
         <div class="col">
+            {{#> components/section title="2023 - By Water Company"}}
+                <div class="row">
+                    <div class="col">
+                        <p>How does each water company compare? These are the totals by company for each. The totals are
+                            really high, counting things in hours doesn't make
+                            it very easy to think about. Here we show how many years of continuous sewage dumps happened
+                            in a single year, by water company.</p>
+                    </div>
+                </div>
+                <div class="row mb-5">
+                    <div class="col">
+                        <div style="height: 300px;" id="plot-company-totals" data-company-name="{{company.name}}"
+                             data-uri="/data/v1/2023/spills-by-company.json"></div>
+                    </div>
+                </div>
+            {{/components/section}}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            {{#> components/section title="2023 - Asset Spill Duration Comparison"}}
+
+                <div class="row">
+                    <div class="col">
+                        <p>It isn't like there are just a few outliers... the problem exists across the entire estate of water assets.
+                        Here we show a 'cumulative frequency diagram' - where the number of CSOs that dumped sewage for a time, or longer, is shown. You can see that many CSOs dumped sewage into a river for months and months.</p>
+
+                        <p>{{company.name}} is highlighted in the plot below</p>
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col">
+                        <div style="height: 300px;" id="plot-company-comparison" data-company-name="{{company.name}}"
+                             data-uri="/data/v1/2023/spills-all.json"></div>
+                    </div>
+                </div>
+            {{/components/section}}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
             {{#> components/section title=(concat "2023 - Worst Locations " company.name)}}
                 <div class="row row-cols-1 row-cols-md-3">
                     {{#each worstCsos}}
@@ -205,6 +249,136 @@
     </div>
 </div>
 
+<script type="module">
+    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/+esm";
+
+    const PlotSpillsByCompany = (data, width, height, company_name) => {
+        return Plot.plot({
+            // marginLeft: 100,
+            // marginBottom: 30,
+            width: width,
+            height: height,
+            y: {
+                grid: true,
+                zero: true,
+                label: "Years of Continuous Dumping ↑",
+            },
+            color: {
+                legend: true
+            },
+            x: {
+                grid: false,
+                domain: [2020, 2021, 2022, 2023],
+                tickFormat: d => `${d}`,
+            },
+            marks: [
+                Plot.areaY(
+                        data,
+                        {
+                            x: "reporting_year",
+                            y: (d) => d.hours / (750.5 * 12),
+                            fill: "company_name",
+                            tip: true,
+                            opacity: 0.7,
+                        }
+                ),
+            ]
+        })
+    };
+
+    const PlotSpillsCumulative = (data, width, height, company_name) => {
+        return Plot.plot({
+            // marginLeft: 100,
+            // marginBottom: 30,
+            width: width,
+            height: height,
+            y: {
+                grid: true,
+                type: "log", base: 10,
+                label: "Count of CSOs ↑",
+            },
+            x: {
+                grid: false,
+                type: "log", base: 10,
+                label: "Hours of Overflow 2023 →",
+            },
+            color: {
+                domain: [false, true],
+                range: ["#ccc", "red"]
+            },
+            marks: [
+                Plot.line(
+                        data.filter(d => d["total_spill_hours"] > 0),
+                        Plot.binX(
+                                {y: "count", filter: null},
+                                {
+                                    thresholds: [1, 168 * 0.5, 168 * 1, 168 * 2, 168 * 3,
+                                        1 * 730, 1.5 * 730, 2 * 730, 2.5 * 750, 3 * 730, 4 * 730, 5 * 730,
+                                        6 * 730, 7 * 730, 8 * 730, 9 * 730, 10 * 730, 11 * 730, 12 * 730],
+
+                                    z: "company_name",
+                                    cumulative: -1,
+                                    x: "total_spill_hours",
+                                    stroke: (d) => d.company_name === company_name,
+                                    sort: (d) => d.company_name === company_name ? 1 : 0
+                                })
+                ),
+                Plot.dot(
+                        data,
+                        Plot.binX(
+                                {y: "count", filter: null},
+                                {
+                                    thresholds: [1, 168 * 0.5, 168 * 1, 168 * 2, 168 * 3,
+                                        1 * 730, 1.5 * 730, 2 * 730, 2.5 * 750, 3 * 730, 4 * 730, 5 * 730,
+                                        6 * 730, 7 * 730, 8 * 730, 9 * 730, 10 * 730, 11 * 730, 12 * 730],
+                                    z: "company_name",
+                                    cumulative: -1,
+                                    x: "total_spill_hours",
+                                    stroke: (d) => d.company_name === company_name,
+                                    sort: (d) => d.company_name === company_name ? 1 : 0,
+                                    opacity: 0.7,
+                                    title: (d) => d.company_name,
+                                    tip: true,
+                                })
+                ),
+                Plot.ruleX(
+                        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        {
+                            stroke: "red",
+                            opacity: 0.4,
+                            x: d => d * 730,
+                        }
+                ),
+                Plot.text(
+                        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        {
+                            text: d => `${d} m`,
+                            //textAnchor: "end",
+                            rotate: 45,
+                            x: d => d * 730,
+                            y: 2000,
+                        }
+                )
+            ]
+        })
+    };
+
+    const div = document.getElementById("plot-company-totals");
+    const response = await fetch(div.attributes["data-uri"].value);
+    const rect = div.getBoundingClientRect()
+    if (response.ok) {
+        div.appendChild(PlotSpillsByCompany(await response.json(), rect.width, rect.height, div.attributes["data-company-name"].value))
+    }
+
+    const divc = document.getElementById("plot-company-comparison");
+    const responsec = await fetch(divc.attributes["data-uri"].value);
+    const rectc = divc.getBoundingClientRect()
+    if (responsec.ok) {
+        divc.appendChild(PlotSpillsCumulative(await responsec.json(), rectc.width, rectc.height, divc.attributes["data-company-name"].value))
+    }
+
+</script>
+
 <div class="container">
     <div class="row">
         <div class="col">
@@ -234,9 +408,6 @@
         </div>
     </div>
 </div>
-
-
-
 
 {{#if beaches}}
     <div class="container">
@@ -291,7 +462,6 @@
     <div class="row">
         <div class="col">{{> chunks/data-sources }}</div>
     </div>
-</div>
 </div>
 
 {{> chunks/footer }}

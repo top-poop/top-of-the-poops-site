@@ -202,7 +202,7 @@ object ConstituencyPageHandler {
                                 cta = "Share $constituencyName sewage horrors",
                                 tags = listOf("sewage"),
                                 via = "sewageuk",
-                                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}.png")
+                                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2023.png")
                             ),
                             summary,
                             constituencyBoundary(constituencyName),
