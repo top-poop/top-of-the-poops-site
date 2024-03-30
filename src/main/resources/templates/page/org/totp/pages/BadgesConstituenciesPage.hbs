@@ -52,8 +52,8 @@
 
                     <div class="row align-middle">
                         <div class="col">
-                            <p class="card-text"><small class="text-muted">{{>chunks/explain-count this.count}}</small>
-                            </p>
+                            <p class="card-text"><small class="text-muted">{{>chunks/explain-count this.count}}</small></p>
+                            <p class="card-text"><small class="text-muted">Red dots are CSOs with no reporting</small></p>
                         </div>
                     </div>
 
@@ -103,12 +103,23 @@
                                 }
                         ),
                         Plot.dot(
-                                items,
+                                items.filter(d => d.spill_count > 0),
                                 {
                                     x: "lon",
                                     y: "lat",
                                     r: "total_spill_hours",
                                     fill: "company_name",
+                                    opacity: 0.7,
+                                    mixBlendMode: "multiply",
+                                }
+                        ),
+                        Plot.dot(
+                                items.filter(d => d.reporting_percent == 0.0),
+                                {
+                                    x: "lon",
+                                    y: "lat",
+                                    r: 10,
+                                    fill: '#cd1919',
                                     opacity: 0.7,
                                     mixBlendMode: "multiply",
                                 }
@@ -136,7 +147,7 @@
 
                     const relevant = spills
                             .filter(it => it.constituency == name)
-                            .filter(it => it.spill_count > 0)
+                            // .filter(it => it.spill_count > 0)
 
                     el.insertAdjacentElement('afterbegin', chart(geojson, relevant));
 
