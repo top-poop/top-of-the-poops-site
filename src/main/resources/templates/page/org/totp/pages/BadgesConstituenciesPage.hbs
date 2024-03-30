@@ -37,9 +37,9 @@
 <div class="ms-3 mt-3">
     {{#each constituencies}}
         <div style="width: 526px; height:263px; overflow: clip"
-             id="{{this.constituency.slug}}"
+             id="{{this.constituency.slug}}-2023" data-name="{{this.constituency.name}}" data-slug="{{this.constituency.slug}}"
              class="twitter-badge constituency mb-2">
-            <div class="card  h-100  rounded-lg " data-name="{{this.constituency.name}}">
+            <div class="card  h-100  rounded-lg ">
                 <img src="/assets/poop.png"/>
                 <div class="card-body" style="background-color: #f9f7ef">
                     <h5 class="card-title"
@@ -53,6 +53,13 @@
                     <div class="row align-middle">
                         <div class="col">
                             <p class="card-text"><small class="text-muted">{{>chunks/explain-count this.count}}</small>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row align-middle mt-1">
+                        <div class="col">
+                            <p class="card-text"><small class="text-muted">top-of-the-poops.org</small>
                             </p>
                         </div>
                     </div>
@@ -91,7 +98,7 @@
                                     fill: "rgb(2,46,4)",
                                     fillOpacity: 0.1,
                                     stroke: "#000000",
-                                    strokeWidth: 2,
+                                    strokeWidth: 4,
                                     strokeOpacity: 0.2,
                                 }
                         ),
@@ -120,12 +127,12 @@
 
         Array.from(document.querySelectorAll(".constituency"))
                 .map(it => {
-                    const id = it.id;
-                    const geojson = JSON.parse(document.getElementById(`boundary-${id}`).textContent);
+                    const slug = it.getAttribute("data-slug")
+                    const geojson = JSON.parse(document.getElementById(`boundary-${slug}`).textContent);
 
                     const el = it.querySelector(".card")
 
-                    const name = it.querySelector("[data-name]").getAttribute("data-name")
+                    const name = it.getAttribute("data-name")
 
                     const relevant = spills
                             .filter(it => it.constituency == name)

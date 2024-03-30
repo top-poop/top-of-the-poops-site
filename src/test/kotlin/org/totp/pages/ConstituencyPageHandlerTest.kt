@@ -74,7 +74,7 @@ class ConstituencyPageHandlerTest {
         val html = Html(service(Request(Method.GET, "/aldershot").header("host", "bob.com")))
 
         expectThat(html).twitterImageUri()
-            .isEqualTo("https://top-of-the-poops.org/badges/constituency/aldershot.png")
+            .isEqualTo("https://top-of-the-poops.org/badges/constituency/aldershot-2023.png")
 
         expectThat(html)
             .select("link[rel='canonical']").first()
@@ -83,6 +83,7 @@ class ConstituencyPageHandlerTest {
     }
 
     @Test
+
     fun `renders a constituency with accents`() {
         Html(service(Request(Method.GET, "/ynys-mon")))
     }

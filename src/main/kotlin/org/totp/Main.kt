@@ -286,7 +286,7 @@ fun main() {
                                 constituencyRank = constituencyRank,
                                 shellfisheryBoundaries = shellfisheryBoundaries
                             ),
-                            "/private/badges/constituencies" bind BadgesConstituenciesHandler(
+                            "/private/badges/constituencies/{letter}" bind BadgesConstituenciesHandler(
                                 renderer = renderer,
                                 constituencyRankings = constituencyRankings,
                                 mpFor = mpFor,

@@ -19,7 +19,7 @@ class BadgesConstituenciesHandlerTest {
 
 
     val service = routes(
-        "/" bind Method.GET to BadgesConstituenciesHandler(
+        "/{letter}" bind Method.GET to BadgesConstituenciesHandler(
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
             constituencyRankings = {
                 listOf(
@@ -52,6 +52,6 @@ class BadgesConstituenciesHandlerTest {
 
     @Test
     fun `renders the badges  page`() {
-        val html = Html(service(Request(Method.GET, "/")))
+        val html = Html(service(Request(Method.GET, "/a")))
     }
 }
