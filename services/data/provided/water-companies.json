@@ -39,6 +39,19 @@
     "twitter": "@NorthumbrianH2O"
   },
   {
+    "name": "Scottish Water",
+    "address": {
+      "line1": "",
+      "line2": "",
+      "line3": "",
+      "town": "",
+      "postcode": ""
+    },
+    "phone": "0800 0778 778",
+    "web": "https://www.scottishwater.co.uk",
+    "twitter": "@scottish_water"
+  },
+  {
     "name": "Severn Trent Water",
     "address": {
       "line1": "Severn Trent Centre",

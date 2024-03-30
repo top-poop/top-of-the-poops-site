@@ -33,7 +33,7 @@ with reports_last as (select pcon20nm                                as constitu
                          left join mps on reports_this.constituency = mps.constituency
                          left join mps_twitter on mps.constituency = mps_twitter.constituency
                 where con.pcon20cd like 'E%'
-                   or con.pcon20cd like 'W%'
+                   or con.pcon20cd like 'W%' or con.pcon20cd like 'S%'
                 order by constituency)
 select jsonb_build_object(
                'type', 'FeatureCollection',

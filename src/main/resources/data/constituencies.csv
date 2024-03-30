@@ -1,13 +1,24 @@
+Aberavon
+Aberconwy
+Aberdeen North
+Aberdeen South
+Airdrie and Shotts
 Aldershot
 Aldridge-Brownhills
 Altrincham and Sale West
+Alyn and Deeside
 Amber Valley
+Angus
+Arfon
+Argyll and Bute
 Arundel and South Downs
 Ashfield
 Ashford
 Ashton-under-Lyne
 Aylesbury
+"Ayr, Carrick and Cumnock"
 Banbury
+Banff and Buchan
 Barking
 Barnsley Central
 Barnsley East
@@ -21,8 +32,13 @@ Battersea
 Beaconsfield
 Beckenham
 Bedford
+Belfast East
+Belfast North
+Belfast South
+Belfast West
 Bermondsey and Old Southwark
 Berwick-upon-Tweed
+"Berwickshire, Roxburgh and Selkirk"
 Bethnal Green and Bow
 Beverley and Holderness
 Bexhill and Battle
@@ -42,6 +58,7 @@ Blackburn
 Blackley and Broughton
 Blackpool North and Cleveleys
 Blackpool South
+Blaenau Gwent
 Blaydon
 Blyth Valley
 Bognor Regis and Littlehampton
@@ -59,10 +76,12 @@ Bradford East
 Bradford South
 Bradford West
 Braintree
+Brecon and Radnorshire
 Brent Central
 Brent North
 Brentford and Isleworth
 Brentwood and Ongar
+Bridgend
 Bridgwater and West Somerset
 Brigg and Goole
 "Brighton, Kemptown"
@@ -82,17 +101,27 @@ Burton
 Bury North
 Bury South
 Bury St Edmunds
+Caerphilly
+"Caithness, Sutherland and Easter Ross"
 Calder Valley
 Camberwell and Peckham
 Camborne and Redruth
 Cambridge
 Cannock Chase
 Canterbury
+Cardiff Central
+Cardiff North
+Cardiff South and Penarth
+Cardiff West
 Carlisle
+Carmarthen East and Dinefwr
+Carmarthen West and South Pembrokeshire
 Carshalton and Wallington
 Castle Point
+Central Ayrshire
 Central Devon
 Central Suffolk and North Ipswich
+Ceredigion
 Charnwood
 Chatham and Aylesford
 Cheadle
@@ -112,6 +141,9 @@ City of Chester
 City of Durham
 Clacton
 Cleethorpes
+Clwyd South
+Clwyd West
+"Coatbridge, Chryston and Bellshill"
 Colchester
 Colne Valley
 Congleton
@@ -125,10 +157,13 @@ Crewe and Nantwich
 Croydon Central
 Croydon North
 Croydon South
+"Cumbernauld, Kilsyth and Kirkintilloch East"
+Cynon Valley
 Dagenham and Rainham
 Darlington
 Dartford
 Daventry
+Delyn
 Denton and Reddish
 Derby North
 Derby South
@@ -142,19 +177,36 @@ Dover
 Dudley North
 Dudley South
 Dulwich and West Norwood
+Dumfries and Galloway
+"Dumfriesshire, Clydesdale and Tweeddale"
+Dundee East
+Dundee West
+Dunfermline and West Fife
+Dwyfor Meirionnydd
 Ealing Central and Acton
 Ealing North
 "Ealing, Southall"
 Easington
+East Antrim
 East Devon
+East Dunbartonshire
 East Ham
 East Hampshire
+"East Kilbride, Strathaven and Lesmahagow"
+East Londonderry
+East Lothian
+East Renfrewshire
 East Surrey
 East Worthing and Shoreham
 East Yorkshire
 Eastbourne
 Eastleigh
 Eddisbury
+Edinburgh East
+Edinburgh North and Leith
+Edinburgh South
+Edinburgh South West
+Edinburgh West
 Edmonton
 Ellesmere Port and Neston
 Elmet and Rothwell
@@ -167,21 +219,34 @@ Erewash
 Erith and Thamesmead
 Esher and Walton
 Exeter
+Falkirk
 Fareham
 Faversham and Mid Kent
 Feltham and Heston
+Fermanagh and South Tyrone
 Filton and Bradley Stoke
 Finchley and Golders Green
 Folkestone and Hythe
 Forest of Dean
+Foyle
 Fylde
 Gainsborough
 Garston and Halewood
 Gateshead
 Gedling
 Gillingham and Rainham
+Glasgow Central
+Glasgow East
+Glasgow North
+Glasgow North East
+Glasgow North West
+Glasgow South
+Glasgow South West
+Glenrothes
 Gloucester
+Gordon
 Gosport
+Gower
 Grantham and Stamford
 Gravesham
 Great Grimsby
@@ -229,21 +294,28 @@ Huntingdon
 Hyndburn
 Ilford North
 Ilford South
+Inverclyde
+"Inverness, Nairn, Badenoch and Strathspey"
 Ipswich
 Isle of Wight
 Islington North
 Islington South and Finsbury
+Islwyn
 Jarrow
 Keighley
 Kenilworth and Southam
 Kensington
 Kettering
+Kilmarnock and Loudoun
 Kingston and Surbiton
 Kingston upon Hull East
 Kingston upon Hull North
 Kingston upon Hull West and Hessle
 Kingswood
+Kirkcaldy and Cowdenbeath
 Knowsley
+Lagan Valley
+Lanark and Hamilton East
 Lancaster and Fleetwood
 Leeds Central
 Leeds East
@@ -261,10 +333,13 @@ Lewisham West and Penge
 Leyton and Wanstead
 Lichfield
 Lincoln
+Linlithgow and East Falkirk
 "Liverpool, Riverside"
 "Liverpool, Walton"
 "Liverpool, Wavertree"
 "Liverpool, West Derby"
+Livingston
+Llanelli
 Loughborough
 Louth and Horncastle
 Ludlow
@@ -281,20 +356,29 @@ Manchester Central
 Mansfield
 Meon Valley
 Meriden
+Merthyr Tydfil and Rhymney
 Mid Bedfordshire
 Mid Derbyshire
 Mid Dorset and North Poole
 Mid Norfolk
 Mid Sussex
+Mid Ulster
 Mid Worcestershire
 Middlesbrough
 Middlesbrough South and East Cleveland
+Midlothian
 Milton Keynes North
 Milton Keynes South
 Mitcham and Morden
 Mole Valley
+Monmouth
+Montgomeryshire
+Moray
 Morecambe and Lunesdale
 Morley and Outwood
+Motherwell and Wishaw
+Na h-Eileanan an Iar
+Neath
 New Forest East
 New Forest West
 Newark
@@ -303,15 +387,22 @@ Newcastle upon Tyne Central
 Newcastle upon Tyne East
 Newcastle upon Tyne North
 Newcastle-under-Lyme
+Newport East
+Newport West
+Newry and Armagh
 Newton Abbot
 "Normanton, Pontefract and Castleford"
+North Antrim
+North Ayrshire and Arran
 North Cornwall
 North Devon
 North Dorset
+North Down
 North Durham
 North East Bedfordshire
 North East Cambridgeshire
 North East Derbyshire
+North East Fife
 North East Hampshire
 North East Hertfordshire
 North East Somerset
@@ -337,22 +428,30 @@ Nottingham East
 Nottingham North
 Nottingham South
 Nuneaton
+Ochil and South Perthshire
+Ogmore
 Old Bexley and Sidcup
 Oldham East and Saddleworth
 Oldham West and Royton
+Orkney and Shetland
 Orpington
 Oxford East
 Oxford West and Abingdon
+Paisley and Renfrewshire North
+Paisley and Renfrewshire South
 Pendle
 Penistone and Stocksbridge
 Penrith and The Border
+Perth and North Perthshire
 Peterborough
 "Plymouth, Moor View"
 "Plymouth, Sutton and Devonport"
+Pontypridd
 Poole
 Poplar and Limehouse
 Portsmouth North
 Portsmouth South
+Preseli Pembrokeshire
 Preston
 Pudsey
 Putney
@@ -362,6 +461,7 @@ Reading West
 Redcar
 Redditch
 Reigate
+Rhondda
 Ribble Valley
 Richmond (Yorks)
 Richmond Park
@@ -370,6 +470,7 @@ Rochester and Strood
 Rochford and Southend East
 Romford
 Romsey and Southampton North
+"Ross, Skye and Lochaber"
 Rossendale and Darwen
 Rother Valley
 Rotherham
@@ -377,6 +478,7 @@ Rugby
 "Ruislip, Northwood and Pinner"
 Runnymede and Weybridge
 Rushcliffe
+Rutherglen and Hamilton West
 Rutland and Melton
 Saffron Walden
 Salford and Eccles
@@ -401,10 +503,12 @@ Sleaford and North Hykeham
 Slough
 Solihull
 Somerton and Frome
+South Antrim
 South Basildon and East Thurrock
 South Cambridgeshire
 South Derbyshire
 South Dorset
+South Down
 South East Cambridgeshire
 South East Cornwall
 South Holland and The Deepings
@@ -437,6 +541,7 @@ Stafford
 Staffordshire Moorlands
 Stalybridge and Hyde
 Stevenage
+Stirling
 Stockport
 Stockton North
 Stockton South
@@ -445,6 +550,7 @@ Stoke-on-Trent North
 Stoke-on-Trent South
 Stone
 Stourbridge
+Strangford
 Stratford-on-Avon
 Streatham
 Stretford and Urmston
@@ -452,8 +558,10 @@ Stroud
 Suffolk Coastal
 Sunderland Central
 Surrey Heath
-Sutton and Cheam
 Sutton Coldfield
+Sutton and Cheam
+Swansea East
+Swansea West
 Tamworth
 Tatton
 Taunton Deane
@@ -468,6 +576,7 @@ Tiverton and Honiton
 Tonbridge and Malling
 Tooting
 Torbay
+Torfaen
 Torridge and West Devon
 Totnes
 Tottenham
@@ -475,7 +584,10 @@ Truro and Falmouth
 Tunbridge Wells
 Twickenham
 Tynemouth
+Upper Bann
 Uxbridge and South Ruislip
+Vale of Clwyd
+Vale of Glamorgan
 Vauxhall
 Wakefield
 Wallasey
@@ -497,12 +609,15 @@ Wellingborough
 Wells
 Welwyn Hatfield
 Wentworth and Dearne
+West Aberdeenshire and Kincardine
 West Bromwich East
 West Bromwich West
 West Dorset
+West Dunbartonshire
 West Ham
 West Lancashire
 West Suffolk
+West Tyrone
 West Worcestershire
 Westminster North
 Westmorland and Lonsdale
@@ -524,50 +639,12 @@ Worcester
 Workington
 Worsley and Eccles South
 Worthing West
+Wrexham
 Wycombe
-Wyre and Preston North
 Wyre Forest
+Wyre and Preston North
 Wythenshawe and Sale East
 Yeovil
+Ynys Môn
 York Central
 York Outer
-Ynys Môn
-Delyn
-Alyn and Deeside
-Wrexham
-Llanelli
-Gower
-Swansea West
-Swansea East
-Aberavon
-Cardiff Central
-Cardiff North
-Rhondda
-Torfaen
-Monmouth
-Newport East
-Newport West
-Arfon
-Aberconwy
-Clwyd West
-Vale of Clwyd
-Dwyfor Meirionnydd
-Clwyd South
-Montgomeryshire
-Ceredigion
-Preseli Pembrokeshire
-Carmarthen West and South Pembrokeshire
-Carmarthen East and Dinefwr
-Brecon and Radnorshire
-Neath
-Cynon Valley
-Merthyr Tydfil and Rhymney
-Blaenau Gwent
-Bridgend
-Ogmore
-Pontypridd
-Caerphilly
-Islwyn
-Vale of Glamorgan
-Cardiff West
-Cardiff South and Penarth

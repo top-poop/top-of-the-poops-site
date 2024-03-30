@@ -29,23 +29,21 @@
 <div class="container-fluid">
     <div class="row justify-content-md-center  align-items-center">
         <div class="col-md-4 offset-md-1">
-            <img alt="A stylised map of England and Wales showing CSO locations" style="width: 100%; height: auto" src="/assets/images/top-of-the-poops-cso-2021-web-fs8.png"/>
+            <img alt="A stylised map of England and Wales showing CSO locations" style="width: 100%; height: auto" src="/assets/images/top-of-the-poops-cso-2023-web-fs8.png"/>
         </div>
         <div class="col-md-4">
             <div class="row">
                 <div class="col">
                     <div class="display-4">A Petri Dish for E.Coli</div>
 
-                    <p>Here are all the CSOs in England and Wales that 'overflowed' in {{ year }} - dumping raw or
+                    <p>Here are all the CSOs in England, Wales & Scotland that 'overflowed' in {{ year }} - dumping raw or
                         minimally treated sewage into fragile chalk streams, rivers, onto beaches and into shellfish
                         areas</p>
                     <p>Each colour represents a different Water Company, the size of each dot relates to how long each
-                        overflow was polluting</p>
+                        overflow was polluting - where the monitoring is disabled we show a medium-sized dot.</p>
                     <p>The figures, supplied by the water companies themselves, understate the problem, as the data is
                         poorly collected by the
-                        Water Companies, with monitoring defective or in many cases completely absent. Many recordings
-                        of data
-                        don't seem to be associated with a valid permit, so it is impossible to know where they are.</p>
+                        Water Companies, with monitoring defective or in many cases completely absent.</p>
                 </div>
             </div>
             <div class="row">
@@ -250,10 +248,10 @@
                     type: "mercator",
                     domain: {
                         type: "MultiPoint",
-                        coordinates: [[-6, 49.9], [1.8, 55.9]],
+                        coordinates: [[-6, 50.0], [1.8, 57.9]],
                     },
                 },
-                width: 800,
+                height: 800,
                 color: {
                     scheme: "oranges",
                 },
