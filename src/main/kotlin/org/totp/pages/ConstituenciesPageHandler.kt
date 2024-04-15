@@ -2,20 +2,9 @@ package org.totp.pages
 
 import dev.forkhandles.values.IntValue
 import dev.forkhandles.values.IntValueFactory
-import kotlinx.html.a
-import kotlinx.html.classes
+import kotlinx.html.*
 import kotlinx.html.stream.createHTML
-import kotlinx.html.tbody
-import kotlinx.html.td
-import kotlinx.html.tr
-import org.http4k.core.Body
-import org.http4k.core.ContentType
-import org.http4k.core.HttpHandler
-import org.http4k.core.Request
-import org.http4k.core.Response
-import org.http4k.core.Status
-import org.http4k.core.Uri
-import org.http4k.core.with
+import org.http4k.core.*
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.http4k.pageUriFrom
@@ -64,7 +53,7 @@ class RenderableDurationDelta(val value: Duration) : Delta {
 class RenderableConstituencyRank(
     val rank: Int,
     val constituency: RenderableConstituency,
-    val mp: MP,
+    val mp: MP?,
     val count: RenderableCount,
     val duration: RenderableDuration,
     val countDelta: DeltaValue,
@@ -82,9 +71,15 @@ fun tableRows(items: List<RenderableConstituencyRank>): String {
                     a("${r.constituency.uri}") { +"${r.constituency.name}" }
                 }
                 td(classes = "align-middle") {
-                    a("${r.mp.uri}") { +r.mp.name }
+                    r.mp?.let {
+                        a("${it.uri}") { +it.name }
+                    }
                 }
-                td(classes = "align-middle") { +r.mp.party }
+                td(classes = "align-middle") {
+                    r.mp?.let {
+                        +it.party
+                    }
+                }
                 td(classes = "align-middle") { +nf(r.count.count) }
                 td(classes = "align-middle") {
                     classes += classesFor(r.countDelta)
@@ -127,7 +122,7 @@ object ConstituenciesPageHandler {
 }
 
 fun ConstituencyRank.toRenderable(
-    mp: (ConstituencyName) -> MP
+    mp: (ConstituencyName) -> MP?
 ) = RenderableConstituencyRank(
     rank,
     constituencyName.toRenderable(),

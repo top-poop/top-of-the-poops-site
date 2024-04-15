@@ -92,6 +92,7 @@ data class RenderableCSOTotal(
 class ConstituencyPage(
     uri: Uri,
     val constituency: RenderableConstituency,
+    val mp: MP?,
     val share: SocialShare,
     val summary: PollutionSummary,
     val geojson: GeoJSON,
@@ -146,7 +147,7 @@ object ConstituencyPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
         constituencySpills: (ConstituencyName) -> List<CSOTotals>,
-        mpFor: (ConstituencyName) -> MP,
+        mpFor: (ConstituencyName) -> MP?,
         constituencyBoundary: (ConstituencyName) -> GeoJSON,
         constituencyLiveAvailable: () -> Set<ConstituencyName>,
         constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
@@ -187,23 +188,34 @@ object ConstituencyPageHandler {
                 val rivers = rivers2.take(5)
                     .map { it.toRenderable() }
 
+                val mp = mpFor(
+                    constituencyName
+                )
+
                 Response(Status.OK)
                     .with(
                         viewLens of ConstituencyPage(
                             pageUriFrom(request).removeQuery(),
                             constituencyName.toRenderable(current = true),
-                            SocialShare(
+                            mp = mp,
+                            mp?.let { mp ->
+                                SocialShare(
+                                    pageUriFrom(request),
+                                    text = "Hey ${mp.handle}! What are you doing about the ${numberFormat.format(summary.duration.hours)} hours of sewage pollution in $constituencyName",
+                                    cta = "Tell ${mp.name} what you think",
+                                    tags = listOf("sewage"),
+                                    via = "sewageuk",
+                                    twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2023.png")
+                                )    
+                            } ?: SocialShare(
                                 pageUriFrom(request),
-                                text = "$constituencyName had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year} - ${
-                                    mpFor(
-                                        constituencyName
-                                    ).handle
-                                }",
+                                text = "$constituencyName had ${numberFormat.format(summary.duration.hours)} hours of sewage pollution in ${summary.year}",
                                 cta = "Share $constituencyName sewage horrors",
                                 tags = listOf("sewage"),
                                 via = "sewageuk",
                                 twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2023.png")
-                            ),
+                            )
+                            ,
                             summary,
                             constituencyBoundary(constituencyName),
                             list.map {
