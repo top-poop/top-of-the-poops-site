@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Top of the Poops | Constituency | {{ constituency.name }}</title>
+    <title>Top of the Poops | Constituency | {{ constituency.name }}| Polluted by {{join summary.companies ', '}}</title>
     <meta name="description" content="Analysing sewage dumps by water companies in {{ constituency.name }}">
 
     {{> chunks/favicons }}
@@ -27,8 +27,8 @@
 {{> chunks/navbar }}
 
 {{#> components/jumbotron }}
-    {{ constituency.name }} polluted by sewage {{numberFormat summary.count.count}} times in {{summary.year}} - lasting
-    {{numberFormat summary.duration.hours}} hours {{#if summary.zeroReportingCount gt 0}}<br/> - but monitoring was disabled in some locations, so could be more{{else if summary.lowReportingCount gt 0}}<br/> - but monitoring fell below 50% in some locations so could be more{{/if}}
+    {{ constituency.name }} was polluted by sewage {{numberFormat summary.count.count}} times in {{summary.year}}
+    <br/>lasting {{numberFormat summary.duration.hours}} hours {{#gt summary.duration.years 1}}- that's {{numberFormat summary.duration.years}} years! {{/gt}}{{#if summary.zeroReportingCount gt 0}}<br/> - but monitoring was disabled in some locations, so could be more{{else if summary.lowReportingCount gt 0}}<br/> - but monitoring fell below 50% in some locations so could be more{{/if}}
 {{/components/jumbotron}}
 
 
@@ -72,8 +72,7 @@
                     <div class="card  mb-3">
                         <div class="card-header">Totals for {{ constituency.name }} in {{summary.year}}</div>
                         <div class="card-body">
-                            <h5 class="card-title">{{summary.locationCount}} Sites polluted by {{join summary.companies
-                                                                                                      ', '}}</h5>
+                            <h5 class="card-title">{{summary.locationCount}} Sites polluted by {{join summary.companies ', '}}</h5>
                             <div class="card-text">
                                 {{numberFormat summary.count.count}} sewage dumps<br>
                                 <span class="spill-hours">{{numberFormat summary.duration.hours}}
