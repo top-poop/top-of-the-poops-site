@@ -16,6 +16,15 @@ made a mistake in our interpretation of a data item.
 
 If we are wrong or make a mistake - please correct us.
 
+
+## There is a lot of sewage in rivers in the UK
+
+Here is a picture of all the sewage dumps....
+
+![A map of CSOs in the England, Wales, and Scotland](src/main/resources/assets/images/top-of-the-poops-cso-2023-web-fs8.png)
+
+it's not so good.
+
 💖
 
 
