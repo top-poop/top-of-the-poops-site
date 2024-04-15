@@ -53,6 +53,22 @@
     </div>
 </div>
 
+
+{{#eq company.name.value 'Scottish Water'}}
+    <div class="container">
+    {{#> components/section title="Special Note regarding Scottish Water" }}
+        <div class="row">
+            <div class="col">
+                <p>Scottish Water simply does not monitor the overflows of many of its CSOs, - so <strong>the numbers here are artificially low</strong>, the
+                real situation is far worse.</p>
+                <p>Of the 702 CSOs locations we know about for Scottish Water, 452 of them have <strong>ZERO</strong> reporting.</p>
+            </div>
+        </div>
+    {{/components/section}}
+    </div>
+{{/eq}}
+
+
 {{#if live}}
     <div class="container">
 
