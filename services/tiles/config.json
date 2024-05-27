@@ -8,7 +8,10 @@
       "mbtiles": ""
     },
     "domains": [
-      "maps.top-of-the-poops.org"
+      "top-of-the-poops.org/tiles"
+    ],
+    "xdomains": [
+      "minnow:8081"
     ],
     "formatQuality": {
       "jpeg": 80,
@@ -39,7 +42,7 @@
   },
   "data": {
     "v3": {
-      "mbtiles": "maptiler-osm-europe_great-britain.mbtiles"
+      "mbtiles": "/data/map/osm-europe_great-britain.mbtiles"
     }
   }
 }

@@ -8,29 +8,36 @@ __check_defined = \
 $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 $(call check_defined, TOTP_CONTEXT, context)
 
-SERVICE=postgres
-SERVICE_VERSION=latest
+SERVICE=tiles
+SERVICE_VERSION=$(shell ../../bin/content-hash.sh nginx.conf Dockerfile config.json styles/*)
 
-IMAGE_NAME=maptiler/tileserver-gl
+IMAGE_NAME=totp-$(SERVICE)
 
 LOCAL_NAME=$(IMAGE_NAME):$(SERVICE_VERSION)
-FULL_NAME=$(LOCAL_NAME)
+FULL_NAME=$(DOCKER_HUB_ORG)/$(IMAGE_NAME):$(SERVICE_VERSION)
 
-.PHONY: image
-image:
+.PHONY: check-context
+check-context:
+	@echo "Current docker context (expect 'default'):" $(shell docker context show)
+	@test $(shell docker context show) = default
 
+image: check-context
+	docker build -t $(LOCAL_NAME)  -t $(FULL_NAME) .
 
 .PHONY: run
 run: image
+	docker run  -p 8081:80 --mount type=bind,source=/home/richja/tmp/tileserver,target=/data/map $(LOCAL_NAME)
 
 .PHONY: push
 push:
+	../../bin/docker-ensure-new-version.sh $(FULL_NAME)
+	docker push $(FULL_NAME)
 
 .PHONY: deploy
 deploy:
 	@test $(shell docker context show) = $(TOTP_CONTEXT)
 	docker service create --with-registry-auth --name $(SERVICE) --network overlay-net \
-	--mount type=bind,source=/data/tileserver,target=/var/lib/postgresql $(FULL_NAME)
+	--mount type=bind,source=/data/tiles,target=/data/map $(FULL_NAME)
 
 .PHONY: upgrade
 upgrade:
