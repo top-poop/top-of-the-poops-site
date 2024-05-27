@@ -10,6 +10,7 @@ with cons as (
             company_name,
             discharge_site_name as site_name,
             receiving_water,
+            wfd_waterbody_id,
             lat,
             lon,
             coalesce(sum(spill_count), 0)  as spill_count,
@@ -17,7 +18,7 @@ with cons as (
             coalesce(avg(reporting_pct), 0) * 100 as reporting_percent
         from cons
         where pcon20nm is not null
-        group by pcon20nm, company_name, discharge_site_name, receiving_water, lat, lon
+        group by pcon20nm, company_name, discharge_site_name, receiving_water, wfd_waterbody_id, lat, lon
     )
 select * from agg
 order by constituency, total_spill_hours desc

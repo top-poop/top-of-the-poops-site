@@ -61,6 +61,7 @@ fun ShellfishCSO.toRenderable(): RenderableCSOTotal {
             company = company.toRenderable(),
             sitename,
             waterway = waterway.toRenderable(company),
+            wfd = wfd?.toRenderable(),
             location,
         ),
         count = RenderableCount(count),

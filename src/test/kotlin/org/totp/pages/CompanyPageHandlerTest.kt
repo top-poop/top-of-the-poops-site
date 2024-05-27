@@ -2,10 +2,10 @@ package org.totp.pages
 
 import org.http4k.core.Method
 import org.http4k.core.Request
-import org.http4k.core.Uri
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
+import org.totp.db.EnvironmentAgency
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.BathingName
 import org.totp.model.data.BathingRank
@@ -32,6 +32,7 @@ class CompanyPageHandlerTest {
                 sitename = "Your House",
                 waterway = WaterwayName("Your River"),
                 location = Coordinates(lon = -0.12460789, lat = 51.49993385),
+                wfd = EnvironmentAgency.WaterbodyId.of("GB012345"),
             ),
             count = 100,
             duration = Duration.ofHours(100),

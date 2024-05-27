@@ -2,18 +2,11 @@ package org.totp.model.data
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.http4k.core.HttpHandler
-import org.http4k.core.Method
-import org.http4k.core.Request
-import org.http4k.core.Uri
-import org.http4k.core.then
+import org.http4k.core.*
+import org.totp.db.EnvironmentAgency
 import org.totp.extensions.kebabCase
 import org.totp.extensions.readSimpleList
-import org.totp.pages.CompanyAnnualSummary
-import org.totp.pages.ConstituencyRank
-import org.totp.pages.DeltaValue
-import org.totp.pages.EnsureSuccessfulResponse
-import org.totp.pages.WaterwaySlug
+import org.totp.pages.*
 import java.io.IOException
 import java.time.Duration
 import java.time.LocalDate
@@ -31,6 +24,7 @@ data class CSO(
     val sitename: String,
     val waterway: WaterwayName,
     val location: Coordinates,
+    val wfd: EnvironmentAgency.WaterbodyId?,
 )
 
 data class LiveDataCSO(
@@ -215,6 +209,7 @@ object AllSpills {
                             company = CompanyName.of(it["company_name"] as String),
                             sitename = it["site_name"] as String,
                             waterway = WaterwayName.of(it["receiving_water"] as String),
+                            wfd = it["wfd_waterbody_id"]?.let { EnvironmentAgency.WaterbodyId.of(it as String) },
                             location = Coordinates(
                                 lat = it["lat"] as Double,
                                 lon = it["lon"] as Double
@@ -376,6 +371,7 @@ data class BathingCSO(
     val duration: Duration,
     val reporting: Number,
     val waterway: WaterwayName,
+    val wfd: EnvironmentAgency.WaterbodyId?,
     val location: Coordinates,
     val constituency: ConstituencyName,
     val beach: BeachName?,
@@ -391,15 +387,16 @@ object BathingCSOs {
                 .map {
                     BathingCSO(
                         year = it["reporting_year"] as Int,
-                        company = CompanyName(it["company_name"] as String),
+                        company = CompanyName.of(it["company_name"] as String),
                         sitename = it["site_name"] as String,
-                        bathing = BathingName(it["bathing"] as String),
+                        bathing = BathingName.of(it["bathing"] as String),
                         count = (it["spill_count"] as Double).toInt(),
                         duration = fromEDMHours(it["total_spill_hours"] as Double),
                         reporting = it["reporting_pct"] as Double,
-                        waterway = WaterwayName(it["receiving_water"] as String),
+                        waterway = WaterwayName.of(it["receiving_water"] as String),
+                        wfd = it["wfd_waterbody_id"]?.let { EnvironmentAgency.WaterbodyId.of(it as String) },
                         location = Coordinates(it["lat"] as Double, it["lon"] as Double),
-                        constituency = ConstituencyName(it["pcon20nm"] as String),
+                        constituency = ConstituencyName.of(it["pcon20nm"] as String),
                         beach = (it["beach_name"] as String?)?.let { BeachName(it) }
                     )
                 }
@@ -417,6 +414,7 @@ data class ShellfishCSO(
     val duration: Duration,
     val reporting: Number,
     val waterway: WaterwayName,
+    val wfd : EnvironmentAgency.WaterbodyId?,
     val location: Coordinates,
     val constituency: ConstituencyName,
 )
@@ -438,6 +436,7 @@ object ShellfishCSOs {
                         duration = fromEDMHours(it["total_spill_hours"] as Double),
                         reporting = it["reporting_pct"] as Double,
                         waterway = WaterwayName(it["receiving_water"] as String),
+                        wfd = it["wfd_waterbody_id"]?.let { EnvironmentAgency.WaterbodyId.of(it as String)},
                         location = Coordinates(it["lat"] as Double, it["lon"] as Double),
                         constituency = ConstituencyName(it["pcon20nm"] as String),
                     )

@@ -215,7 +215,8 @@
                                 <td class="align-middle" data-company="{{this.cso.company.name}}">
                                     <a href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a>
                                 </td>
-                                <td class="align-middle" data-waterway="{{this.cso.waterway.name}}">
+                                <td class="align-middle" data-waterway="{{this.cso.waterway.name}}"
+                                    {{#if this.cso.wfd}}data-geometry-uri="{{this.cso.wfd.uri}}"{{/if}}>
                                     <a href="{{this.cso.waterway.uri}}">{{this.cso.waterway.name}}</a>
                                 </td>
                                 <td class="align-middle"
@@ -344,11 +345,9 @@
     const markerGrey = markerIcon("grey")
 
     const durationIcon = (n, r) => {
-        console.log(`${n} ${r}`)
-        if ( r < 0.5 ) {
+        if (r < 0.5) {
             return markerGrey
-        }
-        else {
+        } else {
             return n > 700 ? markerRed : markerBlue;
         }
     }
@@ -362,6 +361,7 @@
     const count = attr("count", Number)
     const duration = attr("duration", Number)
     const reporting = attr("reporting", Number)
+    const wfd = attr("geometry-uri")
 
     Array.from(document.getElementById("table-csos").querySelectorAll("tr[data-class='cso']"))
             .map(it => {
@@ -378,12 +378,30 @@
             })
             .forEach(it => {
                 L.marker(
-                    [it.lat, it.lon],
+                        [it.lat, it.lon],
                         {icon: durationIcon(it.duration, it.reporting)}
                 ).bindTooltip(
-                        `${it.sitename}<br/>${it.waterway}<br/>${formatNumber(it.count)} Dumps / ${formatNumber(it.duration)} hours by ${it.company}<br/>Reporting was ${formatNumber(it.reporting,2)}%`
+                        `${it.sitename}<br/>${it.waterway}<br/>${formatNumber(it.count)} Dumps / ${formatNumber(it.duration)} hours by ${it.company}<br/>Reporting was ${formatNumber(it.reporting, 2)}%`
                 ).addTo(map)
             })
+
+    const waterwayLayer = L.geoJSON().addTo(map);
+
+    const waterways = Array.from(document.getElementById("table-csos").querySelectorAll("tr[data-class='cso']"))
+            .map(it => it.querySelector("[data-geometry-uri]"))
+            .filter(it => it)
+            .map(it => wfd(it));
+
+    console.log(waterways)
+
+    waterways.forEach(it => fetch(it).then(response => {
+        if (response.ok) {
+            response.json().then(geo => {
+                console.log(geo["geometry"]);
+                waterwayLayer.addData(JSON.parse(geo["geometry"]));
+            })
+        }
+    }));
 </script>
 
 

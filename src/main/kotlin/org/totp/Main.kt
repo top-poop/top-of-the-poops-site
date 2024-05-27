@@ -197,6 +197,7 @@ fun main() {
 
     val thamesWater = ThamesWater(connection)
 
+    val environmentAgency = EnvironmentAgency(connection)
     val server = Undertow(port = port(environment)).toServer(
 
         routes(
@@ -316,12 +317,15 @@ fun main() {
             ),
             "/live/environment-agency/rainfall/{constituency}" bind EnvironmentAgencyRainfall(
                 clock,
-                EnvironmentAgency(connection)
+                environmentAgency
             ),
             "/data-new/constituency/{constituency}/annual-pollution" bind EDMAnnualSummary(
                 EDM(
                     connection
                 )
+            ),
+            "/data-new/waterway/{wfdid}" bind EnvironmentAgencyGeometry(
+                environmentAgency
             ),
             "/map.html" bind OldMapRedirectHandler(),
             "/sitemap.xml" bind SitemapHandler(

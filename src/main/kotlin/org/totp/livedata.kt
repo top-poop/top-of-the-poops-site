@@ -2,11 +2,9 @@ package org.totp
 
 import org.http4k.core.*
 import org.http4k.lens.Path
-import org.http4k.lens.Query
 import org.http4k.lens.value
 import org.totp.db.EnvironmentAgency
 import org.totp.db.ThamesWater
-import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencySlug
 import org.totp.model.data.TotpJson
 import org.totp.pages.slugToConstituency
@@ -91,6 +89,20 @@ class EnvironmentAgencyRainfall(val clock: Clock, val environmentAgency: Environ
             else -> Response(Status.OK).with(
                 response of events
             )
+        }
+    }
+}
+
+class EnvironmentAgencyGeometry(val environmentAgency: EnvironmentAgency) : HttpHandler {
+
+    val response = TotpJson.autoBody<EnvironmentAgency.Waterbody>(contentType = ContentType("application/geo+json")).toLens()
+    val id = Path.value(EnvironmentAgency.WaterbodyId).of("wfdid")
+
+    override fun invoke(request: Request): Response {
+        val waterbody = environmentAgency.waterwayGeometry(id(request))
+        return when (waterbody) {
+            null -> Response(Status.NOT_FOUND)
+            else -> Response(Status.OK).with(response of waterbody)
         }
     }
 }

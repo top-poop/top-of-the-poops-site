@@ -6,6 +6,7 @@ import org.http4k.core.Uri
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
+import org.totp.db.EnvironmentAgency
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyName
@@ -32,6 +33,7 @@ class ShellfisheryPageHandlerTest {
                         duration = Duration.ofHours(22),
                         reporting = 23.3,
                         waterway = WaterwayName.of("waterway"),
+                        wfd = EnvironmentAgency.WaterbodyId.of("GB012345"),
                         location = Coordinates(22, 33),
                         constituency = ConstituencyName.of("Constituency")
                     )

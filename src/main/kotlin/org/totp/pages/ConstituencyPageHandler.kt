@@ -6,6 +6,7 @@ import org.http4k.lens.Path
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.db.EnvironmentAgency
 import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.http4k.removeQuery
@@ -74,10 +75,13 @@ data class ConstituencyPageLiveData(
     val rainfallUri: Uri
 )
 
+data class RenderableWaterbodyId(val id: String, val uri: Uri);
+
 data class RenderableCSO(
     val company: RenderableCompany,
     val sitename: String,
     val waterway: RenderableWaterway,
+    val wfd: RenderableWaterbodyId?,
     val location: Coordinates,
 )
 
@@ -126,6 +130,13 @@ object ConstituencyRedirectFilter {
     }
 }
 
+fun EnvironmentAgency.WaterbodyId.toRenderable(): RenderableWaterbodyId {
+    return RenderableWaterbodyId(
+        id = value,
+        uri = Uri.of("/data-new/waterway/${value}")
+    )
+}
+
 fun CSOTotals.toRenderable(): RenderableCSOTotal {
     return RenderableCSOTotal(
         constituency.toRenderable(),
@@ -134,6 +145,7 @@ fun CSOTotals.toRenderable(): RenderableCSOTotal {
                 it.company.toRenderable(),
                 it.sitename,
                 it.waterway.toRenderable(it.company),
+                it.wfd?.toRenderable(),
                 it.location
             )
         },

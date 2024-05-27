@@ -1,6 +1,7 @@
 select reporting_year,
        company_name,
        site_name,
+       wfd_waterbody_id,
        shellfishery,
        total_spill_hours,
        spill_count,
