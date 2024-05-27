@@ -27,3 +27,7 @@ Disallow: /
 
 User-agent: ChatGPT-User
 Disallow: /
+
+User-agent: FriendlyCrawler
+Disallow: /
+
