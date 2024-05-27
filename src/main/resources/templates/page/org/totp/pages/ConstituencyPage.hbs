@@ -8,12 +8,10 @@
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
     {{> chunks/meta-scripts }}
+    {{> chunks/meta-leaflet }}
 
     <!-- only for constituency page atm -->
     <link rel="canonical" href="{{ uri  }}"/>
-
-    <link rel="stylesheet" href="/assets/css/leaflet.css"/>
-    <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
 
     {{> components/meta-opengraph
             title=(concat "Constituency | " constituency.name)
@@ -306,14 +304,10 @@
         maxZoom: 15.5,
     });
 
-    L.tileLayer(
-            'https://maps.top-of-the-poops.org/styles/v1/{z}/{x}/{y}.png',
-            {
-                attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
-            }
-    )
-            .addTo(map);
-
+    var gl = L.maplibreGL({
+        style: 'https://top-of-the-poops.org/tiles/styles/v2/style.json',
+        attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
+    }).addTo(map);
     const layer = L.geoJSON(JSON.parse(document.getElementById("map-geojson").textContent), {style: myStyle});
     layer.addTo(map);
     map.fitBounds(layer.getBounds())
@@ -344,7 +338,6 @@
     const markerGrey = markerIcon("grey")
 
     const durationIcon = (n, r) => {
-        console.log(`${n} ${r}`)
         if ( r < 0.5 ) {
             return markerGrey
         }

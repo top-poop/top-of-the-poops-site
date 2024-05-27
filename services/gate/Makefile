@@ -27,7 +27,7 @@ image: check-context
 
 .PHONY: run
 run: image
-	docker run  -p 8081:80 $(LOCAL_NAME)
+	docker run  -p 8081:8080 $(LOCAL_NAME)
 
 .PHONY: push
 push: check-context

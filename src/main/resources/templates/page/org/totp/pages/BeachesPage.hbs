@@ -8,9 +8,7 @@
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
     {{> chunks/meta-scripts }}
-
-    <link rel="stylesheet" href="/assets/css/leaflet.css"/>
-    <script src="/assets/js/leaflet-1.9.3/leaflet.js"></script>
+    {{> chunks/meta-leaflet }}
 
     {{> components/meta-opengraph title="Beaches"
             twitterImageUri=share.twitterImageUri
@@ -167,13 +165,10 @@
         [54.00366, -2.547855]
     ])
 
-    L.tileLayer(
-            'https://maps.top-of-the-poops.org/styles/v1/{z}/{x}/{y}.png',
-            {
-                attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
-            }
-    )
-            .addTo(map);
+    var gl = L.maplibreGL({
+        style: 'https://top-of-the-poops.org/tiles/styles/v2/style.json',
+        attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
+    }).addTo(map);
 
     const navigateToBathing = (bathing) => {
         window.location = `/beach/${toKebabCase(bathing)}`;
