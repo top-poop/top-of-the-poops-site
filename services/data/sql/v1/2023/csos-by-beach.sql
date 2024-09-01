@@ -8,13 +8,13 @@ select reporting_year,
        receiving_water,
        lat,
        lon,
-       pcon20nm,
+       pcon24nm,
        beach_name
 from edm_consent_view edm
          join grid_references grid on edm.effluent_grid_ref = grid.grid_reference
          left join edm_bathing_to_beach_mapping bm on edm.bathing = bm.edm_name
 where reporting_year = 2023
   and bathing is not null
-  and pcon20nm is not null
+  and pcon24nm is not null
 /* todo - one cso for beach is not mapped to constituency properly */
 order by company_name

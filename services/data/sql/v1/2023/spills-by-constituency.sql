@@ -1,22 +1,22 @@
 with reports_last as (
-    select pcon20nm                                as constituency,
+    select pcon24nm                                as constituency,
            coalesce(sum(edm.spill_count), 0)       as total_spills,
            coalesce(sum(edm.total_spill_hours), 0) as total_hours
     from edm_consent_view edm
              join grid_references on edm.effluent_grid_ref = grid_references.grid_reference
     where reporting_year = 2022
-      and pcon20nm is not null
-    group by reporting_year, pcon20nm
+      and pcon24nm is not null
+    group by reporting_year, pcon24nm
 ),
      reports_this as (
-         select pcon20nm                                as constituency,
+         select pcon24nm                                as constituency,
                 coalesce(sum(edm.spill_count), 0)       as total_spills,
                 coalesce(sum(edm.total_spill_hours), 0) as total_hours
          from edm_consent_view edm
                   join grid_references on edm.effluent_grid_ref = grid_references.grid_reference
          where reporting_year = 2023
-           and pcon20nm is not null
-         group by reporting_year, pcon20nm
+           and pcon24nm is not null
+         group by reporting_year, pcon24nm
      )
 select reports_this.*,
        coalesce(reports_this.total_spills - reports_last.total_spills,0) as spills_increase,

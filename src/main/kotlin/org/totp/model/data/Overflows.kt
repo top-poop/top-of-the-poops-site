@@ -354,7 +354,7 @@ object ConstituencyNeighbours {
 
             TotpJson.mapper.readSimpleList(response.bodyString())
                 .map {
-                    ConstituencyName(it["pcon20nm"] as String) to
+                    ConstituencyName(it["pcon24nm"] as String) to
                             ConstituencyName(it["neighbour"] as String)
                 }
                 .filter {
@@ -399,7 +399,7 @@ object BathingCSOs {
                         reporting = it["reporting_pct"] as Double,
                         waterway = WaterwayName(it["receiving_water"] as String),
                         location = Coordinates(it["lat"] as Double, it["lon"] as Double),
-                        constituency = ConstituencyName(it["pcon20nm"] as String),
+                        constituency = ConstituencyName(it["pcon24nm"] as String),
                         beach = (it["beach_name"] as String?)?.let { BeachName(it) }
                     )
                 }
@@ -439,7 +439,7 @@ object ShellfishCSOs {
                         reporting = it["reporting_pct"] as Double,
                         waterway = WaterwayName(it["receiving_water"] as String),
                         location = Coordinates(it["lat"] as Double, it["lon"] as Double),
-                        constituency = ConstituencyName(it["pcon20nm"] as String),
+                        constituency = ConstituencyName(it["pcon24nm"] as String),
                     )
                 }
         }

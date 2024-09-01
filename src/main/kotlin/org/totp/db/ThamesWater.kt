@@ -18,7 +18,7 @@ class ThamesWater(private val connection: WithConnection) {
                 sql = """
      with permits as (select distinct(permit_id) from summary_thames)
              select
-                 distinct(g.pcon20nm) as constituency
+                 distinct(g.pcon24nm) as constituency
              from permits
                       join consents_unique_view c on permit_id = c.permit_number
                       join grid_references g on c.effluent_grid_ref = g.grid_reference
@@ -65,7 +65,7 @@ order by date
 
     data class CSOLiveOverflow(
         val started: Instant,
-        val pcon20nm: ConstituencyName,
+        val pcon24nm: ConstituencyName,
         val waterwayName: WaterwayName,
         val site_name: String,
         val permit_id: String,
@@ -81,14 +81,14 @@ with overflowing as (
                       join consent_map cm on permit_number = cm.consent_id
                   ) tmp WHERE rn = 1 and alert_type = 'Start'
 )
-select pcon20nm, discharge_site_name, receiving_water, st.* from overflowing as st
+select pcon24nm, discharge_site_name, receiving_water, st.* from overflowing as st
     join consents_unique_view c on st.reference_consent_id = c.permit_number
     join grid_references g on c.effluent_grid_ref = g.grid_reference
 order by date_time
             """.trimIndent(),
                 mapper = {
                     CSOLiveOverflow(
-                        pcon20nm = it.get(ConstituencyName, "pcon20nm"),
+                        pcon24nm = it.get(ConstituencyName, "pcon24nm"),
                         site_name = it.getString("discharge_site_name"),
                         waterwayName = it.get(WaterwayName, "receiving_water"),
                         permit_id = it.getString("permit_number"),
@@ -146,7 +146,7 @@ order by date_time
                     from summary_thames st
                              join consents_unique_view c on st.permit_id = c.permit_number
                              join grid_references g on c.effluent_grid_ref = g.grid_reference
-                    where g.pcon20nm = ? and date >= ? and date <= ?
+                    where g.pcon24nm = ? and date >= ? and date <= ?
                     order by st.date
                 """.trimIndent(),
                 bind = {
@@ -209,7 +209,7 @@ order by date_time
     data class CSOSummary(
         val permit_id: String,
         val site_name: String,
-        val pcon20nm: ConstituencyName,
+        val pcon24nm: ConstituencyName,
         val overflowing: Duration
     )
 
@@ -219,13 +219,13 @@ order by date_time
 select
     permit_id,
     discharge_site_name,
-    g.pcon20nm,
+    g.pcon24nm,
     extract(epoch from justify_hours(sum(overflowing))) as overflowing
 from summary_thames st
          join consents_unique_view c on st.permit_id = c.permit_number
          join grid_references g on c.effluent_grid_ref = g.grid_reference
 where date >= ? and  date <= ?
-group by permit_id, discharge_site_name, pcon20nm
+group by permit_id, discharge_site_name, pcon24nm
 order by overflowing desc
 limit 100
 """,
@@ -237,7 +237,7 @@ limit 100
                     CSOSummary(
                         permit_id = it.getString("permit_id"),
                         site_name = it.getString("discharge_site_name"),
-                        pcon20nm = it.get(ConstituencyName, "pcon20nm"),
+                        pcon24nm = it.get(ConstituencyName, "pcon24nm"),
                         overflowing = Duration.ofSeconds(it.getLong("overflowing"))
                     )
                 }
