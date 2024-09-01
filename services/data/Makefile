@@ -76,15 +76,11 @@ GEO_2023_GENERATED=$(foreach sql,$(GEO_2023_SQL),$(DATAFILES_2023)/geo/$(basenam
 
 PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAFILES_2023)/geo/countries.json
 
-generated-data: generated-2023 generated-live $(DATAFILES)/constituencies/.uptodate $(DATAFILES)/beaches/.uptodate $(DATAFILES)/shellfisheries/.uptodate $(PROVIDED)
+generated-data: generated-2023 $(DATAFILES)/constituencies/.uptodate $(DATAFILES)/beaches/.uptodate $(DATAFILES)/shellfisheries/.uptodate $(PROVIDED)
 
 generated-2023: $(DATA_2023_GENERATED) $(GEO_2023_GENERATED) $(PROVIDED)
 
 provided: $(PROVIDED)
-
-.PHONY: generated-live
-generated-live:
-	$(PYTHON) thames-summary.py
 
 
 .PHONY: .FORCE
