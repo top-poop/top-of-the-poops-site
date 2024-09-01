@@ -8,7 +8,7 @@ select reporting_year,
        receiving_water,
        lat,
        lon,
-       pcon20nm
+       pcon24nm
 from edm_consent_view as edm
          join grid_references as grid on edm.effluent_grid_ref = grid.grid_reference
 where shellfishery is not null

@@ -62,7 +62,7 @@ def rainfall_by_constituency(connection, constituency):
     return {
         r[0]: r[1]
         for r in psy.select_many(connection,
-                                 sql="select date, min, avg, max, pct_75, count from rainfall_daily_consitituency where pcon20nm = %s",
+                                 sql="select date, min, avg, max, pct_75, count from rainfall_daily_consitituency where pcon24nm = %s",
                                  params=(constituency,),
                                  f=lambda r: (
                                      r["date"], Rainfall(
@@ -77,7 +77,7 @@ def rainfall_by_constituency(connection, constituency):
 
 sql = """
 select
-       g.pcon20nm as constituency,
+       g.pcon24nm as constituency,
        permit_id,
        st.date,
        online,
@@ -89,7 +89,7 @@ select
 from summary_thames st
          join consents_unique_view c on st.permit_id = c.permit_number
          join grid_references g on c.effluent_grid_ref = g.grid_reference
-         order by g.pcon20nm, st.date         
+         order by g.pcon24nm, st.date
 """
 
 

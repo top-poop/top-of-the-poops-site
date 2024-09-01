@@ -24,7 +24,7 @@ class EnvironmentAgency(private val connection: WithConnection) {
                 sql = """
                      select date, min, avg, max, pct_75, count 
                      from rainfall_daily_consitituency 
-                     where pcon20nm = ? and date >= ? and date <= ?
+                     where pcon24nm = ? and date >= ? and date <= ?
                 """.trimIndent(),
                 bind = {
                     it.set(1, constituencyName)

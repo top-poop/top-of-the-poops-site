@@ -104,7 +104,7 @@ def row_to_event(row: Any) -> TWEvent:
 def thames_permit_constituencies(connection):
     return {p: [s, c] for p, s, c in select_many(
         connection=connection,
-        sql="""select permit_number, discharge_site_name, pcon20nm from consents_unique_view join grid_references grid on effluent_grid_ref = grid.grid_reference where company_name ilike %s""",
+        sql="""select permit_number, discharge_site_name, pcon24nm from consents_unique_view join grid_references grid on effluent_grid_ref = grid.grid_reference where company_name ilike %s""",
         params=('THAMES WATER%',),
         f=lambda row: (row[0], row[1], row[2])
     )}

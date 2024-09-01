@@ -34,7 +34,7 @@ class RenderableCSOLiveData(
                 overflowing = it.overflowing.map {
                     RenderableCSOLiveOverflow(
                         started = it.started,
-                        constituency = it.pcon20nm.toRenderable(),
+                        constituency = it.pcon24nm.toRenderable(),
                         waterway = it.waterwayName.toRenderable(company),
                         sitename = it.site_name,
                         permit = it.permit_id

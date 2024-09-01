@@ -218,6 +218,6 @@ class LoadingJsonDatafilesTest {
         )
 
         val service = ConstituencyNeighbours(remote)
-        expectThat(service(ConstituencyName("Aldershot"))).size.isEqualTo(4)
+        expectThat(service(ConstituencyName("Aldershot"))).size.isEqualTo(6)
     }
 }

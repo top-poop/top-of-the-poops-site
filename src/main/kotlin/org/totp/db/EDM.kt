@@ -19,14 +19,14 @@ class EDM(private val connection: WithConnection) {
             query(
                 sql = """
     select reporting_year,
-           pcon20nm                   as constituency,
+           pcon24nm                   as constituency,
            sum(edm.spill_count)       as total_spills,
            sum(edm.total_spill_hours) as total_hours
     from edm_consent_view edm
              join grid_references on edm.effluent_grid_ref = grid_references.grid_reference
-    where pcon20nm = ?
-    group by reporting_year, pcon20nm
-    order by pcon20nm, reporting_year
+    where pcon24nm = ?
+    group by reporting_year, pcon24nm
+    order by pcon24nm, reporting_year
                 """.trimIndent(),
                 bind = {
                     it.set(1, constituencyName)
