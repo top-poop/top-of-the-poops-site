@@ -1,23 +1,21 @@
 package org.totp.pages
 
-import org.http4k.core.ContentType
-import org.http4k.core.Method
-import org.http4k.core.Request
-import org.http4k.core.Status
-import org.http4k.core.Uri
+import org.http4k.core.*
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.strikt.bodyString
 import org.http4k.strikt.contentType
 import org.junit.jupiter.api.Test
-import org.totp.model.TotpHandlebars
 import org.w3c.dom.Document
+import org.w3c.dom.Node
+import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
 import strikt.api.Assertion
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import java.io.StringReader
 import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
 
 
@@ -46,8 +44,8 @@ class SitemapPageHandlerTest {
             get { status }.isEqualTo(Status.OK)
             contentType.isEqualTo(ContentType.TEXT_XML)
             bodyString.isXml.and {
-                xpath("/urlset/url[1]/loc").isEqualTo("https://totp.example.com/page")
-                xpath("/urlset/url[2]/loc").isEqualTo("https://totp.example.com/page?thing=thing&bob=bob")
+                queryString("/urlset/url[1]/loc").isEqualTo("https://totp.example.com/page")
+                queryString("/urlset/url[2]/loc").isEqualTo("https://totp.example.com/page?thing=thing&bob=bob")
             }
         }
     }
@@ -55,7 +53,7 @@ class SitemapPageHandlerTest {
 
 
 val Assertion.Builder<String>.isXml get() = get { Xml.parse(this) }
-fun Assertion.Builder<Document>.xpath(path: String) = get { Xml.xpath(path, this) }
+fun Assertion.Builder<Document>.queryString(path: String) = get { this.queryString(path) }
 
 object Xml {
     fun parse(xml: String): Document {
@@ -65,8 +63,18 @@ object Xml {
             )
         )
     }
+}
 
-    fun xpath(path: String, document: Document): String {
-        return XPathFactory.newInstance().newXPath().evaluate(path, document)
-    }
+fun Document.queryString(path: String): String {
+    return XPathFactory.newInstance().newXPath().evaluate(path, this)
+}
+
+fun Document.queryNodeList(path: String): NodeList {
+    return XPathFactory.newInstance().newXPath().evaluate(path, this, XPathConstants.NODESET) as NodeList
+}
+
+fun NodeList.asSequence(): Sequence<Node> {
+    return (0..<this.length)
+        .asSequence()
+        .map { this.item(it) }
 }
