@@ -192,6 +192,8 @@ object ConstituencyPageHandler {
                     constituencyName
                 )
 
+                val formattedHours = numberFormat.format(summary.duration.hours)
+
                 Response(Status.OK)
                     .with(
                         viewLens of ConstituencyPage(
@@ -201,21 +203,22 @@ object ConstituencyPageHandler {
                             mp?.let { mp ->
                                 SocialShare(
                                     pageUriFrom(request),
-                                    text = "Hey ${mp.handle}! What are you doing about the ${numberFormat.format(summary.duration.hours)} hours of sewage pollution in $constituencyName",
+                                    text = null?.let { handle ->
+                                        "Hey ${handle}! What are you doing about the $formattedHours hours of sewage pollution in $constituencyName"
+                                    } ?: "Hey ${mp.name}! What are you doing about the $formattedHours hours of sewage pollution in $constituencyName",
                                     cta = "Tell ${mp.name} what you think",
                                     tags = listOf("sewage"),
                                     via = "sewageuk",
                                     twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2023.png")
-                                )    
+                                )
                             } ?: SocialShare(
                                 pageUriFrom(request),
-                                text = "$constituencyName had ${numberFormat.format(summary.duration.hours)} hours of sewage pollution in ${summary.year}",
+                                text = "$constituencyName had $formattedHours hours of sewage pollution in ${summary.year}",
                                 cta = "Share $constituencyName sewage horrors",
                                 tags = listOf("sewage"),
                                 via = "sewageuk",
                                 twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2023.png")
-                            )
-                            ,
+                            ),
                             summary,
                             constituencyBoundary(constituencyName),
                             list.map {
