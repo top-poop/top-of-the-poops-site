@@ -1,16 +1,10 @@
 package org.totp.pages
 
-import org.http4k.core.ContentType
-import org.http4k.core.HttpHandler
-import org.http4k.core.Response
-import org.http4k.core.Status
-import org.http4k.core.Uri
-import org.http4k.core.with
+import org.http4k.core.*
 import org.http4k.lens.Header.CONTENT_TYPE
 import org.totp.model.data.BathingRank
 import org.totp.model.data.RiverRank
 import java.io.StringWriter
-import javax.xml.XMLConstants
 import javax.xml.stream.XMLOutputFactory
 
 object SitemapHandler {
@@ -27,7 +21,7 @@ object SitemapHandler {
             writer.writeStartDocument()
             val nsURI = "http://www.sitemaps.org/schemas/sitemap/0.9"
             writer.setDefaultNamespace(nsURI)
-            writer.writeStartElement(nsURI,"urlset",)
+            writer.writeStartElement(nsURI, "urlset")
 
             uris().map {
                 it
@@ -72,8 +66,9 @@ object SitemapUris {
                     it.constituencyName.toRenderable().uri
                 }
             ).plus(
-                riverRankings().flatMap {
-                    it.toRenderable().let { listOf(it.river.uri, it.company.uri) }
+                // bug where anglian has a waterway called '.' - will fix upstream later
+                riverRankings().map { it.toRenderable() }.filterNot { it.river.uri.toString().endsWith("/") }.flatMap {
+                    listOf(it.river.uri, it.company.uri)
                 }
             ).plus(
                 beachRankings().map {
