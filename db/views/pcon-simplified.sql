@@ -1,4 +1,4 @@
-drop materialized view pcon_simplified cascade;
+drop materialized view if exists pcon_simplified cascade;
 
 create materialized view pcon_simplified as
 SELECT pcon_july_2024_uk_bfc.pcon24nm,
