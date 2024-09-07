@@ -3,6 +3,7 @@ package org.totp.pages
 import org.http4k.core.*
 import org.http4k.lens.Header.LOCATION
 import org.http4k.lens.Path
+import org.http4k.lens.PathLens
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
@@ -105,7 +106,7 @@ class ConstituencyPage(
     PageViewModel(uri)
 
 
-object ConstituencyRedirectFilter {
+object ConstituencyAsParameterRedirectFilter {
     operator fun invoke(): Filter {
         val constituencyName = Path.value(ConstituencyName).of("constituency", "The constituency")
 
@@ -117,6 +118,40 @@ object ConstituencyRedirectFilter {
                     Response(Status.TEMPORARY_REDIRECT)
                         .with(
                             LOCATION of request.uri.path(redirect)
+                        )
+                } else {
+                    next(request)
+                }
+            }
+        }
+    }
+}
+
+object ConstituencyBoundaryChangesRedirectFilter {
+
+    data class ChangedConstituency(val old: ConstituencyName, val new: ConstituencyName)
+
+    private val changedConstituencies = readCSV(resource = "/data/changed-constituencies.csv", mapper = {
+        ChangedConstituency(ConstituencyName(it[1]), ConstituencyName(it[2]))
+    })
+
+    private val constituencyRedirects =
+        changedConstituencies
+            .filter { it.old != it.new }
+            .filter { it.old.toSlug() != it.new.toSlug() }
+            .associateBy { it.old.toSlug() }
+
+    operator fun invoke(slug: PathLens<ConstituencySlug>): Filter {
+        return Filter { next ->
+            { request ->
+                val given = slug(request)
+                val redirect = constituencyRedirects[given]
+
+                if (redirect != null) {
+                    val target = redirect.new.toSlug()
+                    Response(Status.TEMPORARY_REDIRECT)
+                        .with(
+                            LOCATION of request.uri.path("/constituency/${target}")
                         )
                 } else {
                     next(request)
@@ -156,88 +191,92 @@ object ConstituencyPageHandler {
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
-        val constituencySlug = Path.value(ConstituencySlug).of("constituency", "The constituency")
+        val constituencySlug: PathLens<ConstituencySlug> =
+            Path.value(ConstituencySlug).of("constituency", "The constituency")
         val numberFormat = NumberFormat.getIntegerInstance()
 
-        return ConstituencyRedirectFilter().then { request: Request ->
-            val slug = constituencySlug(request)
+        return ConstituencyAsParameterRedirectFilter()
+            .then(ConstituencyBoundaryChangesRedirectFilter(constituencySlug))
+            .then { request: Request ->
+                val slug = constituencySlug(request)
 
-            slugToConstituency[slug]?.let { constituencyName ->
+                slugToConstituency[slug]?.let { constituencyName ->
 
-                val liveAvailable = constituencyLiveAvailable()
+                    val liveAvailable = constituencyLiveAvailable()
 
-                val renderableConstituencies = slugToConstituency
-                    .map {
-                        it.value.toRenderable(
-                            current = it.key == slug,
-                            live = liveAvailable.contains(it.value)
-                        )
-                    }
+                    val renderableConstituencies = slugToConstituency
+                        .map {
+                            it.value.toRenderable(
+                                current = it.key == slug,
+                                live = liveAvailable.contains(it.value)
+                            )
+                        }
 
-                val list = constituencySpills(constituencyName).sortedByDescending { it.duration }
+                    val list = constituencySpills(constituencyName).sortedByDescending { it.duration }
 
-                val neighbours = constituencyNeighbours(constituencyName)
-                    .sorted()
-                    .map { constituencyRank(it) }
-                    .filterNotNull()
-                    .map { it.toRenderable(mpFor) }
+                    val neighbours = constituencyNeighbours(constituencyName)
+                        .sorted()
+                        .map { constituencyRank(it) }
+                        .filterNotNull()
+                        .map { it.toRenderable(mpFor) }
 
-                val summary = list.summary()
+                    val summary = list.summary()
 
-                val rivers2 = constituencyRivers(constituencyName)
-                val rivers = rivers2.take(5)
-                    .map { it.toRenderable() }
+                    val rivers2 = constituencyRivers(constituencyName)
+                    val rivers = rivers2.take(5)
+                        .map { it.toRenderable() }
 
-                val mp = mpFor(
-                    constituencyName
-                )
+                    val mp = mpFor(
+                        constituencyName
+                    )
 
-                val formattedHours = numberFormat.format(summary.duration.hours)
+                    val formattedHours = numberFormat.format(summary.duration.hours)
 
-                Response(Status.OK)
-                    .with(
-                        viewLens of ConstituencyPage(
-                            pageUriFrom(request).removeQuery(),
-                            constituencyName.toRenderable(current = true),
-                            mp = mp,
-                            mp?.let { mp ->
-                                SocialShare(
+                    Response(Status.OK)
+                        .with(
+                            viewLens of ConstituencyPage(
+                                pageUriFrom(request).removeQuery(),
+                                constituencyName.toRenderable(current = true),
+                                mp = mp,
+                                mp?.let { mp ->
+                                    SocialShare(
+                                        pageUriFrom(request),
+                                        text = null?.let { handle ->
+                                            "Hey ${handle}! What are you doing about the $formattedHours hours of sewage pollution in $constituencyName"
+                                        }
+                                            ?: "Hey ${mp.name}! What are you doing about the $formattedHours hours of sewage pollution in $constituencyName",
+                                        cta = "Tell ${mp.name} what you think",
+                                        tags = listOf("sewage"),
+                                        via = "sewageuk",
+                                        twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2023.png")
+                                    )
+                                } ?: SocialShare(
                                     pageUriFrom(request),
-                                    text = null?.let { handle ->
-                                        "Hey ${handle}! What are you doing about the $formattedHours hours of sewage pollution in $constituencyName"
-                                    } ?: "Hey ${mp.name}! What are you doing about the $formattedHours hours of sewage pollution in $constituencyName",
-                                    cta = "Tell ${mp.name} what you think",
+                                    text = "$constituencyName had $formattedHours hours of sewage pollution in ${summary.year}",
+                                    cta = "Share $constituencyName sewage horrors",
                                     tags = listOf("sewage"),
                                     via = "sewageuk",
                                     twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2023.png")
-                                )
-                            } ?: SocialShare(
-                                pageUriFrom(request),
-                                text = "$constituencyName had $formattedHours hours of sewage pollution in ${summary.year}",
-                                cta = "Share $constituencyName sewage horrors",
-                                tags = listOf("sewage"),
-                                via = "sewageuk",
-                                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2023.png")
-                            ),
-                            summary,
-                            constituencyBoundary(constituencyName),
-                            list.map {
-                                it.toRenderable()
-                            },
-                            renderableConstituencies,
-                            live = if (liveAvailable.contains(constituencyName)) {
-                                ConstituencyPageLiveData(
-                                    csoUri = Uri.of("/live/thames-water/events/constituency/$slug"),
-                                    rainfallUri = Uri.of("/live/environment-agency/rainfall/$slug"),
-                                )
-                            } else null,
-                            neighbours = neighbours,
-                            rivers = rivers,
+                                ),
+                                summary,
+                                constituencyBoundary(constituencyName),
+                                list.map {
+                                    it.toRenderable()
+                                },
+                                renderableConstituencies,
+                                live = if (liveAvailable.contains(constituencyName)) {
+                                    ConstituencyPageLiveData(
+                                        csoUri = Uri.of("/live/thames-water/events/constituency/$slug"),
+                                        rainfallUri = Uri.of("/live/environment-agency/rainfall/$slug"),
+                                    )
+                                } else null,
+                                neighbours = neighbours,
+                                rivers = rivers,
+                            )
                         )
-                    )
+                }
+                    ?: Response(Status.NOT_FOUND)
             }
-                ?: Response(Status.NOT_FOUND)
-        }
     }
 }
 
