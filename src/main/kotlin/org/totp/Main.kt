@@ -214,6 +214,7 @@ fun main() {
                                 mpFor = mpFor,
                                 shellfishRankings = shellfishRankings,
                             ),
+                            "/support" bind SupportUsHandler(renderer = renderer),
                             "/media" bind MediaPageHandler(
                                 renderer = renderer,
                                 appearances = mediaAppearances
