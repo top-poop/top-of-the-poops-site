@@ -24,8 +24,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 
-class Bob
-
 data class BareMediaAppearance(
     val href: Uri,
     val where: String?,
