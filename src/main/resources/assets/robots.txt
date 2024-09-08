@@ -34,4 +34,6 @@ Disallow: /
 User-agent: domainsproject.org
 Disallow:/
 
+User-Agent: ImagesiftBot
+Disallow:/
 
