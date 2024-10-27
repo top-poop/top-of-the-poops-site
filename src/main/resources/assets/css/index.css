@@ -88,3 +88,18 @@ table.table-spills tbody td {
 .media-card img {
     height: 153px;
 }
+
+@font-face {
+    font-family: 'rubik';
+    src: url(/assets/fonts/RubikMonoOne-Regular.ttf) format('woff2');
+    font-style: normal;
+    font-weight: bold;
+}
+
+.m4cw  a:link {
+    text-decoration: none;
+}
+
+.m4cw a:visited {
+    text-decoration: none;
+}

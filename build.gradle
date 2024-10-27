@@ -1,7 +1,7 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.9.22'
     id 'application'
-    id 'com.google.cloud.tools.jib' version '3.3.1'
+    id 'com.google.cloud.tools.jib' version '3.4.4'
 }
 
 group = 'org.totp'
@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    implementation platform("org.http4k:http4k-bom:5.13.2.0")
+    implementation platform("org.http4k:http4k-bom:5.33.0.1")
     implementation "org.http4k:http4k-core"
     implementation "org.http4k:http4k-server-undertow"
     implementation "org.http4k:http4k-template-handlebars"
@@ -35,10 +35,9 @@ dependencies {
     implementation "org.http4k:http4k-cloudnative"
 
     implementation("org.slf4j:slf4j-nop:2.0.6")
-    implementation("org.sitemesh:sitemesh:3.0.1")
 
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.5")
-    implementation("com.github.ben-manes.caffeine:guava:3.1.5")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    implementation("com.github.ben-manes.caffeine:guava:3.1.8")
 
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
@@ -61,7 +60,7 @@ dependencies {
     testImplementation "org.http4k:http4k-testing-strikt"
     testImplementation "org.jsoup:jsoup:1.15.4"
 
-    implementation "org.postgresql:postgresql:42.6.0"
+    implementation 'org.postgresql:postgresql:42.7.2'
     implementation "com.zaxxer:HikariCP:5.0.0"
 }
 
@@ -70,7 +69,7 @@ test {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 application {
