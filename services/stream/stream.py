@@ -63,3 +63,11 @@ class StreamAPI:
             name=resp['objectIdFieldName'],
             ids=resp['objectIds']
         )
+
+
+
+if __name__ == "__main__":
+
+    api = StreamAPI(company=WaterCompany.Anglian)
+
+    print(api._feature_list())
