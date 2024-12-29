@@ -1,4 +1,9 @@
 
+# Starting admin server
+
+```bash
+docker service create --name admin --network overlay-net --mount type=bind,source=/data,target=/data ubuntu:noble sleep 3000000
+```
 
 # Backing up to local
 
