@@ -68,11 +68,11 @@ class FeatureList:
     ids: List[int]
 
 
-def timestamp(epochMs: Optional[int]) -> Optional[datetime.datetime]:
-    if epochMs is None:
+def timestamp(epoch_ms: Optional[int]) -> Optional[datetime.datetime]:
+    if epoch_ms is None:
         return None
 
-    return datetime.datetime.fromtimestamp(epochMs / 1000.0, tz=datetime.UTC)
+    return datetime.datetime.fromtimestamp(epoch_ms / 1000.0, tz=datetime.UTC)
 
 
 class StreamAPI:
@@ -101,8 +101,8 @@ class StreamAPI:
             ids=resp['objectIds']
         )
 
-    def _features(self, oid: str, ids: List[int]) -> List[FeatureRecord]:
-        things = ','.join([str(id) for id in ids])
+    def _features(self, oids: List[int]) -> List[FeatureRecord]:
+        things = ','.join([str(oid) for oid in oids])
         response = self.session.get(self.base_uri, params={
             'where': f"1=1",
             'outFields': '*',
@@ -130,14 +130,14 @@ class StreamAPI:
 
         return [to_record(f["attributes"]) for f in resp["features"]]
 
-    def features(self):
+    def features(self) -> List[FeatureRecord]:
         feature_list = self._feature_list()
 
         groups = itertools.batched(feature_list.ids, 100)
 
-        return itertools.chain.from_iterable(
-            [self._features(feature_list.name, g) for g in groups]
-        )
+        return list(itertools.chain.from_iterable(
+            [self._features(g) for g in groups]
+        ))
 
 
 import logging
