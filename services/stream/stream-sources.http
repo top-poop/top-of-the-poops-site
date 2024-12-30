@@ -7,7 +7,11 @@ https://services3.arcgis.com/VCOY1atHWVcDlvlJ/arcgis/rest/services/stream_servic
 
 ### Anglian Get Feature By Id
 
-https://services3.arcgis.com/VCOY1atHWVcDlvlJ/arcgis/rest/services/stream_service_outfall_locations_view/FeatureServer/0/query?where=ObjectId%20in(24,25)&outFields=*&outSR=4326&f=json
+https://services3.arcgis.com/VCOY1atHWVcDlvlJ/arcgis/rest/services/stream_service_outfall_locations_view/FeatureServer/0/query?where=ObjectId%20in%20(24,25)&outFields=*&outSR=4326&f=json
+
+### Anglian Get Feature By Id
+
+https://services3.arcgis.com/VCOY1atHWVcDlvlJ/arcgis/rest/services/stream_service_outfall_locations_view/FeatureServer/0/query?where=ObjectId%20in%20%28801%2C802%29&outFields=*&outSR=4326&f=json
 
 ### Anglian Get Feature Count
 
