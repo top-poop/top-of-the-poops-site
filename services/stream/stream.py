@@ -1,6 +1,5 @@
 import dataclasses
 import datetime
-import enum
 import itertools
 from typing import List, Dict, Optional
 
@@ -8,20 +7,10 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
-
-class WaterCompany(enum.Enum):
-    Anglian = 1
-    Northumbrian = 2
-    SevernTrent = 3
-    Southern = 4
-    SouthWestWater = 5
-    ThamesWater = 6
-    UnitedUtilities = 7
-    WessexWater = 8
-    YorkshireWater = 9
+from companies import WaterCompany
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class FeatureRecord:
     id: str
     status: str
@@ -145,7 +134,7 @@ import logging
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
-    api = StreamAPI(company=WaterCompany.WessexWater)
+    api = StreamAPI(company=WaterCompany.YorkshireWater)
 
     features = api.features()
     for f in features:
