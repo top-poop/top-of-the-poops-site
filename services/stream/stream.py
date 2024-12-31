@@ -5,6 +5,7 @@ from typing import List, Dict, Optional
 
 import requests
 from requests.adapters import HTTPAdapter
+from requests.structures import  CaseInsensitiveDict
 from urllib3 import Retry
 
 from companies import WaterCompany
@@ -103,7 +104,8 @@ class StreamAPI:
 
         resp = response.json()
 
-        def to_record(f: Dict) -> FeatureRecord:
+        def to_record(d: Dict) -> FeatureRecord:
+            f = CaseInsensitiveDict(data=d)
             return FeatureRecord(
                 id=f["Id"],
                 status=f["Status"],
@@ -134,7 +136,7 @@ import logging
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
-    api = StreamAPI(company=WaterCompany.YorkshireWater)
+    api = StreamAPI(company=WaterCompany.SouthWestWater)
 
     features = api.features()
     for f in features:

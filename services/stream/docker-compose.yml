@@ -1,0 +1,28 @@
+version: "3.2"
+
+services:
+  stream:
+    image: ${SERVICE_FULL_NAME}
+    networks:
+      - overlay-net
+    secrets:
+      - s3_key_id
+      - s3_secret_key
+    deploy:
+      labels:
+        - "swarm.cronjob.enable=true"
+        - "swarm.cronjob.schedule=*/15 * * * *"
+        - "swarm.cronjob.skip-running=true"
+      restart_policy:
+        condition: none
+
+
+networks:
+  overlay-net:
+    external: true
+
+secrets:
+  s3_key_id:
+    external: true
+  s3_secret_key:
+    external: true
