@@ -1,5 +1,6 @@
 import csv
 import datetime
+import gzip
 import os
 from dataclasses import asdict, fields
 from io import StringIO
@@ -8,7 +9,6 @@ from typing import List, Dict, Optional
 import boto3
 import mypy_boto3_s3.service_resource as s3_resources
 from botocore.config import Config
-from mypy_boto3_s3.service_resource import ObjectSummary
 
 from companies import WaterCompany
 from stream import FeatureRecord
@@ -16,12 +16,10 @@ from stream import FeatureRecord
 csv_fields = ['lastUpdated', 'id', 'status', 'statusStart', 'latestEventStart',
               'latestEventEnd', 'company', 'lat', 'lon', 'receivingWater']
 
-DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
-
 
 def serialize_field(value):
     if isinstance(value, datetime.datetime):
-        return value.strftime(DATETIME_FORMAT)
+        return value.isoformat()
     return value
 
 
@@ -29,9 +27,9 @@ def deserialize_field(field_type, value):
     if field_type == Optional[datetime.datetime]:
         if value == "":
             return None
-        return datetime.datetime.strptime(value, DATETIME_FORMAT)
+        return datetime.datetime.fromisoformat(value)
     if field_type == datetime.datetime:
-        return datetime.datetime.strptime(value, DATETIME_FORMAT)
+        return datetime.datetime.fromisoformat(value)
     return field_type(value)
 
 
@@ -66,18 +64,22 @@ class Storage:
 
     def available(self, company: WaterCompany) -> List[datetime.datetime]:
         items = self.bucket.objects.filter(Delimiter="/", Prefix=f"{company.name}/")
-        keys = [i.key.split('/')[1].replace('.csv','') for i in items]
-        return [datetime.datetime.strptime(k, '%Y%m%d%H%M%S') for k in keys]
+        keys = [i.key.split('/')[1].replace('.csv.gz', '') for i in items if i.key.endswith(".csv.gz")]
+        dates = [datetime.datetime.strptime(k, '%Y%m%d%H%M%S').replace(tzinfo=datetime.UTC) for k in keys]
+        return sorted(dates, reverse=True)
 
     def _filename(self, company: WaterCompany, dt: datetime.datetime):
-        return f"{company.name}/{dt.strftime('%Y%m%d%H%M%S')}.csv"
+        return f"{company.name}/{dt.strftime('%Y%m%d%H%M%S')}.csv.gz"
 
     def save(self, company: WaterCompany, dt: datetime.datetime, items: List[FeatureRecord]):
-        self.bucket.put_object(Key=self._filename(company, dt), Body=(to_csv(items)))
+        self.bucket.put_object(
+            Key=self._filename(company, dt.astimezone(tz=datetime.UTC)),
+            Body=(gzip.compress(data=to_csv(items).encode()))
+        )
 
     def load(self, company: WaterCompany, dt: datetime.datetime) -> List[FeatureRecord]:
         resp = self.bucket.Object(key=self._filename(company, dt)).get()
-        content = resp['Body'].read().decode('utf-8')
+        content = gzip.decompress(resp['Body'].read()).decode()
         return from_csv(content)
 
 
@@ -86,9 +88,9 @@ test_item = FeatureRecord(
     status="0",
     company='Thames Water',
     statusStart=None,
-    latestEventStart=datetime.datetime.now(),
-    latestEventEnd=datetime.datetime.now(),
-    lastUpdated=datetime.datetime.now(),
+    latestEventStart=datetime.datetime.now(tz=datetime.UTC),
+    latestEventEnd=datetime.datetime.now(tz=datetime.UTC),
+    lastUpdated=datetime.datetime.now(tz=datetime.UTC),
     lat=123.45,
     lon=43.210,
     receivingWater='who cares'
@@ -99,21 +101,25 @@ def test_round_trip():
     print(from_csv(to_csv([test_item])))
 
 
+def b2_service(aws_access_key_id: str, aws_secret_access_key: str):
+    return boto3.resource(service_name='s3',
+                          endpoint_url="https://s3.us-west-000.backblazeb2.com",
+                          aws_access_key_id=aws_access_key_id,
+                          aws_secret_access_key=aws_secret_access_key,
+                          config=Config(
+                              signature_version='s3v4',
+                          ))
+
+
 if __name__ == "__main__":
-    s3 = boto3.resource(service_name='s3',
-                        endpoint_url="https://s3.us-west-000.backblazeb2.com",
-                        aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
-                        aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
-                        config=Config(
-                            signature_version='s3v4',
-                        ))
+    s3 = b2_service(os.environ["AWS_ACCESS_KEY_ID"], os.environ["AWS_SECRET_ACCESS_KEY"])
     bucket = s3.Bucket(os.environ["STREAM_BUCKET_NAME"])
     storage = Storage(bucket)
 
-    # storage.save(
-    #     company=WaterCompany.ThamesWater,
-    #     dt=datetime.datetime.now(),
-    #     items=[test_item])
+    storage.save(
+        company=WaterCompany.ThamesWater,
+        dt=datetime.datetime.now(tz=datetime.UTC),
+        items=[test_item])
 
     company = WaterCompany.ThamesWater
     available = storage.available(company=company)

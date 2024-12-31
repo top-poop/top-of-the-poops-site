@@ -1,0 +1,4 @@
+pytest
+requests
+boto3
+boto3-stubs[essential]
