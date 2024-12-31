@@ -8,6 +8,7 @@ services:
     secrets:
       - s3_key_id
       - s3_secret_key
+      - stream_bucket_name
     deploy:
       labels:
         - "swarm.cronjob.enable=true"
@@ -22,6 +23,8 @@ networks:
     external: true
 
 secrets:
+  stream_bucket_name:
+    external: true
   s3_key_id:
     external: true
   s3_secret_key:
