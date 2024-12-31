@@ -3,4 +3,4 @@
 set -e
 
 echo ">>> Stream Update <<<"
-venv/bin/python stream-download.py
+PYTHONUNBUFFERED=1 venv/bin/python stream-download.py
