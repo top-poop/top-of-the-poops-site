@@ -9,6 +9,7 @@ from typing import List, Dict, Optional
 import boto3
 import mypy_boto3_s3.service_resource as s3_resources
 from botocore.config import Config
+from sqlitedict import SqliteDict
 
 from companies import WaterCompany
 from stream import FeatureRecord
@@ -61,26 +62,39 @@ class Storage:
 
     def __init__(self, bucket: s3_resources.Bucket):
         self.bucket = bucket
+        self.cache = SqliteDict(
+            filename=str(os.path.join("/tmp", "b2-stream-cache.sqlite")),
+            autocommit=True
+        )
 
     def available(self, company: WaterCompany) -> List[datetime.datetime]:
         items = self.bucket.objects.filter(Delimiter="/", Prefix=f"{company.name}/")
         keys = [i.key.split('/')[1].replace('.csv.gz', '') for i in items if i.key.endswith(".csv.gz")]
         dates = [datetime.datetime.strptime(k, '%Y%m%d%H%M%S').replace(tzinfo=datetime.UTC) for k in keys]
-        return sorted(dates, reverse=True)
+        return sorted(dates)
 
     def _filename(self, company: WaterCompany, dt: datetime.datetime):
         return f"{company.name}/{dt.strftime('%Y%m%d%H%M%S')}.csv.gz"
 
     def save(self, company: WaterCompany, dt: datetime.datetime, items: List[FeatureRecord]):
+        filename = self._filename(company, dt.astimezone(tz=datetime.UTC))
+        content = gzip.compress(data=to_csv(items).encode())
         self.bucket.put_object(
-            Key=self._filename(company, dt.astimezone(tz=datetime.UTC)),
-            Body=(gzip.compress(data=to_csv(items).encode()))
+            Key=filename,
+            Body=(content)
         )
+        self.cache[filename] = content
 
     def load(self, company: WaterCompany, dt: datetime.datetime) -> List[FeatureRecord]:
-        resp = self.bucket.Object(key=self._filename(company, dt)).get()
-        content = gzip.decompress(resp['Body'].read()).decode()
-        return from_csv(content)
+        filename = self._filename(company, dt)
+        if filename in self.cache:
+            content = self.cache[filename]
+        else:
+            resp = self.bucket.Object(key=filename).get()
+            content = resp['Body'].read()
+            self.cache[filename] = content
+
+        return from_csv(gzip.decompress(content).decode())
 
 
 test_item = FeatureRecord(

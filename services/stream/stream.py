@@ -1,14 +1,21 @@
 import dataclasses
 import datetime
 import itertools
+from enum import Enum
 from typing import List, Dict, Optional
 
 import requests
 from requests.adapters import HTTPAdapter
-from requests.structures import  CaseInsensitiveDict
+from requests.structures import CaseInsensitiveDict
 from urllib3 import Retry
 
 from companies import WaterCompany
+
+
+class EventType(Enum):
+    Start = 1
+    Stop = 0
+    Offline = -1
 
 
 @dataclasses.dataclass(frozen=True)
@@ -19,7 +26,7 @@ class FeatureRecord:
     statusStart: Optional[datetime.datetime]
     latestEventStart: Optional[datetime.datetime]
     latestEventEnd: Optional[datetime.datetime]
-    lastUpdated: datetime.datetime
+    lastUpdated: Optional[datetime.datetime]
     lat: float
     lon: float
     receivingWater: str
@@ -38,6 +45,14 @@ x = {
     "ReceivingWaterCourse": "Tees Estuary (S Bank)",
     "LastUpdated": 1735345436350
 }
+
+# Status
+# Anglian -> int
+# Northumbrian -> coded -> -1 offline, 0 stop, 1 start
+# Severn Trent -> coded -> -1 offline, 0 stop, 1 start
+# Southern -> coded -> -1 offline, 0 stop, 1 start
+# South West Water -> coded -> -1 offline, 0 stop, 1 start
+#
 
 data_urls = {
     WaterCompany.Anglian: "https://services3.arcgis.com/VCOY1atHWVcDlvlJ/arcgis/rest/services/stream_service_outfall_locations_view/FeatureServer/0/query",
