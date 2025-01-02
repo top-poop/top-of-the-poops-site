@@ -8,12 +8,12 @@ from stream import StreamAPI
 
 
 def enum_parser(enum_type):
-    def parse_enum(value):
+    def parse_enum(name):
         try:
-            return enum_type(value)
+            return enum_type[name]
         except ValueError:
-            valid_values = [e.value for e in enum_type]
-            raise argparse.ArgumentTypeError(f"Invalid choice: {value}. Must be one of {valid_values}.")
+            valid_names = [e.name for e in enum_type]
+            raise argparse.ArgumentTypeError(f"Invalid choice: {name}. Must be one of {valid_names}.")
 
     return parse_enum
 

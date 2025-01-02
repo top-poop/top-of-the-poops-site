@@ -84,7 +84,7 @@ class Database:
 WITH ranked_events AS (
     SELECT
         e.*,
-        ROW_NUMBER() OVER (PARTITION BY e.stream_cso_id ORDER BY e.event_time DESC) AS rnk
+        ROW_NUMBER() OVER (PARTITION BY e.stream_cso_id ORDER BY e.event_time DESC, e.file_time desc) AS rnk
     FROM
         stream_cso_event as e
 )
@@ -105,6 +105,7 @@ where m.stream_company = %(company)s;
                 cursor.execute("""
                 insert into stream_cso_event (stream_cso_id, event_time, event, file_time, update_time) 
                 values(%(cso_id)s, %(event_time)s, %(event)s, %(file_time)s, %(update_time)s)
+                on conflict ( stream_cso_id, event_time, event) do nothing 
                 """, {
                     "cso_id": ids[event.id],
                     "event_time": event.event_time,

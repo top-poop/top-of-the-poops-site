@@ -17,13 +17,14 @@ drop table if exists stream_cso_event;
 
 create table stream_cso_event
 (
-    stream_cso_id uuid references stream_cso (stream_cso_id),
+    stream_cso_id uuid,
     event_time    timestamptz,
     event         text,
     file_time     timestamptz,
     update_time   timestamptz
 );
 
+create unique index stream_cso_event_idx1 on stream_cso_event ( stream_cso_id, event_time, event);
 
 drop table if exists stream_process;
 
