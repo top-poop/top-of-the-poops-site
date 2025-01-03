@@ -1,13 +1,15 @@
 import argparse
 import os
+from dataclasses import replace
 
 import psycopg2
 from psycopg2.extras import DictCursor
 
+from args import enum_parser
 from companies import WaterCompany
 from secret import env
-from args import enum_parser
 from storage import b2_service, Storage
+from stream import FeatureRecord, EventType
 from streamdb import Database
 
 if __name__ == '__main__':
@@ -29,7 +31,7 @@ if __name__ == '__main__':
     if args.company:
         companies = args.company
     else:
-        companies = WaterCompany
+        companies = [w for w in WaterCompany if w != WaterCompany.YorkshireWater]
 
     with psycopg2.connect(host=db_host, database="gis", user="docker", password="docker",
                           cursor_factory=DictCursor) as conn:
@@ -44,11 +46,28 @@ if __name__ == '__main__':
 
             to_process = [t for t in available if t not in processed]
 
+            most_recent = database.most_recent_records(company=company)
+            most_recent_by_id = {x.id: x for x in most_recent}
+
             for ts in to_process:
                 print(f"Need to process: {company}: {ts}")
-                features = storage.load(company, ts)
 
                 file_ref = database.create_file(company=company, file_time=ts)
 
-                database.insert_file(file=file_ref, features=features)
+                features = storage.load(company, ts)
+
+                def want(f: FeatureRecord):
+                    if f.id not in most_recent_by_id:
+                        return True
+                    r = most_recent_by_id[f.id]
+                    new_feature = (EventType(int(f.status)), f.statusStart, f.latestEventStart, f.latestEventEnd)
+                    existing_feature = (r.status, r.statusStart, r.latestEventStart, r.latestEventEnd)
+                    return new_feature != existing_feature
+
+
+                wanted_features = [f for f in features if want(f)]
+                print(f"Got {len(wanted_features)} events")
+                database.insert_file(file=file_ref, features=wanted_features)
+
+                most_recent_by_id.update({w.id: replace(w, status=EventType(int(w.status))) for w in wanted_features})
                 conn.commit()

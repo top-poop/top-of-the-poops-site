@@ -178,6 +178,39 @@ where m.stream_company = %(company)s;
                     "lon": feature.lon,
                 })
 
+    def most_recent_records(self, company: WaterCompany) -> List[FeatureRecord]:
+        return list(select_many(connection=self.connection,
+                                sql="""
+
+WITH ranked_events AS (
+    SELECT files.stream_file_id, files.file_time, files.company, content.id, content.status, content.statusstart, content.latesteventstart, content.latesteventend, content.lastupdated, content.lat, content.lon, content.receiving_water,
+           ROW_NUMBER() OVER (PARTITION BY id, status, statusstart, latesteventstart, latesteventend ORDER BY file_time desc) AS rn
+    FROM stream_file_content content
+             join stream_files files on content.stream_file_id = files.stream_file_id
+    where company=%(company)s
+)
+SELECT *
+FROM ranked_events
+WHERE rn = 1
+order by company, id, file_time, id
+                        """,
+                                params={
+                                    "company": company.name
+                                },
+                                f=lambda r: FeatureRecord(
+                                    id=r['id'],
+                                    status=EventType[r['status']],
+                                    company=company.name,
+                                    statusStart=r['statusstart'],
+                                    latestEventStart=r['latesteventstart'],
+                                    latestEventEnd=r['latesteventend'],
+                                    lastUpdated=r['lastupdated'],
+                                    lat=r['lat'],
+                                    lon=r['lon'],
+                                    receivingWater=r['receiving_water'],
+                                ))
+                    )
+
     def insert_file(self, file: StreamFile, features: List[FeatureRecord]):
         with self.connection.cursor() as cursor:
             execute_batch(

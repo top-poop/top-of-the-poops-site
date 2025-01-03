@@ -1,4 +1,4 @@
-drop table if exists stream_files;
+drop table if exists stream_files cascade;
 
 create table stream_files
 (
@@ -9,7 +9,7 @@ create table stream_files
 
 create unique index stream_files_idx1 on stream_files (company, file_time);
 
-drop table if exists stream_file_content;
+drop table if exists stream_file_content cascade;
 
 create table stream_file_content
 (

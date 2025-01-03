@@ -4,7 +4,7 @@ import gzip
 import os
 from dataclasses import asdict, fields
 from io import StringIO
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, TypeVar, Callable
 
 import boto3
 import mypy_boto3_s3.service_resource as s3_resources
@@ -17,6 +17,22 @@ from stream import FeatureRecord
 csv_fields = ['lastUpdated', 'id', 'status', 'statusStart', 'latestEventStart',
               'latestEventEnd', 'company', 'lat', 'lon', 'receivingWater']
 
+K = TypeVar("K")
+V = TypeVar("V")
+
+
+class KeyDefaultDict(dict[K, V]):
+    def __init__(self, default_factory: Callable[[K], V]):
+        super().__init__()
+        self.default_factory = default_factory
+
+    def __missing__(self, key: K) -> V:
+        if self.default_factory is None:
+            raise KeyError(key)
+        else:
+            ret = self[key] = self.default_factory(key)
+            return ret
+
 
 def serialize_field(value):
     if isinstance(value, datetime.datetime):
@@ -24,13 +40,16 @@ def serialize_field(value):
     return value
 
 
+dt_cache = KeyDefaultDict(lambda x: datetime.datetime.fromisoformat(x))
+
+
 def deserialize_field(field_type, value):
     if field_type == Optional[datetime.datetime]:
         if value == "":
             return None
-        return datetime.datetime.fromisoformat(value)
+        return dt_cache[value]
     if field_type == datetime.datetime:
-        return datetime.datetime.fromisoformat(value)
+        return dt_cache[value]
     return field_type(value)
 
 
@@ -62,8 +81,10 @@ class Storage:
 
     def __init__(self, bucket: s3_resources.Bucket):
         self.bucket = bucket
+        totp = os.path.expanduser("~/.totp")
+        os.makedirs(totp, exist_ok=True)
         self.cache = SqliteDict(
-            filename=str(os.path.join("/tmp", "b2-stream-cache.sqlite")),
+            filename=str(os.path.join(totp, "b2-stream-cache.sqlite")),
             autocommit=True
         )
 
