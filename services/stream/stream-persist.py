@@ -5,24 +5,13 @@ from typing import List
 
 import psycopg2
 
+from args import enum_parser
 from companies import WaterCompany
 from secret import env
 from storage import b2_service, Storage
 from stream import EventType
 from streamdb import Database
 from streamdb import StreamEvent
-
-
-def enum_parser(enum_type):
-    def parse_enum(name):
-        try:
-            return enum_type[name]
-        except ValueError:
-            valid_names = [e.name for e in enum_type]
-            raise argparse.ArgumentTypeError(f"Invalid choice: {name}. Must be one of {valid_names}.")
-
-    return parse_enum
-
 
 if __name__ == '__main__':
 
@@ -89,7 +78,8 @@ if __name__ == '__main__':
                         our_event = most_recent.get(f.id)
 
                         if our_event is not None and our_event.event_time > f.statusStart:
-                            print(f"{f.id} - out of sequence -> last event {our_event.event}:{our_event.event_time} is after current {event_type}:{f.statusStart}")
+                            print(
+                                f"{f.id} - out of sequence -> last event {our_event.event}:{our_event.event_time} is after current {event_type}:{f.statusStart}")
                             ## out of sequence! - remove most event and try again.
                             database.remove_event(our_event)
                             most_recent = database.latest_events(company=company)

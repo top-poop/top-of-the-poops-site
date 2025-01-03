@@ -2,6 +2,8 @@ import dataclasses
 import datetime
 from typing import TypeVar, Callable, Tuple, Iterable, List, Dict
 
+from psycopg2.extras import execute_batch
+
 from companies import WaterCompany
 from stream import FeatureRecord, EventType
 
@@ -37,10 +39,44 @@ class StreamEvent:
     update_time: datetime.datetime
 
 
+@dataclasses.dataclass(frozen=True)
+class StreamFile:
+    company: WaterCompany
+    file_id: str
+    file_time: datetime.datetime
+
+
 class Database:
 
     def __init__(self, connection):
         self.connection = connection
+
+    def processed_files(self, company: WaterCompany) -> List[StreamFile]:
+        return list(select_many(self.connection,
+                                sql="""
+        select company, stream_file_id, file_time 
+            from stream_files 
+            where company = %(company)s""",
+                                params={
+                                    "company": company.name
+                                },
+                                f=lambda row: StreamFile(
+                                    company=WaterCompany[row["company"]],
+                                    file_id=row["stream_file_id"],
+                                    file_time=row["file_time"])
+                                ))
+
+    def create_file(self, company: WaterCompany, file_time: datetime.datetime) -> StreamFile:
+        with self.connection.cursor() as cursor:
+            cursor.execute("""
+            insert into stream_files (company, file_time) 
+            values (%(company)s, %(file_time)s) 
+            returning stream_file_id""", {
+                "company": company.name,
+                "file_time": file_time
+            })
+            result = cursor.fetchone()
+            return StreamFile(company=company, file_id=result["stream_file_id"], file_time=file_time)
 
     def last_processed(self, company: WaterCompany) -> datetime.datetime:
         row = list(select_many(self.connection,
@@ -142,19 +178,25 @@ where m.stream_company = %(company)s;
                     "lon": feature.lon,
                 })
 
-    def insert_file(self, company: WaterCompany, dt: datetime.datetime, features: List[FeatureRecord]):
+    def insert_file(self, file: StreamFile, features: List[FeatureRecord]):
         with self.connection.cursor() as cursor:
-            for feature in features:
-                cursor.execute("""
-                insert into stream_files (company, file_time, id, status, statusstart, latesteventstart, latesteventend, lastupdated) 
-                values ( %(company)s, %(file_time)s, %(id)s, %(status)s, %(status_start)s, %(latest_event_start)s, %(latest_event_end)s, %(last_updated)s)
-                """, {
-                    "company": company.name,
-                    "file_time": dt,
+            execute_batch(
+                cur=cursor,
+                sql="""
+                insert into stream_file_content (stream_file_id, id, status, statusstart, latesteventstart, latesteventend, lastupdated, lat, lon, receiving_water) 
+                values ( %(stream_file_id)s, %(id)s, %(status)s, %(status_start)s, %(latest_event_start)s, %(latest_event_end)s, %(last_updated)s, %(lat)s, %(lon)s, %(receiving_water)s)
+                """,
+                argslist=[{
+                    "stream_file_id": file.file_id,
                     "id": feature.id,
                     "status": EventType(int(feature.status)).name,
                     "status_start": feature.statusStart,
                     "latest_event_start": feature.latestEventStart,
                     "latest_event_end": feature.latestEventEnd,
                     "last_updated": feature.lastUpdated,
-                })
+                    "lat": feature.lat,
+                    "lon": feature.lon,
+                    "receiving_water": feature.receivingWater
+                } for feature in features],
+                page_size=500,
+            )
