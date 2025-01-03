@@ -51,5 +51,4 @@ order by count desc;
 
 select * from stream_files, stream_file_content
 where stream_files.stream_file_id = stream_file_content.stream_file_id
-and id = 'UUG0896'
-order by file_time
+order by id, file_time

@@ -211,14 +211,20 @@ order by company, id, file_time, id
                                 ))
                     )
 
-    def insert_file(self, file: StreamFile, features: List[FeatureRecord]):
+    def insert_file_events(self, file: StreamFile, features: List[FeatureRecord]):
+        self._insert_records("stream_file_events", file, features)
+
+    def insert_file_content(self, file: StreamFile, features: List[FeatureRecord]):
+        self._insert_records("stream_file_content", file, features)
+
+    def _insert_records(self, table: str, file: StreamFile, features: List[FeatureRecord]):
         with self.connection.cursor() as cursor:
             execute_batch(
                 cur=cursor,
-                sql="""
-                insert into stream_file_content (stream_file_id, id, status, statusstart, latesteventstart, latesteventend, lastupdated, lat, lon, receiving_water) 
-                values ( %(stream_file_id)s, %(id)s, %(status)s, %(status_start)s, %(latest_event_start)s, %(latest_event_end)s, %(last_updated)s, %(lat)s, %(lon)s, %(receiving_water)s)
-                """,
+                sql=f"""
+                        insert into {table} (stream_file_id, id, status, statusstart, latesteventstart, latesteventend, lastupdated, lat, lon, receiving_water) 
+                        values ( %(stream_file_id)s, %(id)s, %(status)s, %(status_start)s, %(latest_event_start)s, %(latest_event_end)s, %(last_updated)s, %(lat)s, %(lon)s, %(receiving_water)s)
+                        """,
                 argslist=[{
                     "stream_file_id": file.file_id,
                     "id": feature.id,

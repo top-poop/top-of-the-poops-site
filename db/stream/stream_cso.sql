@@ -9,6 +9,24 @@ create table stream_files
 
 create unique index stream_files_idx1 on stream_files (company, file_time);
 
+drop table if exists stream_file_events cascade;
+
+create table stream_file_events
+(
+    stream_file_id   uuid,
+    id               text,
+    status           text,
+    statusStart      timestamptz,
+    latestEventStart timestamptz,
+    latestEventEnd   timestamptz,
+    lastUpdated      timestamptz,
+    lat              float,
+    lon              float,
+    receiving_water  text
+);
+
+create unique index stream_file_events_idx1 on stream_file_events (stream_file_id, id);
+
 drop table if exists stream_file_content cascade;
 
 create table stream_file_content

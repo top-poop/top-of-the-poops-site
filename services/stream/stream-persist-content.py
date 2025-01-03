@@ -56,6 +56,7 @@ if __name__ == '__main__':
 
                 features = storage.load(company, ts)
 
+
                 def want(f: FeatureRecord):
                     if f.id not in most_recent_by_id:
                         return True
@@ -66,8 +67,9 @@ if __name__ == '__main__':
 
 
                 wanted_features = [f for f in features if want(f)]
-                print(f"Got {len(wanted_features)} events")
-                database.insert_file(file=file_ref, features=wanted_features)
+                print(f"Got {len(features)} events, want {len(wanted_features)}")
+                database.insert_file_events(file=file_ref, features=wanted_features)
+                database.insert_file_content(file=file_ref, features=features)
 
                 most_recent_by_id.update({w.id: replace(w, status=EventType(int(w.status))) for w in wanted_features})
                 conn.commit()
