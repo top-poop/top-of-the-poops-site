@@ -24,7 +24,7 @@ create table stream_cso_event
     update_time   timestamptz
 );
 
-create unique index stream_cso_event_idx1 on stream_cso_event ( stream_cso_id, event_time, event);
+-- create unique index stream_cso_event_idx1 on stream_cso_event ( stream_cso_id, event_time, event);
 
 drop table if exists stream_process;
 

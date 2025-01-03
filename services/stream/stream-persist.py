@@ -84,83 +84,46 @@ if __name__ == '__main__':
                         if f.statusStart is None:
                             continue
 
+                        event_type = EventType(int(f.status))
+
                         our_event = most_recent.get(f.id)
 
-                        event_type = EventType(int(f.status))
+                        if our_event is not None and our_event.event_time > f.statusStart:
+                            print(f"{f.id} - out of sequence -> last event {our_event.event}:{our_event.event_time} is after current {event_type}:{f.statusStart}")
+                            ## out of sequence! - remove most event and try again.
+                            database.remove_event(our_event)
+                            most_recent = database.latest_events(company=company)
+                            our_event = most_recent.get(f.id)
 
                         match event_type:
                             case EventType.Stop:
                                 # if stopped now
                                 if our_event is None:
-                                    if f.latestEventEnd is not None and f.latestEventStart != f.latestEventEnd and f.latestEventEnd <= f.statusStart:
+                                    if f.latestEventEnd is not None and f.latestEventStart < f.latestEventEnd <= f.statusStart:
                                         new_events.append(
-                                            StreamEvent(id=f.id, event=EventType.Start, event_time=f.latestEventStart,
+                                            StreamEvent(cso_id=ids[f.id], event=EventType.Start,
+                                                        event_time=f.latestEventStart,
                                                         update_time=f.lastUpdated))
                                         new_events.append(
-                                            StreamEvent(id=f.id, event=EventType.Stop, event_time=f.latestEventEnd,
+                                            StreamEvent(cso_id=ids[f.id], event=EventType.Stop,
+                                                        event_time=f.latestEventEnd,
                                                         update_time=f.lastUpdated))
                                     else:
                                         new_events.append(
-                                            StreamEvent(id=f.id, event=EventType.Stop, event_time=f.statusStart,
+                                            StreamEvent(cso_id=ids[f.id], event=EventType.Stop,
+                                                        event_time=f.statusStart,
                                                         update_time=f.lastUpdated))
                                 else:
                                     match our_event.event:
-                                        case EventType.Start if our_event.event_time == f.latestEventStart:
-                                            # event we started is now stopped
+                                        case EventType.Start if f.latestEventEnd:
                                             new_events.append(
-                                                StreamEvent(id=f.id, event=EventType.Stop, event_time=f.latestEventEnd,
-                                                            update_time=f.lastUpdated))
-                                        case EventType.Start if f.statusStart < our_event.event_time:
-                                            # 'correction' of start to stop
-                                            new_events.append(
-                                                StreamEvent(id=f.id, event=EventType.Stop,
-                                                            event_time=our_event.event_time,
+                                                StreamEvent(cso_id=ids[f.id], event=EventType.Stop,
+                                                            event_time=f.latestEventEnd,
                                                             update_time=f.lastUpdated))
                                         case EventType.Start:
-                                            # it stopped, started and stopped between polls, have to bodge
-                                            print(f"{f.id} Stopped / Started / Stopped")
-                                            new_events.append(
-                                                StreamEvent(id=f.id, event=EventType.Stop,
-                                                            event_time=f.latestEventStart,
-                                                            update_time=f.lastUpdated))
-                                            new_events.append(
-                                                StreamEvent(id=f.id, event=EventType.Start,
-                                                            event_time=f.latestEventStart,
-                                                            update_time=f.lastUpdated))
-                                            new_events.append(
-                                                StreamEvent(id=f.id, event=EventType.Stop, event_time=f.latestEventEnd,
-                                                            update_time=f.lastUpdated))
-                                        case EventType.Offline:
-                                            # went from offline to stop. might have had an event in the middle, ignore for now
-                                            new_events.append(
-                                                StreamEvent(id=f.id, event=EventType.Stop, event_time=f.statusStart,
-                                                            update_time=f.lastUpdated)
-                                            )
-                                        case EventType.Stop if our_event.event_time == f.statusStart:
-                                            # still stopped
                                             pass
-                                        case EventType.Stop if our_event.event_time == f.latestEventEnd:
-                                            # still stopped and our dates match
-                                            pass
-                                        case EventType.Stop if f.latestEventStart == f.latestEventEnd:
-                                            # still stopped but spurious zero length thing happened
-                                            pass
-                                        case EventType.Stop if f.latestEventEnd is None:
-                                            # still stopped, start date changed, no intervening event
-                                            pass
-                                        case EventType.Stop if f.latestEventEnd < f.statusStart:
-                                            # something happened in between polling
-                                            print(f"{f.id} overflowed in between polls")
-                                            new_events.append(
-                                                StreamEvent(id=f.id, event=EventType.Start,
-                                                            event_time=f.latestEventStart,
-                                                            update_time=f.lastUpdated))
-                                            new_events.append(
-                                                StreamEvent(id=f.id, event=EventType.Stop, event_time=f.latestEventEnd,
-                                                            update_time=f.lastUpdated))
                                         case EventType.Stop:
-                                            print(f"{f.id} still stopped, but dodgy data?")
-
+                                            pass
                                         case _:
                                             print(f"Unhandled {event_type} -> ours was {our_event.event}")
 
@@ -168,73 +131,30 @@ if __name__ == '__main__':
                                 # is currently overflowing - latestEventStart == statusStart, latestEventEnd == None.
                                 if our_event is None:
                                     new_events.append(
-                                        StreamEvent(id=f.id, event=EventType.Start, event_time=f.statusStart,
+                                        StreamEvent(cso_id=ids[f.id], event=EventType.Start, event_time=f.statusStart,
                                                     update_time=f.lastUpdated))
                                 else:
                                     match our_event.event:
-                                        case EventType.Start if our_event.event_time == f.statusStart:
-                                            # we have a start and the events match
-                                            print(f"{f.id} still overflowing")
                                         case EventType.Start:
-                                            # stopped and started again, lost information...
-                                            # we will consider that it was overflowing the whole time
-                                            print(f"{f.id} stopped and started")
+                                            pass
                                         case EventType.Stop | EventType.Offline:
                                             # our last event was stop or unknown, so we can add a start
                                             print(f"{f.id} started overflowing")
                                             new_events.append(
-                                                StreamEvent(id=f.id, event=EventType.Start, event_time=f.statusStart,
+                                                StreamEvent(cso_id=ids[f.id], event=EventType.Start,
+                                                            event_time=f.statusStart,
                                                             update_time=f.lastUpdated))
                                         case _:
                                             print(f"Unhandled {event_type} -> ours was {our_event.event}")
 
                             case EventType.Offline:
-                                if our_event is None:
-                                    if f.latestEventEnd is not None and f.latestEventStart != f.latestEventEnd:
-                                        new_events.append(
-                                            StreamEvent(id=f.id, event=EventType.Start, event_time=f.latestEventStart,
-                                                        update_time=f.lastUpdated))
-                                        new_events.append(
-                                            StreamEvent(id=f.id, event=EventType.Stop, event_time=f.latestEventEnd,
-                                                        update_time=f.lastUpdated))
-                                    new_events.append(
-                                        StreamEvent(id=f.id, event=EventType.Offline, event_time=f.statusStart,
-                                                    update_time=f.lastUpdated))
-                                else:
-                                    match our_event.event:
-                                        case EventType.Offline if our_event.event_time == f.statusStart:
-                                            # still offline and dates match
-                                            pass
-                                        case EventType.Offline if f.latestEventStart == f.latestEventEnd:
-                                            # still offline but spurious zero length thing happened
-                                            pass
-                                        case EventType.Offline if f.latestEventEnd is None:
-                                            # still offline, start time changed, but no intervening event
-                                            pass
-                                        case EventType.Offline:
-                                            # now offline but overflowed in between polls
-                                            new_events.append(
-                                                StreamEvent(id=f.id, event=EventType.Start,
-                                                            event_time=f.latestEventStart,
-                                                            update_time=f.lastUpdated))
-                                            new_events.append(
-                                                StreamEvent(id=f.id, event=EventType.Stop, event_time=f.latestEventEnd,
-                                                            update_time=f.lastUpdated))
-                                            new_events.append(
-                                                StreamEvent(id=f.id, event=EventType.Offline, event_time=f.statusStart,
-                                                            update_time=f.lastUpdated))
-                                        case EventType.Start | EventType.Stop:
-                                            new_events.append(
-                                                StreamEvent(id=f.id, event=EventType.Offline, event_time=f.statusStart,
-                                                            update_time=f.lastUpdated))
-                                        case _:
-                                            print(f"Unhandled {event_type} -> ours was {our_event.event}")
+                                pass
                     except Exception as e:
                         print(f"{f.id} error")
                         raise
 
                 if new_events:
-                    database.insert_events(ts, ids=ids, events=new_events)
+                    database.insert_events(ts, events=new_events)
                     print(f"Inserted {len(new_events)} events in {time.time() - s}")
 
                 database.set_last_processed(company=company, dt=ts)

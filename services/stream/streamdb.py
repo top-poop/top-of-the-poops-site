@@ -31,7 +31,7 @@ def select_one(connection, sql, params=None):
 
 @dataclasses.dataclass(frozen=True)
 class StreamEvent:
-    id: str
+    cso_id: str
     event: EventType
     event_time: datetime.datetime
     update_time: datetime.datetime
@@ -76,8 +76,21 @@ class Database:
                 })
         }
 
+    def remove_event(self, event: StreamEvent):
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                """delete from stream_cso_event 
+                where stream_cso_id = %(id)s and event = %(event)s and event_time = %(event_time)s""",
+                {
+                    "id": event.cso_id,
+                    "event": event.event.name,
+                    "event_time": event.event_time
+                }
+            )
+
     def latest_events(self, company: WaterCompany) -> Dict[str, StreamEvent]:
-        return {row[0]: StreamEvent(event=EventType[row[1]], id=row[0], event_time=row[2], update_time=row[3])
+        return {row[0]: StreamEvent(event=EventType[row[1]], event_time=row[2], update_time=row[3],
+                                    cso_id=row[4])
                 for row in select_many(
                 connection=self.connection,
                 sql="""
@@ -88,7 +101,7 @@ WITH ranked_events AS (
     FROM
         stream_cso_event as e
 )
-SELECT m.stream_id, e.event, e.event_time, e.update_time
+SELECT m.stream_id, e.event, e.event_time, e.update_time, m.stream_cso_id
 FROM stream_cso m
 JOIN ranked_events e ON m.stream_cso_id = e.stream_cso_id AND e.rnk = 1
 where m.stream_company = %(company)s;
@@ -98,16 +111,15 @@ where m.stream_company = %(company)s;
                 }
             )}
 
-    def insert_events(self, file_date: datetime.datetime, ids: Dict[str, str], events: List[StreamEvent]) -> int:
+    def insert_events(self, file_date: datetime.datetime, events: List[StreamEvent]) -> int:
         count = []
         with self.connection.cursor() as cursor:
             for event in events:
                 cursor.execute("""
                 insert into stream_cso_event (stream_cso_id, event_time, event, file_time, update_time) 
                 values(%(cso_id)s, %(event_time)s, %(event)s, %(file_time)s, %(update_time)s)
-                on conflict ( stream_cso_id, event_time, event) do nothing 
                 """, {
-                    "cso_id": ids[event.id],
+                    "cso_id": event.cso_id,
                     "event_time": event.event_time,
                     "event": event.event.name,
                     "file_time": file_date,
