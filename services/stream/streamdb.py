@@ -25,10 +25,10 @@ def select_many(connection, sql, params=None, f: Callable[[Tuple], T] = lambda t
         yield from iter_row(cursor, size=100, f=f)
 
 
-def select_one(connection, sql, params=None):
+def select_one(connection, sql, params=None, f: Callable[[Tuple], T] = lambda t: t) -> T:
     with connection.cursor() as cursor:
         cursor.execute(sql, params)
-        return cursor.fetchone()
+        return f(cursor.fetchone())
 
 
 @dataclasses.dataclass(frozen=True)
@@ -36,6 +36,7 @@ class StreamEvent:
     cso_id: str
     event: EventType
     event_time: datetime.datetime
+    file_id: str
     update_time: datetime.datetime
 
 
@@ -51,7 +52,7 @@ class Database:
     def __init__(self, connection):
         self.connection = connection
 
-    def processed_files(self, company: WaterCompany) -> List[StreamFile]:
+    def loaded_files(self, company: WaterCompany) -> List[StreamFile]:
         return list(select_many(self.connection,
                                 sql="""
         select company, stream_file_id, file_time 
@@ -78,26 +79,31 @@ class Database:
             result = cursor.fetchone()
             return StreamFile(company=company, file_id=result["stream_file_id"], file_time=file_time)
 
-    def last_processed(self, company: WaterCompany) -> datetime.datetime:
-        row = list(select_many(self.connection,
-                               sql="""select last_processed from stream_process where company = %(company)s""",
-                               params={
-                                   "company": company.name
-                               }))
-        if row:
-            return row[0][0]
-        else:
-            return datetime.datetime.fromtimestamp(0, tz=datetime.UTC)
+    def files_unprocessed(self, company: WaterCompany) -> List[StreamFile]:
+        return list(
+            select_many(self.connection,
+                        sql="""
+    select stream_file_id, file_time
+from stream_files
+where company = %(company)s
+  and stream_file_id not in
+      (select stream_file_id from stream_files_processed where stream_files_processed.company = %(company)s)
+order by file_time
+                               """,
+                        params={
+                            "company": company.name
+                        },
+                        f=lambda result: StreamFile(company=company, file_id=result["stream_file_id"],
+                                                    file_time=result['file_time'])))
 
-    def set_last_processed(self, company: WaterCompany, dt: datetime.datetime):
+    def mark_processed(self, file: StreamFile):
         with self.connection.cursor() as cursor:
             cursor.execute(
                 """
-            insert into stream_process (company, last_processed) values (%(company)s, %(date)s)
-            on conflict (company) do update set last_processed = excluded.last_processed
+            insert into stream_files_processed (company, stream_file_id) values (%(company)s, %(file_id)s)
             """, {
-                    "company": company.name,
-                    "date": dt
+                    "company": file.company.name,
+                    "file_id": file.file_id
                 }
             )
 
@@ -112,57 +118,52 @@ class Database:
                 })
         }
 
-    def remove_event(self, event: StreamEvent):
+    def insert_events(self, events: List[StreamEvent]) -> int:
+        count = []
         with self.connection.cursor() as cursor:
-            cursor.execute(
-                """delete from stream_cso_event 
-                where stream_cso_id = %(id)s and event = %(event)s and event_time = %(event_time)s""",
-                {
-                    "id": event.cso_id,
+            for event in events:
+                cursor.execute("""
+                insert into stream_cso_event (stream_cso_id, event_time, event, file_id, update_time) 
+                values(%(cso_id)s, %(event_time)s, %(event)s, %(file_id)s, %(update_time)s)
+                """, {
+                    "cso_id": event.cso_id,
+                    "event_time": event.event_time,
                     "event": event.event.name,
-                    "event_time": event.event_time
-                }
-            )
+                    "file_id": event.file_id,
+                    "update_time": event.update_time,
+                })
+                count.append(cursor.rowcount)
+        return sum(count)
 
     def latest_events(self, company: WaterCompany) -> Dict[str, StreamEvent]:
-        return {row[0]: StreamEvent(event=EventType[row[1]], event_time=row[2], update_time=row[3],
-                                    cso_id=row[4])
-                for row in select_many(
+        return {e[0]: e[1]
+                for e in select_many(
                 connection=self.connection,
                 sql="""
 WITH ranked_events AS (
     SELECT
         e.*,
-        ROW_NUMBER() OVER (PARTITION BY e.stream_cso_id ORDER BY e.event_time DESC, e.file_time desc) AS rnk
+        ROW_NUMBER() OVER (PARTITION BY e.stream_cso_id ORDER BY e.event_time DESC, stream_files.file_time desc) AS rnk
     FROM
         stream_cso_event as e
+        join stream_files on stream_files.stream_file_id = e.file_id
 )
-SELECT m.stream_id, e.event, e.event_time, e.update_time, m.stream_cso_id
+SELECT m.stream_id, e.file_id, e.event, e.event_time, e.update_time, m.stream_cso_id
 FROM stream_cso m
 JOIN ranked_events e ON m.stream_cso_id = e.stream_cso_id AND e.rnk = 1
 where m.stream_company = %(company)s;
                            """,
                 params={
                     "company": company.name
-                }
+                },
+                f=lambda row: (row["stream_id"], StreamEvent(
+                    file_id=row["file_id"],
+                    event=EventType[row["event"]],
+                    event_time=row["event_time"],
+                    update_time=row["update_time"],
+                    cso_id=row[4]
+                ))
             )}
-
-    def insert_events(self, file_date: datetime.datetime, events: List[StreamEvent]) -> int:
-        count = []
-        with self.connection.cursor() as cursor:
-            for event in events:
-                cursor.execute("""
-                insert into stream_cso_event (stream_cso_id, event_time, event, file_time, update_time) 
-                values(%(cso_id)s, %(event_time)s, %(event)s, %(file_time)s, %(update_time)s)
-                """, {
-                    "cso_id": event.cso_id,
-                    "event_time": event.event_time,
-                    "event": event.event.name,
-                    "file_time": file_date,
-                    "update_time": event.update_time,
-                })
-                count.append(cursor.rowcount)
-        return sum(count)
 
     def insert_cso(self, company: WaterCompany, features: List[FeatureRecord]):
         with self.connection.cursor() as cursor:
@@ -177,6 +178,20 @@ where m.stream_company = %(company)s;
                     "lat": feature.lat,
                     "lon": feature.lon,
                 })
+
+    def _record_from_row(self, company: WaterCompany, r) -> FeatureRecord:
+        return FeatureRecord(
+            id=r['id'],
+            status=EventType[r['status']],
+            company=company.name,
+            statusStart=r['statusstart'],
+            latestEventStart=r['latesteventstart'],
+            latestEventEnd=r['latesteventend'],
+            lastUpdated=r['lastupdated'],
+            lat=r['lat'],
+            lon=r['lon'],
+            receivingWater=r['receiving_water'],
+        )
 
     def most_recent_records(self, company: WaterCompany) -> List[FeatureRecord]:
         return list(select_many(connection=self.connection,
@@ -197,19 +212,23 @@ order by company, id, file_time, id
                                 params={
                                     "company": company.name
                                 },
-                                f=lambda r: FeatureRecord(
-                                    id=r['id'],
-                                    status=EventType[r['status']],
-                                    company=company.name,
-                                    statusStart=r['statusstart'],
-                                    latestEventStart=r['latesteventstart'],
-                                    latestEventEnd=r['latesteventend'],
-                                    lastUpdated=r['lastupdated'],
-                                    lat=r['lat'],
-                                    lon=r['lon'],
-                                    receivingWater=r['receiving_water'],
-                                ))
+                                f=lambda r: self._record_from_row(company, r))
                     )
+
+    def load_file_events(self, file: StreamFile) -> List[FeatureRecord]:
+        return list(
+            select_many(
+                connection=self.connection,
+                sql="""
+        select * from stream_files, stream_file_events
+        where stream_files.stream_file_id = stream_file_events.stream_file_id
+        and stream_files.stream_file_id = %(file_id)s
+                    """,
+                params={
+                    "file_id": file.file_id
+                },
+                f=lambda row: self._record_from_row(file.company, row))
+        )
 
     def insert_file_events(self, file: StreamFile, features: List[FeatureRecord]):
         self._insert_records("stream_file_events", file, features)

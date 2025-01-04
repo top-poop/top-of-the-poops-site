@@ -42,9 +42,9 @@ if __name__ == '__main__':
 
             available = [ts for ts in storage.available(company=company)]
 
-            processed = [p.file_time for p in database.processed_files(company=company)]
+            loaded_files = [p.file_time for p in database.loaded_files(company=company)]
 
-            to_process = [t for t in available if t not in processed]
+            to_process = [t for t in available if t not in loaded_files]
 
             most_recent = database.most_recent_records(company=company)
             most_recent_by_id = {x.id: x for x in most_recent}

@@ -15,7 +15,6 @@ from calendar_bucket import Calendar, Summariser
 from psy import select_many
 from thames import TWEvent, OFFLINE_START, OFFLINE_STOP, START, STOP, ThamesMonitorState
 
-
 def monitor(event: TWEvent):
     return event.location_name + "|" + event.permit_number
 

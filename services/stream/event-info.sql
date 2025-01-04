@@ -52,3 +52,16 @@ order by count desc;
 select * from stream_files, stream_file_content
 where stream_files.stream_file_id = stream_file_content.stream_file_id
 order by id, file_time
+
+select * from stream_files, stream_file_events
+where stream_files.stream_file_id = stream_file_events.stream_file_id
+order by id, file_time
+
+
+
+select stream_file_id, file_time
+from stream_files
+where company = 'Anglian'
+  and stream_file_id not in
+      (select stream_file_id from stream_files_processed where stream_files_processed.company = 'Anglian')
+order by file_time

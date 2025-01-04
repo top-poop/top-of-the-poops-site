@@ -46,12 +46,13 @@ create table stream_file_content
 create unique index stream_file_content_idx1 on stream_file_content (stream_file_id, id);
 
 
-drop table if exists stream_process;
+drop table if exists stream_files_processed;
 
-create table stream_process
+create table stream_files_processed
 (
     company        text primary key,
-    last_processed timestamptz
+    stream_file_id uuid references stream_files (stream_file_id),
+    process_time   timestamptz default now()
 );
 
 drop table if exists stream_cso cascade;
@@ -76,7 +77,7 @@ create table stream_cso_event
     stream_cso_id uuid,
     event_time    timestamptz,
     event         text,
-    file_time     timestamptz,
+    file_id       uuid references stream_files (stream_file_id),
     update_time   timestamptz
 );
 
