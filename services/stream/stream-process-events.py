@@ -1,7 +1,7 @@
 import argparse
 import os
 import time
-from typing import List, Optional
+from typing import List
 
 import psycopg2
 from psycopg2.extras import DictCursor
@@ -10,66 +10,7 @@ from args import enum_parser
 from companies import WaterCompany
 from secret import env
 from storage import b2_service, Storage
-from stream import EventType, FeatureRecord
-from streamdb import Database, StreamFile, StreamEvent
-
-
-def bob(file: StreamFile, previous: Optional[StreamEvent], current: FeatureRecord) -> Optional[StreamEvent]:
-    match current.status:
-        case EventType.Stop:
-            # if stopped now
-            if our_event is None:
-                if f.latestEventEnd is not None and f.latestEventStart < f.latestEventEnd <= f.statusStart:
-                    new_events.append(
-                        StreamEvent(cso_id=ids[f.id],
-                                    event=EventType.Start,
-                                    event_time=f.latestEventStart,
-                                    update_time=f.lastUpdated))
-                    new_events.append(
-                        StreamEvent(cso_id=ids[f.id], event=EventType.Stop,
-                                    event_time=f.latestEventEnd,
-                                    update_time=f.lastUpdated))
-                else:
-                    new_events.append(
-                        StreamEvent(cso_id=ids[f.id], event=EventType.Stop,
-                                    event_time=f.statusStart,
-                                    update_time=f.lastUpdated))
-            else:
-                match our_event.event:
-                    case EventType.Start if f.latestEventEnd:
-                        new_events.append(
-                            StreamEvent(cso_id=ids[f.id], event=EventType.Stop,
-                                        event_time=f.latestEventEnd,
-                                        update_time=f.lastUpdated))
-                    case EventType.Start:
-                        pass
-                    case EventType.Stop:
-                        pass
-                    case _:
-                        print(f"Unhandled {event_type} -> ours was {our_event.event}")
-        case EventType.Start:
-            # is currently overflowing - latestEventStart == statusStart, latestEventEnd == None.
-            if our_event is None:
-                new_events.append(
-                    StreamEvent(cso_id=ids[f.id], event=EventType.Start, event_time=f.statusStart,
-                                update_time=f.lastUpdated))
-            else:
-                match our_event.event:
-                    case EventType.Start:
-                        pass
-                    case EventType.Stop | EventType.Offline:
-                        # our last event was stop or unknown, so we can add a start
-                        print(f"{f.id} started overflowing")
-                        new_events.append(
-                            StreamEvent(cso_id=ids[f.id], event=EventType.Start,
-                                        event_time=f.statusStart,
-                                        update_time=f.lastUpdated))
-                    case _:
-                        print(f"Unhandled {event_type} -> ours was {our_event.event}")
-
-        case EventType.Offline:
-            pass
-
+from streamdb import Database, StreamEvent
 
 if __name__ == '__main__':
 
