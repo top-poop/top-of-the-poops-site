@@ -9,6 +9,9 @@ from streamdb import StreamFile
 
 ### The water companies have differing interpretations of what the various different states mean.
 
+## anglian on a stop event uses 'statusstart' to be the time that the stop event was received
+## northhumbrian seems to do the same, also severn trent
+## neither has reliable information in the 'latest event start  / end' field
 events_anglian = {
     "initial_stop": [
         "Stop,2024-12-13 02:44:46.000000 +00:00,2024-12-11 02:43:23.000000 +00:00,2024-12-13 02:44:46.000000 +00:00,2024-12-31 12:16:40.810000 +00:00,2024-12-31 12:16:40.810000 +00:00"],
@@ -28,6 +31,9 @@ events_anglian = {
         "Start,2025-01-02 00:46:08.000000 +00:00,2025-01-02 00:46:08.000000 +00:00,,2025-01-02 01:14:34.735000 +00:00",
         "Start,2025-01-02 01:16:16.000000 +00:00,2025-01-02 01:16:16.000000 +00:00,,2025-01-02 01:44:18.519000 +00:00",
         "Stop,2025-01-02 01:31:23.000000 +00:00,2025-01-02 01:16:16.000000 +00:00,2025-01-02 01:31:23.000000 +00:00,2025-01-02 02:14:30.316000 +00:00",
+    ],
+    "offline": [
+        "Offline,2024-03-01 00:00:00.000000 +00:00,,,2024-10-30 14:16:13.573000 +00:00"
     ]
 }
 
@@ -42,9 +48,16 @@ def as_feature(company: WaterCompany, s: str):
     ss = s.split(",")
 
     return FeatureRecord(
-        id="feature-id", status=EventType[ss[0]], company=company.name, statusStart=parse_date(ss[1]),
+        id="feature-id",
+        status=EventType[ss[0]],
+        company=company.name,
+        statusStart=parse_date(ss[1]),
         latestEventStart=parse_date(ss[2]),
-        latestEventEnd=parse_date(ss[3]), lat=0, lon=0, receivingWater='', lastUpdated=datetime.datetime.now()
+        latestEventEnd=parse_date(ss[3]),
+        lat=0,
+        lon=0,
+        receivingWater='',
+        lastUpdated=datetime.datetime.now()
     )
 
 
@@ -130,4 +143,8 @@ class TestAnglian:
                                         file_id=TestAnglian.file.file_id,
                                         update_time=events[3].lastUpdated)
 
-
+    def test_offline(self):
+        """offline: ignored for now"""
+        events = self.events('offline')
+        output = apply_events(self.file, events)
+        assert len(output) == 0

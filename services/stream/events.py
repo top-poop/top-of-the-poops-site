@@ -1,10 +1,14 @@
 from typing import Optional, Dict
 
+from companies import WaterCompany
 from stream import FeatureRecord, EventType
 from streamdb import StreamFile, StreamEvent
 
 
 def bob(mapping: Dict, file: StreamFile, previous: Optional[StreamEvent], f: FeatureRecord) -> Optional[StreamEvent]:
+    if file.company not in [WaterCompany.Anglian, WaterCompany.Northumbrian, WaterCompany.SevernTrent]:
+        return None
+
     match f.status:
         case EventType.Stop:
             if previous is None:
@@ -49,4 +53,5 @@ def bob(mapping: Dict, file: StreamFile, previous: Optional[StreamEvent], f: Fea
                     return None
             raise NotImplementedError()
         case EventType.Offline:
-            raise NotImplementedError()
+            # ignore offline for now
+            return None
