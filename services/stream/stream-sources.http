@@ -29,6 +29,14 @@ https://services-eu1.arcgis.com/MSNNjkZ51iVh8yBj/arcgis/rest/services/Northumbri
 
 https://services1.arcgis.com/NO7lTIlnxRMMG9Gw/arcgis/rest/services/Severn_Trent_Water_Storm_Overflow_Activity/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json
 
+### Severn Trent feature list
+
+https://services1.arcgis.com/NO7lTIlnxRMMG9Gw/arcgis/rest/services/Severn_Trent_Water_Storm_Overflow_Activity/FeatureServer/0/query?where=1%3D1&outFields=*&returnIdsOnly=true&outSR=4326&f=json
+
+### Severn Trent feature count
+
+https://services1.arcgis.com/NO7lTIlnxRMMG9Gw/arcgis/rest/services/Severn_Trent_Water_Storm_Overflow_Activity/FeatureServer/0/query?where=1%3D1&outFields=*&returnIdsOnly=true&returnCountOnly=true&outSR=4326&f=json
+
 ### Southern
 
 https://services-eu1.arcgis.com/XxS6FebPX29TRGDJ/arcgis/rest/services/Southern_Water_Storm_Overflow_Activity/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json

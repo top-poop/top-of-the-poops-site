@@ -60,6 +60,10 @@ if __name__ == '__main__':
                     ids = database.load_ids(company=company)
 
                 for f in [g for g in features if feature_filter(g)]:
+
+                    if f.id == '':
+                        print(f">> Record has no id? file = {file}")
+
                     try:
                         new_event = interpret(ids, file=file, previous=latest_by_id.get(f.id), f=f)
                         if new_event is not None:

@@ -1,5 +1,6 @@
 import argparse
 import os
+from collections import Counter
 from dataclasses import replace
 
 import psycopg2
@@ -56,25 +57,57 @@ if __name__ == '__main__':
 
                 features = storage.load(company, ts)
 
+
+                # Some files contain no id for a CSO - we will filter them out
+                # e.g. SevernTrent/20250107161514
+
+                def probably_valid(f: FeatureRecord):
+                    if f.id is None or f.id == '':
+                        return False
+                    return True
+
+
+                features_with_ids = [f for f in features if probably_valid(f)]
+
+                print(
+                    f"File {file_ref.company} {file_ref.file_id}- Records in file {len(features)}, valid {len(features_with_ids)}")
+
+                ## Now we need to filter out any duplicates - mainly a problem for Severn Trent
+                ## which seems to have hundreds of thousands of duplicates?
+                counter = Counter()
+
+
+                def not_a_duplicate(f: FeatureRecord):
+                    counter.update([f.id])
+                    return counter[f.id] == 1
+
+
+                unique_features = [f for f in features_with_ids if not_a_duplicate(f)]
+
+                if len(unique_features):
+                    if counter.most_common(1)[0][1] > 1:
+                        print(counter.most_common(5))
+
+                print(f"From {len(features_with_ids)} events, unique is {len(unique_features)}")
+
                 ids = database.load_ids(company=company)
-
-
-
 
 
                 def want(f: FeatureRecord):
                     if f.id not in most_recent_by_id:
                         return True
+
                     r = most_recent_by_id[f.id]
                     new_feature = (EventType(int(f.status)), f.statusStart, f.latestEventStart, f.latestEventEnd)
                     existing_feature = (r.status, r.statusStart, r.latestEventStart, r.latestEventEnd)
                     return new_feature != existing_feature
 
 
-                wanted_features = [f for f in features if want(f)]
-                print(f"Got {len(features)} events, want {len(wanted_features)}")
+                wanted_features = [f for f in unique_features if want(f)]
+                print(f"Got {len(unique_features)} events, want {len(wanted_features)}")
+
                 database.insert_file_events(file=file_ref, features=wanted_features)
-                database.insert_file_content(file=file_ref, features=features)
+                database.insert_file_content(file=file_ref, features=unique_features)
 
                 most_recent_by_id.update({w.id: replace(w, status=EventType(int(w.status))) for w in wanted_features})
                 conn.commit()

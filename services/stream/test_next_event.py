@@ -1,6 +1,8 @@
 import datetime
 from typing import Optional, List
 
+import pytest
+
 from companies import WaterCompany
 from events import interpret
 from stream import FeatureRecord, EventType
@@ -34,6 +36,14 @@ events_type1 = {
     ],
     "offline": [
         "Offline,2024-03-01 00:00:00.000000 +00:00,,,2024-10-30 14:16:13.573000 +00:00"
+    ],
+    ## northumbrian time jumping backwards
+    "northumbrian_time_jump": [
+        "Start,2024-12-31 19:00:00.000000 +00:00,2024-12-31 19:00:00.000000 +00:00,,2024-12-31 19:35:03.240000 +00:00",
+        "Stop,2024-12-31 19:15:00.000000 +00:00,2024-12-31 19:00:00.000000 +00:00,2024-12-31 19:15:00.000000 +00:00,2024-12-31 19:54:50.963000 +00:00",
+        "Start,2024-12-31 21:45:00.000000 +00:00,2024-12-31 21:45:00.000000 +00:00,,2024-12-31 22:35:30.560000 +00:00",
+        "Stop,2025-01-01 09:30:00.000000 +00:00,2024-12-31 21:45:00.000000 +00:00,2025-01-01 09:30:00.000000 +00:00,2025-01-01 09:55:29.096000 +00:00",
+        "Stop,2025-01-01 09:16:00.000000 +00:00,2025-01-01 09:15:00.000000 +00:00,2025-01-01 09:16:00.000000 +00:00,2025-01-01 15:54:56.183000 +00:00",
     ]
 }
 
@@ -67,6 +77,12 @@ events_type2 = {
     ],
     "wessex_initial_stop_null": [
         "Stop,,,,2024-12-31 12:28:00.000000 +00:00",
+    ],
+    ## united utilities sometimes has a wobble, no event end
+    "united_no_event_end": [
+        "Start,2024-12-31 11:15:00.000000 +00:00,2024-12-31 11:15:00.000000 +00:00,,2024-12-31 12:22:57.178000 +00:00",
+        "Offline,2024-12-31 13:30:00.000000 +00:00,2024-12-31 11:15:00.000000 +00:00,,2024-12-31 14:22:55.450000 +00:00",
+        "Stop,2024-12-31 14:45:00.000000 +00:00,2024-12-31 11:15:00.000000 +00:00,,2024-12-31 15:53:18.723000 +00:00",
     ]
 }
 
@@ -182,6 +198,25 @@ class TestType1:
         output = apply_events(self.file, events)
         assert len(output) == 0
 
+    def test_northumbrian_time_jump(self):
+        """seems time goes backwards in Northumbria"""
+        events = self.events('northumbrian_time_jump')
+        output = apply_events(self.file, events)
+        assert len(output) == 4
+        assert output[0].event == EventType.Start
+        assert output[1].event == EventType.Stop
+        assert output[2].event == EventType.Start
+        assert output[2].event_time ==events[2].statusStart
+        assert output[3].event == EventType.Stop
+
+    def test_no_event_time(self):
+        """deliberately give unhandled case that will force event start to be None, which will fail"""
+        with pytest.raises(Exception):
+            events = self.events("initial_stop")
+            events.append(FeatureRecord('feature-id', EventType.Start, self.company, statusStart=None, latestEventStart=None, latestEventEnd=None, lastUpdated=None,lat=0,lon=0,receivingWater=''))
+            output = apply_events(self.file, events)
+            print(output)
+
 
 class TestType2:
     company = WaterCompany.Southern
@@ -273,3 +308,14 @@ class TestType2:
                                         event_time=events[0].lastUpdated,
                                         file_id=TestType2.file.file_id,
                                         update_time=events[0].lastUpdated)
+
+    def test_united_no_event_end(self):
+        """for some CSOs there is no end time, particularly when there is an Offline event in there"""
+        events = self.events('united_no_event_end')
+        output = apply_events(self.file, events)
+        assert len(output) == 2
+        assert output[0].event == EventType.Start
+        assert output[0].event_time == events[0].statusStart
+        assert output[1].event == EventType.Stop
+        assert output[1].event_time == events[2].lastUpdated
+
