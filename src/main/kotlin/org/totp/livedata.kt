@@ -2,11 +2,10 @@ package org.totp
 
 import org.http4k.core.*
 import org.http4k.lens.Path
-import org.http4k.lens.Query
 import org.http4k.lens.value
 import org.totp.db.EnvironmentAgency
+import org.totp.db.StreamData
 import org.totp.db.ThamesWater
-import org.totp.model.data.ConstituencyName
 import org.totp.model.data.ConstituencySlug
 import org.totp.model.data.TotpJson
 import org.totp.pages.slugToConstituency
@@ -14,6 +13,15 @@ import java.time.Clock
 import java.time.Duration
 import java.time.LocalDate
 import java.time.ZoneId
+
+class StreamOverflowing(val streamData: StreamData) : HttpHandler {
+
+    val response = TotpJson.autoBody<List<StreamData.StreamCSOLiveOverflow>>().toLens()
+
+    override fun invoke(request: Request): Response {
+        return Response(Status.OK).with(response of streamData.overflowingRightNow())
+    }
+}
 
 class ThamesWaterSummary(val thamesWater: ThamesWater) : HttpHandler {
 

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Top of the Poops - Sewage Overflows Right Now</title>
+    <meta name="description" content="Analysing sewage dumps by water companies in the UK">
+
+    {{> chunks/favicons }}
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
+    {{> components/meta-opengraph
+            title="Live Sewage Overflows"
+            twitterImageUri=share.twitterImageUri
+    }}
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+{{> chunks/navbar }}
+
+<div class="container">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <div style="height: 800px;" id="now"></div>
+        </div>
+        <div class="col-md-3">
+            <div class="display-5">Live Overflow Map</div>
+
+            <p>Here are all the CSOs in England that are overflowing right now. We are using the Water Companies' own
+            data, updated every 15 minutes.</p>
+
+            <p>It's not a pretty picture.</p>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
+
+    function msToTime(ms) {
+        let seconds = (ms / 1000).toFixed(1);
+        let minutes = (ms / (1000 * 60)).toFixed(1);
+        let hours = (ms / (1000 * 60 * 60)).toFixed(1);
+        let days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
+        if (seconds < 60) return seconds + " sec";
+        else if (minutes < 60) return minutes + " min";
+        else if (hours < 24) return hours + " hrs";
+        else return days + " days"
+    }
+
+    const chart = (data, countries) => {
+        const now = Date.now();
+        data = data.map(
+                e => {
+                    const started = Date.parse(e.started);
+                    const duration = now - started;
+                    return {
+                        started,
+                        duration,
+                        ...e,
+                    }
+                }
+        )
+        return Plot.plot(
+                {
+                    projection: {
+                        type: "mercator",
+                        domain: {
+                            type: "MultiPoint",
+                            coordinates: [[-6, 49.9], [1.8, 55.9]],
+                        },
+                    },
+                    height: 800,
+                    marks: [
+                        Plot.geo(
+                                countries,
+                                {
+                                    fill: "rgba(167,198,167,0.19)",
+                                    stroke: "rgba(0,0,0,0.2)",
+                                    strokeWidth: 2,
+                                }
+                        ),
+                        Plot.dot(
+                                data,
+                                {
+                                    x: d => d.loc.lon,
+                                    y: d => d.loc.lat,
+                                    r: 10,
+                                    fill: "company",
+                                    opacity: 0.5,
+                                    mixBlendMode: "multiply",
+                                    title: d => `${d.company} ${d.id} - Overflowing since ${d.started} - Duration ${msToTime(d.duration)}`,
+                                }
+                        )
+
+                    ]
+                }
+        );
+    };
+
+    const countries = await fetch("/data/v1/2023/geo/countries.json")
+    const data = await fetch("/live/stream/overflowing")
+
+    if (data.ok && countries.ok) {
+        document.getElementById("now")
+                .appendChild(
+                        chart(await data.json(), await countries.json())
+                );
+    }
+
+</script>
+
+{{> chunks/footer }}
+
+
+</body>
+</html>

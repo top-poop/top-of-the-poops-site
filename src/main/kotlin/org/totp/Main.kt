@@ -116,7 +116,6 @@ fun main() {
     val isDevelopment =
         EnvironmentKey.boolean().required("DEVELOPMENT_MODE", "Use fake data server (local files) & hot reload")
     val dataServiceUri = EnvironmentKey.uri().required("DATA_SERVICE_URI", "URI for Data Service")
-    val pollutionServiceUri = EnvironmentKey.uri().required("POLLUTION_SERVICE_URI", "URI for Pollution Service")
     val debugging = EnvironmentKey.boolean().required("DEBUG_MODE", "Print all request and response")
     val dbHost = EnvironmentKey.string().defaulted("DB_HOST", "localhost", "Print all request and response")
     val port = EnvironmentKey.int().required("PORT", "Listen Port")
@@ -125,7 +124,6 @@ fun main() {
         isDevelopment of false,
         debugging of false,
         dataServiceUri of Uri.of("http://data"),
-        pollutionServiceUri of Uri.of("http://pollution"),
         port of 80,
     )
 
@@ -197,6 +195,8 @@ fun main() {
 
     val thamesWater = ThamesWater(connection)
 
+    val stream = StreamData(connection)
+
     val server = Undertow(port = port(environment)).toServer(
 
         routes(
@@ -213,6 +213,9 @@ fun main() {
                                 companies = waterCompanies,
                                 mpFor = mpFor,
                                 shellfishRankings = shellfishRankings,
+                            ),
+                            "/now" bind NowHandler(
+                                renderer = renderer,
                             ),
                             "/support" bind SupportUsHandler(renderer = renderer),
                             "/media" bind MediaPageHandler(
@@ -309,6 +312,7 @@ fun main() {
                         )
                     )
             ),
+            "/live/stream/overflowing" bind StreamOverflowing(stream),
             "/live/thames-water/overflow-summary" bind ThamesWaterSummary(thamesWater),
             "/live/thames-water/events/cso/{permit}" bind ThamesWaterPermitEvents(clock, thamesWater),
             "/live/thames-water/events/constituency/{constituency}" bind ThamesWaterConstituencyEvents(
