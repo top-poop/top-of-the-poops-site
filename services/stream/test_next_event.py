@@ -51,7 +51,7 @@ events_type2 = {
         "Start,2025-01-02 00:01:05.000000 +00:00,2025-01-02 00:01:05.000000 +00:00,,2025-01-02 01:00:00.847000 +00:00",
         "Stop,2025-01-02 00:01:05.000000 +00:00,2025-01-02 00:01:05.000000 +00:00,2025-01-02 00:20:49.000000 +00:00,2025-01-02 01:30:00.910000 +00:00",
     ],
-    # this is a peculiarity of UnitedUtilies - multiple stop events all with different status start times
+    # this is a peculiarity of UnitedUtilities/Wessex - multiple stop events all with different status start times
     "stop_stop_stop_stop": [
         "Stop,2025-01-01 13:02:11.300000 +00:00,2025-01-01 12:49:06.000000 +00:00,2025-01-01 13:02:11.300000 +00:00,2025-01-01 13:52:40.970000 +00:00",
         "Stop,2025-01-01 13:52:28.500000 +00:00,2025-01-01 13:49:26.100000 +00:00,2025-01-01 13:52:28.500000 +00:00,2025-01-01 14:22:23.816000 +00:00",
@@ -64,6 +64,9 @@ events_type2 = {
         "Stop,2024-11-25 04:45:00.000000 +00:00,2024-11-25 04:44:00.000000 +00:00,2024-11-25 04:45:00.000000 +00:00,2024-12-31 12:28:00.000000 +00:00",
         "Offline,,2024-11-25 04:44:00.000000 +00:00,2024-11-25 04:45:00.000000 +00:00,2025-01-03 14:28:00.000000 +00:00",
         "Stop,2024-11-25 04:45:00.000000 +00:00,2024-11-25 04:44:00.000000 +00:00,2024-11-25 04:45:00.000000 +00:00,2025-01-04 05:13:00.000000 +00:00",
+    ],
+    "wessex_initial_stop_null": [
+        "Stop,,,,2024-12-31 12:28:00.000000 +00:00",
     ]
 }
 
@@ -239,7 +242,7 @@ class TestType2:
 
     def test_stop_stop_stop_stop(self):
         """stopped: multiple stop events all with differing statusstart times, could be there was a start in the middle
-        but impossible to tell reliably"""
+        but impossible to tell reliably (wessex/"""
         events = self.events('stop_stop_stop_stop')
         output = apply_events(self.file, events)
         assert len(output) == 1
@@ -257,5 +260,16 @@ class TestType2:
         assert output[0] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Stop,
                                         event_time=events[0].statusStart,
+                                        file_id=TestType2.file.file_id,
+                                        update_time=events[0].lastUpdated)
+
+    def test_initial_stop_nulls(self):
+        """wessex water will give stops with all nulls apart from last updated"""
+        events = self.events('wessex_initial_stop_null')
+        output = apply_events(self.file, events)
+        assert len(output) == 1
+        assert output[0] == StreamEvent(cso_id='cso-id',
+                                        event=EventType.Stop,
+                                        event_time=events[0].lastUpdated,
                                         file_id=TestType2.file.file_id,
                                         update_time=events[0].lastUpdated)

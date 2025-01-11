@@ -69,9 +69,9 @@ def _interpret_type_2(mapping: Dict, file: StreamFile, previous: Optional[Stream
                 return StreamEvent(
                     cso_id=mapping[f.id],
                     event=EventType.Stop,
-                    event_time=f.statusStart if f.statusStart is not None else file.file_time,
+                    event_time=f.statusStart if f.statusStart is not None else f.lastUpdated,
                     file_id=file.file_id,
-                    update_time=f.lastUpdated if f.statusStart is not None else file.file_time
+                    update_time=f.lastUpdated
                 )
             match previous.event:
                 case EventType.Stop:
