@@ -58,6 +58,12 @@ events_type2 = {
         "Stop,2025-01-01 14:16:09.000000 +00:00,2025-01-01 14:08:43.200000 +00:00,2025-01-01 14:16:09.000000 +00:00,2025-01-01 14:54:22.183000 +00:00",
         "Stop,2025-01-01 14:53:33.900000 +00:00,2025-01-01 14:08:43.200000 +00:00,2025-01-01 14:16:09.000000 +00:00,2025-01-01 15:23:26.113000 +00:00",
         "Stop,2025-01-01 15:11:50.700000 +00:00,2025-01-01 14:08:43.200000 +00:00,2025-01-01 14:16:09.000000 +00:00,2025-01-01 15:53:35.406000 +00:00",
+    ],
+    # this is wessex water
+    "stop_offline_stop": [
+        "Stop,2024-11-25 04:45:00.000000 +00:00,2024-11-25 04:44:00.000000 +00:00,2024-11-25 04:45:00.000000 +00:00,2024-12-31 12:28:00.000000 +00:00",
+        "Offline,,2024-11-25 04:44:00.000000 +00:00,2024-11-25 04:45:00.000000 +00:00,2025-01-03 14:28:00.000000 +00:00",
+        "Stop,2024-11-25 04:45:00.000000 +00:00,2024-11-25 04:44:00.000000 +00:00,2024-11-25 04:45:00.000000 +00:00,2025-01-04 05:13:00.000000 +00:00",
     ]
 }
 
@@ -232,8 +238,20 @@ class TestType2:
                                         update_time=events[2].lastUpdated)
 
     def test_stop_stop_stop_stop(self):
-        """stopped: get start with statusStart, then stop with latesteventend"""
+        """stopped: multiple stop events all with differing statusstart times, could be there was a start in the middle
+        but impossible to tell reliably"""
         events = self.events('stop_stop_stop_stop')
+        output = apply_events(self.file, events)
+        assert len(output) == 1
+        assert output[0] == StreamEvent(cso_id='cso-id',
+                                        event=EventType.Stop,
+                                        event_time=events[0].statusStart,
+                                        file_id=TestType2.file.file_id,
+                                        update_time=events[0].lastUpdated)
+
+    def test_stop_offline_stop(self):
+        """offline while stopped - ignore offlines for now"""
+        events = self.events('stop_offline_stop')
         output = apply_events(self.file, events)
         assert len(output) == 1
         assert output[0] == StreamEvent(cso_id='cso-id',
