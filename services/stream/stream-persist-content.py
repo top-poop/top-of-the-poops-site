@@ -56,6 +56,11 @@ if __name__ == '__main__':
 
                 features = storage.load(company, ts)
 
+                ids = database.load_ids(company=company)
+
+
+
+
 
                 def want(f: FeatureRecord):
                     if f.id not in most_recent_by_id:

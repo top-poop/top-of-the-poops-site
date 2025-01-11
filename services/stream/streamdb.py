@@ -118,7 +118,7 @@ order by file_time
                 })
         }
 
-    def insert_events(self, events: List[StreamEvent]) -> int:
+    def insert_cso_events(self, events: List[StreamEvent]) -> int:
         count = []
         with self.connection.cursor() as cursor:
             for event in events:
@@ -135,7 +135,7 @@ order by file_time
                 count.append(cursor.rowcount)
         return sum(count)
 
-    def latest_events(self, company: WaterCompany) -> Dict[str, StreamEvent]:
+    def latest_cso_events(self, company: WaterCompany) -> Dict[str, StreamEvent]:
         return {e[0]: e[1]
                 for e in select_many(
                 connection=self.connection,
@@ -215,7 +215,7 @@ order by company, id, file_time, id
                                 f=lambda r: self._record_from_row(company, r))
                     )
 
-    def load_file_events(self, file: StreamFile) -> List[FeatureRecord]:
+    def load_file_records(self, file: StreamFile) -> List[FeatureRecord]:
         return list(
             select_many(
                 connection=self.connection,

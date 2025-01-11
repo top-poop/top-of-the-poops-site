@@ -50,10 +50,12 @@ drop table if exists stream_files_processed;
 
 create table stream_files_processed
 (
-    company        text primary key,
+    company        text,
     stream_file_id uuid references stream_files (stream_file_id),
     process_time   timestamptz default now()
 );
+
+create unique index stream_files_processed_idx1 on stream_files_processed(company, stream_file_id);
 
 drop table if exists stream_cso cascade;
 

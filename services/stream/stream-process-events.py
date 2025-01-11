@@ -9,8 +9,6 @@ from psycopg2.extras import DictCursor
 from args import enum_parser
 from companies import WaterCompany
 from events import interpret
-from secret import env
-from storage import b2_service, Storage
 from streamdb import Database, StreamEvent
 
 if __name__ == '__main__':
@@ -20,13 +18,6 @@ if __name__ == '__main__':
     parser.add_argument("--id", help="id (default: all)")
 
     args = parser.parse_args()
-
-    s3 = b2_service(
-        env("AWS_ACCESS_KEY_ID", "s3_key_id"),
-        env("AWS_SECRET_ACCESS_KEY", "s3_secret_key")
-    )
-    bucket = s3.Bucket(env("STREAM_BUCKET_NAME", "stream_bucket_name"))
-    storage = Storage(bucket)
 
     db_host = os.environ.get("DB_HOST", "localhost")
 
@@ -53,27 +44,33 @@ if __name__ == '__main__':
 
             for file in unprocessed_files:
 
+                print(f"Processing Events from {file}")
+                s = time.time()
+
                 new_events: List[StreamEvent] = []
 
-                latest_by_id = database.latest_events(company)
+                latest_by_id = database.latest_cso_events(company)
 
-                features = database.load_file_events(file)
+                features = database.load_file_records(file)
+
+                new_cso_features = [f for f in features if f.id not in ids]
+                if new_cso_features:
+                    print(f"Found {len(new_cso_features)} new CSOs")
+                    database.insert_cso(company=company, features=new_cso_features)
+                    ids = database.load_ids(company=company)
 
                 for f in [g for g in features if feature_filter(g)]:
                     try:
-                        if f.statusStart is None:
-                            continue
-
-                        our_event = latest_by_id.get(f.id)
-
-                        computed = interpret(ids, file=file, previous=latest_by_id.get(f.id), f=f)
+                        new_event = interpret(ids, file=file, previous=latest_by_id.get(f.id), f=f)
+                        if new_event is not None:
+                            new_events.append(new_event)
 
                     except Exception as e:
                         print(f"{f.id} error")
                         raise
 
                 if new_events:
-                    database.insert_events(events=new_events)
+                    database.insert_cso_events(events=new_events)
                     print(f"Inserted {len(new_events)} events in {time.time() - s}")
 
                 database.mark_processed(file)
