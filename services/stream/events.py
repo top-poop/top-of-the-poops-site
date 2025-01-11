@@ -73,13 +73,17 @@ def _interpret_type_2(mapping: Dict, file: StreamFile, previous: Optional[Stream
                     file_id=file.file_id,
                     update_time=f.lastUpdated if f.statusStart is not None else file.file_time
                 )
-            return StreamEvent(
-                cso_id=mapping[f.id],
-                event=EventType.Stop,
-                event_time=f.latestEventEnd,
-                file_id=file.file_id,
-                update_time=f.lastUpdated
-            )
+            match previous.event:
+                case EventType.Stop:
+                    return None
+                case _:
+                    return StreamEvent(
+                        cso_id=mapping[f.id],
+                        event=EventType.Stop,
+                        event_time=f.latestEventEnd,
+                        file_id=file.file_id,
+                        update_time=f.lastUpdated
+                    )
         case EventType.Start:
             return StreamEvent(
                 cso_id=mapping[f.id],
@@ -99,7 +103,8 @@ handlers = {
 }
 
 
-def interpret(mapping: Dict, file: StreamFile, previous: Optional[StreamEvent], f: FeatureRecord) -> Optional[StreamEvent]:
+def interpret(mapping: Dict, file: StreamFile, previous: Optional[StreamEvent], f: FeatureRecord) -> Optional[
+    StreamEvent]:
     if f.statusStart is not None and previous is not None and f.statusStart < previous.event_time:
         raise NotImplementedError("events moving backwards")
     return handlers.get(file.company, _bob_ignore)(mapping=mapping, file=file, previous=previous, f=f)

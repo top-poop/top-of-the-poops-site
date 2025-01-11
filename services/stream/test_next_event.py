@@ -12,7 +12,7 @@ from streamdb import StreamFile
 ## anglian on a stop event uses 'statusstart' to be the time that the stop event was received
 ## northhumbrian seems to do the same, also severn trent
 ## neither has reliable information in the 'latest event start  / end' field
-events_anglian = {
+events_type1 = {
     "initial_stop": [
         "Stop,2024-12-13 02:44:46.000000 +00:00,2024-12-11 02:43:23.000000 +00:00,2024-12-13 02:44:46.000000 +00:00,2024-12-31 12:16:40.810000 +00:00,2024-12-31 12:16:40.810000 +00:00"],
     "initial_stop_nulls": ["Stop,,,"],
@@ -37,7 +37,7 @@ events_anglian = {
     ]
 }
 
-events_southern = {
+events_type2 = {
     "initial_stop": [
         "Stop,2021-10-02 18:25:00.000000 +00:00,2021-10-02 18:25:00.000000 +00:00,2021-10-02 18:40:00.000000 +00:00,2024-12-31 12:15:01.120000 +00:00"
     ],
@@ -50,6 +50,14 @@ events_southern = {
         "Start,2025-01-01 16:50:08.000000 +00:00,2025-01-01 16:50:08.000000 +00:00,,2025-01-01 18:00:00.123000 +00:00",
         "Start,2025-01-02 00:01:05.000000 +00:00,2025-01-02 00:01:05.000000 +00:00,,2025-01-02 01:00:00.847000 +00:00",
         "Stop,2025-01-02 00:01:05.000000 +00:00,2025-01-02 00:01:05.000000 +00:00,2025-01-02 00:20:49.000000 +00:00,2025-01-02 01:30:00.910000 +00:00",
+    ],
+    # this is a peculiarity of UnitedUtilies - multiple stop events all with different status start times
+    "stop_stop_stop_stop": [
+        "Stop,2025-01-01 13:02:11.300000 +00:00,2025-01-01 12:49:06.000000 +00:00,2025-01-01 13:02:11.300000 +00:00,2025-01-01 13:52:40.970000 +00:00",
+        "Stop,2025-01-01 13:52:28.500000 +00:00,2025-01-01 13:49:26.100000 +00:00,2025-01-01 13:52:28.500000 +00:00,2025-01-01 14:22:23.816000 +00:00",
+        "Stop,2025-01-01 14:16:09.000000 +00:00,2025-01-01 14:08:43.200000 +00:00,2025-01-01 14:16:09.000000 +00:00,2025-01-01 14:54:22.183000 +00:00",
+        "Stop,2025-01-01 14:53:33.900000 +00:00,2025-01-01 14:08:43.200000 +00:00,2025-01-01 14:16:09.000000 +00:00,2025-01-01 15:23:26.113000 +00:00",
+        "Stop,2025-01-01 15:11:50.700000 +00:00,2025-01-01 14:08:43.200000 +00:00,2025-01-01 14:16:09.000000 +00:00,2025-01-01 15:53:35.406000 +00:00",
     ]
 }
 
@@ -91,12 +99,12 @@ def apply_events(file: StreamFile, fs: List[FeatureRecord]) -> List[StreamEvent]
     return out
 
 
-class TestAnglian:
+class TestType1:
     company = WaterCompany.Anglian
     file = StreamFile(company=WaterCompany.Anglian, file_id='1234', file_time=datetime.datetime.now())
 
     def events(self, scenario: str) -> List[FeatureRecord]:
-        return [as_feature(company=self.company, s=s) for s in events_anglian[scenario]]
+        return [as_feature(company=self.company, s=s) for s in events_type1[scenario]]
 
     def test_initial_stop(self):
         """first run: we got a stop event, populated, so take that as initial event"""
@@ -106,7 +114,7 @@ class TestAnglian:
         assert output[0] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Stop,
                                         event_time=events[0].statusStart,
-                                        file_id=TestAnglian.file.file_id,
+                                        file_id=TestType1.file.file_id,
                                         update_time=events[0].lastUpdated)
 
     def test_initial_stop_nulls(self):
@@ -117,7 +125,7 @@ class TestAnglian:
         assert output[0] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Stop,
                                         event_time=self.file.file_time,
-                                        file_id=TestAnglian.file.file_id,
+                                        file_id=TestType1.file.file_id,
                                         update_time=self.file.file_time)
 
     def test_stop_start_stop(self):
@@ -129,12 +137,12 @@ class TestAnglian:
         assert output[1] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Start,
                                         event_time=events[1].statusStart,
-                                        file_id=TestAnglian.file.file_id,
+                                        file_id=TestType1.file.file_id,
                                         update_time=events[1].lastUpdated)
         assert output[2] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Stop,
                                         event_time=events[2].statusStart,
-                                        file_id=TestAnglian.file.file_id,
+                                        file_id=TestType1.file.file_id,
                                         update_time=events[2].lastUpdated)
 
     def test_stop_stop_stop(self):
@@ -151,12 +159,12 @@ class TestAnglian:
         assert output[0] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Start,
                                         event_time=events[0].statusStart,
-                                        file_id=TestAnglian.file.file_id,
+                                        file_id=TestType1.file.file_id,
                                         update_time=events[0].lastUpdated)
         assert output[1] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Stop,
                                         event_time=events[3].statusStart,
-                                        file_id=TestAnglian.file.file_id,
+                                        file_id=TestType1.file.file_id,
                                         update_time=events[3].lastUpdated)
 
     def test_offline(self):
@@ -166,12 +174,12 @@ class TestAnglian:
         assert len(output) == 0
 
 
-class TestSouthern:
+class TestType2:
     company = WaterCompany.Southern
     file = StreamFile(company=WaterCompany.Southern, file_id='4567', file_time=datetime.datetime.now())
 
     def events(self, scenario: str) -> List[FeatureRecord]:
-        return [as_feature(company=self.company, s=s) for s in events_southern[scenario]]
+        return [as_feature(company=self.company, s=s) for s in events_type2[scenario]]
 
     def test_initial_stop(self):
         """first run: we got a stop event, populated, so take that as initial event"""
@@ -181,7 +189,7 @@ class TestSouthern:
         assert output[0] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Stop,
                                         event_time=events[0].statusStart,
-                                        file_id=TestSouthern.file.file_id,
+                                        file_id=TestType2.file.file_id,
                                         update_time=events[0].lastUpdated)
 
     def test_stop_start_stop(self):
@@ -193,12 +201,12 @@ class TestSouthern:
         assert output[1] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Start,
                                         event_time=events[1].statusStart,
-                                        file_id=TestSouthern.file.file_id,
+                                        file_id=TestType2.file.file_id,
                                         update_time=events[1].lastUpdated)
         assert output[2] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Stop,
                                         event_time=events[2].latestEventEnd,
-                                        file_id=TestSouthern.file.file_id,
+                                        file_id=TestType2.file.file_id,
                                         update_time=events[2].lastUpdated)
 
     def test_start_start_stop(self):
@@ -209,16 +217,27 @@ class TestSouthern:
         assert output[0] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Start,
                                         event_time=events[0].statusStart,
-                                        file_id=TestSouthern.file.file_id,
+                                        file_id=TestType2.file.file_id,
                                         update_time=events[0].lastUpdated)
 
         assert output[1] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Start,
                                         event_time=events[1].statusStart,
-                                        file_id=TestSouthern.file.file_id,
+                                        file_id=TestType2.file.file_id,
                                         update_time=events[1].lastUpdated)
         assert output[2] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Stop,
                                         event_time=events[2].latestEventEnd,
-                                        file_id=TestSouthern.file.file_id,
+                                        file_id=TestType2.file.file_id,
                                         update_time=events[2].lastUpdated)
+
+    def test_stop_stop_stop_stop(self):
+        """stopped: get start with statusStart, then stop with latesteventend"""
+        events = self.events('stop_stop_stop_stop')
+        output = apply_events(self.file, events)
+        assert len(output) == 1
+        assert output[0] == StreamEvent(cso_id='cso-id',
+                                        event=EventType.Stop,
+                                        event_time=events[0].statusStart,
+                                        file_id=TestType2.file.file_id,
+                                        update_time=events[0].lastUpdated)
