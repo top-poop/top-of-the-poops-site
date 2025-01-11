@@ -2,7 +2,7 @@ import datetime
 from typing import Optional, List
 
 from companies import WaterCompany
-from events import bob
+from events import interpret
 from stream import FeatureRecord, EventType
 from streamdb import StreamEvent
 from streamdb import StreamFile
@@ -84,7 +84,7 @@ def apply_events(file: StreamFile, fs: List[FeatureRecord]) -> List[StreamEvent]
     previous = None
     out = []
     for f in fs:
-        result = bob(id_mapping, file=file, previous=previous, f=f)
+        result = interpret(id_mapping, file=file, previous=previous, f=f)
         if result is not None:
             previous = result
             out.append(result)

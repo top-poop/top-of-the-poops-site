@@ -5,8 +5,9 @@ from stream import FeatureRecord, EventType
 from streamdb import StreamFile, StreamEvent
 
 
-def _bob_type1(mapping: Dict, file: StreamFile, previous: Optional[StreamEvent], f: FeatureRecord) -> Optional[
+def _interpret_type_1(mapping: Dict, file: StreamFile, previous: Optional[StreamEvent], f: FeatureRecord) -> Optional[
     StreamEvent]:
+    """using status start for the start..."""
     match f.status:
         case EventType.Stop:
             if previous is None:
@@ -59,8 +60,9 @@ def _bob_ignore(**kwargs):
     return None
 
 
-def _bob_southern(mapping: Dict, file: StreamFile, previous: Optional[StreamEvent], f: FeatureRecord) -> Optional[
+def _interpret_type_2(mapping: Dict, file: StreamFile, previous: Optional[StreamEvent], f: FeatureRecord) -> Optional[
     StreamEvent]:
+    """using either status start, or latest event end"""
     match f.status:
         case EventType.Stop:
             if previous is None:
@@ -89,14 +91,15 @@ def _bob_southern(mapping: Dict, file: StreamFile, previous: Optional[StreamEven
 
 
 handlers = {
-    WaterCompany.Anglian: _bob_type1,
-    WaterCompany.Northumbrian: _bob_type1,
-    WaterCompany.SevernTrent: _bob_type1,
-    WaterCompany.Southern: _bob_southern
+    WaterCompany.Anglian: _interpret_type_1,
+    WaterCompany.Northumbrian: _interpret_type_1,
+    WaterCompany.SevernTrent: _interpret_type_1,
+    WaterCompany.Southern: _interpret_type_2,
+    WaterCompany.ThamesWater: _interpret_type_2,
 }
 
 
-def bob(mapping: Dict, file: StreamFile, previous: Optional[StreamEvent], f: FeatureRecord) -> Optional[StreamEvent]:
+def interpret(mapping: Dict, file: StreamFile, previous: Optional[StreamEvent], f: FeatureRecord) -> Optional[StreamEvent]:
     if f.statusStart is not None and previous is not None and f.statusStart < previous.event_time:
         raise NotImplementedError("events moving backwards")
     return handlers.get(file.company, _bob_ignore)(mapping=mapping, file=file, previous=previous, f=f)
