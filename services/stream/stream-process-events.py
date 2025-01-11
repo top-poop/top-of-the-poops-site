@@ -8,6 +8,7 @@ from psycopg2.extras import DictCursor
 
 from args import enum_parser
 from companies import WaterCompany
+from events import bob
 from secret import env
 from storage import b2_service, Storage
 from streamdb import Database, StreamEvent
@@ -64,6 +65,8 @@ if __name__ == '__main__':
                             continue
 
                         our_event = latest_by_id.get(f.id)
+
+                        computed = bob(ids, file=file, previous=latest_by_id.get(f.id), f=f)
 
                     except Exception as e:
                         print(f"{f.id} error")
