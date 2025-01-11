@@ -37,3 +37,10 @@ Disallow:/
 User-Agent: ImagesiftBot
 Disallow:/
 
+User-Agent: meta-externalagent
+Disallow: /
+
+User-Agent: turnitinbot
+Disallow: /
+
+
