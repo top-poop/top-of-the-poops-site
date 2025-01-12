@@ -22,13 +22,17 @@ class StreamData(private val connection: WithConnection) {
     data class StreamCSOCount(val start: Int, val stop: Int) {
         val total = start + stop
     }
+
     data class StreamCompanyStatus(val company: CompanyName, val count: StreamCSOCount)
 
-    data class StreamOverflowSummary(val count: StreamCSOCount, val companies: List<StreamCompanyStatus>)
+    data class StreamOverflowSummary(
+        val count: StreamCSOCount,
+        val companies: List<StreamCompanyStatus>
+    )
 
     fun summary(): StreamOverflowSummary {
         val summary = mutableMapOf<String, MutableMap<String, Int>>()
-        connection.execute(NamedQueryBlock("stream-overflowing-right-now") {
+        connection.execute(NamedQueryBlock("stream-overflow-summary") {
             query(
                 sql = """
 WITH ranked_events AS (
@@ -70,7 +74,6 @@ order by m.stream_company;
             companies = companies
         )
     }
-
 
     fun overflowingRightNow(): List<StreamCSOLiveOverflow> {
         return connection.execute(NamedQueryBlock("stream-overflowing-right-now") {
