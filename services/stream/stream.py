@@ -101,9 +101,15 @@ class StreamAPI:
         response.raise_for_status()
         resp = response.json()
 
+        ids = resp['objectIds']
+
+        print(f">>> Have {len(ids)} object ids to retrieve")
+        ids = list(set(ids))
+        print(f">>> Have {len(ids)} unique object ids to retrieve")
+
         return FeatureList(
             name=resp['objectIdFieldName'],
-            ids=resp['objectIds']
+            ids=ids
         )
 
     def _features(self, oids: List[int]) -> List[FeatureRecord]:
@@ -151,8 +157,11 @@ import logging
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
-    api = StreamAPI(company=WaterCompany.SouthWestWater)
+    api = StreamAPI(company=WaterCompany.SevernTrent)
 
     features = api.features()
-    for f in features:
-        print(f)
+    # for f in features:
+
+    #     print(f)
+
+    print()
