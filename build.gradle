@@ -8,7 +8,7 @@ group = 'org.totp'
 applicationName = 'pages'
 application.mainClassName = "org.totp.MainKt"
 
-jib.from.image="eclipse-temurin:21-jre-alpine@sha256:98963ed09c4fd82e128c6cc9e64d71798239b824164276626d79b8f9e666ac0e"
+jib.from.image="eclipse-temurin:21-jre-alpine@sha256:4300bfe1e11f3dfc3e3512f39939f9093cf18d0e581d1ab1ccd0512f32fe33f0"
 jib.to.image = "totp-pages"  // same as IMAGE in Makefile
 jib.container.jvmFlags = [
         "-XX:+AlwaysActAsServerClassMachine",
