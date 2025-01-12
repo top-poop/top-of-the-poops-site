@@ -9,7 +9,7 @@ $(call check_defined, DOCKER_HUB_ORG, dockerhub org name)
 $(call check_defined, TOTP_CONTEXT, context)
 
 SERVICE=postgres
-SERVICE_VERSION=14-3.1
+SERVICE_VERSION=17-3.5
 
 IMAGE_NAME=kartoza/postgis
 
@@ -30,7 +30,7 @@ push:
 deploy:
 	@test $(shell docker context show) = $(TOTP_CONTEXT)
 	docker service create --with-registry-auth --name $(SERVICE) --network overlay-net \
-	--env-file postgres.env --mount type=bind,source=/data/postgres/2023-v4,target=/var/lib/postgresql $(FULL_NAME)
+	--env-file postgres.env --mount type=bind,source=/data/postgres/17-2025v1,target=/var/lib/postgresql $(FULL_NAME)
 
 .PHONY: upgrade
 upgrade:
