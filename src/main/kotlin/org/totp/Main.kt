@@ -216,6 +216,7 @@ fun main() {
                             ),
                             "/now" bind NowHandler(
                                 renderer = renderer,
+                                streamData = stream
                             ),
                             "/support" bind SupportUsHandler(renderer = renderer),
                             "/media" bind MediaPageHandler(
@@ -269,12 +270,12 @@ fun main() {
                                 bathingRankings = beachRankings,
                                 csoTotals = allSpills,
                                 companyLivedata =
-                                { name ->
-                                    when (name) {
-                                        CompanyName("Thames Water") -> CSOLiveData(thamesWater.overflowingRightNow())
-                                        else -> null
-                                    }
-                                },
+                                    { name ->
+                                        when (name) {
+                                            CompanyName("Thames Water") -> CSOLiveData(thamesWater.overflowingRightNow())
+                                            else -> null
+                                        }
+                                    },
                             ),
                             "/shellfisheries" bind ShellfisheriesPageHandler(
                                 renderer = renderer,

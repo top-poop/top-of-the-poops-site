@@ -24,13 +24,104 @@
         <div class="col-md-6">
             <div style="height: 800px;" id="now"></div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-5">
             <div class="display-5">Live Overflow Map</div>
 
-            <p>Here are all the CSOs in England that are overflowing right now. We are using the Water Companies' own
-            data, updated every 15 minutes.</p>
+            <p>Here are the CSOs in England that we know are overflowing right now. We are using the Water Companies' own
+                data, updated every 15 minutes.</p>
 
-            <p>It's not a pretty picture.</p>
+            <p>Each dot represents an overflowing CSO - Each Water Company has a different colour</p>
+
+            <p>With your support we can do more.. so please <a href="/support">
+                <span class="btn btn-primary me-1">Donate</span>
+            </a></p>
+
+            <div class="table-responsive">
+                <table id="table-stream-summary" data-id="stream-summary" class="table table-spills table-striped">
+                    <thead>
+                    <tr>
+                        <td>Company</td>
+                        <td>Total CSOs</td>
+                        <td>Not Overflowing</td>
+                        <td>Overflowing</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#each summary.companies}}
+                        <tr>
+                            <td>{{this.company}}</td>
+                            <td class="text-end">{{numberFormat this.count.total}}</td>
+                            <td class="text-end">{{numberFormat this.count.stop}}</td>
+                            <td class="text-end">{{numberFormat this.count.start}}</td>
+                        </tr>
+                    {{/each}}
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td></td>
+                        <td class="text-end">{{numberFormat summary.count.total}}</td>
+                        <td class="text-end">{{numberFormat summary.count.stop}}</td>
+                        <td class="text-end">{{numberFormat summary.count.start}}</td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <p>Yorkshire Water, Dwr Cymru and Scottish Water are not yet here.. they are coming soon</p>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+            {{#> components/section title="How do we interpret the data?" }}
+                <div class="row">
+                    <div class="col">
+                        <div class="mb-4">
+                            <p>You might notice that some of the figures in the above chart, particularly around how
+                                long
+                                a CSO has been overflowing, are different from the figures on other websites. We use a
+                                more
+                                sophisticated model to figure out when CSOs really started overflowing.</p>
+
+                            <p>The water companies send a signal each time a CSO overflows, saying that it has 'Started'
+                                and telling us when. Sometimes though, it sends multiple 'Started' events in a row. One
+                                event will say 'Started at 1pm', the next 'Started at 3pm', the next 'Started at
+                                10pm'...</p>
+
+                            <p>Its clear though that despite the latest alert being 'Started at 10pm', the overflow did
+                                actually start at 1pm - so the CSO has been overflowing for far longer. This is how we
+                                keep track
+                                of the state of each CSO overflow, and why our numbers are different, we don't just rely
+                                on the
+                                latest information.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <figure class="figure">
+                            <img src="/assets/images/stream-multiple-events.png"
+                                 alt="An image showing some database records as supplied by Uk Water"/>
+                            <figcaption class="figure-caption">How we receive the data.</figcaption>
+                        </figure>
+                    </div>
+                    <div class="col">
+                        <figure class="figure">
+                            <img src="/assets/images/stream-interpreted-event.png"
+                                 alt="An image showing our interpretation of those records, there are far fewer"/>
+                            <figcaption class="figure-caption">After we've interpreted it.</figcaption>
+                        </figure>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <p>There may be errors in our interpretation... and if we find any we're committed to updating this
+                        information so that it is as accurate as possible. If you find an error, please let us know.</p>
+                    </div>
+                </div>
+            {{/components/section}}
         </div>
     </div>
 </div>
