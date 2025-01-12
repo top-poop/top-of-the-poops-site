@@ -9,6 +9,7 @@ import org.totp.model.PageViewModel
 
 class NowPage(
     uri: Uri,
+    val share: SocialShare,
     val summary: StreamData.StreamOverflowSummary
 ) : PageViewModel(uri)
 
@@ -23,7 +24,18 @@ object NowHandler {
 
             Response(Status.OK)
                 .with(
-                    viewLens of NowPage(pageUriFrom(request), summary = streamData.summary()),
+                    viewLens of NowPage(
+                        pageUriFrom(request),
+                        summary = streamData.summary(),
+                        share = SocialShare(
+                            pageUriFrom(request),
+                            text = "Live Sewage Overflows",
+                            cta = "Sewage pollution",
+                            tags = listOf("sewage"),
+                            via = "sewageuk",
+                            twitterImageUri = Uri.of("https://top-of-the-poops.org/assets/images/logos/live-map-og-image.jpg")
+                        )
+                    ),
                 )
         }
     }

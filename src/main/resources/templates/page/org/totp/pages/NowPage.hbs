@@ -10,7 +10,8 @@
     {{> chunks/meta-scripts }}
 
     {{> components/meta-opengraph
-            title="Live Sewage Overflows"
+            title=share.text
+            description="Live Sewage Map"
             twitterImageUri=share.twitterImageUri
     }}
 
@@ -21,11 +22,11 @@
 
 <div class="container">
     <div class="row align-items-center">
-        <div class="col-md-6">
-            <div style="height: 800px;" id="now"></div>
+        <div style="min-height: 450px;" class="col-md-6">
+            <div  id="now"></div>
         </div>
         <div class="col-md-5">
-            <div class="display-5">Live Overflow Map</div>
+            <div class="display-5 mt-2">Live Overflow Map</div>
 
             <p>Here are the CSOs in England that we know are overflowing right now. We are using the Water Companies' own
                 data, updated every 15 minutes.</p>
@@ -58,7 +59,7 @@
                     </tbody>
                     <tfoot>
                     <tr>
-                        <td></td>
+                        <td><em>Totals</em></td>
                         <td class="text-end">{{numberFormat summary.count.total}}</td>
                         <td class="text-end">{{numberFormat summary.count.stop}}</td>
                         <td class="text-end">{{numberFormat summary.count.start}}</td>
@@ -100,16 +101,16 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col">
+                    <div class="col-md">
                         <figure class="figure">
-                            <img src="/assets/images/stream-multiple-events.png"
+                            <img class="img-fluid" src="/assets/images/stream-multiple-events.png"
                                  alt="An image showing some database records as supplied by Uk Water"/>
                             <figcaption class="figure-caption">How we receive the data.</figcaption>
                         </figure>
                     </div>
-                    <div class="col">
+                    <div class="col-md">
                         <figure class="figure">
-                            <img src="/assets/images/stream-interpreted-event.png"
+                            <img class="img-fluid" src="/assets/images/stream-interpreted-event.png"
                                  alt="An image showing our interpretation of those records, there are far fewer"/>
                             <figcaption class="figure-caption">After we've interpreted it.</figcaption>
                         </figure>
@@ -163,6 +164,7 @@
                         },
                     },
                     height: 800,
+                    r: {range: [3, 20], domain: [0, 86400 * 30 * 1000]},
                     marks: [
                         Plot.geo(
                                 countries,
@@ -177,7 +179,7 @@
                                 {
                                     x: d => d.loc.lon,
                                     y: d => d.loc.lat,
-                                    r: 10,
+                                    r: d => d.duration,
                                     fill: "company",
                                     opacity: 0.5,
                                     mixBlendMode: "multiply",
