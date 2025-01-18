@@ -23,13 +23,23 @@
 <div class="container">
     <div class="row align-items-center">
         <div style="min-height: 450px;" class="col-md-6">
-            <div  id="now"></div>
+            <div id="now">
+                <div></div>
+            </div>
+            <form>
+                <div class="form-group row">
+                    <label for="dateSlider" class="col-md-4 col-form-label"><span id="dateSliderValue"></span></label>
+                    <div class="col-md-8">
+                        <input id="dateSlider" type="range" class="form-range">
+                    </div>
+                </div>
+            </form>
         </div>
         <div class="col-md-5">
             <div class="display-5 mt-2">Live Overflow Map</div>
 
-            <p>Here are the CSOs in England that we know are overflowing right now. We are using the Water Companies' own
-                data, updated every 15 minutes.</p>
+            <p>Here are the CSOs in England that we know are overflowing right now. We are using the Water Companies'
+                own data, updated every 15 minutes.</p>
 
             <p>Each dot represents an overflowing CSO - Each Water Company has a different colour</p>
 
@@ -118,8 +128,10 @@
                 </div>
                 <div class="row">
                     <div class="col">
-                        <p>There may be errors in our interpretation... and if we find any we're committed to updating this
-                        information so that it is as accurate as possible. If you find an error, please let us know.</p>
+                        <p>There may be errors in our interpretation... and if we find any we're committed to updating
+                            this
+                            information so that it is as accurate as possible. If you find an error, please let us
+                            know.</p>
                     </div>
                 </div>
             {{/components/section}}
@@ -141,12 +153,11 @@
         else return days + " days"
     }
 
-    const chart = (data, countries) => {
-        const now = Date.now();
+    const chart = ({asof, data, countries}) => {
         data = data.map(
                 e => {
                     const started = Date.parse(e.started);
-                    const duration = now - started;
+                    const duration = asof - started;
                     return {
                         started,
                         duration,
@@ -192,15 +203,43 @@
         );
     };
 
-    const countries = await fetch("/data/v1/2023/geo/countries.json")
-    const data = await fetch("/live/stream/overflowing")
+    const countries = await fetch("/data/v1/2023/geo/countries.json").then(it => it.json());
 
-    if (data.ok && countries.ok) {
-        document.getElementById("now")
-                .appendChild(
-                        chart(await data.json(), await countries.json())
-                );
+    const slider = document.getElementById('dateSlider');
+    const sliderValue = document.getElementById('dateSliderValue');
+    const chartElement = document.getElementById("now")
+
+    const now = new Date();
+
+    slider.min = Date.parse("2025-01-01T00:00:00Z").valueOf();
+    slider.max = now.getTime();
+    slider.value = slider.max;
+    slider.step = 5 * 60 * 1000;
+
+    const updateDate = (d) => sliderValue.textContent = d.toLocaleString();
+
+    const doChart = async (date) => {
+
+        updateDate(date);
+
+        const data = await fetch(`/live/stream/overflowing/${date.getTime()}`)
+
+        if (data.ok) {
+            chartElement.replaceChildren(
+                    chart({asof: now, data: await data.json(), countries: countries})
+            );
+        }
     }
+
+    slider.oninput = (e) => {
+        doChart(new Date(parseInt(e.target.value)))
+    }
+
+    slider.onchange = (e) => {
+        doChart(new Date(parseInt(e.target.value)))
+    }
+
+    doChart(now);
 
 </script>
 

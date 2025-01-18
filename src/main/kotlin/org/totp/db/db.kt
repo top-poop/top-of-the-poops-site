@@ -11,6 +11,7 @@ import java.math.BigInteger
 import java.sql.*
 import java.time.Clock
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import javax.sql.DataSource
@@ -228,6 +229,14 @@ fun PreparedStatement.set(n: Int, d: LocalDate?) {
         setNull(n, Types.DATE)
     } else {
         setDate(n, Date.valueOf(d))
+    }
+}
+
+fun PreparedStatement.set(n: Int, instant: Instant?) {
+    if (instant == null) {
+        setNull(n, Types.TIMESTAMP)
+    } else {
+        setTimestamp(n, Timestamp.from(instant))
     }
 }
 

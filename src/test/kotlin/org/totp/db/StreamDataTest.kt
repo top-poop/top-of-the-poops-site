@@ -4,9 +4,12 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isGreaterThan
 import strikt.assertions.size
+import java.time.Clock
 
 class StreamDataTest {
 
+
+    val clock = Clock.systemUTC()
 
     val connection = HikariWithConnection(lazy { datasource() })
 
@@ -14,7 +17,7 @@ class StreamDataTest {
 
     @Test
     fun rightNow() {
-        val x = stream.overflowingRightNow()
+        val x = stream.overflowingAt(clock.instant())
 
         expectThat(x).size.isGreaterThan(1)
     }

@@ -313,7 +313,8 @@ fun main() {
                         )
                     )
             ),
-            "/live/stream/overflowing" bind StreamOverflowing(stream),
+            "/live/stream/overflowing" bind StreamOverflowing(clock, stream),
+            "/live/stream/overflowing/{date}" bind StreamOverflowingByDate(stream),
             "/live/thames-water/overflow-summary" bind ThamesWaterSummary(thamesWater),
             "/live/thames-water/events/cso/{permit}" bind ThamesWaterPermitEvents(clock, thamesWater),
             "/live/thames-water/events/constituency/{constituency}" bind ThamesWaterConstituencyEvents(

@@ -75,8 +75,8 @@ order by m.stream_company;
         )
     }
 
-    fun overflowingRightNow(): List<StreamCSOLiveOverflow> {
-        return connection.execute(NamedQueryBlock("stream-overflowing-right-now") {
+    fun overflowingAt(instant: Instant): List<StreamCSOLiveOverflow> {
+        return connection.execute(NamedQueryBlock("stream-overflowing-at") {
             query(
                 sql = """                
 WITH ranked_events AS (
@@ -85,13 +85,17 @@ WITH ranked_events AS (
         ROW_NUMBER() OVER (PARTITION BY e.stream_cso_id ORDER BY e.event_time DESC) AS rnk
     FROM
         stream_cso_event as e
+    where e.event_time <= ?
 )
 SELECT m.stream_company, m.stream_id, m.lat, m.lon, e.event, e.event_time, e.update_time
 FROM stream_cso m
          JOIN ranked_events e ON m.stream_cso_id = e.stream_cso_id AND e.rnk = 1
-where event = 'Start'
+where event = 'Start' 
 order by m.stream_company, m.stream_id
             """.trimIndent(),
+                bind = {
+                    it.set(1, instant)
+                },
                 mapper = {
                     StreamCSOLiveOverflow(
                         id = it.getString("stream_id"),

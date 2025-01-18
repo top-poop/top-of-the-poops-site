@@ -6,7 +6,7 @@ plugins {
 
 group = 'org.totp'
 applicationName = 'pages'
-application.mainClassName = "org.totp.MainKt"
+application.mainClass = "org.totp.MainKt"
 
 jib.from.image="eclipse-temurin:21-jre-alpine@sha256:4300bfe1e11f3dfc3e3512f39939f9093cf18d0e581d1ab1ccd0512f32fe33f0"
 jib.to.image = "totp-pages"  // same as IMAGE in Makefile
@@ -27,6 +27,7 @@ repositories {
 dependencies {
     implementation platform("org.http4k:http4k-bom:5.45.1.0")
     implementation "org.http4k:http4k-core"
+    implementation "org.http4k:http4k-connect-core"
     implementation "org.http4k:http4k-server-undertow"
     implementation "org.http4k:http4k-template-handlebars"
     implementation "org.http4k:http4k-format-jackson"
@@ -53,7 +54,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-html:0.8.1")
 
     implementation("org.ocpsoft.prettytime:prettytime:5.0.7.Final")
-
 
     testImplementation(platform('org.junit:junit-bom:5.9.2'))
     testImplementation('org.junit.jupiter:junit-jupiter')

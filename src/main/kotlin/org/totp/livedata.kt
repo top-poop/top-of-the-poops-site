@@ -1,5 +1,8 @@
 package org.totp
 
+import dev.forkhandles.values.LongValue
+import dev.forkhandles.values.LongValueFactory
+import dev.forkhandles.values.minValue
 import org.http4k.core.*
 import org.http4k.lens.Path
 import org.http4k.lens.value
@@ -9,17 +12,33 @@ import org.totp.db.ThamesWater
 import org.totp.model.data.ConstituencySlug
 import org.totp.model.data.TotpJson
 import org.totp.pages.slugToConstituency
-import java.time.Clock
-import java.time.Duration
-import java.time.LocalDate
-import java.time.ZoneId
+import java.time.*
 
-class StreamOverflowing(val streamData: StreamData) : HttpHandler {
+class StreamOverflowing(val clock: Clock, val streamData: StreamData) : HttpHandler {
 
     val response = TotpJson.autoBody<List<StreamData.StreamCSOLiveOverflow>>().toLens()
 
     override fun invoke(request: Request): Response {
-        return Response(Status.OK).with(response of streamData.overflowingRightNow())
+        return Response(Status.OK).with(response of streamData.overflowingAt(clock.instant()))
+    }
+}
+
+class TimestampMillis private constructor(value: Long) : LongValue(value) {
+    fun toInstant(): Instant = Instant.ofEpochMilli(value)
+
+    companion object : LongValueFactory<TimestampMillis>(::TimestampMillis, 0L.minValue) {
+        fun of(value: Instant) = TimestampMillis(value.toEpochMilli())
+    }
+}
+
+class StreamOverflowingByDate(val streamData: StreamData) : HttpHandler {
+
+    val date = Path.value(TimestampMillis).of("date")
+
+    val response = TotpJson.autoBody<List<StreamData.StreamCSOLiveOverflow>>().toLens()
+
+    override fun invoke(request: Request): Response {
+        return Response(Status.OK).with(response of streamData.overflowingAt(date(request).toInstant()))
     }
 }
 
