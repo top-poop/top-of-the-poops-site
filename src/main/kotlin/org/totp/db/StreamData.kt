@@ -4,6 +4,7 @@ import org.totp.model.data.CompanyName
 import org.totp.model.data.Coordinates
 import java.time.Instant
 
+
 class StreamData(private val connection: WithConnection) {
 
     enum class StreamEvent(val dbName: String) {
@@ -76,6 +77,7 @@ order by m.stream_company;
     }
 
     fun overflowingAt(instant: Instant): List<StreamCSOLiveOverflow> {
+
         return connection.execute(NamedQueryBlock("stream-overflowing-at") {
             query(
                 sql = """                

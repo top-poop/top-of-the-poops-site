@@ -5,7 +5,9 @@ import dev.forkhandles.values.LongValueFactory
 import dev.forkhandles.values.minValue
 import org.http4k.core.*
 import org.http4k.lens.Path
+import org.http4k.lens.location
 import org.http4k.lens.value
+import org.totp.db.DurationUnit
 import org.totp.db.EnvironmentAgency
 import org.totp.db.StreamData
 import org.totp.db.ThamesWater
@@ -38,7 +40,16 @@ class StreamOverflowingByDate(val streamData: StreamData) : HttpHandler {
     val response = TotpJson.autoBody<List<StreamData.StreamCSOLiveOverflow>>().toLens()
 
     override fun invoke(request: Request): Response {
-        return Response(Status.OK).with(response of streamData.overflowingAt(date(request).toInstant()))
+
+        val instant = date(request).toInstant()
+
+        val truncated = instant.truncatedTo(DurationUnit.ofMinutes(5))
+
+        return if ( instant != truncated ) {
+            Response(Status.PERMANENT_REDIRECT).location(Uri.of(truncated.toEpochMilli().toString()))
+        } else {
+            Response(Status.OK).with(response of streamData.overflowingAt(truncated))
+        }
     }
 }
 
