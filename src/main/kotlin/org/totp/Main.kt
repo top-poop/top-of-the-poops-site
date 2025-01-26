@@ -8,7 +8,7 @@ import org.http4k.core.*
 import org.http4k.events.AutoMarshallingEvents
 import org.http4k.events.EventFilters
 import org.http4k.events.then
-import org.http4k.filter.ClientFilters
+import org.http4k.filter.*
 import org.http4k.filter.ClientFilters.SetBaseUriFrom
 import org.http4k.format.Jackson
 import org.http4k.lens.*
@@ -27,6 +27,7 @@ import org.totp.model.TotpHandlebars
 import org.totp.model.data.*
 import org.totp.pages.*
 import java.time.Clock
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 import java.util.logging.LogManager
@@ -196,9 +197,9 @@ fun main() {
     val thamesWater = ThamesWater(connection)
 
     val stream = StreamData(connection)
+    val environmentAgency = EnvironmentAgency(connection)
 
     val server = Undertow(port = port(environment)).toServer(
-
         routes(
             "/" bind Method.GET to inboundFilters.then(
                 HtmlPageErrorFilter(events, renderer)
@@ -291,24 +292,26 @@ fun main() {
                                 constituencyRank = constituencyRank,
                                 shellfisheryBoundaries = shellfisheryBoundaries
                             ),
-                            "/private/badges/constituencies/{letter}" bind BadgesConstituenciesHandler(
-                                renderer = renderer,
-                                constituencyRankings = constituencyRankings,
-                                mpFor = mpFor,
-                                constituencyBoundaries = constituencyBoundaries,
-                            ),
-                            "/private/badges/companies" bind BadgesCompaniesHandler(
-                                renderer = renderer,
-                                companySummaries = CompanyAnnualSummaries(data2023),
-                            ),
-                            "/private/badges/home" bind BadgesHomeHandler(
-                                renderer = renderer,
-                                constituencyRankings = constituencyRankings,
-                                bathingRankings = beachRankings,
-                            ),
-                            "/private/badges/rivers" bind BadgesRiversHandler(
-                                renderer = renderer,
-                                riverRankings = riverRankings,
+                            "/private/badges" bind routes(
+                                "/constituencies/{letter}" bind BadgesConstituenciesHandler(
+                                    renderer = renderer,
+                                    constituencyRankings = constituencyRankings,
+                                    mpFor = mpFor,
+                                    constituencyBoundaries = constituencyBoundaries,
+                                ),
+                                "/companies" bind BadgesCompaniesHandler(
+                                    renderer = renderer,
+                                    companySummaries = CompanyAnnualSummaries(data2023),
+                                ),
+                                "/home" bind BadgesHomeHandler(
+                                    renderer = renderer,
+                                    constituencyRankings = constituencyRankings,
+                                    bathingRankings = beachRankings,
+                                ),
+                                "/rivers" bind BadgesRiversHandler(
+                                    renderer = renderer,
+                                    riverRankings = riverRankings,
+                                ),
                             ),
                             "/fragments" bind routes(
                                 "/stream/table/" bind { Response(Status.OK) }
@@ -317,24 +320,28 @@ fun main() {
                     )
             ),
             "/live" bind routes(
-                "/stream/overflowing" bind StreamOverflowing(clock, stream),
-                "/stream/overflowing/{date}" bind StreamOverflowingByDate(stream),
-                "/thames-water/overflow-summary" bind ThamesWaterSummary(thamesWater),
-                "/thames-water/events/cso/{permit}" bind ThamesWaterPermitEvents(clock, thamesWater),
-                "/thames-water/events/constituency/{constituency}" bind ThamesWaterConstituencyEvents(
-                    clock,
-                    thamesWater
+                "/stream" bind routes(
+                    "/overflowing/{epochms}" bind StreamOverflowingByDate(clock, stream),
                 ),
-                "/environment-agency/rainfall/{constituency}" bind EnvironmentAgencyRainfall(
-                    clock,
-                    EnvironmentAgency(connection)
+                "/thames-water" bind routes(
+                    "/overflow-summary" bind ThamesWaterSummary(thamesWater),
+                    "/events/cso/{permit}" bind ThamesWaterPermitEvents(clock, thamesWater),
+                    "/events/constituency/{constituency}" bind ThamesWaterConstituencyEvents(clock, thamesWater),
                 ),
-            ),
-            "/data-new/constituency/{constituency}/annual-pollution" bind EDMAnnualSummary(
-                EDM(
-                    connection
+                "/environment-agency" bind routes(
+                    "/rainfall/{constituency}" bind EnvironmentAgencyRainfall(clock, environmentAgency),
+                    "/rainfall/grid/{epochms}" bind EnvironmentAgencyGrid(clock, environmentAgency)
+                ),
+            ).withFilter(
+                CachingFilters.CacheResponse.FallbackCacheControl(
+                    defaultCacheTimings = DefaultCacheTimings(
+                        maxAge = MaxAgeTtl(Duration.ofMinutes(30)),
+                        staleIfErrorTtl = StaleIfErrorTtl(Duration.ofMinutes(60)),
+                        staleWhenRevalidateTtl = StaleWhenRevalidateTtl(Duration.ofMinutes(60))
+                    )
                 )
             ),
+            "/data-new/constituency/{constituency}/annual-pollution" bind EDMAnnualSummary(EDM(connection)),
             "/map.html" bind OldMapRedirectHandler(),
             "/sitemap.xml" bind SitemapHandler(
                 siteBaseUri = Uri.of("https://top-of-the-poops.org"),

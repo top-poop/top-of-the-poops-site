@@ -106,16 +106,19 @@ class Storage:
         )
         self.cache[filename] = content
 
-    def load(self, company: WaterCompany, dt: datetime.datetime) -> List[FeatureRecord]:
+    def ensure(self, company: WaterCompany, dt: datetime.datetime) -> bytes:
         filename = self._filename(company, dt)
         if filename in self.cache:
-            content = self.cache[filename]
+            return self.cache[filename]
         else:
+            print(f"S3 Load: {company} {dt}")
             resp = self.bucket.Object(key=filename).get()
             content = resp['Body'].read()
             self.cache[filename] = content
+            return content
 
-        return from_csv(gzip.decompress(content).decode())
+    def load(self, company: WaterCompany, dt: datetime.datetime) -> List[FeatureRecord]:
+        return from_csv(gzip.decompress(self.ensure(company, dt)).decode())
 
 
 test_item = FeatureRecord(

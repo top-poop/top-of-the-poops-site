@@ -58,6 +58,8 @@ object SitemapUris {
         return {
             listOf(
                 Uri.of("/media"),
+                Uri.of("/now"),
+                Uri.of("/support"),
                 Uri.of("/constituencies"),
                 Uri.of("/beaches"),
                 Uri.of("/rivers"),
