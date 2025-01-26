@@ -2,8 +2,8 @@ package org.totp
 
 import com.google.common.base.Suppliers
 import org.http4k.client.OkHttp
-import org.http4k.cloudnative.env.Environment
-import org.http4k.cloudnative.env.EnvironmentKey
+import org.http4k.config.Environment
+import org.http4k.config.EnvironmentKey
 import org.http4k.core.*
 import org.http4k.events.AutoMarshallingEvents
 import org.http4k.events.EventFilters
@@ -316,7 +316,7 @@ fun main() {
                         )
                     )
             ),
-            "/live" bind routes (
+            "/live" bind routes(
                 "/stream/overflowing" bind StreamOverflowing(clock, stream),
                 "/stream/overflowing/{date}" bind StreamOverflowingByDate(stream),
                 "/thames-water/overflow-summary" bind ThamesWaterSummary(thamesWater),
