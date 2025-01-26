@@ -153,8 +153,8 @@
         else return days + " days"
     }
 
-    const chart = ({asof, data, countries}) => {
-        data = data.map(
+    const chart = ({asof, sewage, countries}) => {
+        sewage = sewage.map(
                 e => {
                     const started = Date.parse(e.started);
                     const duration = asof - started;
@@ -186,7 +186,7 @@
                                 }
                         ),
                         Plot.dot(
-                                data,
+                                sewage,
                                 {
                                     x: d => d.loc.lon,
                                     y: d => d.loc.lat,
@@ -226,7 +226,10 @@
 
         if (data.ok) {
             chartElement.replaceChildren(
-                    chart({asof: now, data: await data.json(), countries: countries})
+                    chart({
+                        asof: date,
+                        sewage: await data.json(),
+                        countries: countries})
             );
         }
     }
