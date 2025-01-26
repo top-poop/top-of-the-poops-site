@@ -309,21 +309,26 @@ fun main() {
                             "/private/badges/rivers" bind BadgesRiversHandler(
                                 renderer = renderer,
                                 riverRankings = riverRankings,
+                            ),
+                            "/fragments" bind routes(
+                                "/stream/table/" bind { Response(Status.OK) }
                             )
                         )
                     )
             ),
-            "/live/stream/overflowing" bind StreamOverflowing(clock, stream),
-            "/live/stream/overflowing/{date}" bind StreamOverflowingByDate(stream),
-            "/live/thames-water/overflow-summary" bind ThamesWaterSummary(thamesWater),
-            "/live/thames-water/events/cso/{permit}" bind ThamesWaterPermitEvents(clock, thamesWater),
-            "/live/thames-water/events/constituency/{constituency}" bind ThamesWaterConstituencyEvents(
-                clock,
-                thamesWater
-            ),
-            "/live/environment-agency/rainfall/{constituency}" bind EnvironmentAgencyRainfall(
-                clock,
-                EnvironmentAgency(connection)
+            "/live" bind routes (
+                "/stream/overflowing" bind StreamOverflowing(clock, stream),
+                "/stream/overflowing/{date}" bind StreamOverflowingByDate(stream),
+                "/thames-water/overflow-summary" bind ThamesWaterSummary(thamesWater),
+                "/thames-water/events/cso/{permit}" bind ThamesWaterPermitEvents(clock, thamesWater),
+                "/thames-water/events/constituency/{constituency}" bind ThamesWaterConstituencyEvents(
+                    clock,
+                    thamesWater
+                ),
+                "/environment-agency/rainfall/{constituency}" bind EnvironmentAgencyRainfall(
+                    clock,
+                    EnvironmentAgency(connection)
+                ),
             ),
             "/data-new/constituency/{constituency}/annual-pollution" bind EDMAnnualSummary(
                 EDM(
