@@ -147,20 +147,28 @@ class EnvironmentAgencyGrid(val clock: Clock, val environmentAgency: Environment
     val haveDataDuration = Duration.ofDays(3)
 
     override fun invoke(request: Request): Response {
-        val instant = epochms(request).toInstant()
-        val truncated = instant.truncatedTo(DurationUnit.ofMinutes(15))
+        val requestedInstant = epochms(request).toInstant()
+        val truncated = requestedInstant.truncatedTo(DurationUnit.ofMinutes(15))
 
-        val maxAge = if (instant.isBefore(clock.instant().minus(haveDataDuration))) {
-            MaxAgeTtl(Duration.ofDays(1))
-        } else {
-            MaxAgeTtl(Duration.ofHours(1))
-        }
-
-        return if (instant != truncated) {
+        return if (requestedInstant != truncated) {
             Response(Status.PERMANENT_REDIRECT).location(Uri.of(truncated.toEpochMilli().toString()))
         } else {
+            val dataProbablyAvailableDate = clock.instant().minus(haveDataDuration)
+
+            val grid = if (requestedInstant.isAfter(dataProbablyAvailableDate)) {
+                emptyList()
+            } else {
+                environmentAgency.rainfallGridAt(truncated)
+            }
+
+            val maxAge = if (grid.isEmpty()) {
+                MaxAgeTtl(Duration.ofHours(1))
+            } else {
+                MaxAgeTtl(Duration.ofDays(1))
+            }
+
             Response(Status.OK).with(
-                response of environmentAgency.rainfallGridAt(truncated),
+                response of grid,
                 cache of listOf("public", maxAge.toHeaderValue()).joinToString(",")
             )
         }

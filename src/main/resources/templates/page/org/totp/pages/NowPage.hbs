@@ -22,11 +22,21 @@
 
 <div class="container">
     <div class="row align-items-center">
-        <div style="min-height: 450px;" class="col-md-6">
-            <div id="now">
+        <div class="col-md-6">
+            <div style="min-height: 500px;" id="now">
                 <div></div>
             </div>
             <form>
+                <div class="row">
+                    <div class="col-md-6 offset-4">
+                        <img style="height:1.5em;" alt="move start" id="ctrl-le" src="/assets/icons/bi/chevron-bar-left.svg"/>
+                        <img style="height:1.5em;" alt="move earlier 1 day" id="ctrl-ld" src="/assets/icons/bi/chevron-double-left.svg"/>
+                        <img style="height:1.5em;" alt="move earlier" id="ctrl-l" src="/assets/icons/bi/chevron-left.svg"/>
+                        <img style="height:1.5em;" alt="move later" id="ctrl-r" src="/assets/icons/bi/chevron-right.svg"/>
+                        <img style="height:1.5em;" alt="move later 1 day" id="ctrl-rd" src="/assets/icons/bi/chevron-double-right.svg"/>
+                        <img style="height:1.5em;" alt="move end" id="ctrl-re" src="/assets/icons/bi/chevron-bar-right.svg"/>
+                    </div>
+                </div>
                 <div class="form-group row">
                     <label for="dateSlider" class="col-md-4 col-form-label"><span id="dateSliderValue"></span></label>
                     <div class="col-md-8">
@@ -43,7 +53,9 @@
 
             <p>Each dot represents an overflowing CSO - Each Water Company has a different colour</p>
 
-            <p>With your support we can do more.. so please <a href="/support">
+            <p>Blue squares represent rainfall, if there is any - the darker the blue, the more rain.</p>
+
+            <p>With your support we can do more... so please <a href="/support">
                 <span class="btn btn-primary me-1">Donate</span>
             </a></p>
 
@@ -166,7 +178,7 @@
                 }
         )
 
-        const rainfallScale =  Plot.scale({
+        const rainfallScale = Plot.scale({
             color: {
                 scheme: "Blues",
                 domain: [0, 10 / 4], // 10 mm/h (7.5mm/h is 'heavy'), but we are every 15 mins
@@ -233,9 +245,28 @@
     slider.min = Date.parse("2025-01-01T00:00:00Z").valueOf();
     slider.max = now.getTime();
     slider.value = slider.max;
-    slider.step = 5 * 60 * 1000;
+    slider.step = 60 * 60 * 1000;
 
     const updateDate = (d) => sliderValue.textContent = d.toLocaleString();
+
+    const actions = {
+        "ctrl-le": () => slider.value = slider.min,
+        "ctrl-ld": () => slider.valueAsNumber -= 86400 * 1000,
+        "ctrl-l": () => slider.valueAsNumber -= 60 * 60 * 1000,
+        "ctrl-r": () => slider.valueAsNumber += 60 * 60 * 1000,
+        "ctrl-rd": () => slider.valueAsNumber += 86400 * 1000,
+        "ctrl-re": () => slider.value = slider.max,
+    }
+
+    Object.keys(actions).forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener('click', (_) => {
+            const action = actions[id];
+            if (action != null ) {
+                return actions[id]() && slider.dispatchEvent(new Event('input'));
+            }
+        })
+    })
 
     const doChart = async (date) => {
 
@@ -258,13 +289,8 @@
         }
     }
 
-    slider.oninput = (e) => {
-        doChart(new Date(parseInt(e.target.value)))
-    }
-
-    slider.onchange = (e) => {
-        doChart(new Date(parseInt(e.target.value)))
-    }
+    slider.addEventListener('input', (e) => doChart(new Date(e.target.valueAsNumber)))
+    slider.addEventListener('change', (e) => doChart(new Date(e.target.valueAsNumber)))
 
     doChart(now);
 
