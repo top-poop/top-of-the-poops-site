@@ -32,6 +32,26 @@ class FeatureRecord:
     receivingWater: str
 
 
+@dataclasses.dataclass(frozen=True)
+class DwrCymruRecord:
+    asset_name : str
+    asset_location : str
+    status : str
+    GlobalID : str
+    EditDate : int
+    discharge_duration_last_7_daysH : str
+    stop_date_time_discharge : datetime.datetime
+    start_date_time_discharge : datetime.datetime
+    discharge_duration_hours : float
+    discharge_x_location : int
+    discharge_y_location : int
+    Overflow : str
+    Linked_Bathing_Water : Optional[str]
+    Receiving_Water : str
+    lat: float
+    lon: float
+
+
 x = {
     "OBJECTID": 1539,
     "Id": "NES0141",

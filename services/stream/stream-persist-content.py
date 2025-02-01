@@ -9,7 +9,7 @@ from psycopg2.extras import DictCursor
 from args import enum_parser
 from companies import WaterCompany
 from secret import env
-from storage import b2_service, Storage
+from storage import b2_service, CSVFileStorage, SqlliteStorage, StreamCSV, S3Storage
 from stream import FeatureRecord, EventType
 from streamdb import Database
 
@@ -25,7 +25,11 @@ if __name__ == '__main__':
         env("AWS_SECRET_ACCESS_KEY", "s3_secret_key")
     )
     bucket = s3.Bucket(env("STREAM_BUCKET_NAME", "stream_bucket_name"))
-    storage = Storage(bucket)
+
+    storage = CSVFileStorage(
+        SqlliteStorage(delegate=S3Storage(bucket)),
+        StreamCSV()
+    )
 
     db_host = os.environ.get("DB_HOST", "localhost")
 

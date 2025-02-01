@@ -2,20 +2,18 @@ import csv
 import datetime
 import gzip
 import os
-from dataclasses import asdict, fields
+from dataclasses import asdict, fields, Field
 from io import StringIO
 from typing import List, Dict, Optional, TypeVar, Callable
 
 import boto3
+import botocore.exceptions
 import mypy_boto3_s3.service_resource as s3_resources
 from botocore.config import Config
 from sqlitedict import SqliteDict
 
 from companies import WaterCompany
 from stream import FeatureRecord
-
-csv_fields = ['lastUpdated', 'id', 'status', 'statusStart', 'latestEventStart',
-              'latestEventEnd', 'company', 'lat', 'lon', 'receivingWater']
 
 K = TypeVar("K")
 V = TypeVar("V")
@@ -61,26 +59,49 @@ def mapin(t: Dict, d: Dict) -> Dict:
     return {k: deserialize_field(t[k], v) for (k, v) in d.items()}
 
 
-def to_csv(items: List[FeatureRecord]) -> str:
-    file = StringIO()
-    c = csv.DictWriter(file, fieldnames=csv_fields)
-    c.writeheader()
-    for item in items:
-        c.writerow(mapout(asdict(item)))
-    return file.getvalue()
+T = TypeVar("T")
 
 
-def from_csv(text: str) -> List[FeatureRecord]:
-    file = StringIO(text)
-    types = {f.name: f.type for f in fields(FeatureRecord)}
-    c = csv.DictReader(file)
-    return [FeatureRecord(**mapin(types, r)) for r in c]
+class CSVFile[T]:
+    def _fields(self) -> List[Field]:
+        raise NotImplementedError()
+
+    def to_csv(self, items: List[T]) -> str:
+        file = StringIO()
+        c = csv.DictWriter(file, fieldnames=[f.name for f in self._fields()])
+        c.writeheader()
+        for item in items:
+            c.writerow(mapout(asdict(item)))
+        return file.getvalue()
+
+    def from_csv(self, input: str) -> List[T]:
+        file = StringIO(input)
+        types = {f.name: f.type for f in self._fields()}
+        c = csv.DictReader(file)
+        return [FeatureRecord(**mapin(types, r)) for r in c]
+
+
+class StreamCSV(CSVFile[FeatureRecord]):
+
+    def _fields(self) -> List[Field]:
+        return fields(FeatureRecord)
 
 
 class Storage:
 
-    def __init__(self, bucket: s3_resources.Bucket):
-        self.bucket = bucket
+    def available(self, company: WaterCompany) -> List[datetime.datetime]:
+        raise NotImplementedError()
+
+    def load(self, company: WaterCompany, dt: datetime.datetime) -> Optional[str]:
+        raise NotImplementedError()
+
+    def save(self, company: WaterCompany, dt: datetime.datetime, content: str):
+        raise NotImplementedError()
+
+
+class SqlliteStorage(Storage):
+    def __init__(self, delegate: Optional[Storage]):
+        self.delegate = delegate
         totp = os.path.expanduser("~/.totp")
         os.makedirs(totp, exist_ok=True)
         self.cache = SqliteDict(
@@ -88,37 +109,108 @@ class Storage:
             autocommit=True
         )
 
-    def available(self, company: WaterCompany) -> List[datetime.datetime]:
-        items = self.bucket.objects.filter(Delimiter="/", Prefix=f"{company.name}/")
-        keys = [i.key.split('/')[1].replace('.csv.gz', '') for i in items if i.key.endswith(".csv.gz")]
-        dates = [datetime.datetime.strptime(k, '%Y%m%d%H%M%S').replace(tzinfo=datetime.UTC) for k in keys]
-        return sorted(dates)
-
     def _filename(self, company: WaterCompany, dt: datetime.datetime):
         return f"{company.name}/{dt.strftime('%Y%m%d%H%M%S')}.csv.gz"
 
-    def save(self, company: WaterCompany, dt: datetime.datetime, items: List[FeatureRecord]):
-        filename = self._filename(company, dt.astimezone(tz=datetime.UTC))
-        content = gzip.compress(data=to_csv(items).encode())
-        self.bucket.put_object(
-            Key=filename,
-            Body=(content)
-        )
-        self.cache[filename] = content
+    def available(self, company: WaterCompany) -> List[datetime.datetime]:
+        keys = [k.split('/')[-1].replace('.csv.gz', '') for k in self.cache.keys() if k.startswith(f"{company.name}/")]
+        dates = {datetime.datetime.strptime(k, '%Y%m%d%H%M%S').replace(tzinfo=datetime.UTC) for k in keys}
+        if self.delegate is not None:
+            dates.update(self.delegate.available(company))
 
-    def ensure(self, company: WaterCompany, dt: datetime.datetime) -> bytes:
+        return sorted(list(dates))
+
+    def load(self, company: WaterCompany, dt: datetime.datetime) -> Optional[str]:
         filename = self._filename(company, dt)
         if filename in self.cache:
-            return self.cache[filename]
-        else:
-            print(f"S3 Load: {company} {dt}")
-            resp = self.bucket.Object(key=filename).get()
-            content = resp['Body'].read()
-            self.cache[filename] = content
+            return gzip.decompress(self.cache[filename]).decode()
+        if self.delegate is not None:
+            content = self.delegate.load(company, dt)
+            if content is not None:
+                self._put(company, dt, content)
             return content
 
-    def load(self, company: WaterCompany, dt: datetime.datetime) -> List[FeatureRecord]:
-        return from_csv(gzip.decompress(self.ensure(company, dt)).decode())
+    def _put(self, company: WaterCompany, dt: datetime.datetime, content: str):
+        self.cache[self._filename(company, dt)] = gzip.compress(content.encode())
+
+    def save(self, company: WaterCompany, dt: datetime.datetime, content: str):
+        if self.delegate is not None:
+            self.delegate.save(company, dt, content)
+        self._put(company, dt, content)
+
+
+class S3Storage(Storage):
+    def __init__(self, bucket: s3_resources.Bucket):
+        self.bucket = bucket
+
+    def available(self, company: WaterCompany) -> List[datetime.datetime]:
+        items = list(self.bucket.objects.filter(Prefix=f"{company.name}/"))
+        keys = [i.key.split('/')[-1].replace('.csv.gz', '') for i in items if i.key.endswith(".csv.gz")]
+        dates = [datetime.datetime.strptime(k, '%Y%m%d%H%M%S').replace(tzinfo=datetime.UTC) for k in keys]
+        return sorted(dates)
+
+    def migration(self, company: WaterCompany):
+
+        items = list(self.bucket.objects.filter(Delimiter='/', Prefix=f"{company.name}/"))
+        keys = [i.key.split('/')[-1].replace('.csv.gz', '') for i in items if i.key.endswith(".csv.gz")]
+        dates = [datetime.datetime.strptime(k, '%Y%m%d%H%M%S').replace(tzinfo=datetime.UTC) for k in keys]
+
+        commands = []
+
+        for dt in dates:
+            old_filename = self._filename_old(company, dt)
+            new_filename = self._filename_new(company, dt)
+            commands.append(f'mv s3://{self.bucket.name}/{old_filename} s3://{self.bucket.name}/{new_filename}')
+
+        return commands
+
+    def load(self, company: WaterCompany, dt: datetime.datetime) -> Optional[str]:
+        print(f"S3 Load: {company} {dt}")
+        try:
+            new_filename = self._filename_new(company, dt)
+            print(f">> Trying {new_filename}")
+            resp = self.bucket.Object(key=(new_filename)).get()
+        except botocore.exceptions.ClientError as e:
+            if e.response['Error']['Code'] in {'NoSuchKey', '404'}:
+                old_filename = self._filename_old(company, dt)
+                print(f">> Trying {old_filename}")
+                resp = self.bucket.Object(key=(old_filename)).get()
+            else:
+                raise
+
+        return gzip.decompress(resp['Body'].read()).decode()
+
+    def _filename_new(self, company: WaterCompany, dt: datetime.datetime):
+        return f"{company.name}/{dt.strftime('%Y/%m/%d/%Y%m%d%H%M%S')}.csv.gz"
+
+    def _filename_old(self, company: WaterCompany, dt: datetime.datetime):
+        return f"{company.name}/{dt.strftime('%Y%m%d%H%M%S')}.csv.gz"
+
+    def save(self, company: WaterCompany, dt: datetime.datetime, content: str):
+        filename = self._filename_new(company, dt)
+        content = gzip.compress(data=content.encode())
+        print(f"Writing {filename}")
+        self.bucket.put_object(Key=filename, Body=content)
+
+
+class CSVFileStorage[T]:
+
+    def __init__(self, storage: Storage, csvfile: CSVFile[T]):
+        self.storage = storage
+        self.csvfile = csvfile
+
+    def available(self, company: WaterCompany) -> List[datetime.datetime]:
+        return self.storage.available(company)
+
+    def save(self, company: WaterCompany, dt: datetime.datetime, items: List[T]):
+        content = self.csvfile.to_csv(items)
+        self.storage.save(company, dt.astimezone(tz=datetime.UTC), content)
+
+    def load(self, company: WaterCompany, dt: datetime.datetime) -> List[T]:
+        content = self.storage.load(company, dt)
+        if content is None:
+            raise FileNotFoundError(f"{company} at {dt}")
+        return self.csvfile.from_csv(content)
 
 
 test_item = FeatureRecord(
@@ -136,7 +228,10 @@ test_item = FeatureRecord(
 
 
 def test_round_trip():
-    print(from_csv(to_csv([test_item])))
+    csvfile = StreamCSV()
+    row = csvfile.to_csv([test_item])
+    print(row)
+    print(csvfile.from_csv(row))
 
 
 def b2_service(aws_access_key_id: str, aws_secret_access_key: str):
@@ -152,17 +247,23 @@ def b2_service(aws_access_key_id: str, aws_secret_access_key: str):
 if __name__ == "__main__":
     s3 = b2_service(os.environ["AWS_ACCESS_KEY_ID"], os.environ["AWS_SECRET_ACCESS_KEY"])
     bucket = s3.Bucket(os.environ["STREAM_BUCKET_NAME"])
-    storage = Storage(bucket)
 
-    storage.save(
-        company=WaterCompany.ThamesWater,
-        dt=datetime.datetime.now(tz=datetime.UTC),
-        items=[test_item])
+    s3_storage = S3Storage(bucket)
+    storage = CSVFileStorage(
+        SqlliteStorage(delegate=s3_storage),
+        StreamCSV()
+    )
 
     company = WaterCompany.ThamesWater
     available = storage.available(company=company)
-    print(available)
 
     loaded = storage.load(company=company, dt=available[0])
 
-    print(loaded)
+    # storage.save(
+    #     company=WaterCompany.ThamesWater,
+    #     dt=datetime.datetime.now(tz=datetime.UTC),
+    #     items=[test_item])
+
+    # print(available)
+
+    # print(loaded)

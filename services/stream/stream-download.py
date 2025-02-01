@@ -3,7 +3,7 @@ import datetime
 
 from companies import WaterCompany
 from secret import env
-from storage import b2_service, Storage
+from storage import b2_service, Storage, CSVFileStorage, SqlliteStorage, StreamCSV, S3Storage
 from stream import StreamAPI
 
 
@@ -35,7 +35,11 @@ if __name__ == "__main__":
         env("AWS_SECRET_ACCESS_KEY", "s3_secret_key")
     )
     bucket = s3.Bucket(env("STREAM_BUCKET_NAME", "stream_bucket_name"))
-    storage = Storage(bucket)
+
+    storage = CSVFileStorage(
+        SqlliteStorage(delegate=S3Storage(bucket)),
+        StreamCSV()
+    )
 
     for company in companies:
         print(f"Loading {company}")
