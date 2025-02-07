@@ -16,5 +16,8 @@ venv/bin/python stream-persist-content.py
 echo $(date) " Processing stream files into events <<<"
 venv/bin/python stream-process-events.py
 
+echo $(date) " Downloading new information from dwr cymru <<<"
+venv/bin/python dwr-cymru-download.py
+
 echo $(date) " >>> Complete <<<"
 

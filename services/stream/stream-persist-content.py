@@ -7,6 +7,7 @@ import psycopg2
 from psycopg2.extras import DictCursor
 
 from args import enum_parser
+from companies import StreamMembers
 from companies import WaterCompany
 from secret import env
 from storage import b2_service, CSVFileStorage, SqlliteStorage, StreamCSV, S3Storage
@@ -36,7 +37,7 @@ if __name__ == '__main__':
     if args.company:
         companies = args.company
     else:
-        companies = [w for w in WaterCompany if w != WaterCompany.YorkshireWater]
+        companies = [w for w in StreamMembers if w != WaterCompany.YorkshireWater]
 
     with psycopg2.connect(host=db_host, database="gis", user="docker", password="docker",
                           cursor_factory=DictCursor) as conn:

@@ -1,22 +1,12 @@
 import argparse
 import datetime
 
+from args import enum_parser
+from companies import StreamMembers
 from companies import WaterCompany
 from secret import env
-from storage import b2_service, Storage, CSVFileStorage, SqlliteStorage, StreamCSV, S3Storage
+from storage import b2_service, CSVFileStorage, SqlliteStorage, StreamCSV, S3Storage
 from stream import StreamAPI
-
-
-def enum_parser(enum_type):
-    def parse_enum(name):
-        try:
-            return enum_type[name]
-        except ValueError:
-            valid_names = [e.name for e in enum_type]
-            raise argparse.ArgumentTypeError(f"Invalid choice: {name}. Must be one of {valid_names}.")
-
-    return parse_enum
-
 
 if __name__ == "__main__":
 
@@ -26,7 +16,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.company is None:
-        companies = list(WaterCompany)
+        companies = StreamMembers
     else:
         companies = args.company
 

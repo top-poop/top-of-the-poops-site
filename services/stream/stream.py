@@ -1,8 +1,9 @@
+import collections
 import dataclasses
 import datetime
 import itertools
 from enum import Enum
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, TypeVar, Callable, Counter
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -10,6 +11,8 @@ from requests.structures import CaseInsensitiveDict
 from urllib3 import Retry
 
 from companies import WaterCompany
+
+T = TypeVar('T')
 
 
 class EventType(Enum):
@@ -34,20 +37,20 @@ class FeatureRecord:
 
 @dataclasses.dataclass(frozen=True)
 class DwrCymruRecord:
-    asset_name : str
-    asset_location : str
-    status : str
-    GlobalID : str
-    EditDate : int
-    discharge_duration_last_7_daysH : str
-    stop_date_time_discharge : datetime.datetime
-    start_date_time_discharge : datetime.datetime
-    discharge_duration_hours : float
-    discharge_x_location : int
-    discharge_y_location : int
-    Overflow : str
-    Linked_Bathing_Water : Optional[str]
-    Receiving_Water : str
+    assetName: str
+    asset_location: str
+    status: str
+    GlobalID: str
+    EditDate: datetime.datetime
+    discharge_duration_last_7_daysH: str
+    stop_date_time_discharge: Optional[datetime.datetime]
+    start_date_time_discharge: Optional[datetime.datetime]
+    discharge_duration_hours: Optional[float]
+    discharge_x_location: int
+    discharge_y_location: int
+    Overflow: str
+    Linked_Bathing_Water: Optional[str]
+    Receiving_Water: str
     lat: float
     lon: float
 
@@ -84,6 +87,7 @@ data_urls = {
     WaterCompany.UnitedUtilities: "https://services5.arcgis.com/5eoLvR0f8HKb7HWP/arcgis/rest/services/United_Utilities_Storm_Overflow_Activity/FeatureServer/0/query",
     WaterCompany.WessexWater: "https://services.arcgis.com/3SZ6e0uCvPROr4mS/arcgis/rest/services/Wessex_Water_Storm_Overflow_Activity/FeatureServer/0/query",
     WaterCompany.YorkshireWater: "https://services-eu1.arcgis.com/1WqkK5cDKUbF0CkH/arcgis/rest/services/Yorkshire_Water_Storm_Overflow_Activity/FeatureServer/0/query",
+    WaterCompany.DwrCymru: "https://services3.arcgis.com/KLNF7YxtENPLYVey/arcgis/rest/services/Spill_Prod__view/FeatureServer/0/query",
 }
 
 
@@ -94,21 +98,37 @@ class FeatureList:
 
 
 def timestamp(epoch_ms: Optional[int]) -> Optional[datetime.datetime]:
-    if epoch_ms is None:
-        return None
-
     return datetime.datetime.fromtimestamp(epoch_ms / 1000.0, tz=datetime.UTC)
 
 
-class StreamAPI:
+def timestamp_optional(epoch_ms: Optional[int]) -> Optional[datetime.datetime]:
+    if epoch_ms is None:
+        return None
 
-    def __init__(self, company: WaterCompany):
+    return timestamp(epoch_ms)
+
+
+def iso_datetime_optional(s: Optional[str]) -> Optional[datetime.datetime]:
+    if s is None:
+        return None
+
+    return datetime.datetime.fromisoformat(s)
+
+
+def float_string_optional(s: Optional[str]) -> Optional[float]:
+    if s is None:
+        return None
+
+    return float(s)
+
+
+class ArcGisFeatureServer[T]:
+    def __init__(self, base_uri: str):
         self.session = requests.Session()
         self.session.mount('https://', HTTPAdapter(
             max_retries=(Retry(total=3, backoff_factor=0.5, status_forcelist=[500, 502, 503, 504]))
         ))
-        self.company = company
-        self.base_uri = data_urls[company]
+        self.base_uri = base_uri
 
     def _feature_list(self) -> FeatureList:
         response = self.session.get(self.base_uri, params={
@@ -132,7 +152,7 @@ class StreamAPI:
             ids=ids
         )
 
-    def _features(self, oids: List[int]) -> List[FeatureRecord]:
+    def _features(self, convert: Callable[[Dict], T], oids: List[int]) -> List[T]:
         things = ','.join([str(oid) for oid in oids])
         response = self.session.get(self.base_uri, params={
             'where': f"1=1",
@@ -145,43 +165,77 @@ class StreamAPI:
 
         resp = response.json()
 
-        def to_record(d: Dict) -> FeatureRecord:
-            f = CaseInsensitiveDict(data=d)
-            return FeatureRecord(
-                id=f["Id"],
-                status=f["Status"],
-                statusStart=timestamp(f["StatusStart"]),
-                company=f["Company"],
-                lastUpdated=timestamp(f["LastUpdated"]),
-                latestEventStart=timestamp(f["LatestEventStart"]),
-                latestEventEnd=timestamp(f["LatestEventEnd"]),
-                lat=f["Latitude"],
-                lon=f["Longitude"],
-                receivingWater=f["ReceivingWaterCourse"],
-            )
+        # northumbrian sometimes doesn't have geometry fields !?!?
+        return [convert(dict(f["attributes"], **f.get("geometry", {'x':0, 'y':0}))) for f in resp["features"]]
 
-        return [to_record(f["attributes"]) for f in resp["features"]]
+    def _convert(self, d: Dict) -> T:
+        raise NotImplementedError()
 
-    def features(self) -> List[FeatureRecord]:
+    def features(self) -> List[T]:
         feature_list = self._feature_list()
 
         groups = itertools.batched(feature_list.ids, 100)
 
         return list(itertools.chain.from_iterable(
-            [self._features(g) for g in groups]
+            [self._features(self._convert, g) for g in groups]
         ))
+
+
+class StreamAPI(ArcGisFeatureServer[FeatureRecord]):
+
+    def __init__(self, company: WaterCompany):
+        super().__init__(data_urls[company])
+
+    def _convert(self, d: Dict) -> FeatureRecord:
+        f = CaseInsensitiveDict(data=d)
+        return FeatureRecord(
+            id=f["Id"],
+            status=f["Status"],
+            statusStart=timestamp_optional(f["StatusStart"]),
+            company=f["Company"],
+            lastUpdated=timestamp_optional(f["LastUpdated"]),
+            latestEventStart=timestamp_optional(f["LatestEventStart"]),
+            latestEventEnd=timestamp_optional(f["LatestEventEnd"]),
+            lat=f["Latitude"],
+            lon=f["Longitude"],
+            receivingWater=f["ReceivingWaterCourse"],
+        )
+
+
+class DwrCymruAPI(ArcGisFeatureServer[DwrCymruRecord]):
+
+    def __init__(self):
+        super().__init__(data_urls[WaterCompany.DwrCymru])
+
+    def _convert(self, d: Dict) -> DwrCymruRecord:
+        return DwrCymruRecord(
+            assetName=d["asset_name"],
+            asset_location=d["asset_location"],
+            status=d["status"],
+            GlobalID=d["GlobalID"],
+            EditDate=timestamp(d["EditDate"]),
+            discharge_duration_last_7_daysH=d["discharge_duration_last_7_daysH"],
+            stop_date_time_discharge=iso_datetime_optional(d["stop_date_time_discharge"]),
+            start_date_time_discharge=iso_datetime_optional(d["start_date_time_discharge"]),
+            discharge_duration_hours=float_string_optional(d["discharge_duration_hours"]),
+            discharge_x_location=d["discharge_x_location"],
+            discharge_y_location=d["discharge_y_location"],
+            Overflow=d["Overflow"],
+            Linked_Bathing_Water=d["Linked_Bathing_Water"],
+            Receiving_Water=d["Receiving_Water"],
+            lat=d["y"],
+            lon=d["x"]
+        )
 
 
 import logging
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
-    api = StreamAPI(company=WaterCompany.SevernTrent)
+    # api = StreamAPI(company=WaterCompany.SevernTrent)
+    api = DwrCymruAPI()
 
     features = api.features()
-    # for f in features:
-
-    #     print(f)
-
-    print()
+    c = collections.Counter([f.status for f in features])
+    print(c)

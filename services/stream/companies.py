@@ -11,3 +11,7 @@ class WaterCompany(enum.Enum):
     UnitedUtilities = 7
     WessexWater = 8
     YorkshireWater = 9
+    DwrCymru = 10
+
+
+StreamMembers = [w for w in WaterCompany if w not in {WaterCompany.DwrCymru}]

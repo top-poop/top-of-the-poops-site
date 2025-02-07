@@ -13,7 +13,7 @@ from botocore.config import Config
 from sqlitedict import SqliteDict
 
 from companies import WaterCompany
-from stream import FeatureRecord
+from stream import DwrCymruRecord, FeatureRecord
 
 K = TypeVar("K")
 V = TypeVar("V")
@@ -85,6 +85,11 @@ class StreamCSV(CSVFile[FeatureRecord]):
 
     def _fields(self) -> List[Field]:
         return fields(FeatureRecord)
+
+
+class DwrCymruCSV(CSVFile[DwrCymruRecord]):
+    def _fields(self) -> List[Field]:
+        return fields(DwrCymruRecord)
 
 
 class Storage:

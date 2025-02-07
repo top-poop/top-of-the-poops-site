@@ -199,7 +199,7 @@ where m.stream_company = %(company)s;
 
 WITH ranked_events AS (
     SELECT files.stream_file_id, files.file_time, files.company, content.id, content.status, content.statusstart, content.latesteventstart, content.latesteventend, content.lastupdated, content.lat, content.lon, content.receiving_water,
-           ROW_NUMBER() OVER (PARTITION BY id, status, statusstart, latesteventstart, latesteventend ORDER BY file_time desc) AS rn
+           ROW_NUMBER() OVER (PARTITION BY id  ORDER BY file_time desc) AS rn
     FROM stream_file_content content
              join stream_files files on content.stream_file_id = files.stream_file_id
     where company=%(company)s
