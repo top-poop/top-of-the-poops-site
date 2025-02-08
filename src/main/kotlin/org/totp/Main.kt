@@ -254,6 +254,7 @@ fun main() {
                                 constituencyRank = constituencyRank
                             ),
                             "/constituency/{constituency}" bind ConstituencyPageHandler(
+                                clock = clock,
                                 renderer = renderer,
                                 constituencySpills = constituencyCSOs(allSpills),
                                 constituencyBoundary = constituencyBoundaries,

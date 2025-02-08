@@ -23,12 +23,15 @@ import strikt.api.expectThat
 import strikt.assertions.first
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFailure
+import java.time.Clock
 import java.time.Duration
 
 val anMP = MP("bob", "con", null, Uri.of("http://example.com"))
 
 
 class ConstituencyPageHandlerTest {
+
+    val clock = Clock.systemUTC()
 
     var summaries = listOf(
         CSOTotals(
@@ -47,6 +50,7 @@ class ConstituencyPageHandlerTest {
 
     val service = routes(
         "/{constituency}" bind Method.GET to ConstituencyPageHandler(
+            clock = clock,
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
             constituencySpills = { summaries },
             constituencyBoundary = { GeoJSON.of("some geojson") },

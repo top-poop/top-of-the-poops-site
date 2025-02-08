@@ -14,7 +14,10 @@ import org.totp.model.PageViewModel
 import org.totp.model.data.*
 import org.totp.text.csv.readCSV
 import java.text.NumberFormat
+import java.time.Clock
 import java.time.Duration
+import java.time.LocalDate
+import java.time.ZoneId
 
 
 val constituencyNames = readCSV(
@@ -180,6 +183,7 @@ fun CSOTotals.toRenderable(): RenderableCSOTotal {
 
 object ConstituencyPageHandler {
     operator fun invoke(
+        clock: Clock,
         renderer: TemplateRenderer,
         constituencySpills: (ConstituencyName) -> List<CSOTotals>,
         mpFor: (ConstituencyName) -> MP?,
@@ -232,6 +236,8 @@ object ConstituencyPageHandler {
 
                     val formattedHours = numberFormat.format(summary.duration.hours)
 
+                    val liveDataStart = LocalDate.ofInstant(clock.instant(), ZoneId.of("UTC")).minusMonths(3)
+
                     Response(Status.OK)
                         .with(
                             viewLens of ConstituencyPage(
@@ -266,8 +272,10 @@ object ConstituencyPageHandler {
                                 renderableConstituencies,
                                 live = if (liveAvailable.contains(constituencyName)) {
                                     ConstituencyPageLiveData(
-                                        csoUri = Uri.of("/live/thames-water/events/constituency/$slug"),
-                                        rainfallUri = Uri.of("/live/environment-agency/rainfall/$slug"),
+                                        csoUri = Uri.of("/live/thames-water/events/constituency/$slug")
+                                            .query("since", liveDataStart.toString()),
+                                        rainfallUri = Uri.of("/live/environment-agency/rainfall/$slug")
+                                            .query("since", liveDataStart.toString()),
                                     )
                                 } else null,
                                 neighbours = neighbours,

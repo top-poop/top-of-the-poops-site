@@ -5,10 +5,7 @@ import dev.forkhandles.values.LongValueFactory
 import dev.forkhandles.values.minValue
 import org.http4k.core.*
 import org.http4k.filter.MaxAgeTtl
-import org.http4k.lens.Header
-import org.http4k.lens.Path
-import org.http4k.lens.location
-import org.http4k.lens.value
+import org.http4k.lens.*
 import org.totp.db.DurationUnit
 import org.totp.db.EnvironmentAgency
 import org.totp.db.StreamData
@@ -94,16 +91,19 @@ class ThamesWaterConstituencyEvents(val clock: Clock, val thamesWater: ThamesWat
 
     val response = TotpJson.autoBody<List<ThamesWater.Thing>>().toLens()
     val constituency = Path.value(ConstituencySlug).of("constituency")
+    val sinceDate = Query.localDate().optional("since")
 
     override fun invoke(request: Request): Response {
         val now = clock.instant()
+        val since = sinceDate(request) ?: LocalDate.parse("2023-01-01")
 
         val constituencyName = slugToConstituency[constituency(request)] ?: return Response(Status.NOT_FOUND)
 
+        val today = LocalDate.ofInstant(now, ZoneId.of("UTC"))
         val events = thamesWater.eventSummaryForConstituency(
             constituencyName = constituencyName,
-            startDate = LocalDate.parse("2023-01-01"),
-            endDate = LocalDate.ofInstant(now, ZoneId.of("UTC"))
+            startDate = since,
+            endDate = today
         )
         return when {
             events.isEmpty() -> Response(Status.NOT_FOUND)
@@ -118,15 +118,17 @@ class EnvironmentAgencyRainfall(val clock: Clock, val environmentAgency: Environ
 
     val response = TotpJson.autoBody<List<EnvironmentAgency.Rainfall>>().toLens()
     val constituency = Path.value(ConstituencySlug).of("constituency")
+    val sinceDate = Query.localDate().optional("since")
 
     override fun invoke(request: Request): Response {
         val now = clock.instant()
+        val since = sinceDate(request) ?: LocalDate.parse("2023-01-01")
 
         val constituencyName = slugToConstituency[constituency(request)] ?: return Response(Status.NOT_FOUND)
 
         val events = environmentAgency.rainfallForConstituency(
             constituencyName = constituencyName,
-            startDate = LocalDate.parse("2023-01-01"),
+            startDate = since,
             endDate = LocalDate.ofInstant(now, ZoneId.of("UTC"))
         )
         return when {
