@@ -64,29 +64,6 @@ class ThamesWaterSummary(val thamesWater: ThamesWater) : HttpHandler {
     }
 }
 
-class ThamesWaterPermitEvents(val clock: Clock, val thamesWater: ThamesWater) : HttpHandler {
-
-    val response = TotpJson.autoBody<List<ThamesWater.Thing>>().toLens()
-    val permit = Path.of("permit")
-
-    override fun invoke(request: Request): Response {
-        val now = clock.instant()
-        val events = thamesWater.eventSummaryForCSO(
-            permit_id = permit(request),
-            startDate = LocalDate.ofInstant(now.minus(Duration.ofDays(90)), ZoneId.of("UTC")),
-            endDate = LocalDate.ofInstant(
-                now, ZoneId.of("UTC")
-            )
-        )
-        return when {
-            events.isEmpty() -> Response(Status.NOT_FOUND)
-            else -> Response(Status.OK).with(
-                response of events
-            )
-        }
-    }
-}
-
 class ThamesWaterConstituencyEvents(val clock: Clock, val thamesWater: ThamesWater) : HttpHandler {
 
     val response = TotpJson.autoBody<List<ThamesWater.Thing>>().toLens()

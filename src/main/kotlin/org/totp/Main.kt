@@ -326,7 +326,6 @@ fun main() {
                 ),
                 "/thames-water" bind routes(
                     "/overflow-summary" bind ThamesWaterSummary(thamesWater),
-                    "/events/cso/{permit}" bind ThamesWaterPermitEvents(clock, thamesWater),
                     "/events/constituency/{constituency}" bind ThamesWaterConstituencyEvents(clock, thamesWater),
                 ),
                 "/environment-agency" bind routes(
