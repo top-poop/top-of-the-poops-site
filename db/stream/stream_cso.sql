@@ -83,7 +83,7 @@ create table stream_cso_event
     update_time   timestamptz
 );
 
-
+create index stream_cso_event_idx1 on stream_cso_event ( stream_cso_id, event_time desc);
 
 drop table if exists stream_cso_consent;
 
