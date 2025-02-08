@@ -161,7 +161,7 @@ where m.stream_company = %(company)s;
                     event=EventType[row["event"]],
                     event_time=row["event_time"],
                     update_time=row["update_time"],
-                    cso_id=row[4]
+                    cso_id=row["stream_cso_id"]
                 ))
             )}
 

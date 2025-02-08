@@ -55,7 +55,7 @@ create table stream_files_processed
     process_time   timestamptz default now()
 );
 
-create unique index stream_files_processed_idx1 on stream_files_processed(company, stream_file_id);
+create unique index stream_files_processed_idx1 on stream_files_processed (company, stream_file_id);
 
 drop table if exists stream_cso cascade;
 
@@ -83,10 +83,31 @@ create table stream_cso_event
     update_time   timestamptz
 );
 
-create index stream_cso_event_idx1 on stream_cso_event ( stream_cso_id, event_time desc);
+create index stream_cso_event_idx1 on stream_cso_event (stream_cso_id, event_time desc);
 
-drop table if exists stream_cso_consent;
+create table stream_summary
+(
+    stream_cso_id   uuid,
+    date            date,
+    unknown         interval,
+    start           interval,
+    stop            interval,
+    potential_start interval,
+    offline         interval
+);
 
--- create table stream_cso_consent (
---
--- )
+drop index if exists stream_summary_idx1;
+
+create unique index stream_summary_idx1 on stream_summary (stream_cso_id, date);
+
+create materialized view stream_cso_grid as
+SELECT sc.stream_cso_id, grid.grid_reference, grid.distance, sc.point as sc_point, grid.grid_point as grid_point
+FROM stream_cso sc
+         cross join lateral (
+    select gr.grid_reference, gr.point grid_point,
+           sc.point <-> gr.point as distance
+    from grid_references gr
+    where sc.point <-> gr.point < 0.002
+    order by distance
+    limit 1
+    ) grid

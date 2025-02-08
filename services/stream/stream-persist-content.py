@@ -116,3 +116,7 @@ if __name__ == '__main__':
 
                 most_recent_by_id.update({w.id: replace(w, status=EventType(int(w.status))) for w in wanted_features})
                 conn.commit()
+
+        print("Updating views...")
+        with conn.cursor() as cursor:
+            cursor.execute("refresh materialized view stream_cso_grid")

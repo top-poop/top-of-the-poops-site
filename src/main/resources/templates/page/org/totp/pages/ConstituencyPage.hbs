@@ -45,8 +45,6 @@
         <div class="col">
             <div class="row">
                 <div class="col">
-                    <div role="alert" class="fade alert alert-success show">Select the constituency from the drop-down
-                    </div>
                     <form>
                         <div class="form-group">
                             <label class="form-label">Constituency</label>
@@ -60,6 +58,7 @@
                                 document.getElementById("constituency-select")
                                         .onchange = (e) => { window.location = e.target.value; return false; }
                             </script>
+                            <div class="form-text">Select the constituency from the drop-down</div>
                             <div class="form-text">✔ means we have experimental daily data since 2023</div>
                         </div>
                     </form>
