@@ -119,7 +119,8 @@ def insert_stream_summary(connection, cso_id, calendar: Calendar):
                 "stop": totals[CSOState.STOP],
                 "potential_start": totals[CSOState.POTENTIAL_START],
                 "offline": totals[CSOState.OFFLINE]
-            } for date, totals in calendar.allocations()]
+            } for date, totals in calendar.allocations()],
+            page_size=1000,
         )
     connection.commit()
 
