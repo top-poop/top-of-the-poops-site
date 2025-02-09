@@ -83,6 +83,13 @@ events_type2 = {
         "Start,2024-12-31 11:15:00.000000 +00:00,2024-12-31 11:15:00.000000 +00:00,,2024-12-31 12:22:57.178000 +00:00",
         "Offline,2024-12-31 13:30:00.000000 +00:00,2024-12-31 11:15:00.000000 +00:00,,2024-12-31 14:22:55.450000 +00:00",
         "Stop,2024-12-31 14:45:00.000000 +00:00,2024-12-31 11:15:00.000000 +00:00,,2024-12-31 15:53:18.723000 +00:00",
+    ],
+    "southern_time_jump": [
+        "Start,2025-01-05 09:42:39.000000 +00:00,2025-01-05 09:42:39.000000 +00:00,",
+        "Stop,2025-01-05 09:42:39.000000 +00:00,2025-01-05 09:42:39.000000 +00:00,2025-01-05 11:15:00.000000 +00:00",
+        "Start,2025-01-05 11:42:01.000000 +00:00,2025-01-05 11:42:01.000000 +00:00,",
+        "Start,2025-01-05 11:42:01.000000 +00:00,2025-01-05 11:42:01.000000 +00:00,",
+        "Stop,2025-01-05 11:15:00.000000 +00:00,2025-01-05 11:15:00.000000 +00:00,2025-01-05 11:28:07.000000 +00:00",
     ]
 }
 
@@ -257,19 +264,13 @@ class TestType2:
         """stopped: get start with statusStart, then stop with latesteventend"""
         events = self.events('start_start_stop')
         output = apply_events(self.file, events)
-        assert len(output) == 3
+        assert len(output) == 2
         assert output[0] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Start,
                                         event_time=events[0].statusStart,
                                         file_id=TestType2.file.file_id,
                                         update_time=events[0].lastUpdated)
-
         assert output[1] == StreamEvent(cso_id='cso-id',
-                                        event=EventType.Start,
-                                        event_time=events[1].statusStart,
-                                        file_id=TestType2.file.file_id,
-                                        update_time=events[1].lastUpdated)
-        assert output[2] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Stop,
                                         event_time=events[2].latestEventEnd,
                                         file_id=TestType2.file.file_id,
@@ -319,3 +320,12 @@ class TestType2:
         assert output[1].event == EventType.Stop
         assert output[1].event_time == events[2].lastUpdated
 
+    def test_southern_time_jumping_backward(self):
+        events = self.events('southern_time_jump')
+        output = apply_events(self.file, events)
+        assert len(output) == 4
+
+        assert output[2].event == EventType.Start
+        assert output[3].event == EventType.Stop
+
+        assert output[3].event_time == output[2].event_time + datetime.timedelta(seconds=1)

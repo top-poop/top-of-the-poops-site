@@ -41,6 +41,7 @@ if __name__ == '__main__':
             ids = database.load_ids(company)
 
             unprocessed_files = database.files_unprocessed(company)
+            latest_by_id = database.latest_cso_events(company)
 
             for file in unprocessed_files:
 
@@ -48,8 +49,6 @@ if __name__ == '__main__':
                 s = time.time()
 
                 new_events: List[StreamEvent] = []
-
-                latest_by_id = database.latest_cso_events(company)
 
                 features = database.load_file_records(file)
 
@@ -67,6 +66,7 @@ if __name__ == '__main__':
                     try:
                         new_event = interpret(ids, file=file, previous=latest_by_id.get(f.id), f=f)
                         if new_event is not None:
+                            latest_by_id[f.id] = new_event
                             new_events.append(new_event)
 
                     except Exception as e:

@@ -1,3 +1,5 @@
+import dataclasses
+import datetime
 from typing import Optional, Dict
 
 from companies import WaterCompany
@@ -85,13 +87,25 @@ def _interpret_type_2(mapping: Dict, file: StreamFile, previous: Optional[Stream
                         update_time=f.lastUpdated
                     )
         case EventType.Start:
-            return StreamEvent(
-                cso_id=mapping[f.id],
-                event=EventType.Start,
-                event_time=f.statusStart,
-                file_id=file.file_id,
-                update_time=f.lastUpdated
-            )
+            if previous is None:
+                return StreamEvent(
+                    cso_id=mapping[f.id],
+                    event=EventType.Start,
+                    event_time=f.statusStart,
+                    file_id=file.file_id,
+                    update_time=f.lastUpdated
+                )
+            match previous.event:
+                case EventType.Start:
+                    return None
+                case _:
+                    return StreamEvent(
+                        cso_id=mapping[f.id],
+                        event=EventType.Start,
+                        event_time=f.statusStart,
+                        file_id=file.file_id,
+                        update_time=f.lastUpdated
+                    )
 
 
 handlers = {
@@ -111,7 +125,10 @@ def interpret(mapping: Dict, file: StreamFile, previous: Optional[StreamEvent], 
     if f.statusStart is not None and previous is not None and f.statusStart < previous.event_time:
         diff = previous.event_time - f.statusStart
         print(f"{f.id} -> Time Jumped backwards from {previous.event_time} to {f.statusStart} ( by {diff} ) ")
-        return None
+        if f.status != previous.event:
+            if f.latestEventEnd is not None and f.latestEventEnd <= previous.event_time:
+                f = dataclasses.replace(f, latestEventEnd= previous.event_time + datetime.timedelta(seconds=1))
+            f = dataclasses.replace(f, statusStart = previous.event_time + datetime.timedelta(seconds=1))
     output = handlers[file.company](mapping=mapping, file=file, previous=previous, f=f)
     if output is not None:
         assert(output.event_time is not None)
