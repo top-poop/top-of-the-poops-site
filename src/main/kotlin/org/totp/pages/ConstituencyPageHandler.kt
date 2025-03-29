@@ -7,6 +7,7 @@ import org.http4k.lens.PathLens
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.THE_YEAR
 import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.http4k.removeQuery
@@ -42,7 +43,7 @@ data class PollutionSummary(
 
 fun List<CSOTotals>.summary(): PollutionSummary {
     return PollutionSummary(
-        year = 2023,
+        year = THE_YEAR,
         locationCount = filter { it.count > 0 }.size,
         companies = map { it.cso.company }.toSet().sorted(),
         count = RenderableCount(sumOf { it.count }),
@@ -254,7 +255,7 @@ object ConstituencyPageHandler {
                                         cta = "Tell ${mp.name} what you think",
                                         tags = listOf("sewage"),
                                         via = "sewageuk",
-                                        twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2023.png")
+                                        twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2024.png")
                                     )
                                 } ?: SocialShare(
                                     pageUriFrom(request),
@@ -262,7 +263,7 @@ object ConstituencyPageHandler {
                                     cta = "Share $constituencyName sewage horrors",
                                     tags = listOf("sewage"),
                                     via = "sewageuk",
-                                    twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2023.png")
+                                    twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2024.png")
                                 ),
                                 summary,
                                 constituencyBoundary(constituencyName),

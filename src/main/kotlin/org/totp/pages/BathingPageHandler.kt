@@ -11,6 +11,7 @@ import org.http4k.lens.Path
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.BathingCSO
@@ -39,7 +40,7 @@ class BathingPage(
 
 fun List<BathingCSO>.summary(): PollutionSummary {
     return PollutionSummary(
-        year = 2023,
+        year = THE_YEAR,
         locationCount = filter { it.count > 0 }.size,
         companies = map { it.company }.toSet().sorted(),
         count = sumOf { it.count }.let { RenderableCount(it) },

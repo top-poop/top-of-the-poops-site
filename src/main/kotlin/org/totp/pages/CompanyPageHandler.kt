@@ -157,7 +157,7 @@ object CompanyPageHandler {
                                 cta = "Tweet your displeasure to $name",
                                 listOf("sewage"),
                                 via = "sewageuk",
-                                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/company/${slug}-2023.png")
+                                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/company/${slug}-2024.png")
                             )
                         )
                     )

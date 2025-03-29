@@ -127,7 +127,7 @@ class HomepageHandlerTest {
         expectThat(html).select(".footer").isNotEmpty()
 
         expectThat(html).twitterImageUri()
-            .isEqualTo("https://top-of-the-poops.org/badges/home/home-2023.png")
+            .isEqualTo("https://top-of-the-poops.org/badges/home/home-2024.png")
     }
 
 
@@ -139,7 +139,7 @@ class HomepageHandlerTest {
     "href": "http://example.com",
     "where": "Some August Publication",
     "title": "Nice Title",
-    "date": "2023-01-01",
+    "date": "2024-01-01",
     "image": "http://example.com/image.jpg"
   }]
 """
@@ -152,7 +152,7 @@ class HomepageHandlerTest {
                 get { uri }.isEqualTo(Uri.of("http://example.com"))
                 get { publication }.isEqualTo("Some August Publication")
                 get { title }.isEqualTo("Nice Title")
-                get { date }.isEqualTo(LocalDate.of(2023, 1, 1))
+                get { date }.isEqualTo(LocalDate.of(2024, 1, 1))
                 get { imageUri }.isEqualTo(Uri.of("http://example.com/image.jpg"))
             }
         }

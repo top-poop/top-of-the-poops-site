@@ -7,6 +7,7 @@ import kotlinx.html.stream.createHTML
 import org.http4k.core.*
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.TotpHandlebars
@@ -109,7 +110,7 @@ object ConstituenciesPageHandler {
                 .with(
                     viewLens of ConstituenciesPage(
                         pageUriFrom(request),
-                        year = 2023,
+                        year = THE_YEAR,
                         tableRows(
                             constituencyRankings().sortedBy { it.rank }.map {
                                 it.toRenderable(mpFor)

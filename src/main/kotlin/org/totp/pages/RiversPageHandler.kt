@@ -19,6 +19,7 @@ import org.http4k.lens.Query
 import org.http4k.lens.boolean
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.TotpHandlebars.numberFormat
@@ -153,7 +154,7 @@ object RiversPageHandler {
                 .with(
                     viewLens of RiversPage(
                         pageUriFrom(request),
-                        year = 2023,
+                        year = THE_YEAR,
                         totalCount,
                         totalDuration,
                         showingSummary = !showAll,

@@ -32,11 +32,11 @@ class ThamesWaterTest {
 
     @Test
     fun eventSummaryForCSO() {
-        val x = tw.eventSummaryForCSO("TEMP.2900", LocalDate.parse("2023-01-01"), LocalDate.parse("2024-01-01"))
+        val x = tw.eventSummaryForCSO("TEMP.2900", LocalDate.parse("2024-01-01"), LocalDate.parse("2025-01-01"))
     }
     @Test
     fun eventSummaryForConstituency() {
-        val x = tw.eventSummaryForConstituency(ConstituencyName.of("Aldershot"), LocalDate.parse("2023-01-01"), LocalDate.parse("2024-01-01"))
+        val x = tw.eventSummaryForConstituency(ConstituencyName.of("Aldershot"), LocalDate.parse("2024-01-01"), LocalDate.parse("2025-01-01"))
     }
 
     @Test

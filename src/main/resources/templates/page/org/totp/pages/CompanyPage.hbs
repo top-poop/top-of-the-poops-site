@@ -191,7 +191,7 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            {{#> components/section title="2023 - By Water Company"}}
+            {{#> components/section title="2024 - By Water Company"}}
                 <div class="row">
                     <div class="col">
                         <p>How does each water company compare? These are the totals by company for each. The totals are
@@ -203,7 +203,7 @@
                 <div class="row mb-5">
                     <div class="col">
                         <div style="height: 300px;" id="plot-company-totals" data-company-name="{{company.name}}"
-                             data-uri="/data/v1/2023/spills-by-company.json"></div>
+                             data-uri="/data/v1/2024/spills-by-company.json"></div>
                     </div>
                 </div>
             {{/components/section}}
@@ -212,7 +212,7 @@
 
     <div class="row">
         <div class="col">
-            {{#> components/section title="2023 - Asset Spill Duration Comparison"}}
+            {{#> components/section title="2024 - Asset Spill Duration Comparison"}}
 
                 <div class="row">
                     <div class="col">
@@ -226,7 +226,7 @@
                 <div class="row mb-2">
                     <div class="col">
                         <div style="height: 300px;" id="plot-company-comparison" data-company-name="{{company.name}}"
-                             data-uri="/data/v1/2023/spills-all.json"></div>
+                             data-uri="/data/v1/2024/spills-all.json"></div>
                     </div>
                 </div>
             {{/components/section}}
@@ -235,7 +235,7 @@
 
     <div class="row">
         <div class="col">
-            {{#> components/section title=(concat "2023 - Worst Locations " company.name)}}
+            {{#> components/section title=(concat "2024 - Worst Locations " company.name)}}
                 <div class="row row-cols-1 row-cols-md-3">
                     {{#each worstCsos}}
                         <div class="col mb-4">
@@ -284,7 +284,7 @@
             },
             x: {
                 grid: false,
-                domain: [2020, 2021, 2022, 2023],
+                domain: [2020, 2021, 2022, 2023, 2024],
                 tickFormat: d => `${d}`,
             },
             marks: [
@@ -316,7 +316,7 @@
             x: {
                 grid: false,
                 type: "log", base: 10,
-                label: "Hours of Overflow 2023 →",
+                label: "Hours of Overflow 2024 →",
             },
             color: {
                 domain: [false, true],
@@ -398,7 +398,7 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            {{#> components/section title=(concat "2023 - Rivers Polluted by " company.name)}}
+            {{#> components/section title=(concat "2024 - Rivers Polluted by " company.name)}}
                 <div class="row row-cols-1 row-cols-md-3">
                     {{#each rivers}}
                         <a class="quiet-link" href="{{this.river.uri}}">
@@ -429,7 +429,7 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                {{#> components/section title=(concat "2023 - Beaches Polluted by " company.name)}}
+                {{#> components/section title=(concat "2024 - Beaches Polluted by " company.name)}}
                     <div class="row row-cols-1 row-cols-md-3">
                         {{#each beaches}}
                             <a class="quiet-link" href="{{this.beach.uri}}">

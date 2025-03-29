@@ -10,6 +10,7 @@ import org.http4k.core.Uri
 import org.http4k.core.with
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.BathingRank
@@ -98,7 +99,7 @@ object BeachesPageHandler {
                 .with(
                     viewLens of BeachesPage(
                         pageUriFrom(request),
-                        year = 2023,
+                        year = THE_YEAR,
                         totalCount,
                         totalDuration,
                         rankings.map {
@@ -107,7 +108,7 @@ object BeachesPageHandler {
                         polluterRankings = polluters,
                         SocialShare(
                             pageUriFrom(request),
-                            "Are the beaches safe for swimming? - ${numberFormat.format(totalCount)} sewage pollution incidents in 2023",
+                            "Are the beaches safe for swimming? - ${numberFormat.format(totalCount)} sewage pollution incidents in 2024",
                             cta = "Take action. Tweet this to your followers",
                             listOf("sewage"),
                             via = "sewageuk",

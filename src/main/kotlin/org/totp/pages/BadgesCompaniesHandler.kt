@@ -9,6 +9,7 @@ import org.http4k.core.Uri
 import org.http4k.core.with
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 
@@ -30,13 +31,13 @@ object BadgesCompaniesHandler {
 
             val summaries = companySummaries()
 
-            val applicable = summaries.filter { it.year == 2023 }
+            val applicable = summaries.filter { it.year == THE_YEAR }
 
             Response(Status.OK)
                 .with(
                     viewLens of BadgesCompaniesPage(
                         pageUriFrom(request),
-                        2023,
+                        THE_YEAR,
                         companies = applicable.map { it.toRenderable() }
                     ),
                 )

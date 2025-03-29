@@ -10,6 +10,7 @@ import org.http4k.core.Uri
 import org.http4k.core.with
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.ShellfishRank
@@ -42,7 +43,7 @@ object ShellfisheriesPageHandler {
                 .with(
                     viewLens of ShellfisheriesPage(
                         pageUriFrom(request),
-                        year = 2023,
+                        year = THE_YEAR,
                         totalCount,
                         totalDuration,
                         rankings.map { it.toRenderable() },

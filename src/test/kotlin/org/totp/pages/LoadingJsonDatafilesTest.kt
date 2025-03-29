@@ -150,71 +150,71 @@ class LoadingJsonDatafilesTest {
     }
 
     @Test
-    fun `loading river rankings 2023`() {
+    fun `loading river rankings 2024`() {
         val remote = uriHavingFileContent(
             Uri.of("spills-by-river.json"),
-            File("services/data/datafiles/v1/2023/spills-by-river.json")
+            File("services/data/datafiles/v1/2024/spills-by-river.json")
         )
         val service = RiverRankings(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
-    fun `loading company summaries 2023`() {
+    fun `loading company summaries 2024`() {
         val remote = uriHavingFileContent(
             Uri.of("spills-by-company.json"),
-            File("services/data/datafiles/v1/2023/spills-by-company.json")
+            File("services/data/datafiles/v1/2024/spills-by-company.json")
         )
         val service = CompanyAnnualSummaries(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
-    fun `loading  beaches 2023`() {
+    fun `loading  beaches 2024`() {
         val remote = uriHavingFileContent(
             Uri.of("spills-by-beach.json"),
-            File("services/data/datafiles/v1/2023/spills-by-beach.json")
+            File("services/data/datafiles/v1/2024/spills-by-beach.json")
         )
         val service = BathingRankings(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
-    fun `loading  shellfish 2023`() {
+    fun `loading  shellfish 2024`() {
         val remote = uriHavingFileContent(
             Uri.of("spills-by-shellfish.json"),
-            File("services/data/datafiles/v1/2023/spills-by-shellfish.json")
+            File("services/data/datafiles/v1/2024/spills-by-shellfish.json")
         )
         val service = ShellfishRankings(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
-    fun `loading  bathing csos 2023`() {
+    fun `loading  bathing csos 2024`() {
         val remote = uriHavingFileContent(
             Uri.of("csos-by-beach.json"),
-            File("services/data/datafiles/v1/2023/csos-by-beach.json")
+            File("services/data/datafiles/v1/2024/csos-by-beach.json")
         )
         val service = BathingCSOs(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
-    fun `loading  shellfish csos 2023`() {
+    fun `loading  shellfish csos 2024`() {
         val remote = uriHavingFileContent(
             Uri.of("csos-by-shellfish.json"),
-            File("services/data/datafiles/v1/2023/csos-by-shellfish.json")
+            File("services/data/datafiles/v1/2024/csos-by-shellfish.json")
         )
         val service = ShellfishCSOs(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 
     @Test
-    fun `loading  neighbours 2023`() {
+    fun `loading  neighbours 2024`() {
 
         val remote = uriHavingFileContent(
             Uri.of("constituency-neighbours.json"),
-            File("services/data/datafiles/v1/2023/constituency-neighbours.json")
+            File("services/data/datafiles/v1/2024/constituency-neighbours.json")
         )
 
         val service = ConstituencyNeighbours(remote)

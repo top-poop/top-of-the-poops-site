@@ -9,6 +9,7 @@ import org.http4k.core.Uri
 import org.http4k.core.with
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.BathingRank
@@ -102,7 +103,7 @@ object HomepageHandler {
                 .with(
                     viewLens of HomePage(
                         pageUriFrom(request),
-                        year = 2023,
+                        year = THE_YEAR,
                         totalSpillsRounded,
                         totalDuration.toRenderable(),
                         rankings.take(10).map { it.toRenderable(mpFor) },
@@ -115,11 +116,11 @@ object HomepageHandler {
                         appearances().sortedByDescending { it.date },
                         SocialShare(
                             pageUriFrom(request),
-                            "Water companies are dumping #sewage into rivers and bathing areas all over the UK - over ${totalSpillsRounded} times in 2023 - it needs to be stopped",
+                            "Water companies are dumping #sewage into rivers and bathing areas all over the UK - over ${totalSpillsRounded} times in 2024 - it needs to be stopped",
                             cta = "Take action. Tweet this to your followers",
                             listOf("sewage"),
                             via = "sewageuk",
-                            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/home/home-2023.png")
+                            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/home/home-2024.png")
                         )
                     )
                 )

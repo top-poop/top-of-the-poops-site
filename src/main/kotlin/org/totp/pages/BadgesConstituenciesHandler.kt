@@ -10,6 +10,7 @@ import org.http4k.core.with
 import org.http4k.lens.Path
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.ConstituencyName
@@ -45,7 +46,7 @@ object BadgesConstituenciesHandler {
                 .with(
                     viewLens of BadgesConstituenciesPage(
                         pageUriFrom(request),
-                        2023,
+                        THE_YEAR,
                         rankings.sortedBy { it.constituencyName }.map {
                             RenderableConstituencyRank(
                                 it.rank,

@@ -9,6 +9,7 @@ import org.http4k.core.Uri
 import org.http4k.core.with
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.RiverRank
@@ -36,7 +37,7 @@ object BadgesRiversHandler {
                 .with(
                     viewLens of BadgesRiversPage(
                         pageUriFrom(request),
-                        2023,
+                        THE_YEAR,
                         rankings,
                     ),
                 )

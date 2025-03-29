@@ -39,7 +39,7 @@
 <body>
 
 <div class="ms-3 mt-3">
-    <div style="width: 526px; height:263px; overflow: clip" id="home-2023"
+    <div style="width: 526px; height:263px; overflow: clip" id="home-2024"
          class="twitter-badge mb-2">
         <div class="card  h-100  rounded-lg">
             <img class="right" src="/assets/images/top-of-the-poops-cso-2023-web-fs8.png"/>
@@ -73,7 +73,7 @@
         </div>
     </div>
 
-    <div style="width: 526px; height:263px; overflow: clip" id="beaches-2023"
+    <div style="width: 526px; height:263px; overflow: clip" id="beaches-2024"
          class="twitter-badge mb-2">
         <div class="card  h-100  rounded-lg">
             <img class="poop" src="/assets/poop.png"/>
@@ -159,7 +159,7 @@
     const beaches = await fetch("/data/v1/{{year}}/spills-by-beach.json");
     const countries = await fetch("/data/v1/{{year}}/geo/countries.json")
     if (beaches.ok && countries.ok) {
-        document.getElementById("beaches-2023")
+        document.getElementById("beaches-2024")
                 .querySelector(".card")
                 .insertAdjacentElement(
                 "afterbegin",

@@ -64,6 +64,8 @@ class ThamesWaterSummary(val thamesWater: ThamesWater) : HttpHandler {
     }
 }
 
+private val THAMES_WATER_LIVE_DATA_START = LocalDate.parse("2023-01-01")
+
 class ThamesWaterConstituencyEvents(val clock: Clock, val thamesWater: ThamesWater) : HttpHandler {
 
     val response = TotpJson.autoBody<List<ThamesWater.Thing>>().toLens()
@@ -72,7 +74,7 @@ class ThamesWaterConstituencyEvents(val clock: Clock, val thamesWater: ThamesWat
 
     override fun invoke(request: Request): Response {
         val now = clock.instant()
-        val since = sinceDate(request) ?: LocalDate.parse("2023-01-01")
+        val since = sinceDate(request) ?: THAMES_WATER_LIVE_DATA_START
 
         val constituencyName = slugToConstituency[constituency(request)] ?: return Response(Status.NOT_FOUND)
 
@@ -99,7 +101,7 @@ class EnvironmentAgencyRainfall(val clock: Clock, val environmentAgency: Environ
 
     override fun invoke(request: Request): Response {
         val now = clock.instant()
-        val since = sinceDate(request) ?: LocalDate.parse("2023-01-01")
+        val since = sinceDate(request) ?: THAMES_WATER_LIVE_DATA_START
 
         val constituencyName = slugToConstituency[constituency(request)] ?: return Response(Status.NOT_FOUND)
 
