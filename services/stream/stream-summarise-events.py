@@ -11,6 +11,7 @@ from statemachine import statemachine, State
 
 from event_calendar import CSOState, state_name_to_cso_state, StreamMonitorState, Calendar
 from psy import select_many
+from services.stream.streamdb import Database
 from stream import EventType
 from streamdb import StreamEvent
 
@@ -132,18 +133,23 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     start_date = datetime.date.fromisoformat("2024-12-01")
-    now = datetime.datetime.now(tz=datetime.UTC)
 
     db_host = os.environ.get("DB_HOST", "localhost")
 
     with psycopg2.connect(host=db_host, database="gis", user="docker", password="docker",
                           cursor_factory=DictCursor) as conn:
 
+        streamdb = Database(connection=conn)
+
         print(">> Aggregating...")
         cl = aggregate_stream_events(connection=conn, start_date=start_date)
 
+        recent = streamdb.most_recent()
+
+        print(f">> Most recent file: {recent}")
+
         print(">> Updating Summary...")
-        for cso_id, calendar in cl.things_at(now):
+        for cso_id, calendar in cl.things_at(recent):
             insert_stream_summary(conn, cso_id, calendar)
 
     if args.state:

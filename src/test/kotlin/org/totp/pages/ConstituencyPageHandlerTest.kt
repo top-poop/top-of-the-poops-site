@@ -70,6 +70,8 @@ class ConstituencyPageHandlerTest {
                 )
             },
             constituencyRivers = { listOf(aRiver(1)) },
+            constituencyLiveTotals = { _, _, _ -> Duration.ofHours(10) },
+            liveDataLatest = clock::instant,
         )
     )
 

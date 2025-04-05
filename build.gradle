@@ -60,7 +60,7 @@ dependencies {
     testImplementation "org.http4k:http4k-testing-strikt"
     testImplementation "org.jsoup:jsoup:1.15.4"
 
-    implementation 'org.postgresql:postgresql:42.7.2'
+    implementation 'org.postgresql:postgresql:42.7.5'
     implementation "com.zaxxer:HikariCP:5.0.0"
 }
 

@@ -15,10 +15,7 @@ import org.totp.model.PageViewModel
 import org.totp.model.data.*
 import org.totp.text.csv.readCSV
 import java.text.NumberFormat
-import java.time.Clock
-import java.time.Duration
-import java.time.LocalDate
-import java.time.ZoneId
+import java.time.*
 
 
 val constituencyNames = readCSV(
@@ -76,7 +73,10 @@ data class SocialShare(
 
 data class ConstituencyPageLiveData(
     val csoUri: Uri,
-    val rainfallUri: Uri
+    val rainfallUri: Uri,
+    val duration: RenderableDuration,
+    val year: Int,
+    val latest: LocalDateTime
 )
 
 data class RenderableCSO(
@@ -193,6 +193,8 @@ object ConstituencyPageHandler {
         constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
         constituencyRank: (ConstituencyName) -> ConstituencyRank?,
         constituencyRivers: (ConstituencyName) -> List<RiverRank>,
+        constituencyLiveTotals: (ConstituencyName, LocalDate, LocalDate) -> Duration,
+        liveDataLatest: () -> Instant,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -248,10 +250,7 @@ object ConstituencyPageHandler {
                                 mp?.let { mp ->
                                     SocialShare(
                                         pageUriFrom(request),
-                                        text = null?.let { handle ->
-                                            "Hey ${handle}! What are you doing about the $formattedHours hours of sewage pollution in $constituencyName"
-                                        }
-                                            ?: "Hey ${mp.name}! What are you doing about the $formattedHours hours of sewage pollution in $constituencyName",
+                                        text = "Hey ${mp.name}! What are you doing about the $formattedHours hours of sewage pollution in $constituencyName",
                                         cta = "Tell ${mp.name} what you think",
                                         tags = listOf("sewage"),
                                         via = "sewageuk",
@@ -272,8 +271,16 @@ object ConstituencyPageHandler {
                                 },
                                 renderableConstituencies,
                                 live = if (liveAvailable.contains(constituencyName)) {
+                                    val now = LocalDateTime.ofInstant(clock.instant(), ZoneId.of("Europe/London"))
                                     ConstituencyPageLiveData(
-                                        csoUri = Uri.of("/live/thames-water/events/constituency/$slug")
+                                        latest = LocalDateTime.ofInstant(liveDataLatest(), ZoneId.of("Europe/London")),
+                                        year = now.year,
+                                        duration = constituencyLiveTotals(
+                                            constituencyName,
+                                            LocalDate.of(now.year, 1, 1),
+                                            now.toLocalDate()
+                                        ).toRenderable(),
+                                        csoUri = Uri.of("/live/stream/events/constituency/$slug")
                                             .query("since", liveDataStart.toString()),
                                         rainfallUri = Uri.of("/live/environment-agency/rainfall/$slug")
                                             .query("since", liveDataStart.toString()),

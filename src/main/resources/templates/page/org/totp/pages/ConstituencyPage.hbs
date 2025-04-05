@@ -26,7 +26,11 @@
 
 {{#> components/jumbotron }}
     {{ constituency.name }} was polluted by sewage {{numberFormat summary.count.count}} times in {{summary.year}}
-    <br/>lasting {{numberFormat summary.duration.hours}} hours {{#gt summary.duration.years 1}}- that's {{numberFormat summary.duration.years}} years! {{/gt}}{{#if summary.zeroReportingCount gt 0}}<br/> - but monitoring was disabled in some locations, so could be more{{else if summary.lowReportingCount gt 0}}<br/> - but monitoring fell below 50% in some locations so could be more{{/if}}
+    <br/>lasting {{numberFormat summary.duration.hours}} hours {{#gt summary.duration.years 1}}
+        - that's {{numberFormat summary.duration.years}} years! {{/gt}}{{#if summary.zeroReportingCount gt 0}}
+        <br/> - but monitoring was disabled in some locations, so could be
+        more{{else if summary.lowReportingCount gt 0}}
+        <br/> - but monitoring fell below 50% in some locations so could be more{{/if}}
 {{/components/jumbotron}}
 
 
@@ -56,7 +60,10 @@
                             </select>
                             <script>
                                 document.getElementById("constituency-select")
-                                        .onchange = (e) => { window.location = e.target.value; return false; }
+                                        .onchange = (e) => {
+                                    window.location = e.target.value;
+                                    return false;
+                                }
                             </script>
                             <div class="form-text">Select the constituency from the drop-down</div>
                             <div class="form-text">✔ means we have experimental daily data since 2023</div>
@@ -64,10 +71,27 @@
                     </form>
                 </div>
             </div>
+
+            {{#if live }}
+            <div class="row">
+                <div class="col">
+                    <div class="card border-primary mt-3 mb-3">
+                        <div class="card-header bg-primary text-white">Live data for {{ constituency.name }} in {{live.year}}</div>
+                        <div class="card-body">
+                            <div class="card-text">
+                                So far this year (as of {{dateFormat live.latest time='short' date='short'}}) there has been <span class="spill-hours">{{numberFormat live.duration.hours}} hours </span> of sewage overflows{{#gt summary.duration.years 1}}
+                                - that's {{numberFormat live.duration.years}} years!{{/gt}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+
             <div class="row">
                 <div class="col">
                     <div class="card  mb-3">
-                        <div class="card-header">Totals for {{ constituency.name }} in {{summary.year}}</div>
+                        <div class="card-header bg-primary text-white">Totals for {{ constituency.name }} in {{summary.year}}</div>
                         <div class="card-body">
                             <h5 class="card-title">{{summary.locationCount}} Sites polluted by {{join summary.companies ', '}}</h5>
                             <div class="card-text">
@@ -87,19 +111,21 @@
             <div class="row">
                 <div class="col">
                     <div class="card  mb-3">
-                        <div class="card-header">Change Over Time</div>
-                        <div class="card-body" style="height: 120px;" id="comparison" data-uri="/data-new/constituency/{{constituency.slug}}/annual-pollution"></div>
+                        <div class="card-header bg-primary text-white">Change Over Time</div>
+                        <div class="card-body" style="height: 120px;" id="comparison"
+                             data-uri="/data-new/constituency/{{constituency.slug}}/annual-pollution"></div>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
                     <div class="card  mb-3">
-                        <div class="card-header">Take Action</div>
+                        <div class="card-header bg-primary text-white">Take Action</div>
                         <div class="card-body">
                             <div class="card-text">
 
-                                Your local MP is <a href="{{mp.uri}}">{{mp.name}}</a> ({{mp.party}}) - Find out more about their interests, donors, and voting at <a href="{{mp.uri}}">They Work For You</a>
+                                Your local MP is <a href="{{mp.uri}}">{{mp.name}}</a> ({{mp.party}}) - Find out more
+                                about their interests, donors, and voting at <a href="{{mp.uri}}">They Work For You</a>
 
                                 <br/><br/>
 
@@ -113,13 +139,13 @@
             <div class="row">
                 <div class="col">
                     <div class="card  mb-3">
-                        <div class="card-header">Constituencies near {{constituency.name}}</div>
+                        <div class="card-header bg-primary text-white">Constituencies near {{constituency.name}}</div>
                         <div class="card-body">
                             <div class="card-text">
                                 {{#each neighbours}}
                                     <a href="{{this.constituency.uri}}">
-                                        <button class="btn btn-primary mb-2">
-                                            {{this.constituency.name}}<span class="badge bg-dark ms-1">{{numberFormat
+                                        <button class="btn btn-outline-secondary mb-2">
+                                            {{this.constituency.name}}<span class="badge bg-secondary ms-1">{{numberFormat
                                                 this.count.count}}</span>
                                         </button>
                                     </a>
@@ -130,25 +156,24 @@
                 </div>
             </div>
             {{#if rivers }}
-            <div class="row">
-                <div class="col">
-                    <div class="card  mb-3">
-                        <div class="card-header">Waterways in {{constituency.name}}</div>
-                        <div class="card-body">
-                            <div class="card-text">
-                                {{#each rivers}}
-                                    <a href="{{this.river.uri}}">
-                                        <button class="btn btn-primary mb-2">
-                                            {{this.river.name}}<span class="badge bg-dark ms-1">{{numberFormat
-                                                this.count.count}}</span>
-                                        </button>
-                                    </a>
-                                {{/each}}
+                <div class="row">
+                    <div class="col">
+                        <div class="card  mb-3">
+                            <div class="card-header bg-primary text-white">Waterways in {{constituency.name}}</div>
+                            <div class="card-body">
+                                <div class="card-text">
+                                    {{#each rivers}}
+                                        <a href="{{this.river.uri}}">
+                                            <button class="btn btn-outline-secondary mb-2">
+                                                {{this.river.name}}<span class="badge bg-secondary ms-1">{{numberFormat this.count.count}}</span>
+                                            </button>
+                                        </a>
+                                    {{/each}}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
             {{/if}}
         </div>
     </div>
@@ -159,8 +184,12 @@
         <div class="row">
             <div class="col">
                 <div class="card">
-                    <div class="card-header">Daily Data</div>
+                    <div class="card-header bg-primary text-white">Daily Data</div>
                     <div class="card-body">
+                        <div>We get information about overflowing CSOs since January 2025. Here is a chart of the last three months of data for {{constituency.name}}, here you can see overflows in red, the darker the red,
+                        the more the CSO overflowed that day.</div>
+                        <div>Each CSO has a row, the most recent data is on the right hand side.</div>
+
                         <div class="plot-live observable-plot-container"
                              id="live-data"
                              cso-data-uri="{{live.csoUri}}"
@@ -190,8 +219,10 @@
                     Sometimes sewage can be being dumped for <b>months</b> at a time.</p>
 
                 <p>Reporting refers to how much of the time the monitoring was active.
-                    In this constituency {{summary.lowReportingCount}} of the total {{summary.csoCount}} CSO locations had reporting enabled for less than
-                half the year, of which <strong>{{summary.zeroReportingCount}}</strong> had <em>zero</em> reporting.</p>
+                    In this constituency {{summary.lowReportingCount}} of the total {{summary.csoCount}} CSO locations
+                    had reporting enabled for less than
+                    half the year, of which <strong>{{summary.zeroReportingCount}}</strong> had <em>zero</em> reporting.
+                </p>
 
                 <div class="table-responsive">
                     <table id="table-csos" class="table table-spills table-striped">
@@ -221,7 +252,8 @@
                                         this.count.count}}</td>
                                 <td class="align-middle" data-duration="{{this.duration.hours}}">{{numberFormat
                                         this.duration.hours}}</td>
-                                <td class="align-middle" data-reporting="{{this.reporting}}">{{numberFormat this.reporting}}</td>
+                                <td class="align-middle" data-reporting="{{this.reporting}}">{{numberFormat
+                                        this.reporting}}</td>
                             </tr>
                         {{/each}}
                         </tbody>
@@ -252,7 +284,7 @@
                     {
                         width: width,
                         height: height,
-                        x: {grid: false, domain: [2020, 2021, 2022, 2023,2024], tickFormat: ""},
+                        x: {grid: false, domain: [2020, 2021, 2022, 2023, 2024], tickFormat: ""},
                         y: {grid: false, zero: true},
                         marginLeft: 50,
                         insetLeft: -50,
@@ -337,10 +369,9 @@
     const markerGrey = markerIcon("grey")
 
     const durationIcon = (n, r) => {
-        if ( r < 0.5 ) {
+        if (r < 0.5) {
             return markerGrey
-        }
-        else {
+        } else {
             return n > 700 ? markerRed : markerBlue;
         }
     }
@@ -370,10 +401,10 @@
             })
             .forEach(it => {
                 L.marker(
-                    [it.lat, it.lon],
+                        [it.lat, it.lon],
                         {icon: durationIcon(it.duration, it.reporting)}
                 ).bindTooltip(
-                        `${it.sitename}<br/>${it.waterway}<br/>${formatNumber(it.count)} Dumps / ${formatNumber(it.duration)} hours by ${it.company}<br/>Reporting was ${formatNumber(it.reporting,2)}%`
+                        `${it.sitename}<br/>${it.waterway}<br/>${formatNumber(it.count)} Dumps / ${formatNumber(it.duration)} hours by ${it.company}<br/>Reporting was ${formatNumber(it.reporting, 2)}%`
                 ).addTo(map)
             })
 </script>
@@ -392,21 +423,6 @@
     <script type="module">
 
         import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
-
-        const tt_map = {
-            "a": "Monitoring Online",
-            "z": "Monitoring Offline",
-            "o": "Sewage Overflowing",
-            "p": "Potentially Overflowing",
-            "u": "Unknown"
-        }
-
-        const tt_text = (date, domain) => {
-            const [c, v, _] = domain.split("-")
-            const t = tt_map[c]
-
-            return `${date}: ${t} up to ${v} hours`
-        }
 
         const colours = {
             domain: [
@@ -434,93 +450,32 @@
         const LiveDataHorizontalPlot = (data) => {
 
             const count = new Set(data.cso.map(it => it.p)).size + 1
-            data.rainfall.forEach( it => it.d = new Date(it.d))
-            data.cso.forEach( it => it.d = new Date(it.d))
+            const dates = new Array(...new Set(data.cso.map(it => it.d)))
+
+            data.rainfall.forEach(it => it.d = new Date(it.d))
+            data.cso.forEach(it => it.d = new Date(it.d))
 
             return Plot.plot({
-                marginLeft: 150,
-                width: Math.max(1150, vw - 50),
-                height: (20 * count) + 60,
                 color: colours,
-                x: {
-                    type: "band",
-                    padding: 0.1,
-                    grid: false,
-                },
-                y: {
-                    grid: false,
-                    label: "",
-                },
+                width: Math.max(1150, vw - 50),
+                height: (5 * count+ 50),
+                x: {axis: null},
+                y: {axis: null},
                 marks: [
-                    Plot.axisX({ticks: "year", tickSize: 28, tickPadding: -11, tickFormat: "  %Y", textAnchor: "start"}),
-                    Plot.axisX({ticks: "week", tickSize: 16, tickPadding: -11, tickFormat: "  %b %d", textAnchor: "start"}),
-                    Plot.cell(
-                            data.rainfall,
-                            {
-                                x: d => d.d,
-                                y: d => " Rainfall (mm)", //space -> will come first
-                                fill: "r",
-                                title: d => `${d.d.toLocaleDateString()} - ${d.c} mm (75th percentile from ${d.n} nearby stations)`
-                            }
-                    ),
-
-                    Plot.cell(
+                    Plot.raster(
                             data.cso,
                             {
-                                x: d => d.d,
-                                y: "p",
-                                fill: "a",
-                                title: d => tt_text(d.d.toLocaleDateString(), d.a)
+                                width: dates.length,
+                                height: count,
+                                fill: 'a',
                             }
                     ),
+                    Plot.axisX({ ticks: 8, label: "Date", tickFormat: (i) => {
+                            return data.cso[i].d.toLocaleDateString();
+                        }
+                    })
                 ]
-            })
-        };
-
-        const LiveDataVerticalPlot = (data) => {
-            const dates = new Array(...new Set(data.cso.map(it => it.d))).map(it => new Date(it))
-
-            return Plot.plot({
-                marginTop: 200,
-                marginLeft: 100,
-                marginBottom: 30,
-                width: Math.max(1150, vw - 50),
-                height: (20 * dates.length) + 90,
-                color: colours,
-                y: {
-                    type: "band",
-                    ticks: dates.filter((d, i) => i % 30 === 0),
-                    grid: false,
-                    reverse: true,
-                },
-                x: {
-                    axis: "top",
-                    grid: false,
-                    label: "",
-                    tickRotate: 45,
-                    padding: 0.3,
-                },
-                marks: [
-                    Plot.cell(
-                            data.rainfall,
-                            {
-                                y: d => new Date(d.d),
-                                x: d => " Rainfall (mm)", //space -> will come first
-                                fill: "r",
-                                title: d => `${d.c} mm (75th percentile from ${d.n} nearby stations)`
-                            }
-                    ),
-                    Plot.cell(
-                            data.cso,
-                            {
-                                y: d => new Date(d.d),
-                                x: "p",
-                                fill: "a",
-                                title: d => tt_text(d.d, d.a)
-                            }
-                    ),
-                ]
-            })
+            });
         };
 
         const height = window.innerHeight
@@ -531,18 +486,15 @@
         const rainfall_data = await fetch(element.attributes["rainfall-data-uri"].value);
         if (cso_data.ok) {
 
+            const rainfall = await (rainfall_data.ok ? rainfall_data.json() : Promise.resolve([]))
+
             const data = {
                 "cso": await (cso_data.json()),
-                "rainfall": await (rainfall_data.json()),
+                "rainfall": rainfall,
             }
 
-            if (height > (width * 1.4)) {
-                element.appendChild(LiveDataVerticalPlot(data));
-                element.classList.add("vertical")
-            } else {
-                element.appendChild(LiveDataHorizontalPlot(data))
-                element.classList.add("horizontal")
-            }
+            element.appendChild(LiveDataHorizontalPlot(data))
+            element.classList.add("horizontal")
         }
     </script>
 {{/if}}

@@ -67,6 +67,16 @@ class Database:
                                     file_time=row["file_time"])
                                 ))
 
+    def most_recent(self) -> datetime.datetime:
+        return select_one(connection=self.connection, sql="""
+select f.stream_file_id, file_time, process_time
+from stream_files f
+join stream_files_processed fp on f.stream_file_id = fp.stream_file_id
+order by f.file_time desc
+limit 10
+        """,
+                          f=lambda r: r["file_time"])
+
     def create_file(self, company: WaterCompany, file_time: datetime.datetime) -> StreamFile:
         with self.connection.cursor() as cursor:
             cursor.execute("""

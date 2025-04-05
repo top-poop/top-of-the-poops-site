@@ -1,11 +1,18 @@
 package org.totp.db
 
+import org.http4k.events.Event
+import org.http4k.events.Events
 import org.totp.model.data.CompanyName
+import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
+import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 
-class StreamData(private val connection: WithConnection) {
+class StreamData(private val events: Events, private val connection: WithConnection) {
 
     enum class StreamEvent(val dbName: String) {
         Start("Start"),
@@ -113,4 +120,119 @@ order by m.stream_company, m.stream_id
         })
     }
 
+    fun latestAvailable(): Instant {
+        return connection.execute(NamedQueryBlock("stream-have-live-data") {
+            query(
+                sql = """
+select f.stream_file_id, file_time, process_time
+from stream_files f
+join stream_files_processed fp on f.stream_file_id = fp.stream_file_id
+order by f.file_time desc
+limit 1                    
+                """.trimIndent(),
+                mapper = {
+                    it.get("file_time")
+                }
+            ).first()
+        })
+    }
+
+    fun haveLiveDataFor(): Set<ConstituencyName> {
+        return connection.execute(NamedQueryBlock("stream-have-live-data") {
+            query(
+                sql = """
+select distinct pcon24nm
+from grid_references
+join stream_cso_grid on stream_cso_grid.grid_reference = grid_references.grid_reference
+order by pcon24nm;                    
+                """.trimIndent(),
+                mapper = {
+                    it.get(ConstituencyName, "pcon24nm")
+                }
+            ).toSet()
+        })
+    }
+
+    fun totalForConstituency(constituencyName: ConstituencyName, startDate: LocalDate, endDate: LocalDate): Duration {
+        return connection.execute(NamedQueryBlock("stream-live-events") {
+            query(
+                sql = """
+select grid_references.pcon24nm, extract(epoch from sum(start)) as overflowing
+from stream_summary
+         join stream_cso on stream_cso.stream_cso_id = stream_summary.stream_cso_id
+         join stream_cso_grid on stream_cso.stream_cso_id = stream_cso_grid.stream_cso_id
+         join grid_references on stream_cso_grid.grid_reference = grid_references.grid_reference
+where grid_references.pcon24nm = ? and date >= ? and date <= ?
+group by grid_references.pcon24nm
+                """.trimIndent(),
+                bind = {
+                    it.set(1, constituencyName)
+                    it.set(2, startDate)
+                    it.set(3, endDate)
+                },
+                mapper = {
+                    Duration.ofSeconds(it.getLong("overflowing"))
+                }
+            )
+        }).first()
+
+    }
+
+    data class ConstituencyEventMetrics(
+        val constituencyName: ConstituencyName,
+        val startDate: LocalDate,
+        val endDate: LocalDate,
+        val count: Int
+    ) : Event
+
+    fun eventSummaryForConstituency(
+        constituencyName: ConstituencyName,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): List<Thing> {
+        var counter = 0
+        return connection.execute(NamedQueryBlock("stream-live-events") {
+            query(
+                sql = """
+select stream_id,
+       date,
+       extract(epoch from stop) as stop,
+       extract(epoch from offline) as offline,
+       extract(epoch from start) as start,
+       extract(epoch from unknown) as unknown,
+       extract(epoch from potential_start) as potential_start
+from stream_summary
+join stream_cso on stream_cso.stream_cso_id = stream_summary.stream_cso_id
+join stream_cso_grid on stream_cso.stream_cso_id = stream_cso_grid.stream_cso_id
+join grid_references on stream_cso_grid.grid_reference = grid_references.grid_reference
+where grid_references.pcon24nm = ? and date >= ? and date <= ?
+order by stream_id, date;
+                """.trimIndent(),
+                bind = {
+                    it.set(1, constituencyName)
+                    it.set(2, startDate)
+                    it.set(3, endDate)
+                },
+                mapper = {
+                    counter++
+                    Thing(
+                        p = it.getString("stream_id"),
+                        cid = it.getString("stream_id"),
+                        d = it.getDate("date").toLocalDate(),
+                        a = codeFrom(
+                            Bucket(
+                                online = it.getInt("stop"),
+                                offline = it.getInt("offline"),
+                                overflowing = it.getInt("start"),
+                                unknown = it.getInt("unknown"),
+                                potentially_overflowing = it.getInt("potential_start"),
+                            )
+                        )
+                    )
+                }
+            )
+        }).also {
+            events(ConstituencyEventMetrics(constituencyName, startDate, endDate, counter))
+        }
+    }
 }

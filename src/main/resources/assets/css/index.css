@@ -96,6 +96,12 @@ table.table-spills tbody td {
     font-weight: bold;
 }
 
+.spill-hours {
+    font-weight: bolder;
+}
+
+
+
 .m4cw  a:link {
     text-decoration: none;
 }

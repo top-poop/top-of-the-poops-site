@@ -6,6 +6,7 @@ import dev.forkhandles.values.Value
 import dev.forkhandles.values.ValueFactory
 import org.http4k.events.Event
 import org.http4k.events.Events
+import org.postgresql.util.PGInterval
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.sql.*
@@ -13,6 +14,9 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
 import javax.sql.DataSource
 
@@ -146,6 +150,11 @@ inline fun <reified T : Value<BigInteger>> ResultSet.get(vf: ValueFactory<T, Big
 @JvmName("getLocalDateValue")
 inline fun <reified T : Value<LocalDate>> ResultSet.get(vf: ValueFactory<T, LocalDate>, n: String): T {
     return vf.of(getDate(n).toLocalDate())
+}
+
+@JvmName("getInstant")
+fun ResultSet.get(n: String): Instant {
+    return getObject(n, OffsetDateTime::class.java).toInstant()
 }
 
 fun PreparedStatement.set(n: Int, s: String?) {

@@ -6,10 +6,7 @@ import dev.forkhandles.values.minValue
 import org.http4k.core.*
 import org.http4k.filter.MaxAgeTtl
 import org.http4k.lens.*
-import org.totp.db.DurationUnit
-import org.totp.db.EnvironmentAgency
-import org.totp.db.StreamData
-import org.totp.db.ThamesWater
+import org.totp.db.*
 import org.totp.model.data.ConstituencySlug
 import org.totp.model.data.TotpJson
 import org.totp.pages.slugToConstituency
@@ -23,8 +20,9 @@ class TimestampMillis private constructor(value: Long) : LongValue(value) {
     }
 }
 
+val cacheControl = Header.required("Cache-Control")
+
 class StreamOverflowingByDate(val clock: Clock, val streamData: StreamData) : HttpHandler {
-    val cache = Header.required("Cache-Control")
 
     val epochms = Path.value(TimestampMillis).of("epochms")
 
@@ -49,7 +47,7 @@ class StreamOverflowingByDate(val clock: Clock, val streamData: StreamData) : Ht
         } else {
             Response(Status.OK).with(
                 response of streamData.overflowingAt(truncated),
-                cache of listOf("public", maxAge.toHeaderValue()).joinToString(",")
+                cacheControl of listOf("public", maxAge.toHeaderValue()).joinToString(",")
             )
         }
     }
@@ -65,31 +63,35 @@ class ThamesWaterSummary(val thamesWater: ThamesWater) : HttpHandler {
 }
 
 private val THAMES_WATER_LIVE_DATA_START = LocalDate.parse("2023-01-01")
+private val STREAM_LIVE_DATA_START = LocalDate.parse("2025-01-01")
 
-class ThamesWaterConstituencyEvents(val clock: Clock, val thamesWater: ThamesWater) : HttpHandler {
+class StreamConstituencyEvents(val clock: Clock, val streamData: StreamData) : HttpHandler {
 
-    val response = TotpJson.autoBody<List<ThamesWater.Thing>>().toLens()
+    val response = TotpJson.autoBody<List<Thing>>().toLens()
     val constituency = Path.value(ConstituencySlug).of("constituency")
     val sinceDate = Query.localDate().optional("since")
 
     override fun invoke(request: Request): Response {
         val now = clock.instant()
-        val since = sinceDate(request) ?: THAMES_WATER_LIVE_DATA_START
+        val since = sinceDate(request) ?: STREAM_LIVE_DATA_START
 
         val constituencyName = slugToConstituency[constituency(request)] ?: return Response(Status.NOT_FOUND)
 
         val today = LocalDate.ofInstant(now, ZoneId.of("UTC"))
-        val events = thamesWater.eventSummaryForConstituency(
+
+
+        val events = streamData.eventSummaryForConstituency(
             constituencyName = constituencyName,
             startDate = since,
             endDate = today
         )
+
         return when {
             events.isEmpty() -> Response(Status.NOT_FOUND)
             else -> Response(Status.OK).with(
                 response of events
             )
-        }
+        }.with(cacheControl of listOf("public", MaxAgeTtl(Duration.ofMinutes(5)).toHeaderValue()).joinToString(","))
     }
 }
 

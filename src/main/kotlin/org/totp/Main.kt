@@ -10,7 +10,6 @@ import org.http4k.events.EventFilters
 import org.http4k.events.then
 import org.http4k.filter.*
 import org.http4k.filter.ClientFilters.SetBaseUriFrom
-import org.http4k.format.Jackson
 import org.http4k.lens.*
 import org.http4k.lens.Header.LOCATION
 import org.http4k.routing.ResourceLoader
@@ -141,7 +140,7 @@ fun main() {
             .then(EventFilters.AddEventName())
             .then(EventFilters.AddZipkinTraces())
             .then(EventFilters.AddServiceName("pages"))
-            .then(AutoMarshallingEvents(Jackson))
+            .then(AutoMarshallingEvents(TotpJson))
 
     val renderer = Resources.templates(devMode = isDevelopmentEnvironment)
 
@@ -196,7 +195,7 @@ fun main() {
 
     val thamesWater = ThamesWater(connection)
 
-    val stream = StreamData(connection)
+    val stream = StreamData(events, connection)
     val environmentAgency = EnvironmentAgency(connection)
 
     val server = Undertow(port = port(environment)).toServer(
@@ -258,11 +257,13 @@ fun main() {
                                 renderer = renderer,
                                 constituencySpills = constituencyCSOs(allSpills),
                                 constituencyBoundary = constituencyBoundaries,
-                                constituencyLiveAvailable = memoize(thamesWater::haveLiveDataFor),
+                                constituencyLiveAvailable = memoize(stream::haveLiveDataFor),
+                                constituencyLiveTotals = stream::totalForConstituency,
                                 mpFor = mpFor,
                                 constituencyNeighbours = ConstituencyNeighbours(annualData),
                                 constituencyRank = constituencyRank,
                                 constituencyRivers = constituencyRivers(allSpills, riverRankings),
+                                liveDataLatest = stream::latestAvailable
                             ),
                             "/company/{company}" bind CompanyPageHandler(
                                 renderer = renderer,
@@ -323,10 +324,10 @@ fun main() {
             "/live" bind routes(
                 "/stream" bind routes(
                     "/overflowing/{epochms}" bind StreamOverflowingByDate(clock, stream),
+                    "/events/constituency/{constituency}" bind StreamConstituencyEvents(clock, stream),
                 ),
                 "/thames-water" bind routes(
                     "/overflow-summary" bind ThamesWaterSummary(thamesWater),
-                    "/events/constituency/{constituency}" bind ThamesWaterConstituencyEvents(clock, thamesWater),
                 ),
                 "/environment-agency" bind routes(
                     "/rainfall/{constituency}" bind EnvironmentAgencyRainfall(clock, environmentAgency),
