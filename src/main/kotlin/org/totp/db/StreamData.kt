@@ -1,16 +1,22 @@
 package org.totp.db
 
+import dev.forkhandles.values.StringValue
+import dev.forkhandles.values.StringValueFactory
 import org.http4k.events.Event
 import org.http4k.events.Events
+import org.totp.db.NamedQueryBlock.Companion.block
+import org.totp.db.ThamesWater.DatedOverflow
 import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
+import org.totp.model.data.StreamCompanyName
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZonedDateTime
 
+class StreamId(value: String) : StringValue(value) {
+    companion object : StringValueFactory<StreamId>(::StreamId)
+}
 
 class StreamData(private val events: Events, private val connection: WithConnection) {
 
@@ -21,9 +27,10 @@ class StreamData(private val events: Events, private val connection: WithConnect
     }
 
     data class StreamCSOLiveOverflow(
+        val id: StreamId,
         val company: CompanyName,
+        val pcon24nm: ConstituencyName,
         val started: Instant,
-        val id: String,
         val loc: Coordinates,
     )
 
@@ -96,8 +103,10 @@ WITH ranked_events AS (
         stream_cso_event as e
     where e.event_time <= ?
 )
-SELECT m.stream_company, m.stream_id, m.lat, m.lon, e.event, e.event_time, e.update_time
+SELECT gr.pcon24nm, m.stream_company, m.stream_id, m.lat, m.lon, e.event, e.event_time, e.update_time
 FROM stream_cso m
+         join stream_cso_grid sg on m.stream_cso_id = sg.stream_cso_id
+         join grid_references gr on sg.grid_reference = gr.grid_reference
          JOIN ranked_events e ON m.stream_cso_id = e.stream_cso_id AND e.rnk = 1
 where event = 'Start' 
 order by m.stream_company, m.stream_id
@@ -107,8 +116,9 @@ order by m.stream_company, m.stream_id
                 },
                 mapper = {
                     StreamCSOLiveOverflow(
-                        id = it.getString("stream_id"),
-                        company = it.get(CompanyName, "stream_company"),
+                        id = it.get(StreamId, "stream_id"),
+                        pcon24nm = it.get(ConstituencyName, "pcon24nm"),
+                        company = it.get(StreamCompanyName, "stream_company").asCompanyName() ?: CompanyName("unknown"),
                         started = it.getTimestamp("event_time").toInstant(),
                         loc = Coordinates(
                             lat = it.getFloat("lat"),
@@ -137,7 +147,20 @@ limit 1
         })
     }
 
-    fun haveLiveDataFor(): Set<ConstituencyName> {
+    fun haveLiveDataForCompanies(): Set<StreamCompanyName> {
+        return connection.execute(NamedQueryBlock("stream-have-live-data") {
+            query(
+                sql = """
+select distinct stream_company from stream_cso                    
+                """.trimIndent(),
+                mapper = {
+                    StreamCompanyName.of(it.getString("stream_company"))
+                }
+            ).toSet()
+        })
+    }
+
+    fun haveLiveDataForConstituencies(): Set<ConstituencyName> {
         return connection.execute(NamedQueryBlock("stream-have-live-data") {
             query(
                 sql = """
@@ -176,6 +199,37 @@ group by grid_references.pcon24nm
             )
         }).first()
 
+    }
+
+    fun infrastructureSummary(company: StreamCompanyName): List<DatedOverflow> {
+        return connection.execute(block("infrastructureSummary") {
+            query(
+                sql = """
+select cso.stream_company, date,
+       count(*) as edm_count,
+       extract(epoch from sum(start)) as overflowingSeconds,
+       count(case when start > interval '30m' then 1 end) as overflowing,
+       count(case when offline > interval '30m' then 1 end) as offline
+from stream_summary ss
+    join stream_cso cso on ss.stream_cso_id = cso.stream_cso_id
+where stream_company = ?
+group by cso.stream_company, date
+order by date
+""",
+                bind = {
+                    it.setString(1, company.value)
+                },
+                mapper = {
+                    DatedOverflow(
+                        it.getDate("date").toLocalDate(),
+                        it.getInt("edm_count"),
+                        it.getInt("overflowing"),
+                        it.getInt("overflowingSeconds"),
+                        it.getInt("offline")
+                    )
+                }
+            )
+        })
     }
 
     data class ConstituencyEventMetrics(

@@ -2,27 +2,24 @@ package org.totp.pages
 
 import org.http4k.core.Method
 import org.http4k.core.Request
-import org.http4k.core.Uri
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
+import org.totp.db.StreamData
+import org.totp.db.StreamId
 import org.totp.model.TotpHandlebars
-import org.totp.model.data.BathingName
-import org.totp.model.data.BathingRank
-import org.totp.model.data.CSO
-import org.totp.model.data.CSOTotals
-import org.totp.model.data.CompanyName
-import org.totp.model.data.ConstituencyName
-import org.totp.model.data.Coordinates
-import org.totp.model.data.WaterwayName
+import org.totp.model.data.*
 import strikt.api.expectThat
 import strikt.assertions.contains
 import strikt.assertions.isEqualTo
 import strikt.assertions.one
 import java.io.File
+import java.time.Clock
 import java.time.Duration
 
 class CompanyPageHandlerTest {
+
+    val clock = Clock.systemUTC()
 
     var summaries = listOf(
         CSOTotals(
@@ -69,7 +66,19 @@ class CompanyPageHandlerTest {
             },
             riverRankings = { listOf(aRiver(1)) },
             csoTotals = { summaries },
-            companyLivedata = { CSOLiveData(overflowing = listOf()) }
+            companyLivedata = {
+                CSOLiveData(
+                    overflowing = listOf(
+                        StreamData.StreamCSOLiveOverflow(
+                            id = StreamId.of("thames-1234"),
+                            company = CompanyName.of("Thames Water"),
+                            pcon24nm = ConstituencyName.of("London"),
+                            started = clock.instant(),
+                            loc = Coordinates(1, 1)
+                        )
+                    )
+                )
+            }
         )
     )
 

@@ -1,5 +1,6 @@
 package org.totp.model.data
 
+import com.google.common.collect.HashBiMap
 import dev.forkhandles.values.ComparableValue
 import dev.forkhandles.values.StringValue
 import dev.forkhandles.values.StringValueFactory
@@ -26,9 +27,36 @@ class WaterwayName(value: String) : StringValue(value), ComparableValue<Waterway
     companion object : StringValueFactory<WaterwayName>(::WaterwayName)
 }
 
+
+private val streamEABiMap = HashBiMap.create(
+    mapOf(
+        StreamCompanyName.of("Anglian") to CompanyName.of("Anglian Water"),
+        StreamCompanyName.of("Northumbrian") to CompanyName.of("Northumbrian Water"),
+        StreamCompanyName.of("SevernTrent") to CompanyName.of("Severn Trent Water"),
+        StreamCompanyName.of("SouthWestWater") to CompanyName.of("South West Water"),
+        StreamCompanyName.of("Southern") to CompanyName.of("Southern Water"),
+        StreamCompanyName.of("ThamesWater") to CompanyName.of("Thames Water"),
+        StreamCompanyName.of("UnitedUtilities") to CompanyName.of("United Utilities"),
+        StreamCompanyName.of("WessexWater") to CompanyName.of("Wessex Water"),
+    )
+)
+
 class CompanyName(value: String) : StringValue(value), ComparableValue<CompanyName, String> {
     companion object : StringValueFactory<CompanyName>(::CompanyName)
+
+    fun asStreamCompanyName(): StreamCompanyName? {
+        return streamEABiMap.inverse()[this]
+    }
 }
+
+class StreamCompanyName(value: String) : StringValue(value), ComparableValue<StreamCompanyName, String> {
+    companion object : StringValueFactory<StreamCompanyName>(::StreamCompanyName)
+
+    fun asCompanyName(): CompanyName? {
+        return streamEABiMap[this]
+    }
+}
+
 
 /** name of a bathing location as given in EDM file */
 class BathingName(value: String) : StringValue(value), ComparableValue<BathingName, String> {

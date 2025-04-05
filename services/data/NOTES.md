@@ -3,6 +3,19 @@
 
 ```bash
 docker service create --name admin --network overlay-net --mount type=bind,source=/data,target=/data ubuntu:noble sleep 3000000
+
+docker exec ...
+
+apt-get install -y lsb-release curl ca-certificates
+install -d /usr/share/postgresql-common/pgdg
+curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail https://www.postgresql.org/media/keys/ACCC4CF8.asc
+
+echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+
+apt update
+
+apt -y install postgresql-client-17
+
 ```
 
 # Backing up to local

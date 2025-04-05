@@ -7,8 +7,11 @@ import org.http4k.core.*
 import org.http4k.filter.MaxAgeTtl
 import org.http4k.lens.*
 import org.totp.db.*
+import org.totp.model.data.CompanySlug
 import org.totp.model.data.ConstituencySlug
 import org.totp.model.data.TotpJson
+import org.totp.model.data.toSlug
+import org.totp.pages.CompanyAnnualSummary
 import org.totp.pages.slugToConstituency
 import java.time.*
 
@@ -64,6 +67,34 @@ class ThamesWaterSummary(val thamesWater: ThamesWater) : HttpHandler {
 
 private val THAMES_WATER_LIVE_DATA_START = LocalDate.parse("2023-01-01")
 private val STREAM_LIVE_DATA_START = LocalDate.parse("2025-01-01")
+
+class StreamSummary(
+    val streamData: StreamData,
+    val companySummaries: () -> List<CompanyAnnualSummary>
+) : HttpHandler {
+
+    val response = TotpJson.autoBody<List<ThamesWater.DatedOverflow>>().toLens()
+    val companySlug = Path.value(CompanySlug).of("company", "The company")
+
+    override fun invoke(request: Request): Response {
+
+        val slug = companySlug(request)
+
+        return companySummaries().filter { it.name.toSlug() == slug }.firstOrNull()?.let { company ->
+            company.name.asStreamCompanyName()?.let { streamCompany ->
+                Response(Status.OK).with(response of streamData.infrastructureSummary(streamCompany)).with(
+                    cacheControl of listOf(
+                        "public",
+                        MaxAgeTtl(Duration.ofMinutes(5)).toHeaderValue()
+                    ).joinToString(",")
+                )
+            }
+        }
+            ?: Response(Status.NOT_FOUND)
+
+    }
+}
+
 
 class StreamConstituencyEvents(val clock: Clock, val streamData: StreamData) : HttpHandler {
 

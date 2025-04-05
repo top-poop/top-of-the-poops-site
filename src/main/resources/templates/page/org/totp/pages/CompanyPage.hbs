@@ -79,6 +79,9 @@
                 <div class="row">
                     <div class="col">
                         <p>Here are the ones that have been overflowing for the longest, without interruption</p>
+                        <p>We are getting more data collated for each of the CSOs... right now we just have the Constituency.
+                            Unfortunately, the water companies use different names for the CSOs in their live data than in the
+                        annual returns, so it will take a bit of time to link all the data up....</p>
                     </div>
                 </div>
 
@@ -86,12 +89,10 @@
                     {{#each (take live.overflowing n=9)}}
                         <div class="col mb-4">
                             <div class="card h-100">
-                                <!-- {{this.permit}} -->
-                                <div class="card-header">{{inc @index}}. {{this.sitename}}</div>
+                                <div class="card-header">{{inc @index}}. {{this.id}}</div>
                                 <div class="events  card-body">
                                     <p class="card-title">
                                         <a href="{{this.constituency.uri}}">{{this.constituency.name}}</a>
-                                        into {{this.waterway.name}}
                                     </p>
                                     <p class="card-text"><small class="text-muted">Started {{ago this.started}}</small>
                                     </p>
@@ -124,7 +125,7 @@
                     <div class="row">
                         <div class="col">
                             <div id="edm-spills" class="plot-chart"
-                                 data-uri="/live/{{company.slug}}/overflow-summary">
+                                 data-uri="/live/stream/company/{{company.slug}}/overflow-summary">
                             </div>
                         </div>
                     </div>

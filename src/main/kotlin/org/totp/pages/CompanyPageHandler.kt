@@ -5,7 +5,7 @@ import org.http4k.lens.Path
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
-import org.totp.db.ThamesWater
+import org.totp.db.StreamData.StreamCSOLiveOverflow
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.*
@@ -14,30 +14,28 @@ import java.time.Duration
 import java.time.Instant
 
 class CSOLiveData(
-    val overflowing: List<ThamesWater.CSOLiveOverflow>
+    val overflowing: List<StreamCSOLiveOverflow>
 )
 
 data class RenderableCSOLiveOverflow(
     val started: Instant,
     val constituency: RenderableConstituency,
-    val waterway: RenderableWaterway,
-    val sitename: String,
-    val permit: String,
+    val id: String,
+    val company: CompanyName,
 )
 
 class RenderableCSOLiveData(
     val overflowing: List<RenderableCSOLiveOverflow>
 ) {
     companion object {
-        fun from(it: CSOLiveData, company: CompanyName): RenderableCSOLiveData {
+        fun from(it: CSOLiveData): RenderableCSOLiveData {
             return RenderableCSOLiveData(
                 overflowing = it.overflowing.map {
                     RenderableCSOLiveOverflow(
                         started = it.started,
                         constituency = it.pcon24nm.toRenderable(),
-                        waterway = it.waterwayName.toRenderable(company),
-                        sitename = it.site_name,
-                        permit = it.permit_id
+                        id = it.id.value,
+                        company = it.company
                     )
                 }
             )
@@ -146,7 +144,7 @@ object CompanyPageHandler {
                             rivers = riverRankings().filter { it.company == company.name }.take(6)
                                 .map { it.toRenderable() },
                             worstCsos = worstCsos,
-                            live = companyLivedata(name)?.let { RenderableCSOLiveData.from(it, company.name) },
+                            live = companyLivedata(name)?.let { RenderableCSOLiveData.from(it) },
                             share = SocialShare(
                                 pageUriFrom(request),
                                 "$name - ${company.handle} - dumped #sewage into rivers,seas & bathing areas ${

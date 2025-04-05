@@ -198,6 +198,8 @@ fun main() {
     val stream = StreamData(events, connection)
     val environmentAgency = EnvironmentAgency(connection)
 
+    val companyAnnualSummaries = memoize(CompanyAnnualSummaries(annualData))
+
     val server = Undertow(port = port(environment)).toServer(
         routes(
             "/" bind Method.GET to inboundFilters.then(
@@ -257,7 +259,7 @@ fun main() {
                                 renderer = renderer,
                                 constituencySpills = constituencyCSOs(allSpills),
                                 constituencyBoundary = constituencyBoundaries,
-                                constituencyLiveAvailable = memoize(stream::haveLiveDataFor),
+                                constituencyLiveAvailable = memoize(stream::haveLiveDataForConstituencies),
                                 constituencyLiveTotals = stream::totalForConstituency,
                                 mpFor = mpFor,
                                 constituencyNeighbours = ConstituencyNeighbours(annualData),
@@ -267,16 +269,15 @@ fun main() {
                             ),
                             "/company/{company}" bind CompanyPageHandler(
                                 renderer = renderer,
-                                companySummaries = CompanyAnnualSummaries(annualData),
+                                companySummaries = companyAnnualSummaries,
                                 waterCompanies = waterCompanies,
                                 riverRankings = riverRankings,
                                 bathingRankings = beachRankings,
                                 csoTotals = allSpills,
                                 companyLivedata =
                                     { name ->
-                                        when (name) {
-                                            CompanyName("Thames Water") -> CSOLiveData(thamesWater.overflowingRightNow())
-                                            else -> null
+                                        name.asStreamCompanyName()?.let {
+                                            CSOLiveData(stream.overflowingAt(clock.instant()).filter { it.company == name })
                                         }
                                     },
                             ),
@@ -303,7 +304,7 @@ fun main() {
                                 ),
                                 "/companies" bind BadgesCompaniesHandler(
                                     renderer = renderer,
-                                    companySummaries = CompanyAnnualSummaries(annualData),
+                                    companySummaries = companyAnnualSummaries,
                                 ),
                                 "/home" bind BadgesHomeHandler(
                                     renderer = renderer,
@@ -325,6 +326,7 @@ fun main() {
                 "/stream" bind routes(
                     "/overflowing/{epochms}" bind StreamOverflowingByDate(clock, stream),
                     "/events/constituency/{constituency}" bind StreamConstituencyEvents(clock, stream),
+                    "/company/{company}/overflow-summary" bind StreamSummary(stream, companyAnnualSummaries)
                 ),
                 "/thames-water" bind routes(
                     "/overflow-summary" bind ThamesWaterSummary(thamesWater),

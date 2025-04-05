@@ -3,6 +3,7 @@ package org.totp.db
 import org.http4k.testing.RecordingEvents
 import org.junit.jupiter.api.Test
 import org.totp.model.data.ConstituencyName
+import org.totp.model.data.StreamCompanyName
 import strikt.api.expectThat
 import strikt.assertions.isGreaterThan
 import strikt.assertions.size
@@ -34,8 +35,18 @@ class StreamDataTest {
     }
 
     @Test
-    fun haveLiveDataFor() {
-        expectThat(stream.haveLiveDataFor()).size.isGreaterThan(1)
+    fun infrastructureSummary() {
+        stream.infrastructureSummary(StreamCompanyName("Anglian"))
+    }
+
+    @Test
+    fun haveLiveDataForConstituencies() {
+        expectThat(stream.haveLiveDataForConstituencies()).size.isGreaterThan(1)
+    }
+
+    @Test
+    fun haveLiveDataForCompanies() {
+        expectThat(stream.haveLiveDataForCompanies()).size.isGreaterThan(1)
     }
 
     @Test
