@@ -90,6 +90,12 @@ $nav-link-font-weight: 500;
 .company-card {
   border-radius: 8px;
 
+  &:hover {
+    img {
+     filter: none;
+    }
+  }
+
   .title {
     color: $primary-500;
   }
