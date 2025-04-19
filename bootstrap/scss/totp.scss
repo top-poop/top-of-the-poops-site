@@ -109,6 +109,7 @@ $nav-link-font-weight: 500;
   img {
     max-height: 150px;
     width: 80%;
+    filter: grayscale(100%);
   }
 
   &:hover {

@@ -8449,7 +8449,8 @@ textarea.form-control-lg {
     height: 100%; }
   .company-card img {
     max-height: 150px;
-    width: 80%; }
+    width: 80%;
+    filter: grayscale(100%); }
   .company-card:hover {
     box-shadow: 2px 4px 8px rgba(159, 159, 125, 0.2), 20px 20px 40px rgba(159, 159, 125, 0.15); }
 
