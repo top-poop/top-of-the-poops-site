@@ -15,9 +15,6 @@
             twitterImageUri=share.twitterImageUri
     }}
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Custom Styles -->
     <style>
         .card {
             transition: all 0.3s ease;
@@ -44,14 +41,19 @@
             Polluted by sewage <span class="badge bg-danger fs-5">{{numberFormat summary.count.count}}</span> times
             in {{summary.year}} - lasting <span class="badge bg-danger fs-5">{{numberFormat summary.duration.hours}}
             hours</span>
+            {{#gt summary.duration.years 1}}
+                - That's <em class="text-danger fw-bold">{{numberFormat summary.duration.years}} years!</em>
+            {{/gt}}
         </p>
-        {{#if summary.zeroReportingCount gt 0}}
-            <p class="lead"><i class="bi bi-exclamation-triangle-fill me-2"></i>Monitoring was disabled in some
-                locations, so could be more</p>
-        {{else if summary.lowReportingCount gt 0}}
-            <p class="lead"><i class="bi bi-exclamation-triangle-fill me-2"></i>Monitoring fell below 50% in some
-                locations so could be more</p>
-        {{/if}}
+        <p class="lead">
+            {{#if summary.zeroReportingCount gt 0}}
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Monitoring was disabled in some locations, so could be more
+            {{else if summary.lowReportingCount gt 0}}
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Monitoring fell below 50% in some locations so could be more
+            {{/if}}
+        </p>
     </div>
 {{/components/jumbotron}}
 
