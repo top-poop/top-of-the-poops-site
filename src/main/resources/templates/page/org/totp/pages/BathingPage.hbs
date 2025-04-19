@@ -17,146 +17,218 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- Custom Styles -->
+    <style>
+        .card {
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .map {
+            min-height: 500px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    </style>
+
 </head>
 <body>
 {{> chunks/navbar }}
 
 {{#> components/jumbotron }}
-    {{ name.value }} polluted by sewage {{numberFormat summary.count.count}} times in {{summary.year}} - lasting
-    {{numberFormat summary.duration.hours}} hours {{#if summary.zeroReportingCount gt 0}}<br/> - but monitoring was disabled in some locations, so could be more{{else if summary.lowReportingCount gt 0}}<br/> - but monitoring fell below 50% in some locations so could be more{{/if}}
+    <div class="text-center">
+        <h1 class="display-4 fw-bold">{{ name.value }}</h1>
+        <p class="lead fs-4">
+            Polluted by sewage <span class="badge bg-danger fs-5">{{numberFormat summary.count.count}}</span> times
+            in {{summary.year}} - lasting <span class="badge bg-danger fs-5">{{numberFormat summary.duration.hours}}
+            hours</span>
+        </p>
+        {{#if summary.zeroReportingCount gt 0}}
+            <p class="lead"><i class="bi bi-exclamation-triangle-fill me-2"></i>Monitoring was disabled in some
+                locations, so could be more</p>
+        {{else if summary.lowReportingCount gt 0}}
+            <p class="lead"><i class="bi bi-exclamation-triangle-fill me-2"></i>Monitoring fell below 50% in some
+                locations so could be more</p>
+        {{/if}}
+    </div>
 {{/components/jumbotron}}
 
 
-<div class="container-fluid">
-    <div class="row">
+<div class="container-fluid py-4">
+    <div class="row g-4">
         <div class="col-md-8">
-            <div id="map" class="map">
-                <div style="display:none" data-map-attribution>
-                    &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors <br/>
-                    Contains OS Data &copy; Crown copyright &amp; database right 2021-2024<br/>
-                    &copy; <a href="https://top-of-the-poops.org">Top of the Poops</a> 2021-2024
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div id="map" class="map">
+                        <div style="display:none" data-map-attribution>
+                            &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors
+                            <br/>
+                            Contains OS Data &copy; Crown copyright &amp; database right 2021-2024<br/>
+                            &copy; <a href="https://top-of-the-poops.org">Top of the Poops</a> 2021-2024
+                        </div>
+                    </div>
+                    {{#each boundaries}}
+                        <div style="display: none" class="map-geojson">{{this}}</div>
+                    {{/each}}
                 </div>
             </div>
-            {{#each boundaries}}
-                <div style="display: none" class="map-geojson">{{this}}</div>
-            {{/each}}
         </div>
-        <div class="col">
-            <div class="row">
-                <div class="col">
-                    <div class="card  mb-3">
-                        <div class="card-header">Totals for {{ name }} in {{summary.year}}</div>
-                        <div class="card-body">
-                            <h5 class="card-title">{{summary.locationCount}} Sites polluted by {{join summary.companies
-                                                                                                      ', '}}</h5>
-                            <div class="card-text">
-                                {{numberFormat summary.count.count}} sewage dumps<br>
-                                <span class="spill-hours">{{numberFormat summary.duration.hours}}
-                                    h </span>duration<br>
-                            </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-bar-chart-fill me-2"></i>Totals for {{ name }}
+                        in {{summary.year}}</h2>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-3">
+                        <i class="bi bi-geo-alt me-1 text-danger"></i>
+                        {{summary.locationCount}} Sites polluted by {{join summary.companies ', '}}
+                    </h5>
+                    <div class="card-text mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-droplet-fill text-primary me-2"></i>
+                            <span>{{numberFormat summary.count.count}} sewage dumps</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-clock-fill text-danger me-2"></i>
+                            <span class="spill-hours">{{numberFormat summary.duration.hours}} hours duration</span>
+                        </div>
+                    </div>
 
-                            <small class="text-muted">
-                                {{> chunks/explain-duration summary.duration}}
-                                {{> chunks/explain-count summary.count}}
-                            </small>
-                        </div>
+                    <div class="alert alert-secondary mt-3 mb-0">
+                        <small>
+                            {{> chunks/explain-duration summary.duration}}
+                            {{> chunks/explain-count summary.count}}
+                        </small>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col">
-                    <div class="card  mb-3">
-                        <div class="card-header">How does {{name}} compare?</div>
-                        <div class="card-body">
-                            <div class="card-text">
-                                <p>{{name}} was the #{{rank.rank}} most polluted bathing area in England & Wales, by duration of sewage overflows, as reported by the water companies</p>
-                            </div>
-                        </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-shield-fill-exclamation me-2"></i>How does {{name}} compare?
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{name}} was the <span
+                            class="badge bg-danger">#{{rank.rank}}</span> most polluted bathing area in England & Wales,
+                        by duration of sewage overflows, as reported by the water companies</p>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-megaphone-fill me-2"></i>Take Action</h2>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2">
+                        {{> components/share-facebook share}}
+                        {{> components/share-twitter  share}}
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col">
-                    <div class="card  mb-3">
-                        <div class="card-header">Take Action</div>
-                        <div class="card-body">
-                            <div class="card-text">
-                                {{> components/share-facebook share}}
-                                {{> components/share-twitter  share}}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+            {{> chunks/plea }}
+
             {{#if constituencyRank}}
-            <div class="row">
-                <div class="col">
-                    <div class="card  mb-3">
-                        <div class="card-header">Local Constituency</div>
-                        <div class="card-body">
-                            <div class="card-text">
-                                <a href="{{constituencyRank.constituency.uri}}">
-                                    <button class="btn btn-primary mb-2">
-                                        {{constituencyRank.constituency.name}}<span class="badge bg-dark ms-1">{{numberFormat constituencyRank.count.count}}</span>
-                                    </button>
-                                </a>
-                            </div>
-                        </div>
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Local Constituency</h2>
+                    </div>
+                    <div class="card-body">
+                        <a href="{{constituencyRank.constituency.uri}}" class="text-decoration-none">
+                            <button class="btn btn-outline-primary">
+                                <i class="bi bi-geo-fill me-1"></i>
+                                {{constituencyRank.constituency.name}}<span
+                                    class="badge bg-secondary ms-1">{{numberFormat constituencyRank.count.count}}</span>
+                            </button>
+                        </a>
                     </div>
                 </div>
-            </div>
             {{/if}}
         </div>
     </div>
 </div>
 
-<div class="container">
+<div class="container py-5">
     <div class="row">
         <div class="col">
-            {{#> components/section title=(concat "Pollution Summary " summary.year)}}
-
-                <p>Here are all the reported sewage overflow totals for {{ name }} in {{ summary.year }}.</p>
-
-                <p>If the locations of the sewage outlets look a bit unusual, it is likely that the reporting of the data from the water company is in error. We rely on their data in order to draw these maps.</p>
-
-                <p><b>Accuracy Warning</b> We use data from the water companies, but we are seeing many anomalies, that make us believe that
-                    bathing location information is quite poor. The situation is likely <b>far worse</b> than reported here.</p>
-
-                <p>Other CSOs may also be located nearby, however the water companies claim that these do not affect the water quality here.</p>
-                <div class="table-responsive">
-                    <table id="table-csos" class="table table-spills table-striped">
-                        <thead>
-                        <tr>
-                            <th>Company</th>
-                            <th>Waterway</th>
-                            <th>Site</th>
-                            <th>Sewage Dumps</th>
-                            <th>Duration (Hours)</th>
-                            <th>Reporting %</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {{#each csos}}
-                            <tr data-class="cso" data-lat="{{this.cso.location.lat}}"
-                                data-lon="{{this.cso.location.lon}}">
-                                <td class="align-middle" data-company="{{this.cso.company.name}}">
-                                    <a href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a>
-                                </td>
-                                <td class="align-middle" data-waterway="{{this.cso.waterway.name}}">
-                                    <a href="{{this.cso.waterway.uri}}">{{this.cso.waterway.name}}</a>
-                                </td>
-                                <td class="align-middle"
-                                    data-sitename="{{this.cso.sitename}}">{{this.cso.sitename}}</td>
-                                <td class="align-middle" data-count="{{this.count.count}}">{{numberFormat this.count.count}}</td>
-                                <td class="align-middle" data-duration="{{this.duration.hours}}">{{numberFormat
-                                        this.duration.hours}}</td>
-                                <td class="align-middle{{#if this.reporting lt 0.5}}reporting-low{{/if}}" data-reporting="{{this.reporting}}">{{numberFormat this.reporting}}</td>
-                            </tr>
-                        {{/each}}
-                        </tbody>
-                    </table>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-clipboard-data me-2"></i>Pollution Summary {{summary.year}}</h2>
                 </div>
-            {{/components/section}}
+                <div class="card-body p-4">
+                    <div class="d-flex">
+                        <div class="me-2">
+                            <i class="bi bi-info-circle-fill fs-4 text-primary"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0">Here are all the reported sewage overflow totals for {{ name }}
+                                in {{ summary.year }}.</p>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning mt-3">
+                        <div class="d-flex">
+                            <div class="me-2">
+                                <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                            </div>
+                            <div>
+                                <h5 class="alert-heading">Accuracy Warning</h5>
+                                <p class="mb-0">We use data from the water companies, but we are seeing many anomalies
+                                    that make us believe that
+                                    bathing location information is quite poor. The situation is likely <b>far worse</b>
+                                    than reported here.</p>
+                                <p class="mb-0 mt-2">If the locations of the sewage outlets look a bit unusual, it is
+                                    likely that the reporting of the data from the water company is in error. We rely on
+                                    their data in order to draw these maps.</p>
+                                <p class="mb-0 mt-2">Other CSOs may also be located nearby, however the water companies
+                                    claim that these do not affect the water quality here.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mt-4">
+                        <table id="table-csos" class="table table-hover">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Company</th>
+                                <th>Waterway</th>
+                                <th>Site</th>
+                                <th>Sewage Dumps</th>
+                                <th>Duration (Hours)</th>
+                                <th>Reporting %</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each csos}}
+                                <tr data-class="cso" data-lat="{{this.cso.location.lat}}"
+                                    data-lon="{{this.cso.location.lon}}">
+                                    <td class="align-middle" data-company="{{this.cso.company.name}}">
+                                        <i class="bi bi-building me-1 text-muted"></i>
+                                        <a href="{{this.cso.company.uri}}">{{this.cso.company.name}}</a>
+                                    </td>
+                                    <td class="align-middle" data-waterway="{{this.cso.waterway.name}}">
+                                        <i class="bi bi-water me-1 text-primary"></i>
+                                        <a href="{{this.cso.waterway.uri}}">{{this.cso.waterway.name}}</a>
+                                    </td>
+                                    <td class="align-middle"
+                                        data-sitename="{{this.cso.sitename}}">{{this.cso.sitename}}</td>
+                                    <td class="align-middle" data-count="{{this.count.count}}">{{numberFormat
+                                            this.count.count}}</td>
+                                    <td class="align-middle" data-duration="{{this.duration.hours}}">{{numberFormat
+                                            this.duration.hours}}</td>
+                                    <td class="align-middle{{#if this.reporting lt 0.5}} text-danger{{/if}}"
+                                        data-reporting="{{this.reporting}}">{{numberFormat this.reporting}}</td>
+                                </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -189,7 +261,7 @@
     }).addTo(map);
 
     const bathingAreaLayers = Array.from(document.getElementsByClassName("map-geojson"))
-            .map ( it => L.geoJSON(JSON.parse(it.textContent), {style: myStyle}))
+            .map(it => L.geoJSON(JSON.parse(it.textContent), {style: myStyle}))
 
     bathingAreaLayers.forEach(it => it.addTo(map))
 
@@ -272,13 +344,16 @@
 
 
 <script>
-    new DataTable('#table-csos',
-            {
-                pageLength: 10,
-                dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +
-                        "<'row'<'col-sm-12'tr>>" +
-                        "<'row'<'col-sm-12 col-md-5'i>>"
-            });
+    new DataTable('#table-csos', {
+        pageLength: 10,
+        dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'i>>",
+        language: {
+            search: '<i class="bi bi-search"></i> _INPUT_',
+            searchPlaceholder: 'Search...',
+        }
+    });
 </script>
 
 </body>
