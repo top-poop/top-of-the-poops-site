@@ -23,6 +23,19 @@
         .sewage-map {
             min-height: 400px;
         }
+        /* Equal height columns for the sewage everywhere section */
+        .sewage-columns-equal-height {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .sewage-columns-equal-height > [class*='col-'] {
+            display: flex;
+            flex-direction: column;
+        }
+        .sewage-columns-equal-height:after,
+        .sewage-columns-equal-height:before {
+            display: flex;
+        }
     </style>
 
     {{> components/meta-opengraph
@@ -42,25 +55,22 @@
             At least <em class="text-danger fw-bold">{{numberFormat totalCount}}</em> sewage spills
             into waterways in {{year}}, lasting
             <span class="badge bg-danger fs-4">{{numberFormat totalDuration.hours}} hours</span>
-            <br/><span class="text-muted">(that's {{numberFormat totalDuration.years}} years!)</span>
+            <br/>That's <em class="text-danger fw-bold">{{numberFormat totalDuration.years}} years!</em>
         </p>
-        <a href="/support" class="btn btn-danger btn-lg px-4 py-2 shadow-sm">Support Our Work</a>
+        <a href="/support" class="btn btn-danger btn-lg px-4 py-2">Support Our Work</a>
     </div>
 {{/components/jumbotron}}
 
 
-<div class="container-fluid py-5 bg-light">
-    <div class="row justify-content-md-center align-items-center g-4">
-        <div class="col-md-4 offset-md-1">
+<div class="container-fluid py-5">
+    <div class="row justify-content-md-center g-4 sewage-columns-equal-height">
+        <div class="col-md-5">
             <div class="position-relative">
-                <img alt="A stylised map of England and Wales showing CSO locations" class="img-fluid rounded shadow-sm" src="/assets/images/top-of-the-poops-cso-2023-web-fs8.png"/>
-                <div class="position-absolute top-0 start-0 bg-danger text-white px-3 py-2 rounded-pill m-2">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i> {{year}} Data
-                </div>
+                <img alt="A stylised map of England and Wales showing CSO locations" class="img-fluid rounded " src="/assets/images/top-of-the-poops-cso-2023-web-fs8.png"/>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
+        <div class="col-md-4 align-top">
+            <div class="card border-0">
                 <div class="card-body">
                     <h2 class="card-title fw-bold text-danger mb-3">A Petri Dish for E.Coli</h2>
 
@@ -91,10 +101,10 @@
             </div>
         </div>
     </div>
-    <div class="row justify-content-md-center align-items-center my-5 g-4">
+    <div class="row justify-content-md-center my-4 g-4 sewage-columns-equal-height">
         <div class="col-md-4 offset-md-2">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
+            <div class="card border-0">
+                <div class="card-body">
                     <h2 class="card-title fw-bold text-primary mb-3">Sewage Everywhere</h2>
 
                     <p class="card-text">There is sewage overflowing into rivers in almost every constituency
@@ -119,7 +129,7 @@
                                             <span class="badge bg-primary rounded-pill me-2">{{this.rank}}</span>
                                             <a href="{{this.constituency.uri}}" class="text-decoration-none">{{this.constituency.name}}</a>
                                         </div>
-                                        <span class="badge bg-danger rounded-pill">{{numberFormat this.duration.hours}} hrs</span>
+                                        <span class="badge bg-danger rounded-pill">{{numberFormat this.duration.hours}} hours</span>
                                     </li>
                                 {{/each}}
                             </ul>
@@ -133,17 +143,17 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-0">
+            <div class="card border-0">
+                <div class="card-body align-top">
                     <div id="map-constituency" class="sewage-map rounded"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row justify-content-md-center align-items-center my-5 g-4">
-        <div class="col-md-6 offset-md-1">
-            <div class="card border-0 shadow-sm h-100">
+    <div class="row justify-content-md-center align-items-center my-5 g-4 sewage-columns-equal-height">
+        <div class="col-md-5 offset-md-1">
+            <div class="card border-0">
                 <div class="card-body p-0">
                     <div id="map-beaches" class="sewage-map rounded"></div>
                 </div>
@@ -154,7 +164,7 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card border-0">
                 <div class="card-body p-4">
                     <h2 class="card-title fw-bold text-info mb-3">Swimming in Sewage</h2>
 
@@ -192,7 +202,7 @@
                                             <small class="text-muted me-1">{{this.company.name}} -</small>
                                             <a href="{{this.beach.uri}}" class="text-decoration-none">{{this.beach.name}}</a>
                                         </div>
-                                        <span class="badge bg-danger rounded-pill">{{numberFormat this.duration.hours}} hrs</span>
+                                        <span class="badge bg-danger rounded-pill">{{numberFormat this.duration.hours}} hours</span>
                                     </li>
                                 {{/each}}
                             </ul>
@@ -209,8 +219,8 @@
 
 
     <div class="row justify-content-md-center align-items-center my-5 g-4">
-        <div class="col-md-4 offset-md-2">
-            <div class="card border-0 shadow-sm h-100">
+        <div class="col-md-4">
+            <div class="card border-0  h-100">
                 <div class="card-body p-4">
                     <h2 class="card-title fw-bold text-success mb-3">Rivers & Streams</h2>
 
@@ -241,7 +251,7 @@
                                             <small class="text-muted me-1">{{this.company.name}} -</small>
                                             <a href="{{this.river.uri}}" class="text-decoration-none">{{this.river.name}}</a>
                                         </div>
-                                        <span class="badge bg-danger rounded-pill">{{numberFormat this.duration.hours}} hrs</span>
+                                        <span class="badge bg-danger rounded-pill">{{numberFormat this.duration.hours}} hours</span>
                                     </li>
                                 {{/each}}
                             </ul>
@@ -254,8 +264,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
+        <div class="col-md-6 h-100">
+            <div class="card border-0  h-100">
                 <div class="card-body p-0">
                     <img alt="A map of England and Wales showing major rivers" class="img-fluid rounded" src="/assets/images/top-of-the-poops-rivers-2021.png"/>
                 </div>
@@ -268,19 +278,19 @@
 
 
     <div class="row justify-content-md-center align-items-center my-5 g-4">
-        <div class="col-md-5 offset-md-2">
-            <div class="card border-0 shadow-sm h-100">
+        <div class="col-md-5 offset-md-1">
+            <div class="card border-0  h-100">
                 <div class="card-body p-0">
                     <div id="map-shellfish" class="sewage-map rounded"></div>
                 </div>
                 <div class="card-footer bg-secondary text-white py-2">
-                    <small><i class="bi bi-info-circle me-1"></i> Interactive map of shellfish areas affected by sewage</small>
+                    <small><i class="bi bi-info-circle me-1"></i> Map of shellfish areas affected by sewage</small>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card border-0  h-100">
                 <div class="card-body p-4">
                     <h2 class="card-title fw-bold text-secondary mb-3">Sewage in the Food Chain?</h2>
 
@@ -309,7 +319,7 @@
                                             <small class="text-muted me-1">{{this.company.name}} -</small>
                                             <a href="{{this.shellfish.uri}}" class="text-decoration-none">{{this.shellfish.name}}</a>
                                         </div>
-                                        <span class="badge bg-danger rounded-pill">{{numberFormat this.duration.hours}} hrs</span>
+                                        <span class="badge bg-danger rounded-pill">{{numberFormat this.duration.hours}} hours</span>
                                     </li>
                                 {{/each}}
                             </ul>
@@ -332,7 +342,7 @@
             {{#> components/section title="Water Companies" }}
                 <div class="row g-4">
                     <div class="col-12 mb-4">
-                        <div class="card bg-light border-0 shadow-sm">
+                        <div class="card bg-light border-0 ">
                             <div class="card-body p-4">
                                 <h3 class="text-center mb-3">The Companies Responsible</h3>
                                 <p class="lead text-center mb-0">These water companies are responsible for managing sewage treatment and preventing pollution in our waterways.</p>
@@ -341,7 +351,7 @@
                     </div>
                     {{#each companies}}
                         <div class="col-sm-6 col-md-4 col-lg-3">
-                            <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                            <div class="card h-100 border-0  hover-shadow transition">
                                 <div class="card-body">
                                     {{> components/card-company this}}
                                 </div>
@@ -361,8 +371,8 @@
             {{#> components/section title="Top of the Poops in the Media" }}
                 <div class="row mb-4">
                     <div class="col-12">
-                        <div class="card bg-light border-0 shadow-sm mb-4">
-                            <div class="card-body p-4">
+                        <div class="cardbg-light border-0  mb-4">
+                            <div class="card-bodyp-4">
                                 <h3 class="text-center mb-3">Our Impact in the News</h3>
                                 <p class="lead text-center mb-0">Our data and research have been featured in various media outlets, helping to raise awareness about water pollution issues.</p>
                             </div>
@@ -370,15 +380,9 @@
                     </div>
                 </div>
 
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                <div class="row row-cols-1 row-cols-md-4">
                     {{#each (take appearances n=8)}}
-                        <div class="col">
-                            <div class="card h-100 border-0 shadow-sm hover-shadow transition">
-                                <div class="card-body">
-                                    {{>components/card-media this}}
-                                </div>
-                            </div>
-                        </div>
+                        {{>components/card-media this}}
                     {{/each}}
                 </div>
 
@@ -397,7 +401,7 @@
 <div class="container py-4">
     <div class="row">
         <div class="col">
-            <div class="card border-0 shadow-sm">
+            <div class="card border-0 ">
                 <div class="card-body p-4">
                     <h3 class="card-title text-center mb-4">Our Data Sources</h3>
                     {{> chunks/data-sources }}
@@ -427,28 +431,33 @@
         maximumFractionDigits: m ? m : 0
     });
 
-    const chart = (data) => document.getElementById("map-constituency").append(
-            Plot.plot({
-                projection: {
-                    type: "mercator",
-                    domain: {
-                        type: "MultiPoint",
-                        coordinates: [[-6, 50.0], [1.8, 57.9]],
+    const chart = (data) => {
+        let constituencyDiv = document.getElementById("map-constituency");
+        const rect = constituencyDiv.getBoundingClientRect()
+
+        constituencyDiv.append(
+                Plot.plot({
+                    projection: {
+                        type: "mercator",
+                        domain: {
+                            type: "MultiPoint",
+                            coordinates: [[-6, 50.0], [1.8, 57.9]],
+                        },
                     },
-                },
-                height: 800,
-                color: {
-                    scheme: "oranges",
-                },
-                marks: [
-                    Plot.geo(data, {
-                        fill: d => d.properties.total_hours,
-                        title: d => `${d.properties.constituency}: ${formatNumber(d.properties.total_hours)} hours of sewage`,
-                        stroke: "black",
-                        strokeOpacity: 0.5,
-                    }),
-                ]
-            }));
+                    height: rect.height,
+                    color: {
+                        scheme: "oranges",
+                    },
+                    marks: [
+                        Plot.geo(data, {
+                            fill: d => d.properties.total_hours,
+                            title: d => `${d.properties.constituency}: ${formatNumber(d.properties.total_hours)} hours of sewage`,
+                            stroke: "black",
+                            strokeOpacity: 0.5,
+                        }),
+                    ]
+                }));
+    };
 
     const r = await fetch("/data/v1/{{year}}/geo/choropleth.json");
     if (r.ok) {
@@ -459,49 +468,54 @@
 <script type="module">
     import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
 
-    const chart = (data, countries) => document.getElementById("map-beaches").appendChild(
-            Plot.plot(
-                    {
-                        projection: {
-                            type: "mercator",
-                            domain: {
-                                type: "MultiPoint",
-                                coordinates: [[-6, 49.9], [1.8, 55.9]],
+    const chart = (data, countries) => {
+        let beachesDiv = document.getElementById("map-beaches");
+        const rect = beachesDiv.getBoundingClientRect()
+
+        return beachesDiv.appendChild(
+                Plot.plot(
+                        {
+                            projection: {
+                                type: "mercator",
+                                domain: {
+                                    type: "MultiPoint",
+                                    coordinates: [[-6, 49.9], [1.8, 55.9]],
+                                },
                             },
-                        },
-                        width: 800,
-                        r: {range: [10, 45], domain: [100, 8700]},
-                        color: {
-                            type: "linear",
-                            range: ["steelblue", "#b47846"] // uses d3.interpolateRgb
-                        },
-                        marks: [
-                            Plot.geo(
-                                    countries,
-                                    {
-                                        fill: "rgb(5,118,11)",
-                                        fillOpacity: 0.1,
-                                        stroke: "#000000",
-                                        strokeWidth: 2,
-                                        strokeOpacity: 0.2,
-                                    }
-                            ),
-                            Plot.dot(
-                                    data,
-                                    {
-                                        x: "lon",
-                                        y: "lat",
-                                        r: "total_spill_hours",
-                                        fill: "total_spill_hours",
-                                        opacity: 0.5,
-                                        mixBlendMode: "multiply",
-                                        title: d => `${d.bathing} - ${d.total_spill_hours} hours of sewage in {{year}}`,
-                                    }
-                            )
-                        ]
-                    }
-            )
-    )
+                            height: rect.height,
+                            r: {range: [10, 45], domain: [100, 8700]},
+                            color: {
+                                type: "linear",
+                                range: ["steelblue", "#b47846"] // uses d3.interpolateRgb
+                            },
+                            marks: [
+                                Plot.geo(
+                                        countries,
+                                        {
+                                            fill: "rgb(5,118,11)",
+                                            fillOpacity: 0.1,
+                                            stroke: "#000000",
+                                            strokeWidth: 2,
+                                            strokeOpacity: 0.2,
+                                        }
+                                ),
+                                Plot.dot(
+                                        data,
+                                        {
+                                            x: "lon",
+                                            y: "lat",
+                                            r: "total_spill_hours",
+                                            fill: "total_spill_hours",
+                                            opacity: 0.5,
+                                            mixBlendMode: "multiply",
+                                            title: d => `${d.bathing} - ${d.total_spill_hours} hours of sewage in {{year}}`,
+                                        }
+                                )
+                            ]
+                        }
+                )
+        );
+    }
 
     const beaches = await fetch("/data/v1/{{year}}/spills-by-beach.json");
     const countries = await fetch("/data/v1/{{year}}/geo/countries.json")
