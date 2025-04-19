@@ -144,6 +144,13 @@
     </div>
 {{/eq}}
 
+<div class="container">
+    <div class="row">
+        <div class="col">
+            {{> chunks/plea }}
+        </div>
+    </div>
+</div>
 
 {{#if live}}
     <div class="container py-4">
@@ -180,7 +187,8 @@
                                     <div class="col">
                                         <div class="card border-0 shadow-sm h-100">
                                             <div class="card-header bg-primary text-white">
-                                                <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>{{inc @index}}. {{this.id}}</h5>
+                                                <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>{{inc @index}}
+                                                    . {{this.id}}</h5>
                                             </div>
                                             <div class="card-body">
                                                 <div class="d-flex align-items-center mb-3">
@@ -393,7 +401,8 @@
                             <div class="col">
                                 <div class="card border-0 shadow-sm h-100">
                                     <div class="card-header bg-primary text-white">
-                                        <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>{{inc @index}}. {{this.cso.sitename}}</h5>
+                                        <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>{{inc @index}}
+                                            . {{this.cso.sitename}}</h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="d-flex align-items-center mb-3">
@@ -576,7 +585,8 @@
                                 <a class="quiet-link" href="{{this.river.uri}}">
                                     <div class="card border-0 shadow-sm h-100 hover-shadow">
                                         <div class="card-header bg-primary text-white">
-                                            <h5 class="mb-0"><i class="bi bi-water me-2"></i>{{inc @index}}. {{this.river.name}}</h5>
+                                            <h5 class="mb-0"><i class="bi bi-water me-2"></i>{{inc @index}}
+                                                . {{this.river.name}}</h5>
                                         </div>
                                         <div class="card-body">
                                             <div class="d-flex align-items-center">
@@ -620,7 +630,8 @@
                                     <a class="quiet-link" href="{{this.beach.uri}}">
                                         <div class="card border-0 shadow-sm h-100 hover-shadow">
                                             <div class="card-header bg-primary text-white">
-                                                <h5 class="mb-0"><i class="bi bi-umbrella-beach me-2"></i>{{inc @index}}. {{this.beach.name}}</h5>
+                                                <h5 class="mb-0"><i class="bi bi-umbrella-beach me-2"></i>{{inc @index}}
+                                                    . {{this.beach.name}}</h5>
                                             </div>
                                             <div class="card-body">
                                                 <div class="d-flex align-items-center">
