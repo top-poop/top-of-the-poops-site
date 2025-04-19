@@ -11,6 +11,35 @@
     {{> chunks/meta-styles }}
     {{> chunks/meta-scripts }}
 
+    <!-- Custom Styles -->
+    <style>
+        .card {
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .plot-chart {
+            min-height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .quiet-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .quiet-link:hover {
+            text-decoration: none;
+            color: inherit;
+        }
+    </style>
+
     {{> components/meta-opengraph
             title=(concat "Company | " company.name)
             twitterImageUri=share.twitterImageUri
@@ -22,108 +51,203 @@
 <body>
 {{> chunks/navbar }}
 
-<div class="container-fluid">
-    <div class="row justify-content-md-center  align-items-center">
-        <div class="col-md-4 offset-md-1">
-            <div class="row">
-                <div class="col">
-                    <div class="display-3">{{ company.name }}</div>
+<div class="container-fluid py-5">
+    <div class="row justify-content-md-center align-items-center g-4">
+        <div class="col-md-5 offset-md-1">
+            <div class="card border-0">
+                <div class="card-body p-4">
+                    <h1 class="display-4 fw-bold text-primary mb-4">{{ company.name }}</h1>
 
-                    <p>was responsible for at least <span
-                            class="align-middle display-4 font-weight-bold">{{numberFormat summary.count.count }}</span>
-                        sewage overflows in {{ summary.year }}<br/>
-                        {{> chunks/explain-count summary.count}} </p>
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="bi bi-exclamation-circle-fill fs-3"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 fs-5">Responsible for at least <span
+                                    class="badge bg-danger fs-5">{{numberFormat summary.count.count }}</span>
+                                sewage overflows in {{ summary.year }}</p>
+                            <small class="text-muted">{{> chunks/explain-count summary.count}}</small>
+                        </div>
+                    </div>
 
-                    <p>These lasted for {{numberFormat summary.duration.hours}} hours
-                        ({{> chunks/explain-duration summary.duration}}) - in
-                        {{numberFormat summary.locationCount}} different locations across their service area</p>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    {{> components/share-facebook share}}
-                    {{> components/share-twitter share}}
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="bi bi-clock-fill fs-3"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 fs-5">These lasted for <span
+                                    class="badge bg-warning text-dark fs-5">{{numberFormat
+                                    summary.duration.hours}}</span> hours</p>
+                            <small class="text-muted">{{> chunks/explain-duration summary.duration}}</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="bi bi-geo-alt-fill fs-3"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 fs-5">Affecting <span class="badge bg-info fs-5">{{numberFormat
+                                    summary.locationCount}}</span> different locations across their service area</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        {{> components/share-facebook share}}
+                        {{> components/share-twitter share}}
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4 ">
-            <img style="width: 100%; height: auto; min-height: 300px;" src="{{ csoUri }}"/>
+        <div class="col-md-4">
+            <div class="card border-0">
+                <div class="card-body p-0">
+                    <img class="img-fluid rounded" alt="Map showing CSO locations for {{ company.name }}"
+                         src="{{ csoUri }}"/>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 
 {{#eq company.name.value 'Scottish Water'}}
-    <div class="container">
-    {{#> components/section title="Special Note regarding Scottish Water" }}
+    <div class="container py-4">
         <div class="row">
             <div class="col">
-                <p>Scottish Water simply does not monitor the overflows of many of its CSOs, - so <strong>the numbers here are artificially low</strong>, the
-                real situation is far worse.</p>
-                <p>Of the 702 CSOs locations we know about for Scottish Water, 452 of them have <strong>ZERO</strong> reporting.</p>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-danger text-white">
+                        <h2 class="h4 mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Special Note regarding
+                            Scottish Water</h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="alert alert-warning">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="bi bi-info-circle-fill fs-3"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0">Scottish Water simply does not monitor the overflows of many of its
+                                        CSOs, - so <strong>the numbers here are artificially low</strong>, the real
+                                        situation is far worse.</p>
+                                    <p class="mb-0 mt-2">Of the 702 CSOs locations we know about for Scottish Water,
+                                        <span class="badge bg-danger">452</span> of them have <strong>ZERO</strong>
+                                        reporting.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    {{/components/section}}
     </div>
 {{/eq}}
 
 
 {{#if live}}
-    <div class="container">
-
+    <div class="container py-4">
         {{#if live.overflowing}}
-            {{#> components/section
-                    title=(concat company.name " has " live.overflowing.length " CSOs dumping sewage right now") }}
+            <div class="row mb-4">
+                <div class="col">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-danger text-white">
+                            <h2 class="h4 mb-0"><i class="bi bi-droplet-fill me-2"></i>{{ company.name }} has <span
+                                    class="badge bg-warning text-dark">{{ live.overflowing.length }}</span> CSOs dumping
+                                sewage right now</h2>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="alert alert-info mb-4">
+                                <div class="d-flex">
+                                    <div class="me-3">
+                                        <i class="bi bi-info-circle-fill fs-3"></i>
+                                    </div>
+                                    <div>
+                                        <p class="mb-0">Here are the ones that have been overflowing for the longest,
+                                            without interruption</p>
+                                        <p class="mb-0 mt-2">We are getting more data collated for each of the CSOs...
+                                            right now we just have the Constituency.
+                                            Unfortunately, the water companies use different names for the CSOs in their
+                                            live data than in the
+                                            annual returns, so it will take a bit of time to link all the data
+                                            up....</p>
+                                    </div>
+                                </div>
+                            </div>
 
-                <div class="row">
-                    <div class="col">
-                        <p>Here are the ones that have been overflowing for the longest, without interruption</p>
-                        <p>We are getting more data collated for each of the CSOs... right now we just have the Constituency.
-                            Unfortunately, the water companies use different names for the CSOs in their live data than in the
-                        annual returns, so it will take a bit of time to link all the data up....</p>
+                            <div id="live-csos" class="row row-cols-1 row-cols-md-3 g-4">
+                                {{#each (take live.overflowing n=9)}}
+                                    <div class="col">
+                                        <div class="card border-0 shadow-sm h-100">
+                                            <div class="card-header bg-primary text-white">
+                                                <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>{{inc @index}}. {{this.id}}</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <i class="bi bi-map me-2 text-primary"></i>
+                                                    <a href="{{this.constituency.uri}}"
+                                                       class="text-decoration-none">{{this.constituency.name}}</a>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-clock-history me-2 text-muted"></i>
+                                                    <small>Started {{ago this.started}}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {{/each}}
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+        {{/if}}
 
-                <div id="live-csos" class="row row-cols-1 row-cols-md-3">
-                    {{#each (take live.overflowing n=9)}}
-                        <div class="col mb-4">
-                            <div class="card h-100">
-                                <div class="card-header bg-primary text-white">{{inc @index}}. {{this.id}}</div>
-                                <div class="events  card-body">
-                                    <p class="card-title">
-                                        <a href="{{this.constituency.uri}}">{{this.constituency.name}}</a>
-                                    </p>
-                                    <p class="card-text"><small class="text-muted">Started {{ago this.started}}</small>
-                                    </p>
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="h4 mb-0"><i class="bi bi-graph-up me-2"></i>How many Sewage Overflows are dumping
+                            sewage?</h2>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="alert alert-info mb-4">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="bi bi-info-circle-fill fs-3"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0">We have live data for {{company.name}} so we can track what happens
+                                        every day - given
+                                        that overflows are supposed to happen on an 'exceptional' basis only - does the
+                                        chart
+                                        indicate that?</p>
                                 </div>
                             </div>
                         </div>
-                    {{/each}}
-                </div>
-            {{/components/section}}
-        {{/if}}
-        {{#> components/section title="How many Sewage Overflows are dumping sewage?" }}
-            <div class="row">
-                <div class="col">
-                    <div class="row">
-                        <div class="col">
-                            <p>We have live data for {{company.name}} so we can track what happens every day - given
-                                that
-                                overflows are supposed to happen on an 'exceptional' basis only - does the chart
-                                indicate that?</p>
 
-                            <p>The red line indicates the number of CSOs that overflowed for at least 30mins, the grey,
-                                the
-                                number of CSOs
-                                that were offline for at least 30mins, and the blue line is the total number of CSOs
-                                that we can get information for.</p>
+                        <div class="mb-4">
+                            <div class="d-flex flex-wrap gap-3 mb-3">
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2"
+                                          style="display:inline-block; width:20px; height:20px; background-color: #44beff; border-radius: 4px;"></span>
+                                    <span>Total CSOs monitored</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2"
+                                          style="display:inline-block; width:20px; height:20px; background-color: #ff4444; border-radius: 4px;"></span>
+                                    <span>CSOs overflowing (30+ mins)</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2"
+                                          style="display:inline-block; width:20px; height:20px; background-color: #bbbbbb; border-radius: 4px;"></span>
+                                    <span>CSOs offline (30+ mins)</span>
+                                </div>
+                            </div>
 
-                            <p>There is daily updated information on all constituencies covered by {{company.name}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col">
+                            <p class="mb-3">There is daily updated information on all constituencies covered
+                                by {{company.name}}</p>
+
                             <div id="edm-spills" class="plot-chart"
                                  data-uri="/live/stream/company/{{company.slug}}/overflow-summary">
                             </div>
@@ -131,7 +255,7 @@
                     </div>
                 </div>
             </div>
-        {{/components/section}}
+        </div>
     </div>
     <script type="module">
         import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/+esm";
@@ -189,79 +313,120 @@
 
 {{/if}}
 
-<div class="container">
-    <div class="row">
+<div class="container py-4">
+    <div class="row mb-4">
         <div class="col">
-            {{#> components/section title="2024 - By Water Company"}}
-                <div class="row">
-                    <div class="col">
-                        <p>How does each water company compare? These are the totals by company for each. The totals are
-                            really high, counting things in hours doesn't make
-                            it very easy to think about. Here we show how many years of continuous sewage dumps happened
-                            in a single year, by water company.</p>
-                    </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-bar-chart-fill me-2"></i>2024 - By Water Company</h2>
                 </div>
-                <div class="row mb-5">
-                    <div class="col">
+                <div class="card-body p-4">
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-info-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">How does each water company compare? These are the totals by company for
+                                    each. The totals are
+                                    really high, counting things in hours doesn't make
+                                    it very easy to think about. Here we show how many years of continuous sewage dumps
+                                    happened
+                                    in a single year, by water company.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container mb-3">
                         <div style="height: 300px;" id="plot-company-totals" data-company-name="{{company.name}}"
                              data-uri="/data/v1/2024/spills-by-company.json"></div>
                     </div>
                 </div>
-            {{/components/section}}
+            </div>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row mb-4">
         <div class="col">
-            {{#> components/section title="2024 - Asset Spill Duration Comparison"}}
-
-                <div class="row">
-                    <div class="col">
-                        <p>It isn't like there are just a few outliers... the problem exists across the entire estate of water assets.
-                        Here we show a 'cumulative frequency diagram' - where the number of CSOs that dumped sewage for a time, or longer, is shown. You can see that many CSOs dumped sewage into a river for months and months.</p>
-
-                        <p>{{company.name}} is highlighted in the plot below</p>
-                    </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-graph-up me-2"></i>2024 - Asset Spill Duration Comparison</h2>
                 </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-info-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">It isn't like there are just a few outliers... the problem exists across
+                                    the entire estate of water assets.
+                                    Here we show a 'cumulative frequency diagram' - where the number of CSOs that dumped
+                                    sewage for a time, or longer, is shown. You can see that many CSOs dumped sewage
+                                    into a river for months and months.</p>
 
-                <div class="row mb-2">
-                    <div class="col">
+                                <p class="mb-0 mt-2"><strong>{{company.name}}</strong> is highlighted in the plot below
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container mb-3">
                         <div style="height: 300px;" id="plot-company-comparison" data-company-name="{{company.name}}"
                              data-uri="/data/v1/2024/spills-all.json"></div>
                     </div>
                 </div>
-            {{/components/section}}
+            </div>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row mb-4">
         <div class="col">
-            {{#> components/section title=(concat "2024 - Worst Locations " company.name)}}
-                <div class="row row-cols-1 row-cols-md-3">
-                    {{#each worstCsos}}
-                        <div class="col mb-4">
-                            <div class="card h-100">
-                                <div class="card-header bg-primary text-white">{{inc @index}}. {{this.cso.sitename}}</div>
-                                <div class="card-body">
-                                    <p class="card-title">
-                                        <a href="{{this.constituency.uri}}">{{this.constituency.name}}</a> polluted
-                                        for
-                                        {{numberFormat this.duration.hours}} hours, into <a
-                                            href="{{this.cso.waterway.uri}}">{{this.cso.waterway.name}}</a>
-                                    </p>
-                                    <p class="card-text">{{numberFormat this.count.count}} incidents</p>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>2024 - Worst
+                        Locations: {{ company.name }}</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row row-cols-1 row-cols-md-3 g-4">
+                        {{#each worstCsos}}
+                            <div class="col">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>{{inc @index}}. {{this.cso.sitename}}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="bi bi-map me-2 text-primary"></i>
+                                            <a href="{{this.constituency.uri}}"
+                                               class="text-decoration-none">{{this.constituency.name}}</a>
+                                        </div>
 
-                                    <p class="card-text"><small
-                                            class="text-muted"> {{> chunks/explain-duration this.duration}} </small>
-                                    </p>
-                                    <p class="card-text"><small
-                                            class="text-muted"> {{> chunks/explain-count this.count}} </small></p>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="bi bi-water me-2 text-info"></i>
+                                            <a href="{{this.cso.waterway.uri}}"
+                                               class="text-decoration-none">{{this.cso.waterway.name}}</a>
+                                        </div>
+
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-clock-fill me-2"></i>
+                                            <span>{{numberFormat this.duration.hours}} hours</span>
+                                            <small class="text-muted">
+                                                - {{> chunks/explain-duration this.duration}}</small>
+                                        </div>
+
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-exclamation-circle me-2"></i>
+                                            <span>{{numberFormat this.count.count}} incidents</span>
+                                            <small class="text-muted"> - {{> chunks/explain-count this.count}}</small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    {{/each}}
+                        {{/each}}
+                    </div>
                 </div>
-            {{/components/section}}
+            </div>
         </div>
     </div>
 </div>
@@ -396,82 +561,124 @@
 
 </script>
 
-<div class="container">
-    <div class="row">
+<div class="container py-4">
+    <div class="row mb-4">
         <div class="col">
-            {{#> components/section title=(concat "2024 - Rivers Polluted by " company.name)}}
-                <div class="row row-cols-1 row-cols-md-3">
-                    {{#each rivers}}
-                        <a class="quiet-link" href="{{this.river.uri}}">
-                            <div class="col mb-4">
-                                <div class="card h-100">
-                                    <div class="card-header bg-primary text-white">{{inc @index}}. {{this.river.name}}</div>
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{numberFormat this.duration.hours}} hours</h5>
-                                        <p class="card-text"><small class="text-muted">
-                                            {{> chunks/explain-duration this.duration}}
-                                        </small></p>
-                                        <p class="card-text">{{numberFormat this.count.count}} incidents</p>
-                                        <p class="card-text"><small class="text-muted">
-                                            {{> chunks/explain-count this.count}}
-                                        </small></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    {{/each}}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-water me-2"></i>2024 - Rivers Polluted by {{ company.name }}
+                    </h2>
                 </div>
-            {{/components/section}}
+                <div class="card-body p-4">
+                    <div class="row row-cols-1 row-cols-md-3 g-4">
+                        {{#each rivers}}
+                            <div class="col">
+                                <a class="quiet-link" href="{{this.river.uri}}">
+                                    <div class="card border-0 shadow-sm h-100 hover-shadow">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0"><i class="bi bi-water me-2"></i>{{inc @index}}. {{this.river.name}}</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-clock-fill me-2"></i>
+                                                <h5 class="mb-0">{{numberFormat this.duration.hours}} hours</h5>
+                                                <small class="text-muted">
+                                                    - {{> chunks/explain-duration this.duration}}</small>
+                                            </div>
+
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-exclamation-circle me-2"></i>
+                                                <span>{{numberFormat this.count.count}} incidents</span>
+                                                <small class="text-muted">
+                                                    - {{> chunks/explain-count this.count}}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {{/each}}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 {{#if beaches}}
-    <div class="container">
-        <div class="row">
+    <div class="container py-4">
+        <div class="row mb-4">
             <div class="col">
-                {{#> components/section title=(concat "2024 - Beaches Polluted by " company.name)}}
-                    <div class="row row-cols-1 row-cols-md-3">
-                        {{#each beaches}}
-                            <a class="quiet-link" href="{{this.beach.uri}}">
-                                <div class="col mb-4">
-                                    <div class="card h-100">
-                                        <div class="card-header bg-primary text-white">{{inc @index}}. {{this.beach.name}}</div>
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{numberFormat this.duration.hours}} hours</h5>
-                                            <p class="card-text"><small class="text-muted">
-                                                {{> chunks/explain-duration this.duration}}
-                                            </small></p>
-                                            <p class="card-text">{{numberFormat this.count.count}} incidents</p>
-                                            <p class="card-text"><small class="text-muted">
-                                                {{> chunks/explain-count this.count}}
-                                            </small></p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        {{/each}}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h2 class="h4 mb-0"><i class="bi bi-tsunami me-2"></i>2024 - Beaches Polluted
+                            by {{ company.name }}</h2>
                     </div>
-                {{/components/section}}
+                    <div class="card-body p-4">
+                        <div class="row row-cols-1 row-cols-md-3 g-4">
+                            {{#each beaches}}
+                                <div class="col">
+                                    <a class="quiet-link" href="{{this.beach.uri}}">
+                                        <div class="card border-0 shadow-sm h-100 hover-shadow">
+                                            <div class="card-header bg-primary text-white">
+                                                <h5 class="mb-0"><i class="bi bi-umbrella-beach me-2"></i>{{inc @index}}. {{this.beach.name}}</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-clock-fill me-2"></i>
+                                                    <h5 class="mb-0">{{numberFormat this.duration.hours}} hours</h5>
+                                                    <small class="text-muted">
+                                                        - {{> chunks/explain-duration this.duration}}</small>
+                                                </div>
+
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-exclamation-circle me-2"></i>
+                                                    <span>{{numberFormat this.count.count}} incidents</span>
+                                                    <small class="text-muted">
+                                                        - {{> chunks/explain-count this.count}}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            {{/each}}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 {{/if}}
 
-<div class="container">
-    <div class="row">
+<div class="container py-4">
+    <div class="row mb-4">
         <div class="col">
-            {{#> components/section title="Water Companies" }}
-            {{/components/section}}
-        </div>
-    </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-building me-2"></i>Water Companies</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-info-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">These water companies are responsible for managing sewage treatment and
+                                    preventing pollution in our waterways.</p>
+                            </div>
+                        </div>
+                    </div>
 
-    <div class="row row-cols-1 row-cols-md-4">
-        {{#each links}}
-            <div class="col-sm-4 col-lg-3 mb-4">
-                {{> components/card-company this.company}}
+                    <div class="row row-cols-1 row-cols-md-4 g-4">
+                        {{#each links}}
+                            <div class="col-sm-4 col-lg-3">
+                                {{> components/card-company this.company}}
+                            </div>
+                        {{/each}}
+                    </div>
+                </div>
             </div>
-        {{/each}}
+        </div>
     </div>
 </div>
 
