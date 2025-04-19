@@ -96,6 +96,7 @@ fun main() {
                 appearance
             }
         }
+        .sortedBy { it.date }
 
 
     file.writeText(results.asJsonObject().toPrettyString())
