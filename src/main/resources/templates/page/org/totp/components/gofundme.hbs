@@ -1,43 +1,11 @@
-<div style="
-	-webkit-align-items: center;
-	-ms-flex-align: center;
-	align-items: center;
-	display: -webkit-flex;
-	display: -ms-flexbox;
-	display: flex;
-	margin-top: 1rem;
-">
-    <a href="https://www.gofundme.com/f/9qj846/donate">
-        <button style="
-	background: #f58131;
-	background: linear-gradient(180deg,#fdb933 35.42%,#f58131 139.58%);
-	border-color: #c06828;
-	box-shadow: 0 6px 14px rgba(0,0,0,.1);
-	font-size: 1rem;
-	-webkit-align-items: center;
-	-ms-flex-align: center;
-	align-items: center;
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	appearance: none;
-	border-radius: .75rem;
-	cursor: pointer;
-	display: -webkit-inline-flex;
-	display: -ms-inline-flexbox;
-	display: inline-flex;
-	font-size: 1rem;
-	font-weight: 700;
-	-webkit-justify-content: center;
-	-ms-flex-pack: center;
-	justify-content: center;
-	letter-spacing: .02em;
-	line-height: 1.5;
-	min-height: 3rem;
-	padding: .5rem 1.5rem;
-	position: relative;
-	text-align: center;
-" type="button"><span class="hrt-gradient-button-text">{{#if text}}{{text}}{{else}}Support now{{/if}}</span></button>
-        <div class="ms-2 mt-2">
+<div class="d-flex flex-column align-items-center justify-content-center" style="margin-top: 1rem;">
+    <a href="https://www.gofundme.com/f/9qj846/donate" class="text-center">
+        <button class="btn btn-success btn-lg px-4 py-2 rounded-pill" 
+                style="background: linear-gradient(180deg,#fdb933 35.42%,#f58131 139.58%); border-color: #c06828; box-shadow: 0 6px 14px rgba(0,0,0,.1);" 
+                type="button">
+            <span class="fw-bold">{{#if text}}{{text}}{{else}}Support now{{/if}}</span>
+        </button>
+        <div class="mt-3 text-center">
             <svg class="hrt-gfm-logo" fill="none" height="36" viewBox="0 0 105 36" width="105"
                  xmlns="http://www.w3.org/2000/svg"
                  name="GoFundMe">

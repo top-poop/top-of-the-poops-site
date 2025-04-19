@@ -15,12 +15,58 @@
     }}
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Custom Styles -->
+    <style>
+        .card {
+            transition: all 0.3s ease;
+            border: none;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .support-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .card-header {
+            font-weight: bold;
+        }
+        .responsive-iframe {
+            border: 0;
+            max-width: 100%;
+        }
+        .iframe-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .responsive-iframe {
+                min-height: 700px;
+            }
+        }
+    </style>
 </head>
 <body>
 {{> chunks/navbar }}
 
 {{#> components/jumbotron }}
-    We need your support!
+    <div class="text-center py-4">
+        <h1 class="display-3 fw-bold mb-4">We Need Your Support!</h1>
+        <p class="lead fs-3 mb-4">
+            Help us continue tracking sewage pollution and holding water companies accountable
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <i class="bi bi-heart-fill text-danger fs-1"></i>
+            <i class="bi bi-water text-primary fs-1"></i>
+            <i class="bi bi-heart-fill text-danger fs-1"></i>
+        </div>
+    </div>
 {{/components/jumbotron}}
 
 <script async
@@ -28,26 +74,71 @@
 </script>
 
 
-<div class="container">
+<div class="container py-4">
 
-    <div class="row justify-content-md-center">
-        <div class="col-md-6">
-            <p>Running a website with this much information in it costs money - Running the servers, design and programming are all expensive. Your support
-            means we can develop more information sources - start to personalise the information - develop pollution notification services, and generally improve
-                the quality and relevance of our information.</p>
-            <p>If you can, please support us with either a one-off or small recurring subscription - which you can cancel with no notice at any time.</p>
-            <p>We won't add you to any mailing lists - unless you choose.</p>
-            <p>Thank you!</p>
+    <div class="row justify-content-md-center mb-5">
+        <div class="col-md-8">
+            <div class="card border-0 bg-light shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-info-circle-fill text-primary support-icon"></i>
+                        <h2 class="fw-bold">Why We Need Your Help</h2>
+                    </div>
+                    <p class="lead">Running a website with this much information costs money. Server maintenance, design, and programming are all expensive investments that help us track pollution effectively.</p>
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <div class="me-3">
+                                    <i class="bi bi-graph-up-arrow text-success fs-4"></i>
+                                </div>
+                                <div>
+                                    <h5>Develop More Sources</h5>
+                                    <p>Your support helps us expand our data collection and analysis capabilities.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex mb-3">
+                                <div class="me-3">
+                                    <i class="bi bi-bell text-warning fs-4"></i>
+                                </div>
+                                <div>
+                                    <h5>Pollution Alerts</h5>
+                                    <p>We're developing real-time notification services for river pollution.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <div class="d-flex">
+                            <div class="me-2">
+                                <i class="bi bi-shield-check fs-4"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0"><strong>Your Privacy Matters:</strong> We won't add you to any mailing lists unless you choose to join. You can cancel subscriptions at any time with no notice.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-center mt-4 mb-0 fw-bold fs-5">Thank you for your support!</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col mb-3">
-            <div class="card h-100 text-center">
-                <div class="card-header">Stripe</div>
-                <div class="events  card-body">
+    <h2 class="text-center mb-4 fw-bold">Choose Your Support Method</h2>
 
-                    With Stripe you can subscribe as a Top-of-the-Poops supporter. It's a small monthly subscription, you can cancel at any time. You don't need to share any information with us. Supporters get first access to new features - which will include real-time information about river pollution
+    <div class="row g-4">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 text-center shadow-sm">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0"><i class="bi bi-credit-card me-2"></i>Stripe</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-arrow-repeat text-primary support-icon"></i>
+                    </div>
+                    <h5 class="card-title mb-3">Monthly Subscription</h5>
+                    <p class="card-text mb-4">Subscribe as a Top-of-the-Poops supporter with a small monthly payment. Cancel anytime with no questions asked. Supporters get first access to new features including real-time pollution alerts.</p>
 
                     <stripe-buy-button
                             buy-button-id="buy_btn_1PuHaFI1rZXPCk5qWxlwBBIb"
@@ -58,32 +149,38 @@
             </div>
         </div>
 
-        <div class="col mb-3">
-            <div class="card h-100 text-center">
-                <div class="card-header">GoFundMe</div>
-                <div class="events card-body">
-
-                    GoFundMe allows you to send a one-off payment to help support our work. It's quick and easy.
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 text-center shadow-sm">
+                <div class="card-header bg-success text-white py-3">
+                    <h4 class="mb-0"><i class="bi bi-cash-coin me-2"></i>GoFundMe</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-piggy-bank text-success support-icon"></i>
+                    </div>
+                    <h5 class="card-title mb-3">One-Time Donation</h5>
+                    <p class="card-text mb-4">Make a one-off payment to help support our work. It's quick, easy, and every contribution makes a difference in our fight against water pollution.</p>
 
                     {{> components/gofundme text="Support on GoFundMe"}}
                 </div>
             </div>
         </div>
 
-        <div class="col mb-3">
-            <div class="card h-100 text-center">
-                <div class="card-header">GitHub Sponsor</div>
-                <div class="events  card-body">
-
-                    For the techies, GitHub Sponsors allows people with a GitHub account or organisation to sponsor our Open Source technology.
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 text-center shadow-sm">
+                <div class="card-header bg-warning text-dark py-3">
+                    <h4 class="mb-0"><i class="bi bi-github me-2"></i>GitHub Sponsor</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-code-square text-warning support-icon"></i>
+                    </div>
+                    <h5 class="card-title mb-3">Support Open Source</h5>
+                    <p class="card-text mb-4">For the tech-savvy, GitHub Sponsors allows people with a GitHub account or organisation to sponsor our Open Source technology and development.</p>
 
                     <a target="_blank" href="https://github.com/sponsors/top-poop">
-                        <button class="btn btn-warning mt-2" aria-label="Sponsor @top-poop on GitHub">
-                            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16"
-                                 data-view-component="true"
-                                 class="octicon octicon-heart icon-sponsor color-fg-sponsors me-2">
-                                <path d="m8 14.25.345.666a.75.75 0 0 1-.69 0l-.008-.004-.018-.01a7.152 7.152 0 0 1-.31-.17 22.055 22.055 0 0 1-3.434-2.414C2.045 10.731 0 8.35 0 5.5 0 2.836 2.086 1 4.25 1 5.797 1 7.153 1.802 8 3.02 8.847 1.802 10.203 1 11.75 1 13.914 1 16 2.836 16 5.5c0 2.85-2.045 5.231-3.885 6.818a22.066 22.066 0 0 1-3.744 2.584l-.018.01-.006.003h-.002ZM4.25 2.5c-1.336 0-2.75 1.164-2.75 3 0 2.15 1.58 4.144 3.365 5.682A20.58 20.58 0 0 0 8 13.393a20.58 20.58 0 0 0 3.135-2.211C12.92 9.644 14.5 7.65 14.5 5.5c0-1.836-1.414-3-2.75-3-1.373 0-2.609.986-3.029 2.456a.749.749 0 0 1-1.442 0C6.859 3.486 5.623 2.5 4.25 2.5Z"></path>
-                            </svg>
+                        <button class="btn btn-warning btn-lg px-4" aria-label="Sponsor @top-poop on GitHub">
+                            <i class="bi bi-heart-fill me-2"></i>
                             <span>Sponsor on GitHub</span>
                         </button>
                     </a>
@@ -92,16 +189,26 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-6 offset-3">
-            <div class="card h-100 text-center">
-                <div class="card-header">Email List</div>
-                <div class="events card-body">
-                    Sign up for our email list - to get more information about pollution in rivers and seas
+    <div class="row justify-content-center mt-5 pt-4 border-top">
+        <div class="col-md-8">
+            <div class="text-center mb-4">
+                <i class="bi bi-envelope-paper text-info support-icon"></i>
+                <h2 class="fw-bold">Stay Informed</h2>
+                <p class="lead">Join our email list to receive updates about water pollution and our ongoing work</p>
+            </div>
 
-                    <iframe style="min-height: 650px; min-width: 600px;" src="https://cdn.forms-content-1.sg-form.com/ddd499f1-948a-11ef-832c-c6e07dcc13bd">
-                    Our sign-up page is here but your browser isn't displaying it.
-                    </iframe>
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white py-3">
+                    <h4 class="mb-0 text-center"><i class="bi bi-envelope-check me-2"></i>Email Newsletter</h4>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <p class="mb-4">Sign up to get more information about pollution in rivers and seas, campaign updates, and ways you can help make a difference.</p>
+
+                    <div class="iframe-container">
+                        <iframe class="responsive-iframe" style="min-height: 650px; width: 100%;" src="https://cdn.forms-content-1.sg-form.com/ddd499f1-948a-11ef-832c-c6e07dcc13bd">
+                            Our sign-up page is here but your browser isn't displaying it.
+                        </iframe>
+                    </div>
                 </div>
             </div>
         </div>
