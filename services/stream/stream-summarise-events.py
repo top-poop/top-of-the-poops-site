@@ -11,7 +11,7 @@ from statemachine import statemachine, State
 
 from event_calendar import CSOState, state_name_to_cso_state, StreamMonitorState, Calendar
 from psy import select_many
-from services.stream.streamdb import Database
+from streamdb import Database
 from stream import EventType
 from streamdb import StreamEvent
 
@@ -99,7 +99,7 @@ def aggregate_stream_events(connection, start_date: datetime.date) -> CalendarLi
     return l
 
 
-def insert_stream_summary(connection, cso_id, calendar: Calendar):
+def insert_stream_summary(connection, since: datetime.date, cso_id, calendar: Calendar):
     with connection.cursor() as cursor:
         execute_batch(
             cur=cursor,
@@ -120,7 +120,7 @@ def insert_stream_summary(connection, cso_id, calendar: Calendar):
                 "stop": totals[CSOState.STOP],
                 "potential_start": totals[CSOState.POTENTIAL_START],
                 "offline": totals[CSOState.OFFLINE]
-            } for date, totals in calendar.allocations()],
+            } for date, totals in calendar.allocations(since=since)],
             page_size=1000,
         )
     connection.commit()
@@ -130,11 +130,18 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Take stream events and turn them into daily summary")
     parser.add_argument("--state", action="store_true", help="Write state transitions to file")
+    parser.add_argument("--restart", action="store_true", help="Write information since start of time")
     args = parser.parse_args()
 
     start_date = datetime.date.fromisoformat("2024-12-01")
 
     db_host = os.environ.get("DB_HOST", "localhost")
+
+    now = datetime.date.today()
+    include_since = now - datetime.timedelta(days=3)
+
+    if args.restart:
+        include_since = datetime.date.min
 
     with psycopg2.connect(host=db_host, database="gis", user="docker", password="docker",
                           cursor_factory=DictCursor) as conn:
@@ -150,7 +157,7 @@ if __name__ == "__main__":
 
         print(">> Updating Summary...")
         for cso_id, calendar in cl.things_at(recent):
-            insert_stream_summary(conn, cso_id, calendar)
+            insert_stream_summary(conn, since=include_since, cso_id=cso_id, calendar=calendar)
 
     if args.state:
         try:

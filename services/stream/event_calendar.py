@@ -77,9 +77,9 @@ class Calendar:
         self.current = state
         self.last = at
 
-    def allocations(self):
+    def allocations(self, since:datetime.date):
         dates = sorted(self.buckets.keys())
-        return [(d, self.buckets[d].totals()) for d in dates if self.buckets[d].total.total_seconds() > 0]
+        return [(d, self.buckets[d].totals()) for d in dates if d >= since and self.buckets[d].total.total_seconds() > 0]
 
 
 def date_of(s: str) -> datetime.date:
@@ -87,7 +87,7 @@ def date_of(s: str) -> datetime.date:
 
 
 def datetime_of(s: str) -> datetime.datetime:
-    return datetime.datetime.fromisoformat(s)
+    return datetime.datetime.fromisoformat(s).replace(tzinfo=datetime.UTC)
 
 def state_name_to_cso_state(s:str) -> CSOState:
     match s:
@@ -126,7 +126,7 @@ def test_calendar_with_single_event_spanning_multiple_days():
 
     c.add(CSOState.START, datetime_of("2023-01-02 02:00"))
     c.add(CSOState.STOP, at_midnight(datetime_of("2023-01-04")))
-    b = c.allocations()
+    b = c.allocations(since=datetime.date.min)
 
     assert len(b) == 3
     assert b[0] == (date_of("2023-01-01"), {CSOState.STOP: datetime.timedelta(days=1)})
