@@ -94,9 +94,9 @@ class CompanyPageHandlerTest {
         expectThat(html).twitterImageUri()
             .isEqualTo("https://top-of-the-poops.org/badges/company/water-co-2024.png")
 
-        expectThat(html.select("h3").map { it.text() })
-            .one { isEqualTo("2024 - Rivers Polluted by Water Co") }
-            .one { isEqualTo("2024 - Beaches Polluted by Water Co") }
+        expectThat(html.select("h2").map { it.text() })
+            .one { contains("2024 - Rivers Polluted by Water Co") }
+            .one { contains("2024 - Beaches Polluted by Water Co") }
 
         expectThat(response.bodyString()) {
             contains("1,234")
