@@ -16,137 +16,263 @@
     }}
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Custom Styles -->
+    <style>
+        .card {
+            transition: all 0.3s ease;
+            border: none;
+        }
+        .map-container {
+            min-height: 640px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .control-btn {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        .control-btn:hover {
+            background-color: rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
 {{> chunks/navbar }}
 
-<div class="container">
-    <div class="row align-items-center">
-        <div class="col-md-6">
-            <div style="min-height: 500px;" id="now">
-                <div></div>
+{{#> components/jumbotron }}
+    <div class="text-center py-4">
+        <h1 class="display-3 fw-bold mb-4">Live Sewage Overflow Map</h1>
+        <p class="lead fs-4 mb-4">
+            Track sewage overflows in real-time across England and Wales
+            <br/>Updated every <span class="badge bg-primary fs-5">15 minutes</span>
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="/support" class="btn btn-danger btn-lg px-4 py-2">
+                <i class="bi bi-heart-fill me-2"></i>Support Our Work
+            </a>
+        </div>
+    </div>
+{{/components/jumbotron}}
+
+<div class="container py-4" id="map-section">
+    <div class="row align-items-center g-4">
+        <div class="col-md-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="map-container" id="now">
+                        <div></div>
+                    </div>
+                    <div class="card-footer bg-light p-3">
+                        <form>
+                            <div class="d-flex justify-content-center mb-3">
+                                <div class="btn-group">
+                                    <img class="control-btn" alt="move start" id="ctrl-le" src="/assets/icons/bi/chevron-bar-left.svg"/>
+                                    <img class="control-btn" alt="move earlier 1 day" id="ctrl-ld" src="/assets/icons/bi/chevron-double-left.svg"/>
+                                    <img class="control-btn" alt="move earlier" id="ctrl-l" src="/assets/icons/bi/chevron-left.svg"/>
+                                    <img class="control-btn" alt="move later" id="ctrl-r" src="/assets/icons/bi/chevron-right.svg"/>
+                                    <img class="control-btn" alt="move later 1 day" id="ctrl-rd" src="/assets/icons/bi/chevron-double-right.svg"/>
+                                    <img class="control-btn" alt="move end" id="ctrl-re" src="/assets/icons/bi/chevron-bar-right.svg"/>
+                                </div>
+                            </div>
+                            <div class="form-group row align-items-center">
+                                <label for="dateSlider" class="col-md-4 col-form-label fw-bold">
+                                    <i class="bi bi-calendar-event me-2"></i>
+                                    <span id="dateSliderValue"></span>
+                                </label>
+                                <div class="col-md-8">
+                                    <input id="dateSlider" type="range" class="form-range">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <form>
-                <div class="row">
-                    <div class="col-md-6 offset-4">
-                        <img style="height:1.5em;" alt="move start" id="ctrl-le" src="/assets/icons/bi/chevron-bar-left.svg"/>
-                        <img style="height:1.5em;" alt="move earlier 1 day" id="ctrl-ld" src="/assets/icons/bi/chevron-double-left.svg"/>
-                        <img style="height:1.5em;" alt="move earlier" id="ctrl-l" src="/assets/icons/bi/chevron-left.svg"/>
-                        <img style="height:1.5em;" alt="move later" id="ctrl-r" src="/assets/icons/bi/chevron-right.svg"/>
-                        <img style="height:1.5em;" alt="move later 1 day" id="ctrl-rd" src="/assets/icons/bi/chevron-double-right.svg"/>
-                        <img style="height:1.5em;" alt="move end" id="ctrl-re" src="/assets/icons/bi/chevron-bar-right.svg"/>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="dateSlider" class="col-md-4 col-form-label"><span id="dateSliderValue"></span></label>
-                    <div class="col-md-8">
-                        <input id="dateSlider" type="range" class="form-range">
-                    </div>
-                </div>
-            </form>
         </div>
         <div class="col-md-5">
-            <div class="display-5 mt-2">Live Overflow Map</div>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-map me-2"></i>Map Information</h2>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h3 class="h5 fw-bold text-primary mb-3">What am I seeing?</h3>
+                        <p>Here are the CSOs in England that we know are overflowing right now. We are using the Water Companies'
+                            own data, updated every 15 minutes.</p>
+                    </div>
 
-            <p>Here are the CSOs in England that we know are overflowing right now. We are using the Water Companies'
-                own data, updated every 15 minutes.</p>
+                    <div class="mb-4">
+                        <h3 class="h5 fw-bold text-primary mb-3">Map Legend</h3>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex align-items-center border-0 px-0">
+                                <span class="badge rounded-pill bg-primary me-2">&nbsp;</span>
+                                <span>Each dot represents an overflowing CSO</span>
+                            </li>
+                            <li class="list-group-item d-flex align-items-center border-0 px-0">
+                                <span class="badge bg-info me-2"><i class="bi bi-droplet-fill"></i></span>
+                                <span>Blue squares represent rainfall - darker blue means more rain - we get rainfall data two days delayed,
+                                    so you can't see rainfall for live data, but if you scroll back in time, you can see how much it was raining.</span>
+                            </li>
+                        </ul>
+                    </div>
 
-            <p>Each dot represents an overflowing CSO - Each Water Company has a different colour</p>
-
-            <p>Blue squares represent rainfall, if there is any - the darker the blue, the more rain.</p>
-
-            <p>With your support we can do more... so please <a href="/support">
-                <span class="btn btn-primary me-1">Donate</span>
-            </a></p>
-
-            <div class="table-responsive">
-                <table id="table-stream-summary" data-id="stream-summary" class="table table-spills table-striped">
-                    <thead>
-                    <tr>
-                        <td>Company</td>
-                        <td>Total CSOs</td>
-                        <td>Not Overflowing</td>
-                        <td>Overflowing</td>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {{#each summary.companies}}
-                        <tr>
-                            <td>{{this.company}}</td>
-                            <td class="text-end">{{numberFormat this.count.total}}</td>
-                            <td class="text-end">{{numberFormat this.count.stop}}</td>
-                            <td class="text-end">{{numberFormat this.count.start}}</td>
-                        </tr>
-                    {{/each}}
-                    </tbody>
-                    <tfoot>
-                    <tr>
-                        <td><em>Totals</em></td>
-                        <td class="text-end">{{numberFormat summary.count.total}}</td>
-                        <td class="text-end">{{numberFormat summary.count.stop}}</td>
-                        <td class="text-end">{{numberFormat summary.count.start}}</td>
-                    </tr>
-                    </tfoot>
-                </table>
+                    <div class="alert alert-warning">
+                        <div class="d-flex">
+                            <div class="me-2">
+                                <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">With your support we can do more to track and report on sewage pollution.</p>
+                                <a href="/support" class="btn btn-warning mt-2">
+                                    <i class="bi bi-heart me-1"></i> Donate Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
 
-            <p>Yorkshire Water, Dwr Cymru and Scottish Water are not yet here... they are coming soon</p>
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-table me-2"></i>Overflow Summary by Company</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="table-stream-summary" data-id="stream-summary" class="table table-hover">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Company</th>
+                                <th class="text-end">Total CSOs</th>
+                                <th class="text-end">Not Overflowing</th>
+                                <th class="text-end">Overflowing</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each summary.companies}}
+                                <tr>
+                                    <td><i class="bi bi-building me-2 text-muted"></i>{{this.company}}</td>
+                                    <td class="text-end">{{numberFormat this.count.total}}</td>
+                                    <td class="text-end">{{numberFormat this.count.stop}}</td>
+                                    <td class="text-end fw-bold {{#if this.count.start}}text-danger{{/if}}">{{numberFormat this.count.start}}</td>
+                                </tr>
+                            {{/each}}
+                            </tbody>
+                            <tfoot class="table-light">
+                            <tr>
+                                <td><strong>Totals</strong></td>
+                                <td class="text-end">{{numberFormat summary.count.total}}</td>
+                                <td class="text-end">{{numberFormat summary.count.stop}}</td>
+                                <td class="text-end fw-bold text-danger">{{numberFormat summary.count.start}}</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-info mt-3 mb-0">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Yorkshire Water, Dwr Cymru and Scottish Water are not yet included but will be coming soon.
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="container mt-4">
+<div class="container py-5">
     <div class="row">
         <div class="col">
-            {{#> components/section title="How do we interpret the data?" }}
-                <div class="row">
-                    <div class="col">
-                        <div class="mb-4">
-                            <p>You might notice that some of the figures in the above chart, particularly around how
-                                long
-                                a CSO has been overflowing, are different from the figures on other websites. We use a
-                                more
-                                sophisticated model to figure out when CSOs really started overflowing.</p>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-graph-up me-2"></i>How We Interpret the Data</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-lg-8">
+                            <div class="mb-4">
+                                <h3 class="h5 fw-bold text-primary mb-3">Our Sophisticated Analysis Model</h3>
+                                <p>You might notice that some of the figures in the above chart, particularly around how
+                                    long a CSO has been overflowing, are different from the figures on other websites. We use a
+                                    more sophisticated model to figure out when CSOs really started overflowing.</p>
 
-                            <p>The water companies send a signal each time a CSO overflows, saying that it has 'Started'
-                                and telling us when. Sometimes though, it sends multiple 'Started' events in a row. One
-                                event will say 'Started at 1pm', the next 'Started at 3pm', the next 'Started at
-                                10pm'...</p>
+                                <p>The water companies send a signal each time a CSO overflows, saying that it has 'Started'
+                                    and telling us when. Sometimes though, it sends multiple 'Started' events in a row. One
+                                    event will say 'Started at 1pm', the next 'Started at 3pm', the next 'Started at
+                                    10pm'...</p>
 
-                            <p>Its clear though that despite the latest alert being 'Started at 10pm', the overflow did
-                                actually start at 1pm - so the CSO has been overflowing for far longer. This is how we
-                                keep track
-                                of the state of each CSO overflow, and why our numbers are different, we don't just rely
-                                on the
-                                latest information.</p>
+                                <p>Its clear though that despite the latest alert being 'Started at 10pm', the overflow did
+                                    actually start at 1pm - so the CSO has been overflowing for far longer. This is how we
+                                    keep track of the state of each CSO overflow, and why our numbers are different, we don't just rely
+                                    on the latest information.</p>
+                            </div>
+
+                            <div class="alert alert-secondary">
+                                <div class="d-flex">
+                                    <div class="me-2">
+                                        <i class="bi bi-lightbulb-fill text-warning fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <p class="mb-0">There may be errors in our interpretation... and if we find any we're committed to updating
+                                            this information so that it is as accurate as possible. If you find an error, please let us
+                                            know.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card bg-light border-0 h-100">
+                                <div class="card-body">
+                                    <h4 class="h5 fw-bold text-primary mb-3">Why This Matters</h4>
+                                    <p>Accurate tracking of overflow durations helps us hold water companies accountable and provides a true picture of pollution in our waterways.</p>
+                                    <div class="text-center mt-4">
+                                        <i class="bi bi-droplet-half text-primary" style="font-size: 3rem;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-light">
+                                    <h3 class="h5 mb-0">Raw Data from Water Companies</h3>
+                                </div>
+                                <div class="card-body text-center">
+                                    <figure class="figure mb-0">
+                                        <img class="img-fluid rounded" src="/assets/images/stream-multiple-events.png"
+                                             alt="An image showing some database records as supplied by Uk Water"/>
+                                        <figcaption class="figure-caption mt-2">How we receive the data.</figcaption>
+                                    </figure>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-light">
+                                    <h3 class="h5 mb-0">Our Interpretation</h3>
+                                </div>
+                                <div class="card-body text-center">
+                                    <figure class="figure mb-0">
+                                        <img class="img-fluid rounded" src="/assets/images/stream-interpreted-event.png"
+                                             alt="An image showing our interpretation of those records, there are far fewer"/>
+                                        <figcaption class="figure-caption mt-2">After we've interpreted it.</figcaption>
+                                    </figure>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md">
-                        <figure class="figure">
-                            <img class="img-fluid" src="/assets/images/stream-multiple-events.png"
-                                 alt="An image showing some database records as supplied by Uk Water"/>
-                            <figcaption class="figure-caption">How we receive the data.</figcaption>
-                        </figure>
-                    </div>
-                    <div class="col-md">
-                        <figure class="figure">
-                            <img class="img-fluid" src="/assets/images/stream-interpreted-event.png"
-                                 alt="An image showing our interpretation of those records, there are far fewer"/>
-                            <figcaption class="figure-caption">After we've interpreted it.</figcaption>
-                        </figure>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <p>There may be errors in our interpretation... and if we find any we're committed to updating
-                            this
-                            information so that it is as accurate as possible. If you find an error, please let us
-                            know.</p>
-                    </div>
-                </div>
-            {{/components/section}}
+            </div>
         </div>
     </div>
 </div>
