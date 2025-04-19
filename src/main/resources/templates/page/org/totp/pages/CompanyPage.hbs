@@ -89,7 +89,7 @@
                     {{#each (take live.overflowing n=9)}}
                         <div class="col mb-4">
                             <div class="card h-100">
-                                <div class="card-header">{{inc @index}}. {{this.id}}</div>
+                                <div class="card-header bg-primary text-white">{{inc @index}}. {{this.id}}</div>
                                 <div class="events  card-body">
                                     <p class="card-title">
                                         <a href="{{this.constituency.uri}}">{{this.constituency.name}}</a>
@@ -241,7 +241,7 @@
                     {{#each worstCsos}}
                         <div class="col mb-4">
                             <div class="card h-100">
-                                <div class="card-header">{{inc @index}}. {{this.cso.sitename}}</div>
+                                <div class="card-header bg-primary text-white">{{inc @index}}. {{this.cso.sitename}}</div>
                                 <div class="card-body">
                                     <p class="card-title">
                                         <a href="{{this.constituency.uri}}">{{this.constituency.name}}</a> polluted
@@ -405,7 +405,7 @@
                         <a class="quiet-link" href="{{this.river.uri}}">
                             <div class="col mb-4">
                                 <div class="card h-100">
-                                    <div class="card-header">{{inc @index}}. {{this.river.name}}</div>
+                                    <div class="card-header bg-primary text-white">{{inc @index}}. {{this.river.name}}</div>
                                     <div class="card-body">
                                         <h5 class="card-title">{{numberFormat this.duration.hours}} hours</h5>
                                         <p class="card-text"><small class="text-muted">
@@ -436,7 +436,7 @@
                             <a class="quiet-link" href="{{this.beach.uri}}">
                                 <div class="col mb-4">
                                     <div class="card h-100">
-                                        <div class="card-header">{{inc @index}}. {{this.beach.name}}</div>
+                                        <div class="card-header bg-primary text-white">{{inc @index}}. {{this.beach.name}}</div>
                                         <div class="card-body">
                                             <h5 class="card-title">{{numberFormat this.duration.hours}} hours</h5>
                                             <p class="card-text"><small class="text-muted">
