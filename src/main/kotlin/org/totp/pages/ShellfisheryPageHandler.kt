@@ -50,7 +50,7 @@ fun List<ShellfishCSO>.summary(): PollutionSummary {
             .reduceOrNull { acc, duration -> acc.plus(duration) }
             ?: Duration.ZERO).toRenderable(),
         csoCount = size,
-        lowReportingCount = count { it.reporting.toDouble() < 0.5 },
+        lowReportingCount = count { it.reporting.toDouble() < 50.0 },
         zeroReportingCount = count { it.reporting.toDouble() == 0.0 }
     )
 }

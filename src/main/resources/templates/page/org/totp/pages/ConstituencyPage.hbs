@@ -14,9 +14,6 @@
     <!-- only for constituency page atm -->
     <link rel="canonical" href="{{ uri  }}"/>
 
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
     <!-- Custom Styles -->
     <style>
         .map {
@@ -115,7 +112,7 @@
                             <div class="form-text mb-1"><i class="bi bi-info-circle me-1"></i>Select the constituency
                                 from the drop-down
                             </div>
-                            <div class="form-text"></i>✔ means we have experimental daily data since 2023</div>
+                            <div class="form-text">✔ means we have experimental daily data since 2023</div>
                         </div>
                     </form>
                 </div>
@@ -358,11 +355,19 @@
                         </div>
                         <div>
                             <p class="mb-0">Reporting refers to how much of the time the monitoring was active.
-                                In this constituency {{summary.lowReportingCount}} of the total {{summary.csoCount}}
-                                CSO locations
-                                had reporting enabled for less than
-                                half the year, of which <strong>{{summary.zeroReportingCount}}</strong> had
-                                <em>zero</em> reporting.</p>
+                                {{#eq summary.lowReportingCount 0}}
+                                    In this constituency all the declared CSOs appeared to have monitoring enabled for more than 50% of the year
+                                {{else}}
+                                    In this constituency {{summary.lowReportingCount}} of the total {{summary.csoCount}}
+                                    CSO locations
+                                    had reporting enabled for less than
+                                    half the year.
+                                    {{#gt summary.zeroReportingCount 0}}
+                                        Of these <strong>{{summary.zeroReportingCount}}</strong> had
+                                        <em>zero</em> reporting.
+                                    {{/gt}}
+                                {{/eq}}
+                            </p>
                         </div>
                     </div>
 
