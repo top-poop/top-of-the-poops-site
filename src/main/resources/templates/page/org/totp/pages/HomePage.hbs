@@ -135,7 +135,7 @@
         </div>
         <div class="col-md-6">
             <div class="card border-0">
-                <div class="card-body align-top">
+                <div class="card-body align-top h-100">
                     <div id="map-constituency" class="sewage-map rounded"></div>
                 </div>
             </div>
@@ -426,10 +426,8 @@
 
     import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
 
-
     const chart = (data) => {
         let constituencyDiv = document.getElementById("map-constituency");
-        const rect = constituencyDiv.getBoundingClientRect()
 
         constituencyDiv.append(
                 Plot.plot({
@@ -440,7 +438,7 @@
                             coordinates: [[-6, 50.0], [1.8, 57.9]],
                         },
                     },
-                    height: rect.height,
+                    height: 800,
                     color: {
                         scheme: "oranges",
                     },
@@ -466,7 +464,6 @@
 
     const chart = (data, countries) => {
         let beachesDiv = document.getElementById("map-beaches");
-        const rect = beachesDiv.getBoundingClientRect()
 
         return beachesDiv.appendChild(
                 Plot.plot(
@@ -478,7 +475,7 @@
                                     coordinates: [[-6, 49.9], [1.8, 55.9]],
                                 },
                             },
-                            height: rect.height,
+                            height: 800,
                             r: {range: [10, 45], domain: [100, 8700]},
                             color: {
                                 type: "linear",

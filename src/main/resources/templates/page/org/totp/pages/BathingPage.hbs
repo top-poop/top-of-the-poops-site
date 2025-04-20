@@ -24,7 +24,6 @@
         .map {
             min-height: 500px;
             border-radius: 8px;
-            overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
@@ -222,7 +221,7 @@
                                             this.count.count}}</td>
                                     <td class="align-middle" data-duration="{{this.duration.hours}}">{{numberFormat
                                             this.duration.hours}}</td>
-                                    <td class="align-middle{{#if this.reporting lt 0.5}} text-danger{{/if}}"
+                                    <td class="align-middle{{#lt this.reporting 50}} text-danger{{/lt}}"
                                         data-reporting="{{this.reporting}}">{{numberFormat this.reporting}}</td>
                                 </tr>
                             {{/each}}
