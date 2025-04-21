@@ -1,6 +1,7 @@
 import csv
 import datetime
 import gzip
+import itertools
 import os
 from dataclasses import asdict, fields, Field
 from io import StringIO
@@ -94,7 +95,7 @@ class DwrCymruCSV(CSVFile[DwrCymruRecord]):
 
 class Storage:
 
-    def available(self, company: WaterCompany) -> List[datetime.datetime]:
+    def available(self, company: WaterCompany, since: datetime.datetime) -> List[datetime.datetime]:
         raise NotImplementedError()
 
     def load(self, company: WaterCompany, dt: datetime.datetime) -> Optional[str]:
@@ -117,11 +118,12 @@ class SqlliteStorage(Storage):
     def _filename(self, company: WaterCompany, dt: datetime.datetime):
         return f"{company.name}/{dt.strftime('%Y%m%d%H%M%S')}.csv.gz"
 
-    def available(self, company: WaterCompany) -> List[datetime.datetime]:
+    def available(self, company: WaterCompany, since: datetime.datetime) -> List[datetime.datetime]:
         keys = [k.split('/')[-1].replace('.csv.gz', '') for k in self.cache.keys() if k.startswith(f"{company.name}/")]
-        dates = {datetime.datetime.strptime(k, '%Y%m%d%H%M%S').replace(tzinfo=datetime.UTC) for k in keys}
+        all_dates = {datetime.datetime.strptime(k, '%Y%m%d%H%M%S').replace(tzinfo=datetime.UTC) for k in keys}
+        dates = {d for d in all_dates if d > since}
         if self.delegate is not None:
-            dates.update(self.delegate.available(company))
+            dates.update(self.delegate.available(company, since))
 
         return sorted(list(dates))
 
@@ -148,11 +150,28 @@ class S3Storage(Storage):
     def __init__(self, bucket: s3_resources.Bucket):
         self.bucket = bucket
 
-    def available(self, company: WaterCompany) -> List[datetime.datetime]:
-        items = list(self.bucket.objects.filter(Prefix=f"{company.name}/"))
+    def _files_on(self, company: WaterCompany, date: datetime.date) -> List[datetime.datetime]:
+        print(f">> Finding files for {company} on {date}")
+        folder = date.strftime("%Y/%m/%d")
+        items = list(self.bucket.objects.filter(Prefix=f"{company.name}/{folder}/"))
         keys = [i.key.split('/')[-1].replace('.csv.gz', '') for i in items if i.key.endswith(".csv.gz")]
         dates = [datetime.datetime.strptime(k, '%Y%m%d%H%M%S').replace(tzinfo=datetime.UTC) for k in keys]
-        return sorted(dates)
+        return dates
+
+    def available(self, company: WaterCompany, since: datetime.datetime) -> List[datetime.datetime]:
+
+        start_date = since.date()
+        end_date = datetime.date.today()
+
+        dates = [start_date + datetime.timedelta(days=x) for x in range((end_date - start_date).days + 1)]
+
+        return sorted(
+            list(
+                itertools.chain.from_iterable(
+                    [[d for d in self._files_on(company=company, date=date) if d > since] for date in dates]
+                )
+            )
+        )
 
     def migration(self, company: WaterCompany):
 
@@ -204,8 +223,8 @@ class CSVFileStorage[T]:
         self.storage = storage
         self.csvfile = csvfile
 
-    def available(self, company: WaterCompany) -> List[datetime.datetime]:
-        return self.storage.available(company)
+    def available(self, company: WaterCompany, since: datetime.datetime) -> List[datetime.datetime]:
+        return self.storage.available(company, since=since)
 
     def save(self, company: WaterCompany, dt: datetime.datetime, items: List[T]):
         content = self.csvfile.to_csv(items)

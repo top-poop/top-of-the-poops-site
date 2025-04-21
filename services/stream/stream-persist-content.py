@@ -1,7 +1,9 @@
 import argparse
+import datetime
 import os
 from collections import Counter
 from dataclasses import replace
+from datetime import timezone
 
 import psycopg2
 from psycopg2.extras import DictCursor
@@ -46,11 +48,18 @@ if __name__ == '__main__':
 
         for company in companies:
 
-            available = [ts for ts in storage.available(company=company)]
+            since = database.most_recent_loaded(company=company).file_time
 
-            loaded_files = [p.file_time for p in database.loaded_files(company=company)]
+            if since is None:
+                since = datetime.datetime.combine(
+                    date=datetime.date.fromisoformat("2024-12-01"),
+                    time=datetime.datetime.min.time(),
+                    tzinfo=timezone.utc
+                )
 
-            to_process = [t for t in available if t not in loaded_files]
+            to_process = [ts for ts in storage.available(company=company, since=since)]
+
+            print(f"Loading most recent records for {company}")
 
             most_recent = database.most_recent_records(company=company)
             most_recent_by_id = {x.id: x for x in most_recent}
