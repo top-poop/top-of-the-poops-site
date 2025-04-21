@@ -210,7 +210,6 @@ class Database:
     def most_recent_records(self, company: WaterCompany) -> List[FeatureRecord]:
         return list(select_many(connection=self.connection,
                                 sql="""
-
                                     WITH ranked_events AS (SELECT files.stream_file_id,
                                                                   files.file_time,
                                                                   files.company,
@@ -224,7 +223,7 @@ class Database:
                                                                   content.lon,
                                                                   content.receiving_water,
                                                                   ROW_NUMBER() OVER (PARTITION BY id ORDER BY file_time desc) AS rn
-                                                           FROM stream_file_content content
+                                                           FROM stream_file_events content
                                                                     join stream_files files on content.stream_file_id = files.stream_file_id
                                                            where company = %(company)s)
                                     SELECT *
