@@ -481,8 +481,11 @@
         maxZoom: 18,
     });
 
+    let protocol = new pmtiles.Protocol({metadata: false});
+    maplibregl.addProtocol("pmtiles", protocol.tile);
+
     var gl = L.maplibreGL({
-        style: 'https://top-of-the-poops.org/tiles/styles/v2/style.json',
+        style: 'https://top-of-the-poops.org/tilespm/styles/totp.json',
         attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
     }).addTo(map);
     const layer = L.geoJSON(JSON.parse(document.getElementById("map-geojson").textContent), {style: myStyle});
