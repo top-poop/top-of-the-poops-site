@@ -1,7 +1,7 @@
 import datetime
 from collections import defaultdict
 from enum import Enum
-from typing import Dict
+from typing import Dict, Tuple, List
 
 from statemachine import StateMachine, State
 
@@ -77,7 +77,7 @@ class Calendar:
         self.current = state
         self.last = at
 
-    def allocations(self, since:datetime.date):
+    def allocations(self, since:datetime.date) -> List[Tuple]:
         dates = sorted(self.buckets.keys())
         return [(d, self.buckets[d].totals()) for d in dates if d >= since and self.buckets[d].total.total_seconds() > 0]
 

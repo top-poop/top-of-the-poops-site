@@ -31,6 +31,8 @@ if __name__ == '__main__':
     else:
         feature_filter = lambda x: True
 
+    update_materialised_views = False
+
     with psycopg2.connect(host=db_host, database="gis", user="docker", password="docker",
                           cursor_factory=DictCursor) as conn:
 
@@ -55,6 +57,7 @@ if __name__ == '__main__':
                 new_cso_features = [f for f in features if f.id not in ids]
                 if new_cso_features:
                     print(f"Found {len(new_cso_features)} new CSOs")
+                    update_materialised_views = True
                     database.insert_cso(company=company, features=new_cso_features)
                     ids = database.load_ids(company=company)
 
@@ -79,3 +82,8 @@ if __name__ == '__main__':
 
                 database.mark_processed(file)
                 conn.commit()
+
+        if update_materialised_views:
+            print("Updating views...")
+            with conn.cursor() as cursor:
+                cursor.execute("refresh materialized view stream_cso_grid")

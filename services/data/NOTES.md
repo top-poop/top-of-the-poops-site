@@ -69,6 +69,8 @@ pg_restore -Ft -U docker -h postgres-upgrade --dbname=gis < postgres-$(date +"%Y
 ```
 
 
+# Remote proxy
 
+tcpserver -HR <ip> 8000 stdbuf -i0 -o0 -e0 docker exec -i admin socat - TCP:postgres:5432
 
 

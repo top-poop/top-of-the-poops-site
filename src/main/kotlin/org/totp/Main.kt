@@ -114,7 +114,7 @@ class EDMAnnualSummary(val edm: EDM) : HttpHandler {
 fun main() {
 
     val isDevelopment =
-        EnvironmentKey.boolean().required("DEVELOPMENT_MODE", "Use fake data server (local files) & hot reload")
+        EnvironmentKey.boolean().required("DEVELOPMENT_MODE", "Fake data server (local files) & hot reload")
     val dataServiceUri = EnvironmentKey.uri().required("DATA_SERVICE_URI", "URI for Data Service")
     val debugging = EnvironmentKey.boolean().required("DEBUG_MODE", "Print all request and response")
     val dbHost = EnvironmentKey.string().defaulted("DB_HOST", "localhost", "Print all request and response")

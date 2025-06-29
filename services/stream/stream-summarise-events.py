@@ -22,7 +22,7 @@ from streamdb import StreamEvent
 class CalendarListener:
 
     def __init__(self, start: datetime.date):
-        self.monitors: Mapping[str: Calendar] = defaultdict(lambda: Calendar(CSOState.UNKNOWN, start))
+        self.monitors: Mapping[str, Calendar] = defaultdict(lambda: Calendar(CSOState.UNKNOWN, start))
         self.current: Optional[Calendar] = None
 
     def new(self, cso_id: str):
@@ -101,29 +101,33 @@ def aggregate_stream_events(connection, start_date: datetime.date) -> CalendarLi
 
 def insert_stream_summary(connection, since: datetime.date, cso_id, calendar: Calendar):
     with connection.cursor() as cursor:
-        execute_batch(
-            cur=cursor,
-            sql="""insert into stream_summary ( stream_cso_id, date, unknown, start, stop, potential_start, offline) 
-            values ( %(stream_cso_id)s, %(date)s, %(unknown)s, %(start)s, %(stop)s, %(potential_start)s, %(offline)s ) 
-            on conflict (stream_cso_id, date) 
-            do update set 
-                    unknown = excluded.unknown, 
-                    start = excluded.start, 
-                    stop = excluded.stop, 
-                    potential_start = excluded.potential_start, 
-                    offline = excluded.offline""",
-            argslist=[{
-                "stream_cso_id": cso_id,
-                "date": date,
-                "unknown": totals[CSOState.UNKNOWN],
-                "start": totals[CSOState.START],
-                "stop": totals[CSOState.STOP],
-                "potential_start": totals[CSOState.POTENTIAL_START],
-                "offline": totals[CSOState.OFFLINE]
-            } for date, totals in calendar.allocations(since=since)],
-            page_size=1000,
-        )
-    connection.commit()
+        allocations = calendar.allocations(since=since)
+        if len(allocations):
+            print(f">> Summary {cso_id}: Have {len(allocations)} since {since}")
+
+            execute_batch(
+                cur=cursor,
+                sql="""insert into stream_summary ( stream_cso_id, date, unknown, start, stop, potential_start, offline) 
+                values ( %(stream_cso_id)s, %(date)s, %(unknown)s, %(start)s, %(stop)s, %(potential_start)s, %(offline)s ) 
+                on conflict (stream_cso_id, date) 
+                do update set 
+                        unknown = excluded.unknown, 
+                        start = excluded.start, 
+                        stop = excluded.stop, 
+                        potential_start = excluded.potential_start, 
+                        offline = excluded.offline""",
+                argslist=[{
+                    "stream_cso_id": cso_id,
+                    "date": date,
+                    "unknown": totals[CSOState.UNKNOWN],
+                    "start": totals[CSOState.START],
+                    "stop": totals[CSOState.STOP],
+                    "potential_start": totals[CSOState.POTENTIAL_START],
+                    "offline": totals[CSOState.OFFLINE]
+                } for date, totals in allocations],
+                page_size=1000,
+            )
+        connection.commit()
 
 
 if __name__ == "__main__":
