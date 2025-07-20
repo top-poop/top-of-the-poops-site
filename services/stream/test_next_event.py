@@ -44,6 +44,10 @@ events_type1 = {
         "Start,2024-12-31 21:45:00.000000 +00:00,2024-12-31 21:45:00.000000 +00:00,,2024-12-31 22:35:30.560000 +00:00",
         "Stop,2025-01-01 09:30:00.000000 +00:00,2024-12-31 21:45:00.000000 +00:00,2025-01-01 09:30:00.000000 +00:00,2025-01-01 09:55:29.096000 +00:00",
         "Stop,2025-01-01 09:16:00.000000 +00:00,2025-01-01 09:15:00.000000 +00:00,2025-01-01 09:16:00.000000 +00:00,2025-01-01 15:54:56.183000 +00:00",
+    ],
+    "severn_trent_time_jump": [
+        "Start,2025-01-14 20:05:00.000000 +00:00,2025-01-14 20:05:00.000000 +00:00,",
+        "Stop,2025-01-13 12:53:31.000000 +00:00,2025-01-13 12:36:36.000000 +00:00,2025-01-13 12:53:31.000000 +00:00"
     ]
 }
 
@@ -90,6 +94,10 @@ events_type2 = {
         "Start,2025-01-05 11:42:01.000000 +00:00,2025-01-05 11:42:01.000000 +00:00,",
         "Start,2025-01-05 11:42:01.000000 +00:00,2025-01-05 11:42:01.000000 +00:00,",
         "Stop,2025-01-05 11:15:00.000000 +00:00,2025-01-05 11:15:00.000000 +00:00,2025-01-05 11:28:07.000000 +00:00",
+    ],
+    "southern_time_jump_2": [
+        "Start,2025-01-15 13:23:21.000000 +00:00,2025-01-15 13:23:21.000000 +00:00,",
+        "Stop,2025-01-15 13:23:00.000000 +00:00,2025-01-15 13:23:00.000000 +00:00,2025-01-15 13:44:00.000000 +00:00",
     ]
 }
 
@@ -213,16 +221,23 @@ class TestType1:
         assert output[0].event == EventType.Start
         assert output[1].event == EventType.Stop
         assert output[2].event == EventType.Start
-        assert output[2].event_time ==events[2].statusStart
+        assert output[2].event_time == events[2].statusStart
         assert output[3].event == EventType.Stop
 
     def test_no_event_time(self):
         """deliberately give unhandled case that will force event start to be None, which will fail"""
         with pytest.raises(Exception):
             events = self.events("initial_stop")
-            events.append(FeatureRecord('feature-id', EventType.Start, self.company, statusStart=None, latestEventStart=None, latestEventEnd=None, lastUpdated=None,lat=0,lon=0,receivingWater=''))
+            events.append(
+                FeatureRecord('feature-id', EventType.Start, self.company, statusStart=None, latestEventStart=None,
+                              latestEventEnd=None, lastUpdated=None, lat=0, lon=0, receivingWater=''))
             output = apply_events(self.file, events)
             print(output)
+
+    def test_severn_trent_time_jumping_backwards(self):
+        events = self.events('severn_trent_time_jump')
+        output = apply_events(self.file, events)
+        print(output)
 
 
 class TestType2:
@@ -329,3 +344,14 @@ class TestType2:
         assert output[3].event == EventType.Stop
 
         assert output[3].event_time == output[2].event_time + datetime.timedelta(seconds=1)
+
+    def test_southern_time_jumping_backward_2(self):
+        events = self.events('southern_time_jump_2')
+        output = apply_events(self.file, events)
+        assert len(output) == 2
+
+        assert output[0].event == EventType.Start
+        assert output[1].event == EventType.Stop
+
+        assert output[1].event_time > output[0].event_time
+
