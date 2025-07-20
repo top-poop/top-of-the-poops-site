@@ -9,5 +9,5 @@ COPY *.py /app/
 
 
 WORKDIR /app
-ENV DB_HOST postgres
+ENV DB_HOST=postgres
 ENTRYPOINT [ "/app/entrypoint.sh" ]
