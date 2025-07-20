@@ -91,7 +91,6 @@ order by m.stream_company;
     }
 
     fun overflowingAt(instant: Instant): List<StreamCSOLiveOverflow> {
-
         return connection.execute(NamedQueryBlock("stream-overflowing-at") {
             query(
                 sql = """                

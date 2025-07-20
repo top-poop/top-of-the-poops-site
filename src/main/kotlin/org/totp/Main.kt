@@ -277,7 +277,10 @@ fun main() {
                                 companyLivedata =
                                     { name ->
                                         name.asStreamCompanyName()?.let {
-                                            CSOLiveData(stream.overflowingAt(clock.instant()).filter { it.company == name })
+                                            CSOLiveData(stream.overflowingAt(clock.instant())
+                                                .filter { it.company == name }
+                                                .sortedBy { it.started }
+                                            )
                                         }
                                     },
                             ),
