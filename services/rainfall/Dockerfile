@@ -8,5 +8,6 @@ COPY *.py /app/
 
 
 WORKDIR /app
-ENV DB_HOST postgres
+ENV DB_HOST=postgres
+ENV PYTHONUNBUFFERED=1
 CMD venv/bin/python rainfall-populate.py --update

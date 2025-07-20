@@ -48,14 +48,16 @@ if __name__ == '__main__':
 
         for company in companies:
 
-            since = database.most_recent_loaded(company=company).file_time
+            most_recent_file = database.most_recent_loaded(company=company)
 
-            if since is None:
+            if most_recent_file is None:
                 since = datetime.datetime.combine(
                     date=datetime.date.fromisoformat("2024-12-01"),
                     time=datetime.datetime.min.time(),
                     tzinfo=timezone.utc
                 )
+            else:
+                since = most_recent_file.file_time
 
             to_process = [ts for ts in storage.available(company=company, since=since)]
 
