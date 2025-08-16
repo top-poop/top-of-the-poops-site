@@ -41,19 +41,19 @@ push: check-context
 .PHONY: deploy
 deploy:
 	@test $(shell docker context show) = $(TOTP_CONTEXT)
-	docker service create --with-registry-auth --name $(SERVICE) --network overlay-net --env DB_HOST=postgres $(FULL_NAME)
+	docker service create --with-registry-auth --name $(SERVICE) --network overlay-net --env DB_HOST=postgres --env REDIS_HOST=redis $(FULL_NAME)
 
 .PHONY: test-deploy
 test-deploy:
 	@test $(shell docker context show) = $(TOTP_CONTEXT)
-	docker service create --with-registry-auth --name $(SERVICE)-test --network overlay-net --env DB_HOST=postgres $(FULL_NAME)
+	docker service create --with-registry-auth --name $(SERVICE)-test --network overlay-net --env DB_HOST=postgres --env REDIS_HOST=redis $(FULL_NAME)
 
 .PHONY: upgrade
 upgrade:
 	@test $(shell docker context show) = $(TOTP_CONTEXT)
-	docker service update --with-registry-auth --image $(FULL_NAME) $(SERVICE)
+	docker service update --with-registry-auth --image $(FULL_NAME) --env-add DB_HOST=postgres --env-add REDIS_HOST=redis $(SERVICE)
 
 .PHONY: upgrade
 test-upgrade:
 	@test $(shell docker context show) = $(TOTP_CONTEXT)
-	docker service update --with-registry-auth --image $(FULL_NAME) $(SERVICE)-test
+	docker service update --with-registry-auth --image $(FULL_NAME) --env-add DB_HOST=postgres --env-add REDIS_HOST=redis $(SERVICE)-test

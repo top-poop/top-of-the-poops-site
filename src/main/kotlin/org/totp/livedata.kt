@@ -152,6 +152,7 @@ class EnvironmentAgencyRainfall(val clock: Clock, val environmentAgency: Environ
     }
 }
 
+@Suppress("IDENTITY_SENSITIVE_OPERATIONS_WITH_VALUE_TYPE")
 class EnvironmentAgencyGrid(val clock: Clock, val environmentAgency: EnvironmentAgency) : HttpHandler {
 
     val response = TotpJson.autoBody<List<EnvironmentAgency.RainfallGrid>>().toLens()

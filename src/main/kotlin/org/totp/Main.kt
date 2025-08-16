@@ -25,6 +25,11 @@ import org.totp.http4k.StandardFilters
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.*
 import org.totp.pages.*
+import redis.clients.jedis.HostAndPort
+import redis.clients.jedis.Protocol
+import redis.clients.jedis.UnifiedJedis
+import redisCacheFilter
+import sha256Key
 import java.time.Clock
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -77,8 +82,7 @@ object OldMapRedirectHandler {
 
 fun <T> memoize(loader: () -> T): () -> T {
     val cache = Suppliers.memoizeWithExpiration(
-        loader,
-        5, TimeUnit.MINUTES
+        loader, 5, TimeUnit.MINUTES
     )
     return {
         cache.get()
@@ -117,8 +121,12 @@ fun main() {
         EnvironmentKey.boolean().required("DEVELOPMENT_MODE", "Fake data server (local files) & hot reload")
     val dataServiceUri = EnvironmentKey.uri().required("DATA_SERVICE_URI", "URI for Data Service")
     val debugging = EnvironmentKey.boolean().required("DEBUG_MODE", "Print all request and response")
-    val dbHost = EnvironmentKey.string().defaulted("DB_HOST", "localhost", "Print all request and response")
+    val dbHost = EnvironmentKey.string().defaulted("DB_HOST", "localhost", "database host")
     val port = EnvironmentKey.int().required("PORT", "Listen Port")
+
+    val redisHost = EnvironmentKey.string().defaulted("REDIS_HOST", default = "localhost")
+    val redisPort = EnvironmentKey.int().defaulted("REDIS_PORT", default = Protocol.DEFAULT_PORT)
+
 
     val defaultConfig = Environment.defaults(
         isDevelopment of false,
@@ -127,20 +135,14 @@ fun main() {
         port of 80,
     )
 
-    val environment = Environment.JVM_PROPERTIES overrides
-            Environment.ENV overrides
-            defaultConfig
+    val environment = Environment.JVM_PROPERTIES overrides Environment.ENV overrides defaultConfig
 
     val isDevelopmentEnvironment = isDevelopment(environment)
 
     val clock = Clock.systemUTC()
 
-    val events =
-        EventFilters.AddTimestamp(clock)
-            .then(EventFilters.AddEventName())
-            .then(EventFilters.AddZipkinTraces())
-            .then(EventFilters.AddServiceName("pages"))
-            .then(AutoMarshallingEvents(TotpJson))
+    val events = EventFilters.AddTimestamp(clock).then(EventFilters.AddEventName()).then(EventFilters.AddZipkinTraces())
+        .then(EventFilters.AddServiceName("pages")).then(AutoMarshallingEvents(TotpJson))
 
     val renderer = Resources.templates(devMode = isDevelopmentEnvironment)
 
@@ -152,15 +154,11 @@ fun main() {
     val dataClient = if (isDevelopmentEnvironment) {
         outboundFilters.then(static(ResourceLoader.Directory("services/data/datafiles")))
     } else {
-        SetBaseUriFrom(Uri.of("/data"))
-            .then(ClientFilters.SetHostFrom(dataServiceUri(environment)))
-            .then(outboundHttp)
+        SetBaseUriFrom(Uri.of("/data")).then(ClientFilters.SetHostFrom(dataServiceUri(environment))).then(outboundHttp)
     }
 
     val connection = EventsWithConnection(
-        clock,
-        events,
-        HikariWithConnection(lazy { datasource(dbHost(environment)) })
+        clock, events, HikariWithConnection(lazy { datasource(dbHost(environment)) })
     )
 
     val referenceData = ReferenceData(connection)
@@ -200,11 +198,15 @@ fun main() {
 
     val companyAnnualSummaries = memoize(CompanyAnnualSummaries(annualData))
 
+    val redis = UnifiedJedis(HostAndPort(redisHost(environment), redisPort(environment)))
+
     val server = Undertow(port = port(environment)).toServer(
         routes(
             "/" bind Method.GET to inboundFilters.then(
-                HtmlPageErrorFilter(events, renderer)
-                    .then(
+                HtmlPageErrorFilter(
+                    events,
+                    renderer
+                ).then(
                         routes(
                             "/" bind HomepageHandler(
                                 renderer = renderer,
@@ -217,13 +219,11 @@ fun main() {
                                 shellfishRankings = shellfishRankings,
                             ),
                             "/now" bind NowHandler(
-                                renderer = renderer,
-                                streamData = stream
+                                renderer = renderer, streamData = stream
                             ),
                             "/support" bind SupportUsHandler(renderer = renderer),
                             "/media" bind MediaPageHandler(
-                                renderer = renderer,
-                                appearances = mediaAppearances
+                                renderer = renderer, appearances = mediaAppearances
                             ),
                             "/constituencies" bind ConstituenciesPageHandler(
                                 renderer = renderer,
@@ -231,8 +231,7 @@ fun main() {
                                 mpFor = mpFor,
                             ),
                             "/beaches" bind BeachesPageHandler(
-                                renderer = renderer,
-                                bathingRankings = beachRankings
+                                renderer = renderer, bathingRankings = beachRankings
                             ),
                             "/beach/{bathing}" bind BathingPageHandler(
                                 renderer = renderer,
@@ -245,8 +244,7 @@ fun main() {
                                 constituencyRank = constituencyRank
                             ),
                             "/rivers" bind RiversPageHandler(
-                                renderer = renderer,
-                                riverRankings = riverRankings
+                                renderer = renderer, riverRankings = riverRankings
                             ),
                             "/waterway/{company}/{waterway}" bind WaterwayPageHandler(
                                 renderer = renderer,
@@ -274,19 +272,16 @@ fun main() {
                                 riverRankings = riverRankings,
                                 bathingRankings = beachRankings,
                                 csoTotals = allSpills,
-                                companyLivedata =
-                                    { name ->
-                                        name.asStreamCompanyName()?.let {
-                                            CSOLiveData(stream.overflowingAt(clock.instant())
-                                                .filter { it.company == name }
-                                                .sortedBy { it.started }
-                                            )
-                                        }
-                                    },
+                                companyLivedata = { name ->
+                                    name.asStreamCompanyName()?.let {
+                                        CSOLiveData(
+                                            stream.overflowingAt(clock.instant()).filter { it.company == name }
+                                                .sortedBy { it.started })
+                                    }
+                                },
                             ),
                             "/shellfisheries" bind ShellfisheriesPageHandler(
-                                renderer = renderer,
-                                shellfishRankings = shellfishRankings
+                                renderer = renderer, shellfishRankings = shellfishRankings
                             ),
                             "/shellfishery/{area}" bind ShellfisheryPageHandler(
                                 renderer = renderer,
@@ -320,24 +315,31 @@ fun main() {
                                 ),
                             ),
                             "/fragments" bind routes(
-                                "/stream/table/" bind { Response(Status.OK) }
-                            )
-                        )
-                    )
-            ),
+                                "/stream/table/" bind { Response(Status.OK) })))),
             "/live" bind routes(
                 "/stream" bind routes(
-                    "/overflowing/{epochms}" bind StreamOverflowingByDate(clock, stream),
+                    "/overflowing/{epochms}" bind redisCacheFilter(
+                        redis,
+                        events,
+                        prefix = "stream",
+                        ttl = { Duration.ofMinutes(1) },
+                        key = { sha256Key(it.uri) }).then(StreamOverflowingByDate(clock, stream)),
                     "/events/constituency/{constituency}" bind StreamConstituencyEvents(clock, stream),
-                    "/company/{company}/overflow-summary" bind StreamSummary(stream, companyAnnualSummaries)
-                ),
+                    "/company/{company}/overflow-summary" bind StreamSummary(stream, companyAnnualSummaries)),
                 "/thames-water" bind routes(
                     "/overflow-summary" bind ThamesWaterSummary(thamesWater),
                 ),
                 "/environment-agency" bind routes(
-                    "/rainfall/{constituency}" bind EnvironmentAgencyRainfall(clock, environmentAgency),
-                    "/rainfall/grid/{epochms}" bind EnvironmentAgencyGrid(clock, environmentAgency)
-                ),
+                    "/rainfall/{constituency}" bind EnvironmentAgencyRainfall(
+                        clock,
+                        environmentAgency
+                    ),
+                    "/rainfall/grid/{epochms}" bind redisCacheFilter(
+                        redis,
+                        events,
+                        prefix = "rainfall",
+                        ttl = { Duration.ofMinutes(1) },
+                        key = { sha256Key(it.uri) }).then(EnvironmentAgencyGrid(clock, environmentAgency))),
             ).withFilter(
                 CachingFilters.CacheResponse.FallbackCacheControl(
                     defaultCacheTimings = DefaultCacheTimings(
@@ -350,8 +352,7 @@ fun main() {
             "/data-new/constituency/{constituency}/annual-pollution" bind EDMAnnualSummary(EDM(connection)),
             "/map.html" bind OldMapRedirectHandler(),
             "/sitemap.xml" bind SitemapHandler(
-                siteBaseUri = Uri.of("https://top-of-the-poops.org"),
-                uris = SitemapUris(
+                siteBaseUri = Uri.of("https://top-of-the-poops.org"), uris = SitemapUris(
                     constituencies = constituencyRankings,
                     riverRankings = riverRankings,
                     beachRankings = beachRankings,
@@ -359,8 +360,7 @@ fun main() {
             ),
             "/data" bind static(ResourceLoader.Directory("services/data/datafiles")),
             "/assets" bind static(Resources.assets(isDevelopmentEnvironment)),
-        )
-    )
+        ))
 
     silenceUndertowLogging()
 
