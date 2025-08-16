@@ -127,7 +127,7 @@ object RiversPageHandler {
         riverRankings: () -> List<RiverRank>,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
-        val allLens = Query.boolean().defaulted("all", false, "Show full list of rivers");
+        val allLens = Query.boolean().defaulted("all", false, "Show full list of rivers")
 
         return { request: Request ->
 

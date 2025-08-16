@@ -80,7 +80,7 @@ class StreamSummary(
 
         val slug = companySlug(request)
 
-        return companySummaries().filter { it.name.toSlug() == slug }.firstOrNull()?.let { company ->
+        return companySummaries().firstOrNull { it.name.toSlug() == slug }?.let { company ->
             company.name.asStreamCompanyName()?.let { streamCompany ->
                 Response(Status.OK).with(response of streamData.infrastructureSummary(streamCompany)).with(
                     cacheControl of listOf(

@@ -8,7 +8,7 @@ class DurationUnit private constructor(duration: Duration) : TemporalUnit {
     private val duration: Duration
 
     init {
-        require(!(duration.isZero() || duration.isNegative())) { "Duration may not be zero or negative" }
+        require(!(duration.isZero || duration.isNegative)) { "Duration may not be zero or negative" }
         this.duration = duration
     }
 
@@ -21,7 +21,7 @@ class DurationUnit private constructor(duration: Duration) : TemporalUnit {
     }
 
     override fun isDateBased(): Boolean {
-        return (duration.nano == 0 && duration.getSeconds() % SECONDS_PER_DAY == 0L)
+        return (duration.nano == 0 && duration.seconds % SECONDS_PER_DAY == 0L)
     }
 
     override fun isTimeBased(): Boolean {

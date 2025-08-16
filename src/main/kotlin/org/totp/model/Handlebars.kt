@@ -20,7 +20,7 @@ open class PageViewModel(val uri: Uri) : ViewModel {
 }
 
 object TotpHandlebars {
-    fun templates() = HandlebarsTemplates(handlebarsConfiguration());
+    fun templates() = HandlebarsTemplates(handlebarsConfiguration())
 
     fun handlebars() = handlebarsConfiguration()(Handlebars())
 

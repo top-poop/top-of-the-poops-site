@@ -10,7 +10,7 @@ import javax.xml.stream.XMLOutputFactory
 object SitemapHandler {
     operator fun invoke(siteBaseUri: Uri, uris: () -> List<Uri>): HttpHandler {
         val factory = XMLOutputFactory.newFactory().also {
-            it.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, true);
+            it.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, true)
         }
 
         return { request ->
