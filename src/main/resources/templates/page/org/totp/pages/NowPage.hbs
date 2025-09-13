@@ -67,16 +67,10 @@
 
 {{#> components/jumbotron }}
     <div class="text-center">
-        <h1 class="display-3 fw-bold mb-4">Live Sewage Overflow Map</h1>
-        <p class="lead fs-4">
-            Track sewage overflows in real-time across England and Wales
-            <br/>Updated every <span class="badge bg-primary fs-5">15 minutes</span>
+        Live Sewage Overflow Map
+        <p class="lead">
+            <span class="badge bg-primary fs-5">{{numberFormat summary.count.start}}</span> CSOs overflowing right now
         </p>
-        <div class="d-flex justify-content-center gap-3">
-            <a href="/support" class="btn btn-danger btn-lg">
-                <i class="bi bi-heart-fill me-2"></i>Support Our Work
-            </a>
-        </div>
     </div>
 {{/components/jumbotron}}
 
@@ -155,8 +149,8 @@
                             </div>
                             <div>
                                 <p class="mb-0">With your support we can do more to track and report on sewage pollution.</p>
-                                <a href="/support" class="btn btn-warning mt-2">
-                                    <i class="bi bi-heart me-1"></i> Donate Now
+                                <a href="/support" class="btn btn-danger mt-2">
+                                    <i class="bi bi-heart-fill me-1"></i> Support our work
                                 </a>
                             </div>
                         </div>
