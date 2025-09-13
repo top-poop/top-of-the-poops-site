@@ -21,26 +21,44 @@
             border: none;
         }
         .map-container {
-            /* Responsive height: scales on mobile, remains spacious on desktop */
             height: clamp(300px, 60vh, 720px);
-            /* maintain a pleasant aspect on very short screens */
             min-height: 300px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
+        .controls-panel { box-shadow: 0 1px 2px rgba(0,0,0,0.04) inset, 0 2px 6px rgba(0,0,0,0.06); }
+        .cassette-controls {
+            position: relative;
+        }
+
         @media (max-width: 576px) {
-            /* Avoid extra whitespace from inner wrappers on small screens */
             .card-body.p-0 > .map-container#now { height: clamp(260px, 55vh, 520px); }
             #map-section .card-footer { padding-bottom: 0.5rem; }
+            .cassette-controls::before { width: 80px; }
         }
         .control-btn {
+            -webkit-appearance: none;
+            appearance: none;
+            border: 1px solid rgba(0,0,0,0.2);
+            background: linear-gradient(180deg, #ffffff 0%, #f0f3f7 100%);
+            color: #333;
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            margin: 0 6px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.7);
+            transition: transform 0.06s ease, box-shadow 0.2s ease, filter 0.2s ease;
             cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            transition: all 0.2s ease;
         }
-        .control-btn:hover {
-            background-color: rgba(0,0,0,0.1);
+        .control-btn .bi { font-size: 1.05rem; }
+        .control-btn:hover { filter: brightness(1.03); box-shadow: 0 3px 6px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.8); }
+        .control-btn:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.12), inset 0 2px 4px rgba(0,0,0,0.08); }
+        .control-btn:focus-visible { outline: 2px solid #86b7fe; outline-offset: 2px; }
+        @media (prefers-contrast: more) {
+            .control-btn { background: #fff; border-color: #000; }
         }
     </style>
 </head>
@@ -70,16 +88,21 @@
                     <div class="map-container" id="now">
                         <div></div>
                     </div>
-                    <div class="card-footer bg-light p-3">
+                    <div class="card-footer cassette-footer bg-white p-1">
+                        <div class="controls-panel bg-info bg-opacity-25 rounded-3 p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-clock-history text-primary me-2"></i>
+                                <h3 id="timeline-controls-title" class="h6 mb-0">Timeline Controls</h3>
+                            </div>
                         <form>
-                            <div class="d-flex justify-content-center mb-3">
-                                <div class="btn-group">
-                                    <img class="control-btn" alt="move start" id="ctrl-le" src="/assets/icons/bi/chevron-bar-left.svg"/>
-                                    <img class="control-btn" alt="move earlier 1 day" id="ctrl-ld" src="/assets/icons/bi/chevron-double-left.svg"/>
-                                    <img class="control-btn" alt="move earlier" id="ctrl-l" src="/assets/icons/bi/chevron-left.svg"/>
-                                    <img class="control-btn" alt="move later" id="ctrl-r" src="/assets/icons/bi/chevron-right.svg"/>
-                                    <img class="control-btn" alt="move later 1 day" id="ctrl-rd" src="/assets/icons/bi/chevron-double-right.svg"/>
-                                    <img class="control-btn" alt="move end" id="ctrl-re" src="/assets/icons/bi/chevron-bar-right.svg"/>
+                            <div class="d-flex justify-content-center mb-3 cassette-controls" aria-label="Timeline controls" role="group" aria-labelledby="timeline-controls-title">
+                                <div class="d-flex align-items-center">
+                                    <button type="button" class="control-btn" id="ctrl-le" aria-label="Move to start" title="Move to start"><i class="bi bi-chevron-bar-left"></i></button>
+                                    <button type="button" class="control-btn" id="ctrl-ld" aria-label="Step back 1 day" title="Step back 1 day"><i class="bi bi-chevron-double-left"></i></button>
+                                    <button type="button" class="control-btn" id="ctrl-l" aria-label="Step back 1 hour" title="Step back 1 hour"><i class="bi bi-chevron-left"></i></button>
+                                    <button type="button" class="control-btn" id="ctrl-r" aria-label="Step forward 1 hour" title="Step forward 1 hour"><i class="bi bi-chevron-right"></i></button>
+                                    <button type="button" class="control-btn" id="ctrl-rd" aria-label="Step forward 1 day" title="Step forward 1 day"><i class="bi bi-chevron-double-right"></i></button>
+                                    <button type="button" class="control-btn" id="ctrl-re" aria-label="Move to end" title="Move to end"><i class="bi bi-chevron-bar-right"></i></button>
                                 </div>
                             </div>
                             <div class="form-group row align-items-center">
@@ -89,9 +112,11 @@
                                 </label>
                                 <div class="col-md-8">
                                     <input id="dateSlider" type="range" class="form-range">
+                                    <div class="form-text mt-1" id="timeline-help"><i class="bi bi-info-circle me-1"></i>move the slider to show an animation of sewage and rainfall across the country</div>
                                 </div>
                             </div>
                         </form>
+                        </div>
                     </div>
                 </div>
             </div>
