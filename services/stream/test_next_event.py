@@ -242,7 +242,7 @@ class TestType1:
 
 class TestType2:
     company = WaterCompany.Southern
-    file = StreamFile(company=WaterCompany.Southern, file_id='4567', file_time=datetime.datetime.now())
+    file = StreamFile(company=company, file_id='4567', file_time=datetime.datetime.now())
 
     def events(self, scenario: str) -> List[FeatureRecord]:
         return [as_feature(company=self.company, s=s) for s in events_type2[scenario]]
@@ -354,4 +354,49 @@ class TestType2:
         assert output[1].event == EventType.Stop
 
         assert output[1].event_time > output[0].event_time
+
+
+events_yorkshire = {
+    "filtered": [
+        "Start,2025-01-01 00:14:14.000000 +00:00,2025-01-01 00:14:14.000000 +00:00,",
+        "Stop,2024-12-31 20:44:55.000000 +00:00,2024-12-31 19:42:17.000000 +00:00,2024-12-31 20:44:55.000000 +00:00",
+        "Start,2025-01-01 00:14:14.000000 +00:00,2025-01-01 00:14:14.000000 +00:00,",
+        "Stop,2024-12-31 20:44:55.000000 +00:00,2024-12-31 19:42:17.000000 +00:00,2024-12-31 20:44:55.000000 +00:00"
+    ],
+    "start_stop": [
+        "Start,2025-01-05 17:33:54.000000 +00:00,2025-01-05 17:33:54.000000 +00:00,",
+        "Stop,2025-01-05 21:01:56.000000 +00:00,2025-01-05 17:33:54.000000 +00:00,2025-01-05 21:01:56.000000 +00:00",
+        "Start,2025-01-06 03:38:14.000000 +00:00,2025-01-06 03:38:14.000000 +00:00,",
+        "Stop,2025-01-06 16:54:25.000000 +00:00,2025-01-06 03:38:14.000000 +00:00,2025-01-06 16:54:25.000000 +00:00"
+    ]
+}
+
+
+class TestYorkshire:
+    company = WaterCompany.YorkshireWater
+    file = StreamFile(company=company, file_id='4567', file_time=datetime.datetime.now())
+
+    def events(self, scenario: str) -> List[FeatureRecord]:
+        return [as_feature(company=self.company, s=s) for s in events_yorkshire[scenario]]
+
+    def test_filtering(self):
+        events = self.events('filtered')
+        output = apply_events(self.file, events)
+        assert len(output) == 0
+
+    def test_yorkshire_start_stop(self):
+        events = self.events('start_stop')
+        output = apply_events(self.file, events)
+        assert len(output) == 4
+
+        assert output[0].event == EventType.Start
+        assert output[1].event == EventType.Stop
+        assert output[2].event == EventType.Start
+        assert output[3].event == EventType.Stop
+
+        assert output[0] == StreamEvent(cso_id='cso-id',
+                                        event=EventType.Start,
+                                        event_time=events[0].statusStart,
+                                        file_id=TestYorkshire.file.file_id,
+                                        update_time=events[0].lastUpdated)
 

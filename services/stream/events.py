@@ -1,6 +1,7 @@
+import collections
 import dataclasses
 import datetime
-from typing import Optional, Dict
+from typing import Optional, Dict, DefaultDict
 
 from companies import WaterCompany
 from stream import FeatureRecord, EventType
@@ -117,11 +118,21 @@ handlers = {
     WaterCompany.ThamesWater: _interpret_type_2,
     WaterCompany.UnitedUtilities: _interpret_type_2,
     WaterCompany.WessexWater: _interpret_type_2,
+    WaterCompany.YorkshireWater: _interpret_type_1
 }
 
+yorkshire_start_date= datetime.datetime.fromisoformat("2025-01-05 12:00:00.000000 +00:00")
+
+filters = collections.defaultdict(lambda x: True)
+filters[WaterCompany.YorkshireWater]=lambda x: x.statusStart > yorkshire_start_date
 
 def interpret(mapping: Dict, file: StreamFile, previous: Optional[StreamEvent], f: FeatureRecord) -> Optional[
     StreamEvent]:
+
+    if not filters[file.company](f):
+        print(f"Filtering out {f}")
+        return None
+
     if f.statusStart is not None and previous is not None and f.statusStart < previous.event_time:
         diff = previous.event_time - f.statusStart
         print(f"{f.id} -> Time Jumped backwards from {previous.event_time} to {f.statusStart} ( by {diff} ) ")
