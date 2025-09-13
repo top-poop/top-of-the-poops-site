@@ -322,7 +322,7 @@ fun main() {
                         redis,
                         events,
                         prefix = "stream",
-                        ttl = { Duration.ofMinutes(1) },
+                        ttl = { Duration.ofMinutes(10) },
                         key = { sha256Key(it.uri) }).then(StreamOverflowingByDate(clock, stream)),
                     "/events/constituency/{constituency}" bind StreamConstituencyEvents(clock, stream),
                     "/company/{company}/overflow-summary" bind StreamSummary(stream, companyAnnualSummaries)),
@@ -338,7 +338,7 @@ fun main() {
                         redis,
                         events,
                         prefix = "rainfall",
-                        ttl = { Duration.ofMinutes(1) },
+                        ttl = { Duration.ofHours(12) },
                         key = { sha256Key(it.uri) }).then(EnvironmentAgencyGrid(clock, environmentAgency))),
             ).withFilter(
                 CachingFilters.CacheResponse.FallbackCacheControl(
