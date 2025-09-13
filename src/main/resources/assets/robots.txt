@@ -46,4 +46,6 @@ Disallow: /
 User-Agent: turnitinbot
 Disallow: /
 
-
+User-agent: AwarioRssBot
+User-agent: AwarioSmartBot
+Disallow: /
