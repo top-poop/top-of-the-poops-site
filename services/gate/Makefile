@@ -23,7 +23,7 @@ check-context:
 
 .PHONY: image
 image: check-context
-	docker build -t $(LOCAL_NAME)  -t $(FULL_NAME) .
+	docker build --pull -t $(LOCAL_NAME)  -t $(FULL_NAME) .
 
 .PHONY: run
 run: image
