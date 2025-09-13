@@ -48,24 +48,24 @@
 {{> chunks/navbar }}
 
 {{#> components/jumbotron }}
-    <div class="text-center py-4">
+    <div class="text-center">
         <h1 class="display-3 fw-bold mb-4">Live Sewage Overflow Map</h1>
-        <p class="lead fs-4 mb-4">
+        <p class="lead fs-4">
             Track sewage overflows in real-time across England and Wales
             <br/>Updated every <span class="badge bg-primary fs-5">15 minutes</span>
         </p>
         <div class="d-flex justify-content-center gap-3">
-            <a href="/support" class="btn btn-danger btn-lg px-4 py-2">
+            <a href="/support" class="btn btn-danger btn-lg">
                 <i class="bi bi-heart-fill me-2"></i>Support Our Work
             </a>
         </div>
     </div>
 {{/components/jumbotron}}
 
-<div class="container py-4" id="map-section">
-    <div class="row align-items-center g-4">
-        <div class="col-md-7">
-            <div class="card border-0 shadow-sm">
+<div class="container" id="map-section">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <div class="card border-0">
                 <div class="card-body p-0">
                     <div class="map-container" id="now">
                         <div></div>
@@ -96,7 +96,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-primary text-white">
                     <h2 class="h4 mb-0"><i class="bi bi-map me-2"></i>Map Information</h2>
@@ -142,7 +142,7 @@
     </div>
 
     <div class="row mt-5">
-        <div class="col-12">
+        <div class="col">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-info text-white">
                     <h2 class="h4 mb-0"><i class="bi bi-table me-2"></i>Overflow Summary by Company</h2>
@@ -154,8 +154,8 @@
                             <tr>
                                 <th>Company</th>
                                 <th class="text-end">Total CSOs</th>
-                                <th class="text-end">Not Overflowing</th>
                                 <th class="text-end">Overflowing</th>
+                                <th class="text-end">Not Overflowing</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -163,8 +163,8 @@
                                 <tr>
                                     <td><i class="bi bi-building me-2 text-muted"></i>{{this.company}}</td>
                                     <td class="text-end">{{numberFormat this.count.total}}</td>
-                                    <td class="text-end">{{numberFormat this.count.stop}}</td>
                                     <td class="text-end fw-bold {{#if this.count.start}}text-danger{{/if}}">{{numberFormat this.count.start}}</td>
+                                    <td class="text-end">{{numberFormat this.count.stop}}</td>
                                 </tr>
                             {{/each}}
                             </tbody>
@@ -172,8 +172,8 @@
                             <tr>
                                 <td><strong>Totals</strong></td>
                                 <td class="text-end">{{numberFormat summary.count.total}}</td>
-                                <td class="text-end">{{numberFormat summary.count.stop}}</td>
                                 <td class="text-end fw-bold text-danger">{{numberFormat summary.count.start}}</td>
+                                <td class="text-end">{{numberFormat summary.count.stop}}</td>
                             </tr>
                             </tfoot>
                         </table>
