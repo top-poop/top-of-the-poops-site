@@ -21,9 +21,17 @@
             border: none;
         }
         .map-container {
-            min-height: 640px;
+            /* Responsive height: scales on mobile, remains spacious on desktop */
+            height: clamp(300px, 60vh, 720px);
+            /* maintain a pleasant aspect on very short screens */
+            min-height: 300px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 576px) {
+            /* Avoid extra whitespace from inner wrappers on small screens */
+            .card-body.p-0 > .map-container#now { height: clamp(260px, 55vh, 520px); }
+            #map-section .card-footer { padding-bottom: 0.5rem; }
         }
         .control-btn {
             cursor: pointer;
@@ -284,7 +292,7 @@
         else return days + " days"
     }
 
-    const chart = ({asof, sewage, rainfall, countries}) => {
+    const chart = ({asof, sewage, rainfall, countries, height, width}) => {
         sewage = sewage.map(
                 e => {
                     const started = Date.parse(e.started);
@@ -313,7 +321,10 @@
                             coordinates: [[-6, 49.9], [1.8, 55.9]],
                         },
                     },
-                    height: 800,
+                    margin: 0,
+                    frame: false,
+                    height: height,
+                    width: width,
                     r: {range: [3, 10], domain: [0, 86400 * 30 * 1000]},
                     marks: [
                         Plot.geo(
@@ -322,6 +333,7 @@
                                     fill: "rgba(167,198,167,0.19)",
                                     stroke: "rgba(0,0,0,0.2)",
                                     strokeWidth: 2,
+                                    inset: 0,
                                 }
                         ),
                         Plot.rect(
@@ -333,12 +345,14 @@
                                     y2: "ymax",
                                     opacity: 0.7,
                                     filter: d => d.rain > 0,
-                                    fill: d => rainfallScale.apply(d.rain)
+                                    fill: d => rainfallScale.apply(d.rain),
+                                    inset: 0,
                                 }
                         ),
                         Plot.dot(
                                 sewage,
                                 {
+                                    inset: 0,
                                     x: d => d.loc.lon,
                                     y: d => d.loc.lat,
                                     r: d => d.duration,
@@ -397,12 +411,17 @@
         const rainfall = await fetch(`/live/environment-agency/rainfall/grid/${epochMillis}`)
 
         if (sewage.ok) {
+            const rect = chartElement.getBoundingClientRect();
+            const h = Math.max(300, Math.floor(rect.height));
+
             chartElement.replaceChildren(
                     chart({
                         asof: date,
                         sewage: await sewage.json(),
                         rainfall: await rainfall.json(),
-                        countries: countries
+                        countries: countries,
+                        height: h,
+                        width: Math.floor(rect.width)
                     })
             );
         }
@@ -410,6 +429,9 @@
 
     slider.addEventListener('input', (e) => doChart(new Date(e.target.valueAsNumber)))
     slider.addEventListener('change', (e) => doChart(new Date(e.target.valueAsNumber)))
+
+    // Rerender on resize so the plot height matches the container on desktop
+    window.addEventListener('resize', () => doChart(new Date(Number(slider.value))))
 
     doChart(now);
 
