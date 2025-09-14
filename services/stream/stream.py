@@ -3,7 +3,7 @@ import dataclasses
 import datetime
 import itertools
 from enum import Enum
-from typing import List, Dict, Optional, TypeVar, Callable, Counter
+from typing import List, Dict, Optional, TypeVar, Callable
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -35,6 +35,11 @@ class FeatureRecord:
     receivingWater: str
 
 
+#  Overflow Not Operating
+#  Overflow Not Operating (Has in the last 24 hours)
+#  Overflow Operating
+#  Under Investigation
+
 @dataclasses.dataclass(frozen=True)
 class DwrCymruRecord:
     assetName: str
@@ -42,7 +47,7 @@ class DwrCymruRecord:
     status: str
     GlobalID: str
     EditDate: datetime.datetime
-    discharge_duration_last_7_daysH: str
+    discharge_duration_last_7_daysH: float
     stop_date_time_discharge: Optional[datetime.datetime]
     start_date_time_discharge: Optional[datetime.datetime]
     discharge_duration_hours: Optional[float]
@@ -53,6 +58,33 @@ class DwrCymruRecord:
     Receiving_Water: str
     lat: float
     lon: float
+
+    def _map_status(self, status: str) -> EventType:
+        match status:
+            case "Overflow Operating":
+                return EventType.Start
+            case s if s.startswith("Overflow Not Operating"):
+                return EventType.Stop
+            case "Under Investigation":
+                return EventType.Stop
+            case _:
+                raise ValueError(f"Status {status}")
+
+    def as_feature_record(self) -> FeatureRecord:
+        et = self._map_status(self.status)
+
+        return FeatureRecord(
+            id=self.GlobalID,
+            status=et,
+            company=WaterCompany.DwrCymru.name,
+            statusStart=self.start_date_time_discharge if et == EventType.Start else self.stop_date_time_discharge,
+            latestEventStart=self.start_date_time_discharge if et == EventType.Start else self.stop_date_time_discharge,
+            latestEventEnd=None if et == EventType.Start else self.stop_date_time_discharge,
+            lastUpdated=self.EditDate,
+            lat=self.lat,
+            lon=self.lon,
+            receivingWater=self.Receiving_Water
+        )
 
 
 x = {
@@ -166,7 +198,7 @@ class ArcGisFeatureServer[T]:
         resp = response.json()
 
         # northumbrian sometimes doesn't have geometry fields !?!?
-        return [convert(dict(f["attributes"], **f.get("geometry", {'x':0, 'y':0}))) for f in resp["features"]]
+        return [convert(dict(f["attributes"], **f.get("geometry", {'x': 0, 'y': 0}))) for f in resp["features"]]
 
     def _convert(self, d: Dict) -> T:
         raise NotImplementedError()
