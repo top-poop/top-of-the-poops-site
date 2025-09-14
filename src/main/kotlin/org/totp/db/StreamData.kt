@@ -97,7 +97,7 @@ order by m.stream_company;
 WITH ranked_events AS (
     SELECT
         e.*,
-        ROW_NUMBER() OVER (PARTITION BY e.stream_cso_id ORDER BY e.event_time DESC) AS rnk
+        ROW_NUMBER() OVER (PARTITION BY e.stream_cso_id ORDER BY e.event_time DESC, e.update_time DESC) AS rnk
     FROM
         stream_cso_event as e
     where e.event_time <= ?

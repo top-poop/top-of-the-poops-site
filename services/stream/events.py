@@ -123,7 +123,7 @@ handlers = {
 
 yorkshire_start_date= datetime.datetime.fromisoformat("2025-01-05 12:00:00.000000 +00:00")
 
-filters = collections.defaultdict(lambda x: True)
+filters = collections.defaultdict(lambda: lambda x: True)
 filters[WaterCompany.YorkshireWater]=lambda x: x.statusStart > yorkshire_start_date
 
 def interpret(mapping: Dict, file: StreamFile, previous: Optional[StreamEvent], f: FeatureRecord) -> Optional[

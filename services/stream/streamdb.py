@@ -151,6 +151,22 @@ class Database:
                 count.append(cursor.rowcount)
         return sum(count)
 
+    def last_seen_cso(self, company: WaterCompany) -> Dict[str, datetime.datetime]:
+        return {c[0]: c[1] for c in select_many(connection=self.connection,
+                                                sql="""
+                                                    select c.id as stream_id, max(f.file_time) as last_seen_time
+                                                    from stream_file_content c
+                                                             join stream_files f using (stream_file_id)
+                                                    where f.company = %(company)s
+                                                    group by c.id
+                                                    order by last_seen_time;
+                                                    """,
+                                                params={
+                                                    "company": company.name
+                                                },
+                                                f=lambda row: (row["stream_id"], row["last_seen_time"]))
+                }
+
     def latest_cso_events(self, company: WaterCompany) -> Dict[str, StreamEvent]:
         return {e[0]: e[1]
                 for e in select_many(

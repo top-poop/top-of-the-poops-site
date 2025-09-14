@@ -13,6 +13,9 @@ venv/bin/python stream-download.py
 echo $(date) " Persisting stream files to db <<<"
 venv/bin/python stream-persist-content.py
 
+echo $(date) " Bodging CSOs that have gone away <<<"
+venv/bin/python stream-bodge-disappeared.py
+
 echo $(date) " Processing stream files into events <<<"
 venv/bin/python stream-process-events.py
 
