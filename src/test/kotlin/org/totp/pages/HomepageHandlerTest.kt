@@ -1,26 +1,12 @@
 package org.totp.pages
 
-import org.http4k.core.Method
-import org.http4k.core.Request
-import org.http4k.core.Response
-import org.http4k.core.Status
-import org.http4k.core.Uri
+import org.http4k.core.*
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
+import org.totp.db.StreamData
 import org.totp.model.TotpHandlebars
-import org.totp.model.data.Address
-import org.totp.model.data.BathingName
-import org.totp.model.data.BathingRank
-import org.totp.model.data.CompanyName
-import org.totp.model.data.ConstituencyName
-import org.totp.model.data.MediaAppearance
-import org.totp.model.data.MediaAppearances
-import org.totp.model.data.RiverRank
-import org.totp.model.data.ShellfishRank
-import org.totp.model.data.ShellfisheryName
-import org.totp.model.data.WaterCompany
-import org.totp.model.data.WaterwayName
+import org.totp.model.data.*
 import strikt.api.expectThat
 import strikt.assertions.get
 import strikt.assertions.hasSize
@@ -116,7 +102,8 @@ class HomepageHandlerTest {
                 )
             },
             companies = { listOf(aWaterCompany) },
-            mpFor = { MP("mp1", "con", "handle1", Uri.of("https://example.com/1")) }
+            mpFor = { MP("mp1", "con", "handle1", Uri.of("https://example.com/1")) },
+            streamSummary = { StreamData.StreamOverflowSummary(StreamData.StreamCSOCount(123, 45), emptyList()) }
         )
     )
 

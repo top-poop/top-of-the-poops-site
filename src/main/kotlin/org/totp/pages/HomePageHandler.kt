@@ -10,6 +10,7 @@ import org.http4k.core.with
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.THE_YEAR
+import org.totp.db.StreamData
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.BathingRank
@@ -72,6 +73,7 @@ class HomePage(
     val shellfishRankings: List<RenderableShellfishRank>,
     val appearances: List<MediaAppearance>,
     val share: SocialShare,
+    val summary: StreamData.StreamOverflowSummary,
 ) : PageViewModel(uri)
 
 object HomepageHandler {
@@ -85,7 +87,8 @@ object HomepageHandler {
         appearances: () -> List<MediaAppearance>,
         companies: () -> List<WaterCompany>,
         mpFor: (ConstituencyName) -> MP,
-    ): HttpHandler {
+        streamSummary: () -> StreamData.StreamOverflowSummary,
+        ): HttpHandler {
 
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -121,7 +124,8 @@ object HomepageHandler {
                             listOf("sewage"),
                             via = "sewageuk",
                             twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/home/home-2024.png")
-                        )
+                        ),
+                        summary = streamSummary(),
                     )
                 )
         }

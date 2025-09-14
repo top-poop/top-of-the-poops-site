@@ -217,6 +217,7 @@ fun main() {
                                 companies = waterCompanies,
                                 mpFor = mpFor,
                                 shellfishRankings = shellfishRankings,
+                                streamSummary = stream::summary
                             ),
                             "/now" bind NowHandler(
                                 renderer = renderer, streamData = stream
