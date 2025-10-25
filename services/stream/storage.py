@@ -5,7 +5,7 @@ import itertools
 import os
 from dataclasses import asdict, fields, Field
 from io import StringIO
-from typing import List, Dict, Optional, TypeVar, Callable
+from typing import List, Dict, Optional, TypeVar, Callable, get_origin, Union, get_args, Tuple, Any
 
 import boto3
 import botocore.exceptions
@@ -42,14 +42,26 @@ def serialize_field(value):
 dt_cache = KeyDefaultDict(lambda x: datetime.datetime.fromisoformat(x))
 
 
+def is_optional(field_type) -> Tuple[bool, Any]:
+    origin = get_origin(field_type)
+    if origin is Union:
+        args = get_args(field_type)
+        if len(args) != 2:
+            raise ValueError(f"Can't handle Union Type {field_type}")
+        return type(None) in args, args[0]
+    return False, field_type
+
+
 def deserialize_field(field_type, value):
-    if field_type == Optional[datetime.datetime]:
+    opt, t = is_optional(field_type)
+    if opt:
         if value == "":
             return None
+        if t == datetime.datetime:
+            return dt_cache[value]
+    if t == datetime.datetime:
         return dt_cache[value]
-    if field_type == datetime.datetime:
-        return dt_cache[value]
-    return field_type(value)
+    return t(value)
 
 
 def mapout(d: Dict) -> Dict:
@@ -67,6 +79,9 @@ class CSVFile[T]:
     def _fields(self) -> List[Field]:
         raise NotImplementedError()
 
+    def _construct(self, **kwargs) -> T:
+        raise NotImplementedError()
+
     def to_csv(self, items: List[T]) -> str:
         file = StringIO()
         c = csv.DictWriter(file, fieldnames=[f.name for f in self._fields()])
@@ -79,7 +94,7 @@ class CSVFile[T]:
         file = StringIO(input)
         types = {f.name: f.type for f in self._fields()}
         c = csv.DictReader(file)
-        return [FeatureRecord(**mapin(types, r)) for r in c]
+        return [self._construct(**mapin(types, r)) for r in c]
 
 
 class StreamCSV(CSVFile[FeatureRecord]):
@@ -87,10 +102,16 @@ class StreamCSV(CSVFile[FeatureRecord]):
     def _fields(self) -> List[Field]:
         return fields(FeatureRecord)
 
+    def _construct(self, **kwargs) -> T:
+        return FeatureRecord(**kwargs)
+
 
 class DwrCymruCSV(CSVFile[DwrCymruRecord]):
     def _fields(self) -> List[Field]:
         return fields(DwrCymruRecord)
+
+    def _construct(self, **kwargs) -> T:
+        return DwrCymruRecord(**kwargs)
 
 
 class Storage:
@@ -130,6 +151,7 @@ class SqlliteStorage(Storage):
     def load(self, company: WaterCompany, dt: datetime.datetime) -> Optional[str]:
         filename = self._filename(company, dt)
         if filename in self.cache:
+            print(f"Cache Load: {company} {dt}")
             return gzip.decompress(self.cache[filename]).decode()
         if self.delegate is not None:
             content = self.delegate.load(company, dt)
@@ -192,7 +214,6 @@ class S3Storage(Storage):
         print(f"S3 Load: {company} {dt}")
         try:
             new_filename = self._filename_new(company, dt)
-            print(f">> Trying {new_filename}")
             resp = self.bucket.Object(key=(new_filename)).get()
         except botocore.exceptions.ClientError as e:
             if e.response['Error']['Code'] in {'NoSuchKey', '404'}:

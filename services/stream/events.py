@@ -118,7 +118,8 @@ handlers = {
     WaterCompany.ThamesWater: _interpret_type_2,
     WaterCompany.UnitedUtilities: _interpret_type_2,
     WaterCompany.WessexWater: _interpret_type_2,
-    WaterCompany.YorkshireWater: _interpret_type_1
+    WaterCompany.YorkshireWater: _interpret_type_1,
+    WaterCompany.DwrCymru: _interpret_type_1,
 }
 
 yorkshire_start_date= datetime.datetime.fromisoformat("2025-01-05 12:00:00.000000 +00:00")

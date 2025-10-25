@@ -16,7 +16,7 @@ def test_convert_dwr_start():
                        lat=123, lon=456)
     f = d.as_feature_record()
 
-    assert f.status == EventType.Start
+    assert f.status == str(EventType.Start.value)
     assert f.statusStart == some_date
     assert f.latestEventEnd is None
     assert f.lat == 123
@@ -34,10 +34,11 @@ def test_convert_dwr_stop():
                        lat=123, lon=456)
     f = d.as_feature_record()
 
-    assert f.status == EventType.Stop
+    assert f.status == str(EventType.Stop.value)
     assert f.statusStart == later_date
     assert f.latestEventStart == later_date
     assert f.latestEventEnd == later_date
     assert f.lat == 123
     assert f.lon == 456
     assert f.id == d.GlobalID
+

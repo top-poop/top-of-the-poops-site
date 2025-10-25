@@ -47,7 +47,7 @@ class DwrCymruRecord:
     status: str
     GlobalID: str
     EditDate: datetime.datetime
-    discharge_duration_last_7_daysH: float
+    discharge_duration_last_7_daysH: Optional[float]
     stop_date_time_discharge: Optional[datetime.datetime]
     start_date_time_discharge: Optional[datetime.datetime]
     discharge_duration_hours: Optional[float]
@@ -67,15 +67,17 @@ class DwrCymruRecord:
                 return EventType.Stop
             case "Under Investigation":
                 return EventType.Stop
+            case "Under Maintenance":
+                return EventType.Stop
             case _:
-                raise ValueError(f"Status {status}")
+                raise ValueError(f"Status '{status}'")
 
     def as_feature_record(self) -> FeatureRecord:
         et = self._map_status(self.status)
 
         return FeatureRecord(
             id=self.GlobalID,
-            status=et,
+            status=str(et.value),  # to match ex
             company=WaterCompany.DwrCymru.name,
             statusStart=self.start_date_time_discharge if et == EventType.Start else self.stop_date_time_discharge,
             latestEventStart=self.start_date_time_discharge if et == EventType.Start else self.stop_date_time_discharge,

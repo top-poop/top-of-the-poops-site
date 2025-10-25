@@ -27,7 +27,6 @@ class WaterwayName(value: String) : StringValue(value), ComparableValue<Waterway
     companion object : StringValueFactory<WaterwayName>(::WaterwayName)
 }
 
-
 private val streamEABiMap = HashBiMap.create(
     mapOf(
         StreamCompanyName.of("Anglian") to CompanyName.of("Anglian Water"),
@@ -38,6 +37,7 @@ private val streamEABiMap = HashBiMap.create(
         StreamCompanyName.of("ThamesWater") to CompanyName.of("Thames Water"),
         StreamCompanyName.of("UnitedUtilities") to CompanyName.of("United Utilities"),
         StreamCompanyName.of("WessexWater") to CompanyName.of("Wessex Water"),
+        StreamCompanyName.of("DwrCymru") to CompanyName.of("Dwr Cymru Welsh Water"),
     )
 )
 

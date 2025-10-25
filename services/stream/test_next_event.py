@@ -400,3 +400,34 @@ class TestYorkshire:
                                         file_id=TestYorkshire.file.file_id,
                                         update_time=events[0].lastUpdated)
 
+
+events_dwr_cymru = {
+    "starting_stopping": [
+        "Start,2025-01-23 07:30:00.000000 +00:00,2025-01-23 07:30:00.000000 +00:00,,2025-02-08 14:13:35.563000 +00:00,51.63781659476942,-3.1354419764513506,Afon Ebbw",
+        "Stop,2025-02-13 05:15:00.000000 +00:00,2025-02-13 05:15:00.000000 +00:00,2025-02-13 05:15:00.000000 +00:00,2025-02-13 06:04:19.030000 +00:00,51.63781659476942,-3.1354419764513506,Afon Ebbw",
+        "Start,2025-02-13 05:30:00.000000 +00:00,2025-02-13 05:30:00.000000 +00:00,,2025-02-13 06:22:21.772000 +00:00,51.63781659476942,-3.1354419764513506,Afon Ebbw",
+        "Stop,2025-02-14 02:45:00.000000 +00:00,2025-02-14 02:45:00.000000 +00:00,2025-02-14 02:45:00.000000 +00:00,2025-02-14 03:28:23.548000 +00:00,51.63781659476942,-3.1354419764513506,Afon Ebbw",
+        "Start,2025-02-14 07:45:00.000000 +00:00,2025-02-14 07:45:00.000000 +00:00,,2025-02-14 08:19:19.235000 +00:00,51.63781659476942,-3.1354419764513506,Afon Ebbw",
+        "Stop,2025-02-15 02:45:00.000000 +00:00,2025-02-15 02:45:00.000000 +00:00,2025-02-15 02:45:00.000000 +00:00,2025-02-15 03:16:27.266000 +00:00,51.63781659476942,-3.1354419764513506,Afon Ebbw"
+    ]
+}
+
+
+class TestDwrCymru:
+    # dwrcymru is type 1 - status start is the start time of the indicated status
+    company = WaterCompany.DwrCymru
+    file = StreamFile(company=company, file_id='4567', file_time=datetime.datetime.now())
+
+    def events(self, scenario: str) -> List[FeatureRecord]:
+        return [as_feature(company=self.company, s=s) for s in events_dwr_cymru[scenario]]
+
+    def test_regular_operation(self):
+        events = self.events('starting_stopping')
+        output = apply_events(self.file, events)
+
+        assert len(output) == 6
+        assert [o.event for o in output] == [EventType.Start, EventType.Stop, EventType.Start, EventType.Stop,
+                                             EventType.Start, EventType.Stop]
+
+        assert output[0].event_time == events[0].statusStart
+        assert output[1].event_time == events[1].statusStart

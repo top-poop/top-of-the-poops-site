@@ -43,3 +43,14 @@ deploy:
 upgrade:
 	@test $(shell docker context show) = $(TOTP_CONTEXT)
 	SERVICE_FULL_NAME=$(FULL_NAME)  docker stack deploy --with-registry-auth -c docker-compose.yml $(SERVICE)
+
+.PHONY: temp
+temp: check-context
+	docker build -f Dockerfile-temp -t stream-temp -t $(DOCKER_HUB_ORG)/stream-temp:temp .
+	docker push $(DOCKER_HUB_ORG)/stream-temp:temp
+
+.PHONY: temp
+temp-run:
+	@test $(shell docker context show) = $(TOTP_CONTEXT)
+	docker pull $(DOCKER_HUB_ORG)/stream-temp:temp
+	docker service create --with-registry-auth --name swarm-temp --network overlay-net --restart-condition none --replicas 1 --secret s3_key_id --secret s3_secret_key --secret stream_bucket_name $(DOCKER_HUB_ORG)/stream-temp:temp

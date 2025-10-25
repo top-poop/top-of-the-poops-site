@@ -8,11 +8,10 @@ from datetime import timezone
 import psycopg2
 from psycopg2.extras import DictCursor
 
-from companies import StreamMembers
 from secret import env
-from services.stream.companies import WaterCompany
-from services.stream.storage import DwrCymruCSV
-from services.stream.stream import DwrCymruRecord
+from companies import WaterCompany
+from storage import DwrCymruCSV
+from stream import DwrCymruRecord
 from storage import b2_service, CSVFileStorage, SqlliteStorage, S3Storage
 from stream import FeatureRecord, EventType
 from streamdb import Database
@@ -109,4 +108,4 @@ if __name__ == '__main__':
             database.insert_file_content(file=file_ref, features=converted_features)
 
             most_recent_by_id.update({w.id: replace(w, status=EventType(int(w.status))) for w in wanted_features})
-            conn.rollback()
+            conn.commit()
