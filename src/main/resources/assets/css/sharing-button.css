@@ -56,6 +56,14 @@
     background-color: #2795e9
 }
 
+.resp-sharing-button--mastodon {
+    background-color: #6364FF
+}
+
+.resp-sharing-button--mastodon:hover {
+    background-color: #563ACC
+}
+
 .resp-sharing-button--pinterest {
     background-color: #bd081c
 }
@@ -140,31 +148,6 @@
 .resp-sharing-button--vk:hover {
     background-color: #43648c
 }
-
-.resp-sharing-button--facebook {
-    background-color: #3b5998;
-    border-color: #3b5998;
-}
-
-.resp-sharing-button--facebook:hover,
-.resp-sharing-button--facebook:active {
-    background-color: #2d4373;
-    border-color: #2d4373;
-}
-
-.resp-sharing-button--twitter {
-    background-color: #55acee;
-    border-color: #55acee;
-}
-
-.resp-sharing-button--twitter:hover,
-.resp-sharing-button--twitter:active {
-    background-color: #2795e9;
-    border-color: #2795e9;
-}
-
-
-
 
 .resp-sharing-button--insta {
     background-color: #C13584

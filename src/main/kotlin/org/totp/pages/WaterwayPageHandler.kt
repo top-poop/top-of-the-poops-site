@@ -88,7 +88,6 @@ object WaterwayPageHandler {
                             SocialShare(
                                 pageUriFrom(request),
                                 text = "$name had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year}",
-                                cta = "$name pollution",
                                 tags = listOf("sewage"),
                                 via = "sewageuk"
                             ),

@@ -6,6 +6,7 @@ import org.http4k.template.viewModel
 import org.totp.db.StreamData
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
+import java.text.NumberFormat
 
 class NowPage(
     uri: Uri,
@@ -21,16 +22,17 @@ object NowHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
         return { request: Request ->
+            val summary = streamData.summary()
 
+            val formatted = NumberFormat.getNumberInstance().format(summary.count.start)
             Response(Status.OK)
                 .with(
                     viewLens of NowPage(
                         pageUriFrom(request),
-                        summary = streamData.summary(),
+                        summary = summary,
                         share = SocialShare(
                             pageUriFrom(request),
-                            text = "Live Sewage Overflows",
-                            cta = "Sewage pollution",
+                            text = "$formatted sewage overflows happening right now",
                             tags = listOf("sewage"),
                             via = "sewageuk",
                             twitterImageUri = Uri.of("https://top-of-the-poops.org/assets/images/logos/live-map-og-image.jpg")

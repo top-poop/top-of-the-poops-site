@@ -12,14 +12,13 @@ import strikt.api.DescribeableBuilder
 import strikt.api.expectThat
 import strikt.assertions.contains
 import strikt.assertions.first
-import strikt.assertions.get
 import strikt.assertions.isEqualTo
 
-fun Assertion.Builder<Document>.select(selector:String): DescribeableBuilder<Elements> {
+fun Assertion.Builder<Document>.select(selector: String): DescribeableBuilder<Elements> {
     return get { this.select(selector) }
 }
 
-fun Assertion.Builder<Element>.attribute(name:String): DescribeableBuilder<String> {
+fun Assertion.Builder<Element>.attribute(name: String): DescribeableBuilder<String> {
     return get { this.attr(name) }
 }
 
@@ -28,9 +27,11 @@ fun Assertion.Builder<Document>.twitterImageUri(): DescribeableBuilder<String> {
 }
 
 
-
 object Html {
-    operator fun invoke(response: Response, expected: (Response) -> Unit = { expectThat(it).status.isEqualTo(Status.OK) }) : Document {
+    operator fun invoke(
+        response: Response,
+        expected: (Response) -> Unit = { expectThat(it).status.isEqualTo(Status.OK) }
+    ): Document {
         expected(response)
 
         val body = response.bodyString()

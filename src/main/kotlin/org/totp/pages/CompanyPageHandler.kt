@@ -152,7 +152,6 @@ object CompanyPageHandler {
                                         mostRecent.count.count
                                     )
                                 } times in ${mostRecent.year} - Unacceptable!",
-                                cta = "Tweet your displeasure to $name",
                                 listOf("sewage"),
                                 via = "sewageuk",
                                 twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/company/${slug}-2024.png")

@@ -175,11 +175,66 @@ order by pcon24nm;
         })
     }
 
-    fun totalForConstituency(constituencyName: ConstituencyName, startDate: LocalDate, endDate: LocalDate): Duration {
+    data class StreamCsoSummary(
+        val id: String,
+        val lat: Float,
+        val lon: Float,
+        val duration: Duration,
+        val days: Int
+    )
+
+    fun byCsoForConstituency(
+        constituency: ConstituencyName,
+        startDate: LocalDate, endDate: LocalDate
+    ): List<StreamCsoSummary> {
         return connection.execute(NamedQueryBlock("stream-live-events") {
             query(
                 sql = """
-select grid_references.pcon24nm, extract(epoch from sum(start)) as overflowing
+select
+    cso.stream_id, cso.lat, cso.lon,
+    extract(epoch from sum(start)) as duration_seconds,
+    count(*) filter (where start <> interval '0') as count
+from stream_summary
+         join stream_cso as cso on cso.stream_cso_id = stream_summary.stream_cso_id
+         join stream_cso_grid on cso.stream_cso_id = stream_cso_grid.stream_cso_id
+         join grid_references on stream_cso_grid.grid_reference = grid_references.grid_reference
+where grid_references.pcon24nm = ? and date >= ? and date <= ?
+group by cso.stream_cso_id;
+                """.trimIndent(),
+                bind = {
+                    it.set(1, constituency)
+                    it.set(2, startDate)
+                    it.set(3, endDate)
+                },
+                mapper = {
+                    StreamData.StreamCsoSummary(
+                        it.getString("stream_id"),
+                        lat = it.getFloat("lat"),
+                        lon = it.getFloat("lon"),
+                        duration = Duration.ofSeconds(it.getLong("duration_seconds")),
+                        days = it.getInt("count")
+                    )
+                }
+            )
+        })
+    }
+
+
+    data class ConstituencyLiveTotal(
+        val constituency: ConstituencyName,
+        val duration: Duration,
+        val csoCount: Int
+    )
+
+    fun totalForConstituency(
+        constituency: ConstituencyName,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): ConstituencyLiveTotal {
+        return connection.execute(NamedQueryBlock("stream-live-events") {
+            query(
+                sql = """
+select grid_references.pcon24nm, extract(epoch from sum(start)) as overflowing, count(distinct stream_cso.stream_cso_id) as cso_count
 from stream_summary
          join stream_cso on stream_cso.stream_cso_id = stream_summary.stream_cso_id
          join stream_cso_grid on stream_cso.stream_cso_id = stream_cso_grid.stream_cso_id
@@ -188,15 +243,23 @@ where grid_references.pcon24nm = ? and date >= ? and date <= ?
 group by grid_references.pcon24nm
                 """.trimIndent(),
                 bind = {
-                    it.set(1, constituencyName)
+                    it.set(1, constituency)
                     it.set(2, startDate)
                     it.set(3, endDate)
                 },
                 mapper = {
-                    Duration.ofSeconds(it.getLong("overflowing"))
+                    ConstituencyLiveTotal(
+                        constituency = constituency,
+                        duration = Duration.ofSeconds(it.getLong("overflowing")),
+                        csoCount = it.getInt("cso_count")
+                    )
                 }
             )
-        }).first()
+        }).firstOrNull() ?: ConstituencyLiveTotal(
+            constituency = constituency,
+            duration = Duration.ZERO,
+            csoCount = 0
+        )
 
     }
 

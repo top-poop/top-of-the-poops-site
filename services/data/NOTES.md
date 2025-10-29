@@ -35,6 +35,10 @@ scp poop.server:/data/postgres-$(date +"%Y-%m-%d").tar.zst .
 
 ```
 
+cd /data
+rclone copyto bbpsql:xxx postgres-$(date +"%Y-%m-%d").tar.zst
+
+
 # Restoring backup to local
 
 ```bash

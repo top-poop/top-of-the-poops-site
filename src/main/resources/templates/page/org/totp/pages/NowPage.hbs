@@ -10,7 +10,7 @@
     {{> chunks/meta-scripts }}
 
     {{> components/meta-opengraph
-            title=share.text
+            title=(concat "Live Sewage | " share.text)
             description="Live Sewage Map"
             twitterImageUri=share.twitterImageUri
     }}
@@ -20,26 +20,40 @@
             transition: all 0.3s ease;
             border: none;
         }
+
         .map-container {
             height: clamp(300px, 60vh, 720px);
             min-height: 300px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        .controls-panel { box-shadow: 0 1px 2px rgba(0,0,0,0.04) inset, 0 2px 6px rgba(0,0,0,0.06); }
+
+        .controls-panel {
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset, 0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+
         .cassette-controls {
             position: relative;
         }
 
         @media (max-width: 576px) {
-            .card-body.p-0 > .map-container#now { height: clamp(260px, 55vh, 520px); }
-            #map-section .card-footer { padding-bottom: 0.5rem; }
-            .cassette-controls::before { width: 80px; }
+            .card-body.p-0 > .map-container#now {
+                height: clamp(260px, 55vh, 520px);
+            }
+
+            #map-section .card-footer {
+                padding-bottom: 0.5rem;
+            }
+
+            .cassette-controls::before {
+                width: 80px;
+            }
         }
+
         .control-btn {
             -webkit-appearance: none;
             appearance: none;
-            border: 1px solid rgba(0,0,0,0.2);
+            border: 1px solid rgba(0, 0, 0, 0.2);
             background: linear-gradient(180deg, #ffffff 0%, #f0f3f7 100%);
             color: #333;
             width: 42px;
@@ -49,16 +63,35 @@
             border-radius: 12px;
             display: grid;
             place-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.7);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.7);
             transition: transform 0.06s ease, box-shadow 0.2s ease, filter 0.2s ease;
             cursor: pointer;
         }
-        .control-btn .bi { font-size: 1.05rem; }
-        .control-btn:hover { filter: brightness(1.03); box-shadow: 0 3px 6px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.8); }
-        .control-btn:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,0.12), inset 0 2px 4px rgba(0,0,0,0.08); }
-        .control-btn:focus-visible { outline: 2px solid #86b7fe; outline-offset: 2px; }
+
+        .control-btn .bi {
+            font-size: 1.05rem;
+        }
+
+        .control-btn:hover {
+            filter: brightness(1.03);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        .control-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .control-btn:focus-visible {
+            outline: 2px solid #86b7fe;
+            outline-offset: 2px;
+        }
+
         @media (prefers-contrast: more) {
-            .control-btn { background: #fff; border-color: #000; }
+            .control-btn {
+                background: #fff;
+                border-color: #000;
+            }
         }
     </style>
 </head>
@@ -88,119 +121,160 @@
                                 <i class="bi bi-clock-history text-primary me-2"></i>
                                 <h3 id="timeline-controls-title" class="h6 mb-0">Timeline Controls</h3>
                             </div>
-                        <form>
-                            <div class="d-flex justify-content-center mb-3 cassette-controls" aria-label="Timeline controls" role="group" aria-labelledby="timeline-controls-title">
-                                <div class="d-flex align-items-center">
-                                    <button type="button" class="control-btn" id="ctrl-le" aria-label="Move to start" title="Move to start"><i class="bi bi-chevron-bar-left"></i></button>
-                                    <button type="button" class="control-btn" id="ctrl-ld" aria-label="Step back 1 day" title="Step back 1 day"><i class="bi bi-chevron-double-left"></i></button>
-                                    <button type="button" class="control-btn" id="ctrl-l" aria-label="Step back 1 hour" title="Step back 1 hour"><i class="bi bi-chevron-left"></i></button>
-                                    <button type="button" class="control-btn" id="ctrl-r" aria-label="Step forward 1 hour" title="Step forward 1 hour"><i class="bi bi-chevron-right"></i></button>
-                                    <button type="button" class="control-btn" id="ctrl-rd" aria-label="Step forward 1 day" title="Step forward 1 day"><i class="bi bi-chevron-double-right"></i></button>
-                                    <button type="button" class="control-btn" id="ctrl-re" aria-label="Move to end" title="Move to end"><i class="bi bi-chevron-bar-right"></i></button>
+                            <form>
+                                <div class="d-flex justify-content-center mb-3 cassette-controls"
+                                     aria-label="Timeline controls" role="group"
+                                     aria-labelledby="timeline-controls-title">
+                                    <div class="d-flex align-items-center">
+                                        <button type="button" class="control-btn" id="ctrl-le"
+                                                aria-label="Move to start" title="Move to start"><i
+                                                class="bi bi-chevron-bar-left"></i></button>
+                                        <button type="button" class="control-btn" id="ctrl-ld"
+                                                aria-label="Step back 1 day" title="Step back 1 day"><i
+                                                class="bi bi-chevron-double-left"></i></button>
+                                        <button type="button" class="control-btn" id="ctrl-l"
+                                                aria-label="Step back 1 hour" title="Step back 1 hour"><i
+                                                class="bi bi-chevron-left"></i></button>
+                                        <button type="button" class="control-btn" id="ctrl-r"
+                                                aria-label="Step forward 1 hour" title="Step forward 1 hour"><i
+                                                class="bi bi-chevron-right"></i></button>
+                                        <button type="button" class="control-btn" id="ctrl-rd"
+                                                aria-label="Step forward 1 day" title="Step forward 1 day"><i
+                                                class="bi bi-chevron-double-right"></i></button>
+                                        <button type="button" class="control-btn" id="ctrl-re" aria-label="Move to end"
+                                                title="Move to end"><i class="bi bi-chevron-bar-right"></i></button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-group row align-items-center">
-                                <label for="dateSlider" class="col-md-4 col-form-label fw-bold">
-                                    <i class="bi bi-calendar-event me-2"></i>
-                                    <span id="dateSliderValue"></span>
-                                </label>
-                                <div class="col-md-8">
-                                    <input id="dateSlider" type="range" class="form-range">
-                                    <div class="form-text mt-1" id="timeline-help"><i class="bi bi-info-circle me-1"></i>move the slider to show an animation of sewage and rainfall across the country</div>
+                                <div class="form-group row align-items-center">
+                                    <label for="dateSlider" class="col-md-4 col-form-label fw-bold">
+                                        <i class="bi bi-calendar-event me-2"></i>
+                                        <span id="dateSliderValue"></span>
+                                    </label>
+                                    <div class="col-md-8">
+                                        <input id="dateSlider" type="range" class="form-range">
+                                        <div class="form-text mt-1" id="timeline-help"><i
+                                                class="bi bi-info-circle me-1"></i>move the slider to show an animation
+                                            of sewage and rainfall across the country
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="h4 mb-0"><i class="bi bi-map me-2"></i>Map Information</h2>
-                </div>
-                <div class="card-body">
-                    <div class="mb-4">
-                        <h3 class="h5 fw-bold text-primary mb-3">What am I seeing?</h3>
-                        <p>Here are the CSOs in England that we know are overflowing right now. We are using the Water Companies'
-                            own data, updated every 15 minutes.</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <h3 class="h5 fw-bold text-primary mb-3">Map Legend</h3>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item d-flex align-items-center border-0 px-0">
-                                <span class="badge rounded-pill bg-primary me-2">&nbsp;</span>
-                                <span>Each dot represents an overflowing CSO</span>
-                            </li>
-                            <li class="list-group-item d-flex align-items-center border-0 px-0">
-                                <span class="badge bg-info me-2"><i class="bi bi-droplet-fill"></i></span>
-                                <span>Blue squares represent rainfall - darker blue means more rain - we get rainfall data two days delayed,
-                                    so you can't see rainfall for live data, but if you scroll back in time, you can see how much it was raining.</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="alert alert-warning">
-                        <div class="d-flex">
-                            <div class="me-2">
-                                <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+            <div class="row mb-2">
+                <div class="col">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h2 class="h4 mb-0"><i class="bi bi-map me-2"></i>Map Information</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <h3 class="h5 fw-bold text-primary mb-3">What am I seeing?</h3>
+                                <p>Here are the CSOs in England that we know are overflowing right now. We are using the
+                                    Water Companies'
+                                    own data, updated every 15 minutes.</p>
                             </div>
-                            <div>
-                                <p class="mb-0">With your support we can do more to track and report on sewage pollution.</p>
-                                <a href="/support" class="btn btn-danger mt-2">
-                                    <i class="bi bi-heart-fill me-1"></i> Support our work
-                                </a>
+
+                            <div class="mb-4">
+                                <h3 class="h5 fw-bold text-primary mb-3">Map Legend</h3>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex align-items-center border-0 px-0">
+                                        <span class="badge rounded-pill bg-primary me-2">&nbsp;</span>
+                                        <span>Each dot represents an overflowing CSO</span>
+                                    </li>
+                                    <li class="list-group-item d-flex align-items-center border-0 px-0">
+                                        <span class="badge bg-info me-2"><i class="bi bi-droplet-fill"></i></span>
+                                        <span>Blue squares represent rainfall - darker blue means more rain - we get rainfall data two days delayed,
+                                    so you can't see rainfall for live data, but if you scroll back in time, you can see how much it was raining.</span>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div class="row mt-5">
-        <div class="col">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-info text-white">
-                    <h2 class="h4 mb-0"><i class="bi bi-table me-2"></i>Overflow Summary by Company</h2>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table id="table-stream-summary" data-id="stream-summary" class="table table-hover">
-                            <thead class="table-light">
-                            <tr>
-                                <th>Company</th>
-                                <th class="text-end">Total CSOs</th>
-                                <th class="text-end">Overflowing</th>
-                                <th class="text-end">Not Overflowing</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {{#each summary.companies}}
-                                <tr>
-                                    <td><i class="bi bi-building me-2 text-muted"></i>{{this.company}}</td>
-                                    <td class="text-end">{{numberFormat this.count.total}}</td>
-                                    <td class="text-end fw-bold {{#if this.count.start}}text-danger{{/if}}">{{numberFormat this.count.start}}</td>
-                                    <td class="text-end">{{numberFormat this.count.stop}}</td>
-                                </tr>
-                            {{/each}}
-                            </tbody>
-                            <tfoot class="table-light">
-                            <tr>
-                                <td><strong>Totals</strong></td>
-                                <td class="text-end">{{numberFormat summary.count.total}}</td>
-                                <td class="text-end fw-bold text-danger">{{numberFormat summary.count.start}}</td>
-                                <td class="text-end">{{numberFormat summary.count.stop}}</td>
-                            </tr>
-                            </tfoot>
-                        </table>
+            <div class="row mb-2">
+                <div class="col">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h2 class="h4 mb-0"><i class="bi bi-share-fill me-2"></i>Share</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex gap-1">
+                                {{> components/share-social share}}
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h2 class="h4 mb-0"><i class="bi bi-currency-pound me-2"></i>Support Us</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <p class="mb-0">With your support we can do more to track and report on
+                                    sewage
+                                    pollution.</p>
+                                <a href="/support" class="btn btn-danger mt-2">
+                                    <i class="bi bi-heart-fill me-1"></i> Support our work
+                                </a>                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    <div class="alert alert-info mt-3 mb-0">
-                        <i class="bi bi-info-circle-fill me-2"></i>
-                        Yorkshire Water, Dwr Cymru and Scottish Water are not yet included but will be coming soon.
+        <div class="row mt-2">
+            <div class="col">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h2 class="h4 mb-0"><i class="bi bi-table me-2"></i>Overflow Summary by Company</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="table-stream-summary" data-id="stream-summary" class="table table-hover">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Company</th>
+                                    <th class="text-end">Total CSOs</th>
+                                    <th class="text-end">Overflowing</th>
+                                    <th class="text-end">Not Overflowing</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {{#each summary.companies}}
+                                    <tr>
+                                        <td><i class="bi bi-building me-2 text-muted"></i>{{this.company}}</td>
+                                        <td class="text-end">{{numberFormat this.count.total}}</td>
+                                        <td class="text-end fw-bold {{#if
+                                                this.count.start}}text-danger{{/if}}">{{numberFormat
+                                                this.count.start}}</td>
+                                        <td class="text-end">{{numberFormat this.count.stop}}</td>
+                                    </tr>
+                                {{/each}}
+                                </tbody>
+                                <tfoot class="table-light">
+                                <tr>
+                                    <td><strong>Totals</strong></td>
+                                    <td class="text-end">{{numberFormat summary.count.total}}</td>
+                                    <td class="text-end fw-bold text-danger">{{numberFormat summary.count.start}}</td>
+                                    <td class="text-end">{{numberFormat summary.count.stop}}</td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <div class="alert alert-info mt-3 mb-0">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            Yorkshire Water, Dwr Cymru and Scottish Water are not yet included but will be coming soon.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -220,18 +294,25 @@
                         <div class="col-lg-8">
                             <div class="mb-4">
                                 <h3 class="h5 fw-bold text-primary mb-3">Our Sophisticated Analysis Model</h3>
-                                <p>You might notice that some of the figures in the above chart, particularly around how
-                                    long a CSO has been overflowing, are different from the figures on other websites. We use a
+                                <p>You might notice that some of the figures in the above chart, particularly around
+                                    how
+                                    long a CSO has been overflowing, are different from the figures on other
+                                    websites. We use a
                                     more sophisticated model to figure out when CSOs really started overflowing.</p>
 
-                                <p>The water companies send a signal each time a CSO overflows, saying that it has 'Started'
-                                    and telling us when. Sometimes though, it sends multiple 'Started' events in a row. One
+                                <p>The water companies send a signal each time a CSO overflows, saying that it has
+                                    'Started'
+                                    and telling us when. Sometimes though, it sends multiple 'Started' events in a
+                                    row. One
                                     event will say 'Started at 1pm', the next 'Started at 3pm', the next 'Started at
                                     10pm'...</p>
 
-                                <p>Its clear though that despite the latest alert being 'Started at 10pm', the overflow did
-                                    actually start at 1pm - so the CSO has been overflowing for far longer. This is how we
-                                    keep track of the state of each CSO overflow, and why our numbers are different, we don't just rely
+                                <p>Its clear though that despite the latest alert being 'Started at 10pm', the
+                                    overflow did
+                                    actually start at 1pm - so the CSO has been overflowing for far longer. This is
+                                    how we
+                                    keep track of the state of each CSO overflow, and why our numbers are different,
+                                    we don't just rely
                                     on the latest information.</p>
                             </div>
 
@@ -241,8 +322,10 @@
                                         <i class="bi bi-lightbulb-fill text-warning fs-4"></i>
                                     </div>
                                     <div>
-                                        <p class="mb-0">There may be errors in our interpretation... and if we find any we're committed to updating
-                                            this information so that it is as accurate as possible. If you find an error, please let us
+                                        <p class="mb-0">There may be errors in our interpretation... and if we find
+                                            any we're committed to updating
+                                            this information so that it is as accurate as possible. If you find an
+                                            error, please let us
                                             know.</p>
                                     </div>
                                 </div>
@@ -252,7 +335,8 @@
                             <div class="card bg-light border-0 h-100">
                                 <div class="card-body">
                                     <h4 class="h5 fw-bold text-primary mb-3">Why This Matters</h4>
-                                    <p>Accurate tracking of overflow durations helps us hold water companies accountable and provides a true picture of pollution in our waterways.</p>
+                                    <p>Accurate tracking of overflow durations helps us hold water companies
+                                        accountable and provides a true picture of pollution in our waterways.</p>
                                     <div class="text-center mt-4">
                                         <i class="bi bi-droplet-half text-primary" style="font-size: 3rem;"></i>
                                     </div>
@@ -269,9 +353,11 @@
                                 </div>
                                 <div class="card-body text-center">
                                     <figure class="figure mb-0">
-                                        <img class="img-fluid rounded" src="/assets/images/stream-multiple-events.png"
+                                        <img class="img-fluid rounded"
+                                             src="/assets/images/stream-multiple-events.png"
                                              alt="An image showing some database records as supplied by Uk Water"/>
-                                        <figcaption class="figure-caption mt-2">How we receive the data.</figcaption>
+                                        <figcaption class="figure-caption mt-2">How we receive the data.
+                                        </figcaption>
                                     </figure>
                                 </div>
                             </div>
@@ -283,9 +369,11 @@
                                 </div>
                                 <div class="card-body text-center">
                                     <figure class="figure mb-0">
-                                        <img class="img-fluid rounded" src="/assets/images/stream-interpreted-event.png"
+                                        <img class="img-fluid rounded"
+                                             src="/assets/images/stream-interpreted-event.png"
                                              alt="An image showing our interpretation of those records, there are far fewer"/>
-                                        <figcaption class="figure-caption mt-2">After we've interpreted it.</figcaption>
+                                        <figcaption class="figure-caption mt-2">After we've interpreted it.
+                                        </figcaption>
                                     </figure>
                                 </div>
                             </div>
@@ -414,7 +502,7 @@
         const el = document.getElementById(id);
         el.addEventListener('click', (_) => {
             const action = actions[id];
-            if (action != null ) {
+            if (action != null) {
                 return actions[id]() && slider.dispatchEvent(new Event('input'));
             }
         })

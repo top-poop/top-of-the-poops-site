@@ -8,6 +8,7 @@ import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.THE_YEAR
+import org.totp.db.StreamData
 import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.http4k.removeQuery
@@ -65,7 +66,6 @@ data class RenderableConstituency(
 data class SocialShare(
     val uri: Uri,
     val text: String,
-    val cta: String,
     val tags: List<String>,
     val via: String,
     val twitterImageUri: Uri? = null,
@@ -74,7 +74,7 @@ data class SocialShare(
 data class ConstituencyPageLiveData(
     val csoUri: Uri,
     val rainfallUri: Uri,
-    val duration: RenderableDuration,
+    val total: RenderableConstituencyLiveTotal,
     val year: Int,
     val latest: LocalDateTime
 )
@@ -193,14 +193,13 @@ object ConstituencyPageHandler {
         constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
         constituencyRank: (ConstituencyName) -> ConstituencyRank?,
         constituencyRivers: (ConstituencyName) -> List<RiverRank>,
-        constituencyLiveTotals: (ConstituencyName, LocalDate, LocalDate) -> Duration,
+        constituencyLiveTotals: (ConstituencyName, LocalDate, LocalDate) -> StreamData.ConstituencyLiveTotal,
         liveDataLatest: () -> Instant,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
         val constituencySlug: PathLens<ConstituencySlug> =
             Path.value(ConstituencySlug).of("constituency", "The constituency")
-        val numberFormat = NumberFormat.getIntegerInstance()
 
         return ConstituencyAsParameterRedirectFilter()
             .then(ConstituencyBoundaryChangesRedirectFilter(constituencySlug))
@@ -215,7 +214,7 @@ object ConstituencyPageHandler {
                         .map {
                             it.value.toRenderable(
                                 current = it.key == slug,
-                                live = liveAvailable.contains(it.value)
+                                haveLive = liveAvailable.contains(it.value)
                             )
                         }
 
@@ -223,8 +222,7 @@ object ConstituencyPageHandler {
 
                     val neighbours = constituencyNeighbours(constituencyName)
                         .sorted()
-                        .map { constituencyRank(it) }
-                        .filterNotNull()
+                        .mapNotNull { constituencyRank(it) }
                         .map { it.toRenderable(mpFor) }
 
                     val summary = list.summary()
@@ -233,11 +231,7 @@ object ConstituencyPageHandler {
                     val rivers = rivers2.take(5)
                         .map { it.toRenderable() }
 
-                    val mp = mpFor(
-                        constituencyName
-                    )
-
-                    val formattedHours = numberFormat.format(summary.duration.hours)
+                    val mp = mpFor(constituencyName)
 
                     val liveDataStart = LocalDate.ofInstant(clock.instant(), ZoneId.of("UTC")).minusMonths(3)
 
@@ -247,23 +241,7 @@ object ConstituencyPageHandler {
                                 pageUriFrom(request).removeQuery(),
                                 constituencyName.toRenderable(current = true),
                                 mp = mp,
-                                mp?.let { mp ->
-                                    SocialShare(
-                                        pageUriFrom(request),
-                                        text = "Hey ${mp.name}! What are you doing about the $formattedHours hours of sewage pollution in $constituencyName",
-                                        cta = "Tell ${mp.name} what you think",
-                                        tags = listOf("sewage"),
-                                        via = "sewageuk",
-                                        twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2024.png")
-                                    )
-                                } ?: SocialShare(
-                                    pageUriFrom(request),
-                                    text = "$constituencyName had $formattedHours hours of sewage pollution in ${summary.year}",
-                                    cta = "Share $constituencyName sewage horrors",
-                                    tags = listOf("sewage"),
-                                    via = "sewageuk",
-                                    twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2024.png")
-                                ),
+                                share(mp, summary, constituencyName, slug, pageUriFrom(request)),
                                 summary,
                                 constituencyBoundary(constituencyName),
                                 list.map {
@@ -275,7 +253,7 @@ object ConstituencyPageHandler {
                                     ConstituencyPageLiveData(
                                         latest = LocalDateTime.ofInstant(liveDataLatest(), ZoneId.of("Europe/London")),
                                         year = now.year,
-                                        duration = constituencyLiveTotals(
+                                        total = constituencyLiveTotals(
                                             constituencyName,
                                             LocalDate.of(now.year, 1, 1),
                                             now.toLocalDate()
@@ -294,15 +272,67 @@ object ConstituencyPageHandler {
                     ?: Response(Status.NOT_FOUND)
             }
     }
+
+    private fun share(
+        mp: MP?,
+        summary: PollutionSummary,
+        constituencyName: ConstituencyName,
+        slug: ConstituencySlug,
+        uri: Uri
+    ): SocialShare {
+
+        val numberFormat = NumberFormat.getIntegerInstance()
+        val formatted = numberFormat.format(summary.duration.hours)
+
+        return mp?.let { mp ->
+            SocialShare(
+                uri,
+                text = "Hey ${mp.name}! What are you doing about the $formatted hours of sewage pollution in $constituencyName",
+                tags = listOf("sewage"),
+                via = "sewageuk",
+                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2024.png")
+            )
+        } ?: SocialShare(
+            uri,
+            text = "$constituencyName had $formatted hours of sewage pollution in ${summary.year}",
+            tags = listOf("sewage"),
+            via = "sewageuk",
+            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2024.png")
+        )
+    }
 }
 
-fun ConstituencyName.toRenderable(current: Boolean = false, live: Boolean = false): RenderableConstituency {
+fun ConstituencyName.toRenderable(
+    current: Boolean = false,
+    haveLive: Boolean = false,
+    linkLive: Boolean = false
+): RenderableConstituency {
     val slug = this.toSlug()
     return RenderableConstituency(
         name = this,
         current = current,
         slug = slug,
-        uri = slug.let { Uri.of("/constituency/$it") },
-        live = live,
+        uri = slug.let {
+            if (linkLive) {
+                Uri.of("/constituency/$it/live")
+            } else {
+                Uri.of("/constituency/$it")
+            }
+        },
+        live = haveLive,
+    )
+}
+
+data class RenderableConstituencyLiveTotal(
+    val constituency: RenderableConstituency,
+    val duration: RenderableDuration,
+    val count: RenderableCount,
+)
+
+fun StreamData.ConstituencyLiveTotal.toRenderable(): RenderableConstituencyLiveTotal {
+    return RenderableConstituencyLiveTotal(
+        constituency = this.constituency.toRenderable(linkLive = true),
+        duration = this.duration.toRenderable(),
+        count = RenderableCount(csoCount),
     )
 }

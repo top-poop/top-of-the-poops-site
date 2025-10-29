@@ -109,7 +109,6 @@ object BeachesPageHandler {
                         SocialShare(
                             pageUriFrom(request),
                             "Are the beaches safe for swimming? - ${numberFormat.format(totalCount)} sewage pollution incidents in 2024",
-                            cta = "Take action. Tweet this to your followers",
                             listOf("sewage"),
                             via = "sewageuk",
                             twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/home/beaches.png")

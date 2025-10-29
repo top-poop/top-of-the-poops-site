@@ -1,0 +1,129 @@
+package org.totp.pages
+
+import org.http4k.core.*
+import org.http4k.lens.Path
+import org.http4k.lens.PathLens
+import org.http4k.lens.value
+import org.http4k.template.TemplateRenderer
+import org.http4k.template.viewModel
+import org.totp.db.StreamData
+import org.totp.http4k.pageUriFrom
+import org.totp.http4k.removeQuery
+import org.totp.model.PageViewModel
+import org.totp.model.data.ConstituencyName
+import org.totp.model.data.ConstituencySlug
+import org.totp.model.data.GeoJSON
+import java.text.NumberFormat
+import java.time.Clock
+import java.time.Instant
+import java.time.LocalDate
+
+class ConstituencyLivePage(
+    pageUri: Uri,
+    val asAt: Instant,
+    val constituency: RenderableConstituency,
+    val mp: MP?,
+    val geojson: GeoJSON,
+    val neighbours: List<RenderableConstituency>,
+    val constituencies: List<RenderableConstituency>,
+    val summary: RenderableConstituencyLiveTotal,
+    val share: SocialShare?,
+) : PageViewModel(pageUri)
+
+class ConstituencyLiveNotAvailablePage(
+    pageUri: Uri,
+    val constituency: RenderableConstituency,
+    val geojson: GeoJSON,
+    val neighbours: List<RenderableConstituency>,
+    val constituencies: List<RenderableConstituency>,
+) : PageViewModel(pageUri)
+
+object ConstituencyLivePageHandler {
+    operator fun invoke(
+        clock: Clock,
+        renderer: TemplateRenderer,
+        constituencyBoundary: (ConstituencyName) -> GeoJSON,
+        mpFor: (ConstituencyName) -> MP,
+        constituencyLiveAvailable: () -> Set<ConstituencyName>,
+        constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
+        constituencyLiveTotals: (ConstituencyName, LocalDate, LocalDate) -> StreamData.ConstituencyLiveTotal,
+        liveDataLatest: () -> Instant,
+    ): HttpHandler {
+
+        val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
+
+        val constituencySlug: PathLens<ConstituencySlug> =
+            Path.value(ConstituencySlug).of("constituency", "The constituency")
+
+        return { request: Request ->
+
+            val slug = constituencySlug(request)
+            val liveAvailable = constituencyLiveAvailable()
+
+            slugToConstituency[slug]?.let { constituencyName ->
+
+                val mp = mpFor(constituencyName)
+
+                val neighbourConstituencies = constituencyNeighbours(constituencyName)
+                    .sorted()
+                    .map { it.toRenderable(linkLive = true) }
+
+                val allConstituencies = slugToConstituency
+                    .map {
+                        it.value.toRenderable(
+                            current = it.key == slug,
+                            haveLive = liveAvailable.contains(it.value),
+                            linkLive = true,
+                        )
+                    }
+
+                val year = 2025
+
+                if (liveAvailable.contains(constituencyName)) {
+                    val totals = constituencyLiveTotals(
+                        constituencyName,
+                        LocalDate.of(year, 1, 1),
+                        LocalDate.of(year, 12, 31)
+                    )
+                    val hours = totals.duration.toHours()
+                    val formatted = NumberFormat.getNumberInstance().format(hours)
+
+                    Response(Status.OK).with(
+                        viewLens of ConstituencyLivePage(
+                            pageUriFrom(request).removeQuery(),
+                            asAt = liveDataLatest(),
+                            constituency = constituencyName.toRenderable(current = true),
+                            mp = mp,
+                            geojson = constituencyBoundary(constituencyName),
+                            neighbours = neighbourConstituencies,
+                            constituencies = allConstituencies,
+                            summary = totals.toRenderable(),
+                            share = SocialShare(
+                                uri = pageUriFrom(request),
+                                text = if (hours>100) {
+                                    "Unbelievable $formatted hours of sewage so far in $year in $constituencyName"
+                                } else {
+                                    "Unusually, only $formatted hours of sewage so far in $year in $constituencyName"
+                                },
+                                tags = listOf("sewage"),
+                                via = "sewageuk",
+                                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2024.png")
+                            )
+                        )
+                    )
+                } else {
+                    Response(Status.OK).with(
+                        viewLens of ConstituencyLiveNotAvailablePage(
+                            pageUriFrom(request).removeQuery(),
+                            constituencyName.toRenderable(current = true),
+                            geojson = constituencyBoundary(constituencyName),
+                            neighbours = neighbourConstituencies,
+                            constituencies = allConstituencies,
+                        )
+                    )
+                }
+
+            } ?: Response(Status.NOT_FOUND)
+        }
+    }
+}

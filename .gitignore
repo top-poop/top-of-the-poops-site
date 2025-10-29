@@ -28,3 +28,5 @@ out/
 ### Mac OS ###
 .DS_Store
 venv/
+
+*.env

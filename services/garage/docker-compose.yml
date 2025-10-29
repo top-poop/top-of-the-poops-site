@@ -1,0 +1,36 @@
+services:
+
+#  s3manager:
+#    container_name: s3manager
+#    image: cloudlena/s3manager
+#    networks:
+#      - overlay-net
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      - ENDPOINT=garage:3900
+#      - ACCESS_KEY_ID=${GARAGE_ACCESS_KEY_ID}
+#      - SECRET_ACCESS_KEY=${GARAGE_SECRET_ACCESS_KEY}
+#      - USE_SSL=false
+#    depends_on:
+#      - garage
+
+  garage:
+    image: dxflrs/garage:v2.1.0
+    networks:
+      - overlay-net
+#    environment:
+#      - GARAGE_ADMIN_TOKEN=${GARAGE_ADMIN_TOKEN}
+#    ports:
+#      - "3900:3900"
+#      - "3901:3901"
+#      - "3902:3902"
+#      - "3903:3903"
+    volumes:
+      - /data/garage/garage.toml:/etc/garage.toml
+      - /data/garage/meta:/var/lib/garage/meta
+      - /data/garage/data:/var/lib/garage/data
+
+networks:
+  overlay-net:
+    external: true

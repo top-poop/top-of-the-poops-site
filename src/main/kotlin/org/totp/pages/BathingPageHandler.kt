@@ -115,7 +115,6 @@ object BathingPageHandler {
                             share = SocialShare(
                                 pageUriFrom(request),
                                 text = "$bathingAreaName had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year}",
-                                cta = "$bathingAreaName pollution",
                                 tags = listOf("sewage"),
                                 via = "sewageuk",
                                 twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/beach/${bathingArea}")

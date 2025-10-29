@@ -1,3 +1,5 @@
+Sitemap: https://top-of-the-poops.org/sitemap.xml
+
 User-agent: *
 Disallow: /data
 

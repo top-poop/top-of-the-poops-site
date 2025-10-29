@@ -64,8 +64,11 @@ object SitemapUris {
                 Uri.of("/beaches"),
                 Uri.of("/rivers"),
             ).plus(
-                constituencies().map {
-                    it.constituencyName.toRenderable().uri
+                constituencies().flatMap {
+                    listOf(
+                        it.constituencyName.toRenderable().uri,
+                        it.constituencyName.toRenderable(linkLive = true).uri
+                    )
                 }
             ).plus(
                 // bug where anglian has a waterway called '.' - will fix upstream later

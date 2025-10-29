@@ -10,14 +10,9 @@ import org.http4k.routing.routes
 import org.http4k.strikt.header
 import org.http4k.strikt.status
 import org.junit.jupiter.api.Test
+import org.totp.db.StreamData
 import org.totp.model.TotpHandlebars
-import org.totp.model.data.CSO
-import org.totp.model.data.CSOTotals
-import org.totp.model.data.CompanyName
-import org.totp.model.data.ConstituencyName
-import org.totp.model.data.Coordinates
-import org.totp.model.data.GeoJSON
-import org.totp.model.data.WaterwayName
+import org.totp.model.data.*
 import strikt.api.expectCatching
 import strikt.api.expectThat
 import strikt.assertions.first
@@ -70,7 +65,13 @@ class ConstituencyPageHandlerTest {
                 )
             },
             constituencyRivers = { listOf(aRiver(1)) },
-            constituencyLiveTotals = { _, _, _ -> Duration.ofHours(10) },
+            constituencyLiveTotals = { c, _, _ ->
+                StreamData.ConstituencyLiveTotal(
+                    constituency = c,
+                    duration = Duration.ofHours(10),
+                    csoCount = 10
+                )
+            },
             liveDataLatest = clock::instant,
         )
     )

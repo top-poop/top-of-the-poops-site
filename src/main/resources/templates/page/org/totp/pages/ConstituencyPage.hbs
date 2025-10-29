@@ -80,7 +80,7 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
-                    <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Select Constituency</h2>
+                    <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Select Another Constituency</h2>
                 </div>
                 <div class="card-body">
                     <form>
@@ -103,7 +103,7 @@
                             <div class="form-text mb-1"><i class="bi bi-info-circle me-1"></i>Select the constituency
                                 from the drop-down
                             </div>
-                            <div class="form-text">✔ means we have experimental daily data since 2023</div>
+                            <div class="form-text">✔ means we have live data</div>
                         </div>
                     </form>
                 </div>
@@ -121,14 +121,21 @@
                                 <i class="bi bi-info-circle-fill fs-4 text-primary"></i>
                             </div>
                             <div>
-                                <p class="mb-0">So far this year (as of {{dateFormat live.latest time='short'
+                                <p class="mb-2">So far this year (as of {{dateFormat live.latest time='short'
                                                                                      date='short'}}) there has been
-                                    <span class="badge bg-danger">{{numberFormat live.duration.hours}} hours</span>
-                                    of sewage overflows
-                                    {{#gt summary.duration.years 1}}
+                                    <span class="badge bg-danger">{{numberFormat live.total.duration.hours}}
+                                        hours</span>
+                                    of sewage overflows, from <span class="badge bg-danger">{{numberFormat
+                                            live.total.count.count}}</span> CSOs
+                                    {{#gt live.total.duration.years 1}}
                                         - that's <span class="fw-bold text-danger">{{numberFormat
-                                            live.duration.years}} years!</span>
+                                            live.total.duration.years}} years!</span>
                                     {{/gt}}</p>
+                                <a href="{{live.total.constituency.uri}}" class="text-decoration-none">
+                                    <button class="btn btn-danger">
+                                        <i class="bi bi-info-circle-fill me-1"></i>View Live Information Page
+                                    </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -200,8 +207,7 @@
                     </div>
 
                     <div class="d-flex gap-2">
-                        {{> components/share-facebook share}}
-                        {{> components/share-twitter  share}}
+                        {{> components/share-social share}}
                     </div>
                 </div>
             </div>
@@ -352,7 +358,8 @@
                         <div>
                             <p class="mb-0">Reporting refers to how much of the time the monitoring was active.
                                 {{#eq summary.lowReportingCount 0}}
-                                    In this constituency all the declared CSOs appeared to have monitoring enabled for more than 50% of the year
+                                    In this constituency all the declared CSOs appeared to have monitoring enabled for
+                                    more than 50% of the year
                                 {{else}}
                                     In this constituency {{summary.lowReportingCount}} of the total {{summary.csoCount}}
                                     CSO locations

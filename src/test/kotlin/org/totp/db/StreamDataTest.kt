@@ -30,6 +30,15 @@ class StreamDataTest {
     }
 
     @Test
+    fun csoSummaryForConstituency() {
+        expectThat(
+            stream.byCsoForConstituency(
+                ConstituencyName.of("Aldershot"), LocalDate.parse("2025-01-01"), LocalDate.now()
+            )
+        ).size.isGreaterThan(1)
+    }
+
+    @Test
     fun latest() {
         stream.latestAvailable()
     }

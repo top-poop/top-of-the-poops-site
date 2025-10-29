@@ -122,7 +122,6 @@ object ShellfisheryPageHandler {
                             SocialShare(
                                 pageUriFrom(request),
                                 text = "$name had ${numberFormat.format(summary.count.count)} sewage overflows in ${summary.year}",
-                                cta = "$name pollution",
                                 tags = listOf("sewage"),
                                 via = "sewageuk",
                                 twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/shellfishery/${area}")
