@@ -1,7 +1,6 @@
 import org.http4k.core.*
 import org.http4k.events.Event
 import org.http4k.events.Events
-import redis.clients.jedis.UnifiedJedis
 import redis.clients.jedis.commands.JedisCommands
 import redis.clients.jedis.exceptions.JedisConnectionException
 import java.net.SocketTimeoutException

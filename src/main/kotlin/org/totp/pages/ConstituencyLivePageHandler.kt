@@ -10,13 +10,20 @@ import org.totp.db.StreamData
 import org.totp.http4k.pageUriFrom
 import org.totp.http4k.removeQuery
 import org.totp.model.PageViewModel
-import org.totp.model.data.ConstituencyName
-import org.totp.model.data.ConstituencySlug
-import org.totp.model.data.GeoJSON
+import org.totp.model.data.*
 import java.text.NumberFormat
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
+
+data class RenderableStreamCsoSummary(
+    val company: RenderableCompany,
+    val id: String,
+    val location: Coordinates,
+    val duration: RenderableDuration,
+    val days: RenderableCount,
+)
+
 
 class ConstituencyLivePage(
     pageUri: Uri,
@@ -28,6 +35,7 @@ class ConstituencyLivePage(
     val constituencies: List<RenderableConstituency>,
     val summary: RenderableConstituencyLiveTotal,
     val share: SocialShare?,
+    val csos: List<RenderableStreamCsoSummary>,
 ) : PageViewModel(pageUri)
 
 class ConstituencyLiveNotAvailablePage(
@@ -47,6 +55,7 @@ object ConstituencyLivePageHandler {
         constituencyLiveAvailable: () -> Set<ConstituencyName>,
         constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
         constituencyLiveTotals: (ConstituencyName, LocalDate, LocalDate) -> StreamData.ConstituencyLiveTotal,
+        csoLive: (ConstituencyName, LocalDate, LocalDate) -> List<StreamData.StreamCsoSummary>,
         liveDataLatest: () -> Instant,
     ): HttpHandler {
 
@@ -80,11 +89,9 @@ object ConstituencyLivePageHandler {
                 val year = 2025
 
                 if (liveAvailable.contains(constituencyName)) {
-                    val totals = constituencyLiveTotals(
-                        constituencyName,
-                        LocalDate.of(year, 1, 1),
-                        LocalDate.of(year, 12, 31)
-                    )
+                    val startDate = LocalDate.of(year, 1, 1)
+                    val endDate = LocalDate.of(year, 12, 31)
+                    val totals = constituencyLiveTotals(constituencyName, startDate, endDate)
                     val hours = totals.duration.toHours()
                     val formatted = NumberFormat.getNumberInstance().format(hours)
 
@@ -100,7 +107,7 @@ object ConstituencyLivePageHandler {
                             summary = totals.toRenderable(),
                             share = SocialShare(
                                 uri = pageUriFrom(request),
-                                text = if (hours>100) {
+                                text = if (hours > 100) {
                                     "Unbelievable $formatted hours of sewage so far in $year in $constituencyName"
                                 } else {
                                     "Unusually, only $formatted hours of sewage so far in $year in $constituencyName"
@@ -108,7 +115,10 @@ object ConstituencyLivePageHandler {
                                 tags = listOf("sewage"),
                                 via = "sewageuk",
                                 twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2024.png")
-                            )
+                            ),
+                            csos = csoLive(constituencyName, startDate, endDate)
+                                .map { it.toRenderable() }
+                                .sortedByDescending { it.duration.value }
                         )
                     )
                 } else {
@@ -126,4 +136,14 @@ object ConstituencyLivePageHandler {
             } ?: Response(Status.NOT_FOUND)
         }
     }
+}
+
+fun StreamData.StreamCsoSummary.toRenderable(): RenderableStreamCsoSummary {
+    return RenderableStreamCsoSummary(
+        company = company.toRenderable(),
+        id = id,
+        location = location,
+        duration = RenderableDuration(duration),
+        days = RenderableCount(days),
+    )
 }

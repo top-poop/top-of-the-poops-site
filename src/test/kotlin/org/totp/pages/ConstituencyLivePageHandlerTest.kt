@@ -48,6 +48,7 @@ class ConstituencyLivePageHandlerTest {
                 )
             },
             liveDataLatest = clock::instant,
+            csoLive = { c, _, _ -> listOf() }
         )
     )
 

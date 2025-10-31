@@ -32,11 +32,14 @@ class DeltaValue(value: Int) : IntValue(value), Delta {
     override fun isNegative() = value < 0
 }
 
-class RenderableDuration(value: Duration) {
+class RenderableDuration(val value: Duration) {
     val hours = value.toHours()
     val days = hours / 24.0
     val months = days / 30.0
     val years = months / 12.0
+
+    val minutes = value.toMinutes() % 60;
+
 
     val hasMonths = months > 1.0
     val hasYears = years > 1.0

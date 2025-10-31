@@ -173,6 +173,35 @@
             {{> chunks/plea }}
         </div>
     </div>
+
+    <div class="table-responsive">
+        <table id="table-csos" class="table table-hover">
+            <thead class="table-light">
+            <tr>
+                <th>Company</th>
+                <th>CSO ID</th>
+                <th class="text-end">Overflow Days</th>
+                <th>Total Duration (hours)</th>
+                <th class="text-end">Total Duration (days)</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#each csos}}
+                <tr data-class="cso" data-lat="{{this.location.lat}}" data-lon="{{this.location.lon}}">
+                    <td data-company="{{this.company.name}}">
+                        <i class="bi bi-building me-1 text-muted"></i>
+                        <a href="{{this.company.uri}}">{{this.company.name}}</a>
+                    </td>
+                    <td data-id="{{this.id}}">{{this.id}}</td>
+
+                    <td class="text-end" data-count="{{this.days.count}}">{{numberFormat this.days.count}}</td>
+                    <td data-duration="{{this.duration.hours}}" data-order="{{this.duration.hours}}">{{numberFormat this.duration.hours}}h {{#if this.duration.minutes}}{{this.duration.minutes}}m{{/if}}</td>
+                    <td class="text-end" >{{numberFormat this.duration.days}}</td>
+                </tr>
+            {{/each}}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <div class="container">
@@ -184,6 +213,12 @@
 {{> chunks/footer }}
 
 <script>
+
+    const formatNumber = (n, m) => n.toLocaleString(undefined, {
+        minimumFractionDigits: m ? m : 0,
+        maximumFractionDigits: m ? m : 0
+    });
+
     const myStyle = {
         "color": "#ff7800",
         "weight": 5,
@@ -205,6 +240,67 @@
     layer.addTo(map);
     map.fitBounds(layer.getBounds());
 
+
+    const attr = (a, tr) => {
+        const attributeName = `data-${a}`
+        const f = tr ? tr : (n => n);
+        return n => f(n.attributes[attributeName].value)
+    };
+
+    const markerIcon = (colour) => {
+        return L.icon({
+            iconUrl: `/assets/icons/leaflet/marker-icon-${colour}.png`,
+            iconRetinaUrl: `/assets/icons/leaflet/marker-icon-2x-${colour}.png`,
+            iconAnchor: [5, 55],
+            popupAnchor: [10, -44],
+            iconSize: [25, 41]
+        })
+    }
+
+    const markerBlue = markerIcon("blue")
+    const markerRed = markerIcon("red")
+
+    const durationIcon = (n) => {
+        return n > 100 ? markerRed : markerBlue;
+    }
+
+    const lat = attr("lat", Number)
+    const lon = attr("lon", Number)
+
+    const company = attr("company")
+    const id = attr("id")
+    const count = attr("count", Number)
+    const duration = attr("duration", Number)
+
+    Array.from(document.getElementById("table-csos").querySelectorAll("tr[data-class='cso']"))
+            .map(it => {
+                return {
+                    lat: lat(it),
+                    lon: lon(it),
+                    id: id(it.querySelector("[data-id]")),
+                    company: company(it.querySelector("[data-company]")),
+                    count: count(it.querySelector("[data-count]")),
+                    duration: duration(it.querySelector("[data-duration]")),
+                }
+            })
+            .forEach(it => {
+                L.marker(
+                        [it.lat, it.lon],
+                        {icon: durationIcon(it.duration)}
+                ).bindTooltip(
+                        `${it.id}<br/><br/>${formatNumber(it.count)} Dumps / ${formatNumber(it.duration)} hours by ${it.company}`
+                ).addTo(map)
+            })
+
+</script>
+
+<script>
+    new DataTable('#table-csos', {
+        pageLength: 25,
+        dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'i>>"
+    });
 </script>
 
 </body>

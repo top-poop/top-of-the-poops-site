@@ -278,6 +278,7 @@ fun main() {
                                     constituencyLiveTotals = stream::totalForConstituency,
                                     constituencyNeighbours = ConstituencyNeighbours(annualData),
                                     liveDataLatest = stream::latestAvailable,
+                                    csoLive = stream::byCsoForConstituency
                                 ),
                         "/company/{company}" bind CompanyPageHandler(
                             renderer = renderer,

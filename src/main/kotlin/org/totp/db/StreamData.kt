@@ -176,11 +176,11 @@ order by pcon24nm;
     }
 
     data class StreamCsoSummary(
+        val company: CompanyName,
         val id: String,
-        val lat: Float,
-        val lon: Float,
+        val location: Coordinates,
         val duration: Duration,
-        val days: Int
+        val days: Int,
     )
 
     fun byCsoForConstituency(
@@ -191,9 +191,30 @@ order by pcon24nm;
             query(
                 sql = """
 select
-    cso.stream_id, cso.lat, cso.lon,
+    cso.stream_id,
+    cso.stream_company,
+    cso.lat, cso.lon,
     extract(epoch from sum(start)) as duration_seconds,
-    count(*) filter (where start <> interval '0') as count
+    count(*) filter (where start <> interval '0') as count,
+        (
+        select json_agg(
+                   json_build_object(
+                       'month', to_char(month_start, 'YYYY-MM'),
+                       'count', cnt,
+                       'duration_seconds', dur
+                   )
+                   order by month_start
+               )
+        from (
+            select
+                date_trunc('month', ss.date) as month_start,
+                count(*) filter (where ss.start <> interval '0') as cnt,
+                extract(epoch from sum(ss.start)) as dur
+            from stream_summary ss
+            where ss.stream_cso_id = cso.stream_cso_id and ss.date >= ? and ss.date <= ?
+            group by date_trunc('month', ss.date)
+        ) m
+    ) as counts_by_month
 from stream_summary
          join stream_cso as cso on cso.stream_cso_id = stream_summary.stream_cso_id
          join stream_cso_grid on cso.stream_cso_id = stream_cso_grid.stream_cso_id
@@ -202,15 +223,20 @@ where grid_references.pcon24nm = ? and date >= ? and date <= ?
 group by cso.stream_cso_id;
                 """.trimIndent(),
                 bind = {
-                    it.set(1, constituency)
-                    it.set(2, startDate)
-                    it.set(3, endDate)
+                    it.set(1, startDate)
+                    it.set(2, endDate)
+                    it.set(3, constituency)
+                    it.set(4, startDate)
+                    it.set(5, endDate)
                 },
                 mapper = {
-                    StreamData.StreamCsoSummary(
-                        it.getString("stream_id"),
-                        lat = it.getFloat("lat"),
-                        lon = it.getFloat("lon"),
+                    StreamCsoSummary(
+                        id = it.getString("stream_id"),
+                        company = it.get(StreamCompanyName, "stream_company").asCompanyName() ?: CompanyName("unknown"),
+                        location = Coordinates(
+                            lat = it.getFloat("lat"),
+                            lon = it.getFloat("lon")
+                        ),
                         duration = Duration.ofSeconds(it.getLong("duration_seconds")),
                         days = it.getInt("count")
                     )

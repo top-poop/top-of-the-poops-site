@@ -7,6 +7,7 @@ import org.http4k.core.*
 import org.http4k.filter.MaxAgeTtl
 import org.http4k.lens.*
 import org.totp.db.*
+import org.totp.db.StreamData.StreamCsoSummary
 import org.totp.model.data.CompanySlug
 import org.totp.model.data.ConstituencySlug
 import org.totp.model.data.TotpJson
@@ -94,7 +95,6 @@ class StreamSummary(
 
     }
 }
-
 
 class StreamConstituencyEvents(val clock: Clock, val streamData: StreamData) : HttpHandler {
 
