@@ -38,7 +38,7 @@ class StreamData(private val events: Events, private val connection: WithConnect
         val total = start + stop
     }
 
-    data class StreamCompanyStatus(val company: CompanyName, val count: StreamCSOCount)
+    data class StreamCompanyStatus(val company: StreamCompanyName, val count: StreamCSOCount)
 
     data class StreamOverflowSummary(
         val count: StreamCSOCount,
@@ -73,7 +73,7 @@ order by m.stream_company;
 
         val companies = summary.entries.map {
             StreamCompanyStatus(
-                company = CompanyName.of(it.key),
+                company = StreamCompanyName.of(it.key),
                 count = StreamCSOCount(
                     start = it.value[StreamEvent.Start.dbName] ?: 0,
                     stop = it.value[StreamEvent.Stop.dbName] ?: 0

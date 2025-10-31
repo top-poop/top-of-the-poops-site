@@ -72,8 +72,6 @@ data class SocialShare(
 )
 
 data class ConstituencyPageLiveData(
-    val csoUri: Uri,
-    val rainfallUri: Uri,
     val total: RenderableConstituencyLiveTotal,
     val year: Int,
     val latest: LocalDateTime
@@ -233,8 +231,6 @@ object ConstituencyPageHandler {
 
                     val mp = mpFor(constituencyName)
 
-                    val liveDataStart = LocalDate.ofInstant(clock.instant(), ZoneId.of("UTC")).minusMonths(3)
-
                     Response(Status.OK)
                         .with(
                             viewLens of ConstituencyPage(
@@ -258,10 +254,6 @@ object ConstituencyPageHandler {
                                             LocalDate.of(now.year, 1, 1),
                                             now.toLocalDate()
                                         ).toRenderable(),
-                                        csoUri = Uri.of("/live/stream/events/constituency/$slug")
-                                            .query("since", liveDataStart.toString()),
-                                        rainfallUri = Uri.of("/live/environment-agency/rainfall/$slug")
-                                            .query("since", liveDataStart.toString()),
                                     )
                                 } else null,
                                 neighbours = neighbours,

@@ -33,7 +33,7 @@ class RenderableCSOLiveData(
                 overflowing = it.overflowing.map {
                     RenderableCSOLiveOverflow(
                         started = it.started,
-                        constituency = it.pcon24nm.toRenderable(),
+                        constituency = it.pcon24nm.toRenderable(linkLive = true),
                         id = it.id.value,
                         company = it.company
                     )

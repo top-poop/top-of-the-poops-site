@@ -15,6 +15,7 @@ import java.text.NumberFormat
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 
 data class RenderableStreamCsoSummary(
     val company: RenderableCompany,
@@ -36,7 +37,10 @@ class ConstituencyLivePage(
     val summary: RenderableConstituencyLiveTotal,
     val share: SocialShare?,
     val csos: List<RenderableStreamCsoSummary>,
-) : PageViewModel(pageUri)
+    val csoUri: Uri,
+    val rainfallUri: Uri,
+
+    ) : PageViewModel(pageUri)
 
 class ConstituencyLiveNotAvailablePage(
     pageUri: Uri,
@@ -89,6 +93,10 @@ object ConstituencyLivePageHandler {
                 val year = 2025
 
                 if (liveAvailable.contains(constituencyName)) {
+
+                    val liveDataStart = LocalDate.ofInstant(clock.instant(), ZoneId.of("UTC")).minusMonths(3)
+
+
                     val startDate = LocalDate.of(year, 1, 1)
                     val endDate = LocalDate.of(year, 12, 31)
                     val totals = constituencyLiveTotals(constituencyName, startDate, endDate)
@@ -118,8 +126,13 @@ object ConstituencyLivePageHandler {
                             ),
                             csos = csoLive(constituencyName, startDate, endDate)
                                 .map { it.toRenderable() }
-                                .sortedByDescending { it.duration.value }
-                        )
+                                .sortedByDescending { it.duration.value },
+                            csoUri = Uri.of("/live/stream/events/constituency/$slug")
+                                .query("since", liveDataStart.toString()),
+                            rainfallUri = Uri.of("/live/environment-agency/rainfall/$slug")
+                                .query("since", liveDataStart.toString()),
+
+                            )
                     )
                 } else {
                     Response(Status.OK).with(

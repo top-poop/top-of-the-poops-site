@@ -66,106 +66,170 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="row">
-                <div class="col">
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-header bg-primary text-white">
-                            <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Select Another Constituency</h2>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Select Another Constituency</h2>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="form-group">
+                            <label class="form-label fw-bold">Constituency</label>
+                            <select class="form-select form-select-lg mb-2" name="constituency"
+                                    id="constituency-select">
+                                {{#each constituencies}}
+                                    <option value="{{this.uri}}" {{#if this.current}}selected{{/if}}>{{#if
+                                            this.live}}
+                                        ✔ {{else}}𝑥 {{/if}}{{this.name}}</option>
+                                {{/each}}
+                            </select>
+                            <script>
+                                document.getElementById("constituency-select")
+                                        .onchange = (e) => {
+                                    window.location = e.target.value;
+                                    return false;
+                                }
+                            </script>
+                            <div class="form-text mb-1"><i class="bi bi-info-circle me-1"></i>Select the
+                                constituency
+                                from the drop-down
+                            </div>
+                            <div class="form-text">✔ means we have live data (𝑥 if not)</div>
                         </div>
-                        <div class="card-body">
-                            <form>
-                                <div class="form-group">
-                                    <label class="form-label fw-bold">Constituency</label>
-                                    <select class="form-select form-select-lg mb-2" name="constituency"
-                                            id="constituency-select">
-                                        {{#each constituencies}}
-                                            <option value="{{this.uri}}" {{#if this.current}}selected{{/if}}>{{#if
-                                                    this.live}}
-                                                ✔ {{else}}𝑥 {{/if}}{{this.name}}</option>
-                                        {{/each}}
-                                    </select>
-                                    <script>
-                                        document.getElementById("constituency-select")
-                                                .onchange = (e) => {
-                                            window.location = e.target.value;
-                                            return false;
-                                        }
-                                    </script>
-                                    <div class="form-text mb-1"><i class="bi bi-info-circle me-1"></i>Select the
-                                        constituency
-                                        from the drop-down
-                                    </div>
-                                    <div class="form-text">✔ means we have live data (𝑥 if not)</div>
-                                </div>
-                            </form>
+                    </form>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-megaphone-fill me-2"></i>View Annual Sewage Data</h2>
+                </div>
+                <div class="card-body">
+                    You're looking at the totals that we have calculated for sewage in {{constituency.name}} so far this year. It is an estimate, based on very poor quality live data from the Water Companies.
+                    The water companies
+                    report their sewage to the Environment Agency every year in April. You can see report for last year in the
+                    other page.<br/>
+
+                    <a href="{{constituency.uri}}" class="text-decoration-none">
+                        <button class="btn btn-danger">
+                            <i class="bi bi-info-circle-fill me-1"></i>Switch to Annual Information
+                        </button>
+                    </a>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-megaphone-fill me-2"></i>Take Action</h2>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="me-2">
+                            <i class="bi bi-person-fill fs-4 text-primary"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0">Your local MP is <a href="{{mp.uri}}"
+                                                                class="fw-bold">{{mp.name}}</a>
+                                ({{mp.party}}) - Find out more
+                                about their interests, donors, and voting at <a href="{{mp.uri}}">They
+                                    Work For
+                                    You</a></p>
                         </div>
                     </div>
-                    <div class="col">
-                        <div class="card border-0 shadow-sm mb-4">
-                            <div class="card-header bg-primary text-white">
-                                <h2 class="h5 mb-0"><i class="bi bi-megaphone-fill me-2"></i>Take Action</h2>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex">
-                                    <div class="me-2">
-                                        <i class="bi bi-person-fill fs-4 text-primary"></i>
-                                    </div>
-                                    <div>
-                                        <p class="mb-0">Your local MP is <a href="{{mp.uri}}"
-                                                                            class="fw-bold">{{mp.name}}</a>
-                                            ({{mp.party}}) - Find out more
-                                            about their interests, donors, and voting at <a href="{{mp.uri}}">They
-                                                Work For
-                                                You</a></p>
-                                    </div>
-                                </div>
 
-                                {{#if share}}
-                                    <div class="d-flex gap-2">
-                                        {{> components/share-social share}}
-                                    </div>
-                                {{/if}}
+                    {{#if share}}
+                        <div class="d-flex gap-2">
+                            {{> components/share-social share}}
+                        </div>
+                    {{/if}}
 
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-header bg-primary text-white">
-                            <h2 class="h5 mb-0"><i class="bi bi-megaphone-fill me-2"></i>View Annual Sewage Data</h2>
-                        </div>
-                        <div class="card-body">
-                            <a href="{{constituency.uri}}" class="text-decoration-none">
-                                <button class="btn btn-danger">
-                                    <i class="bi bi-info-circle-fill me-1"></i>Switch to Annual Information
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Constituencies
+                        near {{constituency.name}}
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        {{#each neighbours}}
+                            <a href="{{this.uri}}" class="text-decoration-none">
+                                <button class="btn btn-outline-secondary">
+                                    <i class="bi bi-geo-fill me-1"></i> {{this.name}}
                                 </button>
                             </a>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="card border-0 shadow-sm mb-4">
-                            <div class="card-header bg-primary text-white">
-                                <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Constituencies
-                                    near {{constituency.name}}
-                                </h2>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex flex-wrap gap-2">
-                                    {{#each neighbours}}
-                                        <a href="{{this.uri}}" class="text-decoration-none">
-                                            <button class="btn btn-outline-secondary">
-                                                <i class="bi bi-geo-fill me-1"></i> {{this.name}}
-                                            </button>
-                                        </a>
-                                    {{/each}}
-                                </div>
-                            </div>
-                        </div>
+                        {{/each}}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-calendar3 me-2"></i>Daily Data</h2>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="me-2">
+                            <i class="bi bi-info-circle-fill fs-4 text-primary"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0">We get information about overflowing CSOs since January 2025. Here
+                                is a chart of the last three months of data for {{constituency.name}}, here you
+                                can see overflows in red, the darker the red,
+                                the more the CSO overflowed that day.</p>
+                            <p class="mb-0 mt-2">Each CSO has a row, the most recent data is on the right hand
+                                side.</p>
+                        </div>
+                    </div>
+
+                    <div class="plot-live observable-plot-container mb-4"
+                         id="live-data"
+                         cso-data-uri="{{csoUri}}"
+                         rainfall-data-uri="{{rainfallUri}}">
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-3 mb-3">
+                        <div class="d-flex align-items-center">
+                                <span class="me-2"
+                                      style="display:inline-block; width:20px; height:20px; background-color: #28A64580; border-radius: 4px;"></span>
+                            <span>Monitoring Online</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                                <span class="me-2"
+                                      style="display:inline-block; width:20px; height:20px; background-color: #333333; border-radius: 4px;"></span>
+                            <span>Monitoring Offline</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                                <span class="me-2"
+                                      style="display:inline-block; width:20px; height:20px; background-color: #842904; border-radius: 4px;"></span>
+                            <span>Polluting</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                                <span class="me-2"
+                                      style="display:inline-block; width:20px; height:20px; background-color: #460d83; border-radius: 4px;"></span>
+                            <span>Potentially Polluting</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                                <span class="me-2"
+                                      style="display:inline-block; width:20px; height:20px; background-color: #3b9acb80; border-radius: 4px;"></span>
+                            <span>Unknown</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Daily data is experimental and data is not guaranteed to be accurate. Please
+                    inform us of any issue, we will fix.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="container py-5">
     <div class="row">
@@ -174,33 +238,43 @@
         </div>
     </div>
 
-    <div class="table-responsive">
-        <table id="table-csos" class="table table-hover">
-            <thead class="table-light">
-            <tr>
-                <th>Company</th>
-                <th>CSO ID</th>
-                <th class="text-end">Overflow Days</th>
-                <th>Total Duration (hours)</th>
-                <th class="text-end">Total Duration (days)</th>
-            </tr>
-            </thead>
-            <tbody>
-            {{#each csos}}
-                <tr data-class="cso" data-lat="{{this.location.lat}}" data-lon="{{this.location.lon}}">
-                    <td data-company="{{this.company.name}}">
-                        <i class="bi bi-building me-1 text-muted"></i>
-                        <a href="{{this.company.uri}}">{{this.company.name}}</a>
-                    </td>
-                    <td data-id="{{this.id}}">{{this.id}}</td>
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h2 class="h5 mb-0"><i class="bi bi-calendar3 me-2"></i>Totals so far</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="table-csos" class="table table-hover">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Company</th>
+                        <th>CSO ID</th>
+                        <th class="text-end">Overflow Days</th>
+                        <th>Total Duration (hours)</th>
+                        <th class="text-end">Total Duration (days)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#each csos}}
+                        <tr data-class="cso" data-lat="{{this.location.lat}}" data-lon="{{this.location.lon}}">
+                            <td data-company="{{this.company.name}}">
+                                <i class="bi bi-building me-1 text-muted"></i>
+                                <a href="{{this.company.uri}}">{{this.company.name}}</a>
+                            </td>
+                            <td data-id="{{this.id}}">{{this.id}}</td>
 
-                    <td class="text-end" data-count="{{this.days.count}}">{{numberFormat this.days.count}}</td>
-                    <td data-duration="{{this.duration.hours}}" data-order="{{this.duration.hours}}">{{numberFormat this.duration.hours}}h {{#if this.duration.minutes}}{{this.duration.minutes}}m{{/if}}</td>
-                    <td class="text-end" >{{numberFormat this.duration.days}}</td>
-                </tr>
-            {{/each}}
-            </tbody>
-        </table>
+                            <td class="text-end" data-count="{{this.days.count}}">{{numberFormat this.days.count}}</td>
+                            <td data-duration="{{this.duration.hours}}"
+                                data-order="{{this.duration.value.toSeconds}}">{{numberFormat this.duration.hours}}
+                                h {{#if
+                                        this.duration.minutes}}{{this.duration.minutes}}m{{/if}}</td>
+                            <td class="text-end">{{numberFormat this.duration.days}}</td>
+                        </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -297,9 +371,10 @@
 <script>
     new DataTable('#table-csos', {
         pageLength: 25,
-        dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +
-                "<'row'<'col-sm-12'tr>>" +
-                "<'row'<'col-sm-12 col-md-5'i>>"
+        dom:
+                "<'row mb-3'<'offset-md-4 col-md-4'p><'col-md-4'f>>" +
+                "<'row'<'col-sm-12't>>" +
+                "<'row mt-3'<'col-sm-12 col-md-5'i>>",
     });
 </script>
 

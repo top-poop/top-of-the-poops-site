@@ -108,7 +108,6 @@
                     </form>
                 </div>
             </div>
-
             {{#if live }}
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-primary text-white">
@@ -141,7 +140,6 @@
                     </div>
                 </div>
             {{/if}}
-
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
                     <h2 class="h5 mb-0"><i class="bi bi-bar-chart-fill me-2"></i>Totals for {{ constituency.name }}
@@ -171,7 +169,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
                     <h2 class="h5 mb-0"><i class="bi bi-graph-up me-2"></i>Change Over Time</h2>
@@ -181,8 +178,6 @@
                          data-uri="/data-new/constituency/{{constituency.slug}}/annual-pollution"></div>
                 </div>
             </div>
-
-
         </div>
     </div>
     <div class="row">
@@ -259,73 +254,6 @@
     </div>
 </div>
 
-{{#if live}}
-    <div class="container-fluid py-4">
-        <div class="row">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h2 class="h5 mb-0"><i class="bi bi-calendar3 me-2"></i>Daily Data</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex">
-                            <div class="me-2">
-                                <i class="bi bi-info-circle-fill fs-4 text-primary"></i>
-                            </div>
-                            <div>
-                                <p class="mb-0">We get information about overflowing CSOs since January 2025. Here
-                                    is a chart of the last three months of data for {{constituency.name}}, here you
-                                    can see overflows in red, the darker the red,
-                                    the more the CSO overflowed that day.</p>
-                                <p class="mb-0 mt-2">Each CSO has a row, the most recent data is on the right hand
-                                    side.</p>
-                            </div>
-                        </div>
-
-                        <div class="plot-live observable-plot-container mb-4"
-                             id="live-data"
-                             cso-data-uri="{{live.csoUri}}"
-                             rainfall-data-uri="{{live.rainfallUri}}">
-                        </div>
-
-                        <div class="d-flex flex-wrap gap-3 mb-3">
-                            <div class="d-flex align-items-center">
-                                <span class="me-2"
-                                      style="display:inline-block; width:20px; height:20px; background-color: #28A64580; border-radius: 4px;"></span>
-                                <span>Monitoring Online</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2"
-                                      style="display:inline-block; width:20px; height:20px; background-color: #333333; border-radius: 4px;"></span>
-                                <span>Monitoring Offline</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2"
-                                      style="display:inline-block; width:20px; height:20px; background-color: #842904; border-radius: 4px;"></span>
-                                <span>Polluting</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2"
-                                      style="display:inline-block; width:20px; height:20px; background-color: #460d83; border-radius: 4px;"></span>
-                                <span>Potentially Polluting</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2"
-                                      style="display:inline-block; width:20px; height:20px; background-color: #3b9acb80; border-radius: 4px;"></span>
-                                <span>Unknown</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer bg-light">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        Daily data is experimental and data is not guaranteed to be accurate. Please
-                        inform us of any issue, we will fix.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-{{/if}}
 
 <div class="container py-5">
     <div class="row">
