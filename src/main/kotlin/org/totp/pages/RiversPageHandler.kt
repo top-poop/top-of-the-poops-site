@@ -24,7 +24,6 @@ import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.TotpHandlebars.numberFormat
 import org.totp.model.data.CompanyName
-import org.totp.model.data.CompanySlug
 import org.totp.model.data.RenderableCompany
 import org.totp.model.data.RiverRank
 import org.totp.model.data.WaterwayName

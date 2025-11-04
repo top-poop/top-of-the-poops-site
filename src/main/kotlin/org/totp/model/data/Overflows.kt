@@ -13,6 +13,7 @@ import org.totp.pages.CompanyAnnualSummary
 import org.totp.pages.ConstituencyRank
 import org.totp.pages.DeltaValue
 import org.totp.pages.EnsureSuccessfulResponse
+import org.totp.pages.UrbanAreaRank
 import org.totp.pages.WaterwaySlug
 import java.io.IOException
 import java.time.Duration
@@ -99,6 +100,27 @@ object ConstituencyRankings {
                         duration = fromEDMHours((it["total_hours"] as Double)),
                         countDelta = (it["spills_increase"] as Double).toInt(),
                         durationDelta = fromEDMHours(it["hours_increase"] as Double)
+                    )
+                }
+        }
+    }
+}
+
+object LocalityRankings {
+    operator fun invoke(handler: HttpHandler): () -> List<UrbanAreaRank> {
+        return {
+            val response = handler(Request(Method.GET, "spills-by-locality.json"))
+
+            TotpJson.mapper.readSimpleList(response.bodyString())
+                .mapIndexed { r, it ->
+                    UrbanAreaRank(
+                        rank = r + 1,
+                        localityName = LocalityName(it["locality"] as String),
+                        count = (it["total_spills"] as Double).toInt(),
+                        duration = fromEDMHours((it["total_hours"] as Double)),
+                        countDelta = (it["spills_increase"] as Double).toInt(),
+                        durationDelta = fromEDMHours(it["hours_increase"] as Double),
+                        csoCount = (it["cso_count"] as Int),
                     )
                 }
         }
@@ -236,7 +258,7 @@ fun constituencyCSOs(source: () -> List<CSOTotals>) =
     }
 
 fun waterwayCSOs(source: () -> List<CSOTotals>) =
-    { name: WaterwaySlug, company: CompanySlug ->
+    { name: WaterwaySlug, company: Slug ->
         val result = source()
             .filter { name == WaterwaySlug.from(it.cso.waterway) }
             .filter { company == it.cso.company.toSlug() }

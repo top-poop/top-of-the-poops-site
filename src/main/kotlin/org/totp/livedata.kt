@@ -7,9 +7,7 @@ import org.http4k.core.*
 import org.http4k.filter.MaxAgeTtl
 import org.http4k.lens.*
 import org.totp.db.*
-import org.totp.db.StreamData.StreamCsoSummary
-import org.totp.model.data.CompanySlug
-import org.totp.model.data.ConstituencySlug
+import org.totp.model.data.Slug
 import org.totp.model.data.TotpJson
 import org.totp.model.data.toSlug
 import org.totp.pages.CompanyAnnualSummary
@@ -75,11 +73,11 @@ class StreamSummary(
 ) : HttpHandler {
 
     val response = TotpJson.autoBody<List<ThamesWater.DatedOverflow>>().toLens()
-    val companySlug = Path.value(CompanySlug).of("company", "The company")
+    val slug = Path.value(Slug).of("company", "The company")
 
     override fun invoke(request: Request): Response {
 
-        val slug = companySlug(request)
+        val slug = slug(request)
 
         return companySummaries().firstOrNull { it.name.toSlug() == slug }?.let { company ->
             company.name.asStreamCompanyName()?.let { streamCompany ->
@@ -99,7 +97,7 @@ class StreamSummary(
 class StreamConstituencyEvents(val clock: Clock, val streamData: StreamData) : HttpHandler {
 
     val response = TotpJson.autoBody<List<Thing>>().toLens()
-    val constituency = Path.value(ConstituencySlug).of("constituency")
+    val constituency = Path.value(Slug).of("constituency")
     val sinceDate = Query.localDate().optional("since")
 
     override fun invoke(request: Request): Response {
@@ -129,7 +127,7 @@ class StreamConstituencyEvents(val clock: Clock, val streamData: StreamData) : H
 class EnvironmentAgencyRainfall(val clock: Clock, val environmentAgency: EnvironmentAgency) : HttpHandler {
 
     val response = TotpJson.autoBody<List<EnvironmentAgency.Rainfall>>().toLens()
-    val constituency = Path.value(ConstituencySlug).of("constituency")
+    val constituency = Path.value(Slug).of("constituency")
     val sinceDate = Query.localDate().optional("since")
 
     override fun invoke(request: Request): Response {

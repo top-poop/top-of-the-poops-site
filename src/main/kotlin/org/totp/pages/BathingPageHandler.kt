@@ -17,7 +17,7 @@ import org.totp.model.PageViewModel
 import org.totp.model.data.BathingCSO
 import org.totp.model.data.BathingName
 import org.totp.model.data.BathingRank
-import org.totp.model.data.BathingSlug
+import org.totp.model.data.Slug
 import org.totp.model.data.BeachName
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.GeoJSON
@@ -76,18 +76,18 @@ object BathingPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
         bathingRankings: () -> List<BathingRank>,
-        bathingCSOs: (BathingSlug) -> List<BathingCSO>,
+        bathingCSOs: (Slug) -> List<BathingCSO>,
         beachBoundaries: (BeachName) -> GeoJSON?,
         mpFor: (ConstituencyName) -> MP,
         constituencyRank: (ConstituencyName) -> ConstituencyRank?,
     ): HttpHandler {
 
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
-        val bathingSlug = Path.value(BathingSlug).of("bathing", "The bathing area, as given in EDM")
+        val slug = Path.value(Slug).of("bathing", "The bathing area, as given in EDM")
 
         return { request ->
 
-            val bathingArea = bathingSlug(request)
+            val bathingArea = slug(request)
 
             val csos = bathingCSOs(bathingArea).sortedByDescending { it.duration }
 

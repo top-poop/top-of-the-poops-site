@@ -3,15 +3,13 @@
 <head>
     <meta charset="utf-8"/>
     <title>Top of the Poops | Constituencies</title>
-    <meta name="description" content="Sewage dumps by constituency">
+    <meta name="description" content="Analysing sewage dumps by water companies">
 
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
     {{> chunks/meta-scripts }}
 
-    {{> components/meta-opengraph title="Constituencies"
-        description=(concat "Sewage dumps by constituence for" year)
-    }}
+    {{> components/meta-opengraph title="Constituencies" }}
 </head>
 <body>
 {{> chunks/navbar }}
@@ -19,34 +17,33 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            <p class="display-4">Find your constituency & take action</p>
+            <p class="display-4">Find your City or Town & take action</p>
         </div>
     </div>
     <div class="row">
         <div class="col">
-            {{#> components/section title=(concat "Constituencies Ranked for " year)}}
+            {{#> components/section title=(concat "Places Ranked for " year)}}
 
-                <p>Here are all the constituencies in England and Wales that had sewage overflows in 2024</p>
+                <p>Here are all the towns and cities in England, Wales and Scotland that had sewage overflows in 2024</p>
 
-                <p><b>Click</b> on the constituency name to see more details...</p>
+                <p><b>Click</b> on the place name to see more details...</p>
 
                 {{> chunks/plea }}
 
                 <div class="table-responsive">
-                    <table id="table-constituency" data-id="constituency" class="table table-spills table-striped">
+                    <table id="table-localities" data-id="locality" class="table table-spills table-striped">
                         <thead>
                         <tr>
                             <td>Rank</td>
-                            <td>Constituency</td>
-                            <td>MP</td>
-                            <td>MP Party</td>
+                            <td>Place</td>
                             <td>Sewage Dumps</td>
                             <td>Change</td>
-                            <td>Duration</td>
+                            <td>Duration (Hours)</td>
                             <td>Change</td>
+                            <td>CSO Count</td>
                         </tr>
                         </thead>
-                        {{{constituenciesTableRows}}}
+                        {{{localityTableRows}}}
                     </table>
                 </div>
             {{/components/section}}
@@ -55,7 +52,7 @@
 </div>
 
 <script>
-    new DataTable('#table-constituency',
+    new DataTable('#table-localities',
             {
                 pageLength: 20,
                 dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +

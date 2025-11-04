@@ -2,5 +2,5 @@ changed-constituencies.csv is from https://commonslibrary.parliament.uk/content/
 
 It is used to redirect users from old constituency name to new.
 
-(C) Crown Copyright and database right 2023.
+© Crown Copyright and database right 2023.
 

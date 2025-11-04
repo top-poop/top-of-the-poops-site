@@ -65,12 +65,12 @@ object ConstituencyLivePageHandler {
 
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
-        val constituencySlug: PathLens<ConstituencySlug> =
-            Path.value(ConstituencySlug).of("constituency", "The constituency")
+        val slug: PathLens<Slug> =
+            Path.value(Slug).of("constituency", "The constituency")
 
         return { request: Request ->
 
-            val slug = constituencySlug(request)
+            val slug = slug(request)
             val liveAvailable = constituencyLiveAvailable()
 
             slugToConstituency[slug]?.let { constituencyName ->

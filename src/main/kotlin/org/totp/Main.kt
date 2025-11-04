@@ -101,7 +101,7 @@ fun mpForConstituency(contacts: () -> List<ConstituencyContact>): (ConstituencyN
 class EDMAnnualSummary(val edm: EDM) : HttpHandler {
 
     val data = TotpJson.autoBody<List<EDM.ConstituencyAnnualSummary>>().toLens()
-    val constituency = Path.value(ConstituencySlug).of("constituency")
+    val constituency = Path.value(Slug).of("constituency")
     override fun invoke(request: Request): Response {
 
         val constituencyName = slugToConstituency[constituency(request)]
@@ -172,6 +172,7 @@ fun main() {
     val beachRankings = memoize(BathingRankings(annualData))
     val shellfishRankings = memoize(ShellfishRankings(annualData))
     val constituencyRankings = memoize(ConstituencyRankings(annualData))
+    val localityRankings = memoize(LocalityRankings(annualData))
 
     val mpFor = mpForConstituency(referenceData::mps)
 
@@ -232,6 +233,10 @@ fun main() {
                             renderer = renderer,
                             constituencyRankings = constituencyRankings,
                             mpFor = mpFor,
+                        ),
+                        "/localities" bind LocalitiesPageHandler(
+                            renderer = renderer,
+                            areaRankings = localityRankings,
                         ),
                         "/beaches" bind BeachesPageHandler(
                             renderer = renderer, bathingRankings = beachRankings

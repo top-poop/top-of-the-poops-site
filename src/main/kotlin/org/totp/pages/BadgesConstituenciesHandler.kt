@@ -14,14 +14,14 @@ import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.ConstituencyName
-import org.totp.model.data.ConstituencySlug
+import org.totp.model.data.Slug
 import org.totp.model.data.GeoJSON
 
 class BadgesConstituenciesPage(
     uri: Uri,
     val year: Int,
     val constituencies: List<RenderableConstituencyRank>,
-    val boundaries: List<Pair<ConstituencySlug, GeoJSON>>,
+    val boundaries: List<Pair<Slug, GeoJSON>>,
 ) : PageViewModel(uri)
 
 

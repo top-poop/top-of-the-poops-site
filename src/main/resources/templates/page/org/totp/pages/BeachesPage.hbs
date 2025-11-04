@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <title>Top of the Poops | Beaches</title>
-    <meta name="description" content="Analysing sewage dumps by water companies">
+    <meta name="description" content="Sewage dumps at beaches for {{year}} ">
 
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
@@ -12,6 +12,7 @@
 
     {{> components/meta-opengraph title="Beaches"
             twitterImageUri=share.twitterImageUri
+            description=(concat "All the sewage in bathing areas")
     }}
 </head>
 <body>

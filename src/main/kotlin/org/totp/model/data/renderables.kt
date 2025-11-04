@@ -2,11 +2,11 @@ package org.totp.model.data
 
 import org.http4k.core.Uri
 
-data class RenderableShellfishName(val name: ShellfisheryName, val slug: ShellfishSlug, val uri: Uri)
+data class RenderableShellfishName(val name: ShellfisheryName, val slug: Slug, val uri: Uri)
 
-data class RenderableBathingName(val name: BathingName, val slug: BathingSlug, val uri: Uri)
+data class RenderableBathingName(val name: BathingName, val slug: Slug, val uri: Uri)
 
-data class RenderableCompany(val name: CompanyName, val slug: CompanySlug, val uri: Uri)
+data class RenderableCompany(val name: CompanyName, val slug: Slug, val uri: Uri)
 
 fun ShellfisheryName.toRenderable(): RenderableShellfishName {
     val slug = toSlug()

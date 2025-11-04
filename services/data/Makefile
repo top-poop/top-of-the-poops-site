@@ -76,7 +76,12 @@ GEO_2024_GENERATED=$(foreach sql,$(GEO_2024_SQL),$(DATAFILES_2024)/geo/$(basenam
 
 PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAFILES_2024)/geo/countries.json
 
-generated-data: generated-2024 $(DATAFILES)/constituencies/.uptodate $(DATAFILES)/beaches/.uptodate $(DATAFILES)/shellfisheries/.uptodate $(PROVIDED)
+generated-data: generated-2024 \
+	$(DATAFILES)/constituencies/.uptodate \
+	$(DATAFILES)/beaches/.uptodate \
+	$(DATAFILES)/shellfisheries/.uptodate \
+	$(DATAFILES)/urban-areas/.uptodate \
+	$(PROVIDED)
 
 generated-2024: $(DATA_2024_GENERATED) $(GEO_2024_GENERATED) $(PROVIDED)
 
@@ -115,6 +120,11 @@ $(DATAFILES)/shellfisheries/.uptodate: $(PYTHON) geometry.py shellfisheries.sql
 	$(PYTHON) geometry.py shellfisheries.sql $(DATAFILES)/shellfisheries
 	touch $@
 
+$(DATAFILES)/urban-areas/.uptodate: $(PYTHON) geometry.py urban-areas.sql
+	rm -rf $(DATAFILES)/urban-areas
+	@mkdir $(DATAFILES)/urban-areas
+	$(PYTHON) geometry.py urban-areas.sql $(DATAFILES)/urban-areas
+	touch $@
 
 $(DATAFILES)/media-appearances.json: provided/media-appearances.json
 	cp $< $@

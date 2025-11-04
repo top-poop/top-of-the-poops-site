@@ -18,7 +18,7 @@ import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.CSOTotals
-import org.totp.model.data.CompanySlug
+import org.totp.model.data.Slug
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.WaterwayName
 import java.text.NumberFormat
@@ -46,19 +46,19 @@ class WaterwaySlug(value: String) : StringValue(value) {
 object WaterwayPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
-        waterwaySpills: (WaterwaySlug, CompanySlug) -> List<CSOTotals>,
+        waterwaySpills: (WaterwaySlug, Slug) -> List<CSOTotals>,
         mpFor: (ConstituencyName) -> MP,
         constituencyRank: (ConstituencyName) -> ConstituencyRank?
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
         val waterwaySlug = Path.value(WaterwaySlug).of("waterway", "The waterway")
-        val companySlug = Path.value(CompanySlug).of("company", "The company")
+        val slug = Path.value(Slug).of("company", "The company")
 
         return { request: Request ->
             val numberFormat = NumberFormat.getIntegerInstance()
 
-            val spills = waterwaySpills(waterwaySlug(request), companySlug(request))
+            val spills = waterwaySpills(waterwaySlug(request), slug(request))
 
             if (spills.isEmpty()) {
                 Response(Status.NOT_FOUND)

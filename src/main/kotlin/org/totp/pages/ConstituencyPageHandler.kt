@@ -58,7 +58,7 @@ fun List<CSOTotals>.summary(): PollutionSummary {
 data class RenderableConstituency(
     val name: ConstituencyName,
     val current: Boolean,
-    val slug: ConstituencySlug,
+    val slug: Slug,
     val uri: Uri,
     val live: Boolean,
 )
@@ -143,7 +143,7 @@ object ConstituencyBoundaryChangesRedirectFilter {
             .filter { it.old.toSlug() != it.new.toSlug() }
             .associateBy { it.old.toSlug() }
 
-    operator fun invoke(slug: PathLens<ConstituencySlug>): Filter {
+    operator fun invoke(slug: PathLens<Slug>): Filter {
         return Filter { next ->
             { request ->
                 val given = slug(request)
@@ -196,13 +196,13 @@ object ConstituencyPageHandler {
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
-        val constituencySlug: PathLens<ConstituencySlug> =
-            Path.value(ConstituencySlug).of("constituency", "The constituency")
+        val slug: PathLens<Slug> =
+            Path.value(Slug).of("constituency", "The constituency")
 
         return ConstituencyAsParameterRedirectFilter()
-            .then(ConstituencyBoundaryChangesRedirectFilter(constituencySlug))
+            .then(ConstituencyBoundaryChangesRedirectFilter(slug))
             .then { request: Request ->
-                val slug = constituencySlug(request)
+                val slug = slug(request)
 
                 slugToConstituency[slug]?.let { constituencyName ->
 
@@ -269,7 +269,7 @@ object ConstituencyPageHandler {
         mp: MP?,
         summary: PollutionSummary,
         constituencyName: ConstituencyName,
-        slug: ConstituencySlug,
+        slug: Slug,
         uri: Uri
     ): SocialShare {
 

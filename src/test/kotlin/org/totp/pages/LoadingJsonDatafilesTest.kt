@@ -1,38 +1,13 @@
 package org.totp.pages
 
-import org.http4k.core.HttpHandler
-import org.http4k.core.Method
-import org.http4k.core.Request
-import org.http4k.core.Response
-import org.http4k.core.Status
-import org.http4k.core.Uri
-import org.http4k.core.then
+import org.http4k.core.*
 import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
-import org.totp.model.data.AllSpills
-import org.totp.model.data.BathingCSOs
-import org.totp.model.data.BathingRankings
-import org.totp.model.data.Boundaries
-import org.totp.model.data.CompanyAnnualSummaries
-import org.totp.model.data.ConstituencyBoundaries
-import org.totp.model.data.ConstituencyName
-import org.totp.model.data.ConstituencyNeighbours
-import org.totp.model.data.ConstituencyRankings
-import org.totp.model.data.Coordinates
-import org.totp.model.data.GeoJSON
-import org.totp.model.data.RiverRankings
-import org.totp.model.data.ShellfishCSOs
-import org.totp.model.data.ShellfishRankings
-import org.totp.model.data.WaterCompanies
+import org.totp.model.data.*
 import strikt.api.expectThat
-import strikt.assertions.get
-import strikt.assertions.hasSize
-import strikt.assertions.isEqualTo
-import strikt.assertions.isGreaterThan
-import strikt.assertions.isNotBlank
-import strikt.assertions.size
+import strikt.assertions.*
 import java.io.File
 import java.time.Duration
 
@@ -137,16 +112,17 @@ class LoadingJsonDatafilesTest {
     }
 
 
-
     fun uriHavingFileContent(uri: Uri, file: File): RoutingHttpHandler {
         expectThat(uri.path).isNotBlank()
-        if ( ! file.exists() ) {
-            throw IllegalArgumentException("given files does not exist  $file" )
+        if (!file.exists()) {
+            throw IllegalArgumentException("given files does not exist  $file")
         }
         val handler: HttpHandler = { Response(Status.OK).body(file.readText()) }
-        return EnsureSuccessfulResponse().then(routes(
-            uri.path bind Method.GET to handler,
-        ))
+        return EnsureSuccessfulResponse().then(
+            routes(
+                uri.path bind Method.GET to handler,
+            )
+        )
     }
 
     @Test
@@ -156,6 +132,16 @@ class LoadingJsonDatafilesTest {
             File("services/data/datafiles/v1/2024/spills-by-river.json")
         )
         val service = RiverRankings(remote)
+        expectThat(service()).size.isGreaterThan(3)
+    }
+
+    @Test
+    fun `loading locality rankings 2024`() {
+        val remote = uriHavingFileContent(
+            Uri.of("spills-by-locality.json"),
+            File("services/data/datafiles/v1/2024/spills-by-locality.json")
+        )
+        val service = LocalityRankings(remote)
         expectThat(service()).size.isGreaterThan(3)
     }
 

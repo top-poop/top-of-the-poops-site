@@ -19,7 +19,7 @@ import org.totp.model.data.ConstituencyName
 import org.totp.model.data.GeoJSON
 import org.totp.model.data.ShellfishCSO
 import org.totp.model.data.ShellfishRank
-import org.totp.model.data.ShellfishSlug
+import org.totp.model.data.Slug
 import org.totp.model.data.ShellfisheryName
 import org.totp.model.data.toRenderable
 import org.totp.model.data.toSlug
@@ -75,19 +75,19 @@ object ShellfisheryPageHandler {
         renderer: TemplateRenderer,
         shellfishRankings: () -> List<ShellfishRank>,
         shellfisheryBoundaries: (ShellfisheryName) -> GeoJSON?,
-        shellfishSpills: (ShellfishSlug) -> List<ShellfishCSO>,
+        shellfishSpills: (Slug) -> List<ShellfishCSO>,
         mpFor: (ConstituencyName) -> MP,
         constituencyRank: (ConstituencyName) -> ConstituencyRank?,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
-        val shellfishSlug = Path.value(ShellfishSlug).of("area", "The shellfish area")
+        val slug = Path.value(Slug).of("area", "The shellfish area")
 
         return { request: Request ->
 
             val numberFormat = NumberFormat.getIntegerInstance()
 
-            val area = shellfishSlug(request)
+            val area = slug(request)
             val spills = shellfishSpills(area)
 
             if (spills.isEmpty()) {

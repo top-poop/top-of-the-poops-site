@@ -20,6 +20,7 @@ import org.totp.model.data.RenderableCompany
 import org.totp.model.data.RenderableShellfishName
 import org.totp.model.data.RiverRank
 import org.totp.model.data.ShellfishRank
+import org.totp.model.data.LocalityName
 import org.totp.model.data.WaterCompany
 import org.totp.model.data.toRenderable
 import java.time.Duration
@@ -36,6 +37,15 @@ data class ConstituencyRank(
     val durationDelta: Duration,
 )
 
+data class UrbanAreaRank(
+    val rank: Int,
+    val localityName: LocalityName,
+    val count: Int,
+    val duration: Duration,
+    val countDelta: Int,
+    val durationDelta: Duration,
+    val csoCount: Int,
+)
 
 data class RenderableShellfishRank(
     val rank: Int,

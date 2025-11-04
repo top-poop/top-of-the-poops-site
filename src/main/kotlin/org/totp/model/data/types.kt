@@ -17,11 +17,15 @@ class ConstituencyName(value: String) : StringValue(value), ComparableValue<Cons
     companion object : StringValueFactory<ConstituencyName>(::ConstituencyName)
 }
 
-class ConstituencySlug(value: String) : StringValue(value) {
-    companion object : StringValueFactory<ConstituencySlug>(::ConstituencySlug)
+class LocalityName(value: String) : StringValue(value), ComparableValue<LocalityName, String> {
+    companion object : StringValueFactory<LocalityName>(::LocalityName)
 }
 
-fun ConstituencyName.toSlug(): ConstituencySlug = ConstituencySlug.of(value.kebabCase())
+class Slug(value: String) : StringValue(value) {
+    companion object : StringValueFactory<Slug>(::Slug)
+}
+
+fun StringValue.toSlug(): Slug = Slug.of(value.kebabCase())
 
 class WaterwayName(value: String) : StringValue(value), ComparableValue<WaterwayName, String> {
     companion object : StringValueFactory<WaterwayName>(::WaterwayName)
@@ -57,7 +61,6 @@ class StreamCompanyName(value: String) : StringValue(value), ComparableValue<Str
     }
 }
 
-
 /** name of a bathing location as given in EDM file */
 class BathingName(value: String) : StringValue(value), ComparableValue<BathingName, String> {
     companion object : StringValueFactory<BathingName>(::BathingName)
@@ -68,30 +71,18 @@ class ShellfisheryName(value: String) : StringValue(value), ComparableValue<Shel
     companion object : StringValueFactory<ShellfisheryName>(::ShellfisheryName)
 }
 
-fun ShellfisheryName.toSlug() = ShellfishSlug.of(value.kebabCase())
+fun ShellfisheryName.toSlug() = Slug.of(value.kebabCase())
 
 class ShellfishAreaName(value: String) : StringValue(value), ComparableValue<ShellfishAreaName, String> {
     companion object : StringValueFactory<ShellfishAreaName>(::ShellfishAreaName)
 }
 
-class ShellfishSlug(value: String) : StringValue(value) {
-    companion object : StringValueFactory<ShellfishSlug>(::ShellfishSlug)
-}
-
-fun BathingName.toSlug() = BathingSlug.of(value.kebabCase())
-
-class BathingSlug(value: String) : StringValue(value) {
-    companion object : StringValueFactory<BathingSlug>(::BathingSlug)
-}
+fun BathingName.toSlug() = Slug.of(value.kebabCase())
 
 /** name of a beach, as designated "sensitive area bathing" */
 class BeachName(value: String) : StringValue(value), ComparableValue<BeachName, String> {
     companion object : StringValueFactory<BeachName>(::BeachName)
 }
 
-class CompanySlug(value: String) : StringValue(value) {
-    companion object : StringValueFactory<CompanySlug>(::CompanySlug)
-}
-
-fun CompanyName.toSlug(): CompanySlug = CompanySlug.of(value.kebabCase())
+fun CompanyName.toSlug(): Slug = Slug.of(value.kebabCase())
 

@@ -101,13 +101,13 @@ object CompanyPageHandler {
         companyLivedata: (CompanyName) -> CSOLiveData?
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
-        val companySlug = Path.value(CompanySlug).of("company", "The company")
+        val slug = Path.value(Slug).of("company", "The company")
 
         val numberFormat = NumberFormat.getIntegerInstance()
 
         return { request: Request ->
 
-            val slug = companySlug(request)
+            val slug = slug(request)
             val summaries = companySummaries()
 
             val applicable = summaries.filter { it.name.toSlug() == slug }.sortedByDescending { it.year }
