@@ -21,7 +21,7 @@ class LocalityName(value: String) : StringValue(value), ComparableValue<Locality
     companion object : StringValueFactory<LocalityName>(::LocalityName)
 }
 
-class Slug(value: String) : StringValue(value) {
+class Slug(value: String) : StringValue(value),  ComparableValue<Slug, String> {
     companion object : StringValueFactory<Slug>(::Slug)
 }
 

@@ -40,17 +40,17 @@ class RenderableLocalityRank(
 ) {
 
     fun variant(): String {
-        if ( csoCount.count == 0 ) {
+        if (csoCount.count == 0) {
             return "none"
         }
-        if ( zeroMonitoringCount == csoCount.count ) {
+        if (zeroMonitoringCount == csoCount.count) {
             return "unmonitored"
         }
 
-        if ( zeroMonitoringCount > 0 ) {
+        if (zeroMonitoringCount > 0) {
             return "unsure"
         }
-        if ( duration.value == Duration.ZERO) {
+        if (duration.value == Duration.ZERO) {
             return "zero"
         }
         return "normal";
@@ -112,21 +112,27 @@ object LocalitiesPageHandler {
 }
 
 fun LocalityRank.toRenderable(current: Boolean = false): RenderableLocalityRank {
-    val slug = this.localityName.toSlug()
+    val name = this.localityName
     return RenderableLocalityRank(
         rank,
-        locality = RenderableLocality(
-            this.localityName,
-            current,
-            slug,
-            uri = Uri.of("/locality/$slug"),
-            live = false
-        ),
+        locality = name.toRenderable(current),
         overflowCount = RenderableCount(overflowCount),
         zeroMonitoringCount = zeroMonitoringCount,
         duration = duration.toRenderable(),
         countDelta = DeltaValue.of(countDelta),
         durationDelta = RenderableDurationDelta(durationDelta),
         csoCount = RenderableCount(csoCount)
+    )
+}
+
+fun LocalityName.toRenderable(current: Boolean): RenderableLocality {
+    val slug = toSlug()
+
+    return RenderableLocality(
+        this,
+        current,
+        slug,
+        uri = Uri.of("/locality/$slug"),
+        live = false
     )
 }

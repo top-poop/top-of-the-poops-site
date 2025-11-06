@@ -85,6 +85,25 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col">
+                    <div class="card  mb-3">
+                        <div class="card-header">Places along {{name}}</div>
+                        <div class="card-body">
+                            <div class="card-text">
+                                {{#each localities}}
+                                    <a href="{{this.locality.uri}}">
+                                        <button class="btn btn-primary mb-2">
+                                            {{this.locality.name}}
+                                            <span class="badge bg-dark ms-1">{{numberFormat this.overflowCount.count}}</span>
+                                        </button>
+                                    </a>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -215,12 +234,10 @@
                     duration: duration(it.querySelector("[data-duration]"))
                 }
             })
-            .map(it => {
-                return {
-                    lat: it.lat, lon: it.lon, duration: it.duration,
-                    text: `${it.sitename}<br/>${it.waterway}<br/>${it.count} Dumps / ${it.duration} hours by ${it.company}`
-                }
-            })
+            .map(it => ({
+                lat: it.lat, lon: it.lon, duration: it.duration,
+                text: `${it.sitename}<br/>${it.waterway}<br/>${it.count} Dumps / ${it.duration} hours by ${it.company}`
+            }))
             .map(it => L.marker([it.lat, it.lon], {icon: durationIcon(it.duration)}).bindTooltip(it.text));
 
     const bounds = markers.reduce((acc, m) => {

@@ -98,21 +98,26 @@ fun mpForConstituency(contacts: () -> List<ConstituencyContact>): (ConstituencyN
     return { name -> cache()[name]?.mp ?: throw Defect("We don't have the MP for $name") }
 }
 
-class EDMAnnualSummary(val edm: EDM) : HttpHandler {
+class EDMAnnualConstituencySummary(val edm: EDM) : HttpHandler {
 
     val data = TotpJson.autoBody<List<EDM.ConstituencyAnnualSummary>>().toLens()
     val constituency = Path.value(Slug).of("constituency")
-    override fun invoke(request: Request): Response {
+    override fun invoke(request: Request): Response = slugToConstituency[constituency(request)]
+        ?.let(edm::annualSummariesForConstituency)
+        ?.let {
+            Response(Status.OK).with(data of it)
+        } ?: Response(Status.NOT_FOUND)
+}
 
-        val constituencyName = slugToConstituency[constituency(request)]
-
-        return if (constituencyName == null) {
-            Response(Status.NOT_FOUND)
-        } else {
-            val annual = edm.annualSummariesForConstituency(constituencyName)
-            Response(Status.OK).with(data of annual)
+class EDMAnnualLocalitySummary(val edm: EDM) : HttpHandler {
+    val data = TotpJson.autoBody<List<EDM.LocalityAnnualSummary>>().toLens()
+    val locality = Path.value(Slug).of("locality")
+    override fun invoke(request: Request): Response = slugToLocality[locality(request)]
+        ?.let(edm::annualSummariesForLocality)
+        ?.let {
+            Response(Status.OK).with(data of it)
         }
-    }
+        ?: Response(Status.NOT_FOUND)
 }
 
 fun main() {
@@ -196,6 +201,10 @@ fun main() {
         constituencyRankings().firstOrNull { it.constituencyName == wanted }
     }
 
+    val localityRank = { wanted: LocalityName ->
+        localityRankings().firstOrNull { it.localityName == wanted }
+    }
+
     val thamesWater = ThamesWater(connection)
 
     val stream = StreamData(events, connection)
@@ -206,6 +215,8 @@ fun main() {
     val redis = UnifiedJedis(HostAndPort(redisHost(environment), redisPort(environment)))
 
     val constituencyLiveAvailable = memoize(stream::haveLiveDataForConstituencies)
+
+    val edm = EDM(connection)
 
     val server = Undertow(port = port(environment)).toServer(
         routes(
@@ -262,7 +273,8 @@ fun main() {
                             renderer = renderer,
                             waterwaySpills = waterwayCSOs(allSpills),
                             mpFor = mpFor,
-                            constituencyRank = constituencyRank
+                            constituencyRank = constituencyRank,
+                            localityRank = localityRank,
                         ),
                         "/constituency/{constituency}" bind ConstituencyPageHandler(
                             clock = clock,
@@ -303,6 +315,13 @@ fun main() {
                                             .sortedBy { it.started })
                                 }
                             },
+                        ),
+                        "/locality/{locality}" bind LocalityPageHandler(
+                            renderer = renderer,
+                            localityTotals = localityCSOs(allSpills),
+                            localityBoundary = localityBoundaries,
+                            localityRank = localityRank,
+                            localityRivers = localityRivers(allSpills, riverRankings),
                         ),
                         "/shellfisheries" bind ShellfisheriesPageHandler(
                             renderer = renderer, shellfishRankings = shellfishRankings
@@ -383,7 +402,8 @@ fun main() {
                     )
                 )
             ),
-            "/data-new/constituency/{constituency}/annual-pollution" bind EDMAnnualSummary(EDM(connection)),
+            "/data-new/locality/{locality}/annual-pollution" bind EDMAnnualLocalitySummary(edm),
+            "/data-new/constituency/{constituency}/annual-pollution" bind EDMAnnualConstituencySummary(edm),
             "/map.html" bind OldMapRedirectHandler(),
             "/sitemap.xml" bind SitemapHandler(
                 siteBaseUri = Uri.of("https://top-of-the-poops.org"), uris = SitemapUris(

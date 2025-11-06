@@ -12,6 +12,7 @@ import java.time.LocalDate
 
 data class CSOTotals(
     val constituency: ConstituencyName,
+    val localities: List<LocalityName>,
     val cso: CSO,
     val count: Int,
     val duration: Duration,
@@ -233,6 +234,7 @@ object AllSpills {
                 .map {
                     CSOTotals(
                         constituency = ConstituencyName(it["constituency"] as String),
+                        localities = (it["localities"] as List<String>).map { LocalityName.of(it) },
                         cso = CSO(
                             company = CompanyName.of(it["company_name"] as String),
                             sitename = it["site_name"] as String,
@@ -253,9 +255,10 @@ object AllSpills {
 
 
 fun constituencyCSOs(source: () -> List<CSOTotals>) =
-    { name: ConstituencyName ->
-        source().filter { name == it.constituency }
-    }
+    { name: ConstituencyName -> source().filter { it.constituency == name } }
+
+fun localityCSOs(source: () -> List<CSOTotals>) = { name: LocalityName -> source().filter { name in it.localities } }
+
 
 fun waterwayCSOs(source: () -> List<CSOTotals>) =
     { name: WaterwaySlug, company: Slug ->
@@ -269,6 +272,18 @@ fun constituencyRivers(csos: () -> List<CSOTotals>, rivers: () -> List<RiverRank
     val waterways = csos()
         .asSequence()
         .filter { it.constituency == name }
+        .map { it.cso.company to it.cso.waterway }
+        .toSet()
+
+    rivers()
+        .filter { it.company to it.river in waterways }
+        .sortedBy { it.rank }
+}
+
+fun localityRivers(csos: () -> List<CSOTotals>, rivers: () -> List<RiverRank>) = { name: LocalityName ->
+    val waterways = csos()
+        .asSequence()
+        .filter { name in it.localities }
         .map { it.cso.company to it.cso.waterway }
         .toSet()
 

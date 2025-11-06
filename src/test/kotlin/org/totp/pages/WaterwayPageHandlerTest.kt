@@ -13,6 +13,7 @@ import org.totp.model.data.CSOTotals
 import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
+import org.totp.model.data.LocalityName
 import org.totp.model.data.WaterwayName
 import org.totp.model.data.waterwayCSOs
 import strikt.api.expectThat
@@ -24,6 +25,7 @@ class WaterwayPageHandlerTest {
     var summaries = listOf(
         CSOTotals(
             constituency = ConstituencyName("Your House"),
+            localities = listOf(LocalityName.of("d")),
             cso = CSO(
                 company = CompanyName.of("Venture Cap"),
                 sitename = "Your House",

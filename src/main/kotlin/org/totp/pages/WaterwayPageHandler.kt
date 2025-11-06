@@ -2,14 +2,7 @@ package org.totp.pages
 
 import dev.forkhandles.values.StringValue
 import dev.forkhandles.values.StringValueFactory
-import org.http4k.core.Body
-import org.http4k.core.ContentType
-import org.http4k.core.HttpHandler
-import org.http4k.core.Request
-import org.http4k.core.Response
-import org.http4k.core.Status
-import org.http4k.core.Uri
-import org.http4k.core.with
+import org.http4k.core.*
 import org.http4k.lens.Path
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
@@ -17,10 +10,7 @@ import org.http4k.template.viewModel
 import org.totp.extensions.kebabCase
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
-import org.totp.model.data.CSOTotals
-import org.totp.model.data.Slug
-import org.totp.model.data.ConstituencyName
-import org.totp.model.data.WaterwayName
+import org.totp.model.data.*
 import java.text.NumberFormat
 
 
@@ -30,6 +20,7 @@ class WaterwayPage(
     val share: SocialShare,
     val summary: PollutionSummary,
     val constituencies: List<RenderableConstituencyRank>,
+    val localities: List<RenderableLocalityRank>,
     val csos: List<RenderableCSOTotal>,
 ) :
     PageViewModel(uri)
@@ -48,7 +39,8 @@ object WaterwayPageHandler {
         renderer: TemplateRenderer,
         waterwaySpills: (WaterwaySlug, Slug) -> List<CSOTotals>,
         mpFor: (ConstituencyName) -> MP,
-        constituencyRank: (ConstituencyName) -> ConstituencyRank?
+        constituencyRank: (ConstituencyName) -> ConstituencyRank?,
+        localityRank: (LocalityName) -> LocalityRank?,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -70,13 +62,14 @@ object WaterwayPageHandler {
                     .map { it.constituency }
                     .toSet()
                     .sorted()
-                    .map {
-                        constituencyRank(it)
-                    }
-                    .filterNotNull()
-                    .map {
-                        it.toRenderable(mpFor)
-                    }
+                    .mapNotNull { constituencyRank(it) }
+                    .map { it.toRenderable(mpFor) }
+
+                val localities = spills.flatMap { it.localities }
+                    .toSet()
+                    .sorted()
+                    .mapNotNull { localityRank(it) }
+                    .map { it.toRenderable() }
 
                 val summary = spills.summary()
 
@@ -93,6 +86,7 @@ object WaterwayPageHandler {
                             ),
                             summary = summary,
                             constituencies = constituencies,
+                            localities = localities,
                             csos = spills
                                 .sortedByDescending { it.duration }
                                 .map {

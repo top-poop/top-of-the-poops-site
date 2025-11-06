@@ -225,9 +225,7 @@ object ConstituencyPageHandler {
 
                     val summary = list.summary()
 
-                    val rivers2 = constituencyRivers(constituencyName)
-                    val rivers = rivers2.take(5)
-                        .map { it.toRenderable() }
+                    val rivers = constituencyRivers(constituencyName).take(5).map { it.toRenderable() }
 
                     val mp = mpFor(constituencyName)
 
