@@ -54,7 +54,7 @@ DATAFILES=datafiles
 BADGES=$(DATAFILES)
 
 CONSTITUENCY_BADGES=$(BADGES)/constituency
-LOCALITY_BADGES=$(BADGES)/localities
+LOCALITY_BADGES=$(BADGES)/locality
 HOME_BADGES=$(BADGES)/home
 COMPANY_BADGES=$(BADGES)/company
 
@@ -71,7 +71,7 @@ python: $(PYTHON)
 
 
 TMP_CON_ORIG=tmp/constituencies
-TMP_LOC_ORIG=tmp/localities
+TMP_LOC_ORIG=tmp/locality
 TMP_HOME_ORIG=tmp/home
 TMP_COMPANY_ORIG=tmp/companies
 TMP_RIVERS_ORIG=tmp/waterway
