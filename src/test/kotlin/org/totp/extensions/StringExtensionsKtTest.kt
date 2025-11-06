@@ -17,5 +17,8 @@ class StringExtensionsKtTest {
     @Test
     fun diacritics() {
         expectThat("Ynys Môn".kebabCase()).isEqualTo("ynys-mon")
+        expectThat("Aberdâr".kebabCase()).isEqualTo("aberdar")
+        expectThat("An t-Àrchar".kebabCase()).isEqualTo("an-t-archar")
+        expectThat("Lìonal".kebabCase()).isEqualTo("lional")
     }
 }

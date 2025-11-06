@@ -54,6 +54,7 @@ DATAFILES=datafiles
 BADGES=$(DATAFILES)
 
 CONSTITUENCY_BADGES=$(BADGES)/constituency
+LOCALITY_BADGES=$(BADGES)/localities
 HOME_BADGES=$(BADGES)/home
 COMPANY_BADGES=$(BADGES)/company
 
@@ -70,12 +71,16 @@ python: $(PYTHON)
 
 
 TMP_CON_ORIG=tmp/constituencies
+TMP_LOC_ORIG=tmp/localities
 TMP_HOME_ORIG=tmp/home
 TMP_COMPANY_ORIG=tmp/companies
 TMP_RIVERS_ORIG=tmp/waterway
 
 CONSTITUENCY_ORIG=$(wildcard $(TMP_CON_ORIG)/*.png)
 CONSTITUENCY_QUANT=$(foreach png,$(CONSTITUENCY_ORIG),$(CONSTITUENCY_BADGES)/$(notdir $(png)))
+
+LOCALITY_ORIG=$(wildcard $(TMP_LOC_ORIG)/*.png)
+LOCALITY_QUANT=$(foreach png,$(LOCALITY_ORIG),$(LOCALITY_BADGES)/$(notdir $(png)))
 
 HOME_ORIG=$(wildcard $(TMP_HOME_ORIG)/*.png)
 HOME_QUANT=$(foreach png,$(HOME_ORIG),$(HOME_BADGES)/$(notdir $(png)))
@@ -87,9 +92,13 @@ RIVERS_ORIG=$(wildcard $(TMP_RIVERS_ORIG)/*.png)
 RIVERS_QUANT=$(foreach png,$(RIVERS_ORIG),$(RIVERS_BADGES)/$(notdir $(png)))
 
 .PHONY: quantised
-quantised: $(CONSTITUENCY_QUANT) $(HOME_QUANT) $(COMPANY_QUANT) $(RIVERS_QUANT)
+quantised: $(CONSTITUENCY_QUANT) $(HOME_QUANT) $(COMPANY_QUANT) $(RIVERS_QUANT) $(LOCALITY_QUANT)
 
 $(CONSTITUENCY_BADGES)/%.png: $(TMP_CON_ORIG)/%.png
+	@mkdir -p $(@D)
+	pngcrush $< $@
+
+$(LOCALITY_BADGES)/%.png: $(TMP_LOC_ORIG)/%.png
 	@mkdir -p $(@D)
 	pngcrush $< $@
 
@@ -115,6 +124,12 @@ generate-constituency-badges:
 		$(NPM) run save-elements http://localhost:8000/private/badges/constituencies/$${letter} $(TMP_CON_ORIG); \
 	done
 
+generate-locality-badges:
+	@mkdir -p $(TMP_CON_ORIG)
+	for letter in a b c d e f g h i j k l m n o p q r s t u v w x y z; do \
+		$(NPM) run save-elements http://localhost:8000/private/badges/localities/$${letter} $(TMP_LOC_ORIG); \
+	done
+
 generate-home-badges:
 	@mkdir -p $(TMP_HOME_ORIG)
 	$(NPM) run save-elements http://localhost:8000/private/badges/home $(TMP_HOME_ORIG)
@@ -125,4 +140,4 @@ generate-rivers-badges:
 
 
 .PHONY: generated-data
-generated-data: generate-company-badges generate-constituency-badges generate-home-badges
+generated-data: generate-company-badges generate-constituency-badges generate-home-badges generate-locality-badges

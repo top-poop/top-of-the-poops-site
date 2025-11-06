@@ -3,12 +3,16 @@ import contextlib
 import re
 import sys
 import os
+import unicodedata
+
 
 def kebabcase(s):
-    s = s.replace("ô", "o")
+    nfkd_form = unicodedata.normalize('NFD', s.lower())
+    s = ''.join(c for c in nfkd_form if not unicodedata.combining(c))
+
     return "-".join(re.findall(
         r"[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+",
-        s.lower()
+       s
     ))
 
 
@@ -18,6 +22,9 @@ def test_kebabcase():
     assert kebabcase("Bob Smith") == "bob-smith"
     assert kebabcase("Bob,Smith") == "bob-smith"
     assert kebabcase("Ynys Môn") == "ynys-mon"
+    assert kebabcase("Aberdâr") == "aberdar"
+    assert kebabcase("An t-Àrchar") == "an-t-archar"
+    assert kebabcase("Lìonal") == "lional"
 
 
 def iter_row(cursor, size=10):

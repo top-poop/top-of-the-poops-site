@@ -2,19 +2,10 @@ package org.totp.model.data
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.http4k.core.HttpHandler
-import org.http4k.core.Method
-import org.http4k.core.Request
-import org.http4k.core.Uri
-import org.http4k.core.then
+import org.http4k.core.*
 import org.totp.extensions.kebabCase
 import org.totp.extensions.readSimpleList
-import org.totp.pages.CompanyAnnualSummary
-import org.totp.pages.ConstituencyRank
-import org.totp.pages.DeltaValue
-import org.totp.pages.EnsureSuccessfulResponse
-import org.totp.pages.UrbanAreaRank
-import org.totp.pages.WaterwaySlug
+import org.totp.pages.*
 import java.io.IOException
 import java.time.Duration
 import java.time.LocalDate
@@ -54,6 +45,14 @@ object ConstituencyBoundaries {
     operator fun invoke(handler: (String) -> GeoJSON?): (ConstituencyName) -> GeoJSON {
         return { name ->
             handler(name.toSlug().value) ?: throw IOException("can't find constituency boundary for $name")
+        }
+    }
+}
+
+object LocalityBoundaries {
+    operator fun invoke(handler: (String) -> GeoJSON?): (LocalityName) -> GeoJSON {
+        return { name ->
+            handler(name.toSlug().value) ?: throw IOException("can't find locality boundary for $name")
         }
     }
 }
@@ -107,16 +106,17 @@ object ConstituencyRankings {
 }
 
 object LocalityRankings {
-    operator fun invoke(handler: HttpHandler): () -> List<UrbanAreaRank> {
+    operator fun invoke(handler: HttpHandler): () -> List<LocalityRank> {
         return {
             val response = handler(Request(Method.GET, "spills-by-locality.json"))
 
             TotpJson.mapper.readSimpleList(response.bodyString())
                 .mapIndexed { r, it ->
-                    UrbanAreaRank(
+                    LocalityRank(
                         rank = r + 1,
                         localityName = LocalityName(it["locality"] as String),
-                        count = (it["total_spills"] as Double).toInt(),
+                        overflowCount = (it["total_spills"] as Double).toInt(),
+                        zeroMonitoringCount = (it["monitoring_zero_count"] as Int),
                         duration = fromEDMHours((it["total_hours"] as Double)),
                         countDelta = (it["spills_increase"] as Double).toInt(),
                         durationDelta = fromEDMHours(it["hours_increase"] as Double),

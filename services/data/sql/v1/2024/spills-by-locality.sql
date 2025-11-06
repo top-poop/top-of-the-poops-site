@@ -13,7 +13,8 @@ with reports_last as (select count(*)                                as cso_coun
      reports_this as (select count(*)                                as cso_count,
                              name1_text                              as locality,
                              coalesce(sum(edm.spill_count), 0)       as total_spills,
-                             coalesce(sum(edm.total_spill_hours), 0) as total_hours
+                             coalesce(sum(edm.total_spill_hours), 0) as total_hours,
+                             COUNT(CASE WHEN edm.reporting_pct = 0 THEN 1 END) AS monitoring_zero_count
                       from edm_consent_view edm
                                join grid_references gr on edm.effluent_grid_ref = gr.grid_reference
                                join os_open_built_up_areas a

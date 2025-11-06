@@ -180,6 +180,10 @@ fun main() {
         Boundaries(SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient))
     )
 
+    val localityBoundaries = LocalityBoundaries(
+        Boundaries(SetBaseUriFrom(Uri.of("/localities")).then(dataClient))
+    )
+
     val beachBoundaries = BeachBoundaries(
         Boundaries(SetBaseUriFrom(Uri.of("/beaches")).then(dataClient))
     )
@@ -319,6 +323,11 @@ fun main() {
                                 constituencyRankings = constituencyRankings,
                                 mpFor = mpFor,
                                 constituencyBoundaries = constituencyBoundaries,
+                            ),
+                            "/localities/{letter}" bind BadgesLocalitiesHandler(
+                                renderer = renderer,
+                                localityRankings = localityRankings,
+                                localityBoundaries = localityBoundaries,
                             ),
                             "/companies" bind BadgesCompaniesHandler(
                                 renderer = renderer,

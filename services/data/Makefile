@@ -80,7 +80,7 @@ generated-data: generated-2024 \
 	$(DATAFILES)/constituencies/.uptodate \
 	$(DATAFILES)/beaches/.uptodate \
 	$(DATAFILES)/shellfisheries/.uptodate \
-	$(DATAFILES)/urban-areas/.uptodate \
+	$(DATAFILES)/localities/.uptodate \
 	$(PROVIDED)
 
 generated-2024: $(DATA_2024_GENERATED) $(GEO_2024_GENERATED) $(PROVIDED)
@@ -102,28 +102,28 @@ $(DATAFILES)/v1/2024/geo/%.json:  sql/v1/2024/geo/$(basename $(notdir %)).sql $(
 	$(PYTHON) $(SQL_TO_TEXT) $< | jq -r tostring > $@
 
 
-$(DATAFILES)/constituencies/.uptodate: $(PYTHON) geometry.py constituencies.sql
+$(DATAFILES)/constituencies/.uptodate: $(PYTHON) geometry.py constituencies.sql utils.py
 	rm -rf $(DATAFILES)/constituencies
 	@mkdir $(DATAFILES)/constituencies
 	$(PYTHON) geometry.py constituencies.sql $(DATAFILES)/constituencies
 	touch $@
 
-$(DATAFILES)/beaches/.uptodate: $(PYTHON) geometry.py beaches.sql
+$(DATAFILES)/beaches/.uptodate: $(PYTHON) geometry.py beaches.sql utils.py
 	rm -rf $(DATAFILES)/beaches
 	@mkdir $(DATAFILES)/beaches
 	$(PYTHON) geometry.py beaches.sql $(DATAFILES)/beaches
 	touch $@
 
-$(DATAFILES)/shellfisheries/.uptodate: $(PYTHON) geometry.py shellfisheries.sql
+$(DATAFILES)/shellfisheries/.uptodate: $(PYTHON) geometry.py shellfisheries.sql utils.py
 	rm -rf $(DATAFILES)/shellfisheries
 	@mkdir $(DATAFILES)/shellfisheries
 	$(PYTHON) geometry.py shellfisheries.sql $(DATAFILES)/shellfisheries
 	touch $@
 
-$(DATAFILES)/urban-areas/.uptodate: $(PYTHON) geometry.py urban-areas.sql
-	rm -rf $(DATAFILES)/urban-areas
-	@mkdir $(DATAFILES)/urban-areas
-	$(PYTHON) geometry.py urban-areas.sql $(DATAFILES)/urban-areas
+$(DATAFILES)/localities/.uptodate: $(PYTHON) geometry.py localities.sql utils.py
+	rm -rf $(DATAFILES)/localities
+	@mkdir $(DATAFILES)/localities
+	$(PYTHON) geometry.py localities.sql $(DATAFILES)/localities
 	touch $@
 
 $(DATAFILES)/media-appearances.json: provided/media-appearances.json

@@ -1,28 +1,13 @@
 package org.totp.pages
 
-import org.http4k.core.Body
-import org.http4k.core.ContentType
-import org.http4k.core.HttpHandler
-import org.http4k.core.Response
-import org.http4k.core.Status
-import org.http4k.core.Uri
-import org.http4k.core.with
+import org.http4k.core.*
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.THE_YEAR
 import org.totp.db.StreamData
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
-import org.totp.model.data.BathingRank
-import org.totp.model.data.ConstituencyName
-import org.totp.model.data.MediaAppearance
-import org.totp.model.data.RenderableCompany
-import org.totp.model.data.RenderableShellfishName
-import org.totp.model.data.RiverRank
-import org.totp.model.data.ShellfishRank
-import org.totp.model.data.LocalityName
-import org.totp.model.data.WaterCompany
-import org.totp.model.data.toRenderable
+import org.totp.model.data.*
 import java.time.Duration
 import kotlin.math.floor
 
@@ -37,14 +22,15 @@ data class ConstituencyRank(
     val durationDelta: Duration,
 )
 
-data class UrbanAreaRank(
+data class LocalityRank(
     val rank: Int,
     val localityName: LocalityName,
-    val count: Int,
+    val overflowCount: Int,
+    val zeroMonitoringCount: Int,
     val duration: Duration,
     val countDelta: Int,
     val durationDelta: Duration,
-    val csoCount: Int,
+    val csoCount: Int
 )
 
 data class RenderableShellfishRank(
@@ -98,7 +84,7 @@ object HomepageHandler {
         companies: () -> List<WaterCompany>,
         mpFor: (ConstituencyName) -> MP,
         streamSummary: () -> StreamData.StreamOverflowSummary,
-        ): HttpHandler {
+    ): HttpHandler {
 
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
