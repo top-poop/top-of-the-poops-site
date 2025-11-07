@@ -120,6 +120,14 @@ class EDMAnnualLocalitySummary(val edm: EDM) : HttpHandler {
         ?: Response(Status.NOT_FOUND)
 }
 
+class LocalityPlaceRedirectHandler(): HttpHandler {
+    val locality = Path.value(Slug).of("locality")
+    override fun invoke(request: Request): Response {
+        val l = locality(request)
+        return Response(Status.PERMANENT_REDIRECT).with(LOCATION of Uri.of("/place/${l.value}"))
+    }
+}
+
 fun main() {
 
     val isDevelopment =
@@ -316,6 +324,7 @@ fun main() {
                                 }
                             },
                         ),
+                        "/locality/{locality}" bind LocalityPlaceRedirectHandler(),
                         "/place/{locality}" bind LocalityPageHandler(
                             renderer = renderer,
                             localityTotals = localityCSOs(allSpills),
