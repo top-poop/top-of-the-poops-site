@@ -249,7 +249,7 @@ fun main() {
                             constituencyRankings = constituencyRankings,
                             mpFor = mpFor,
                         ),
-                        "/localities" bind LocalitiesPageHandler(
+                        "/places" bind LocalitiesPageHandler(
                             renderer = renderer,
                             areaRankings = localityRankings,
                         ),
@@ -316,7 +316,7 @@ fun main() {
                                 }
                             },
                         ),
-                        "/locality/{locality}" bind LocalityPageHandler(
+                        "/place/{locality}" bind LocalityPageHandler(
                             renderer = renderer,
                             localityTotals = localityCSOs(allSpills),
                             localityBoundary = localityBoundaries,
@@ -410,6 +410,7 @@ fun main() {
                     constituencies = constituencyRankings,
                     riverRankings = riverRankings,
                     beachRankings = beachRankings,
+                    localityRankings = localityRankings,
                 )
             ),
             "/data" bind static(ResourceLoader.Directory("services/data/datafiles")),

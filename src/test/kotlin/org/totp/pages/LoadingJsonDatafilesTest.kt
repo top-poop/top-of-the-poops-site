@@ -27,7 +27,8 @@ class LoadingJsonDatafilesTest {
     "lon": -3.873983,
     "spill_count": 173.0,
     "total_spill_hours": 1651.0,
-    "reporting_percent": 100.0
+    "reporting_percent": 100.0,
+    "localities": []
   }]"""
 
         val summaries =

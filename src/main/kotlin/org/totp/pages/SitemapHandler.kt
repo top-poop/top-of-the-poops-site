@@ -53,7 +53,8 @@ object SitemapUris {
     operator fun invoke(
         constituencies: () -> List<ConstituencyRank>,
         riverRankings: () -> List<RiverRank>,
-        beachRankings: () -> List<BathingRank>
+        beachRankings: () -> List<BathingRank>,
+        localityRankings: () -> List<LocalityRank>,
     ): () -> List<Uri> {
         return {
             listOf(
@@ -63,6 +64,7 @@ object SitemapUris {
                 Uri.of("/constituencies"),
                 Uri.of("/beaches"),
                 Uri.of("/rivers"),
+                Uri.of("/places"),
             ).plus(
                 constituencies().flatMap {
                     listOf(
@@ -71,15 +73,21 @@ object SitemapUris {
                     )
                 }
             ).plus(
-                // bug where anglian has a waterway called '.' - will fix upstream later
-                riverRankings().map { it.toRenderable() }.filterNot { it.river.uri.toString().endsWith("/") }.flatMap {
-                    listOf(it.river.uri, it.company.uri)
-                }
-            ).plus(
-                beachRankings().map {
-                    it.toRenderable().beach.uri
+                localityRankings().map {
+                    it.localityName.toRenderable().uri
                 }
             )
+                .plus(
+                    // bug where anglian has a waterway called '.' - will fix upstream later
+                    riverRankings().map { it.toRenderable() }.filterNot { it.river.uri.toString().endsWith("/") }
+                        .flatMap {
+                            listOf(it.river.uri, it.company.uri)
+                        }
+                ).plus(
+                    beachRankings().map {
+                        it.toRenderable().beach.uri
+                    }
+                )
                 .toSet()
                 .toList()
         }

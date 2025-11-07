@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Top of the Poops | Locality | {{ locality.name }}| Polluted by {{join summary.companies ', '}}</title>
+    <title>Top of the Poops | Place | {{ locality.name }}| Polluted by {{join summary.companies ', '}}</title>
     <meta name="description" content="Analysing sewage dumps by water companies in {{ locality.name }}">
 
     {{> chunks/favicons }}
@@ -28,7 +28,7 @@
     </style>
 
     {{> components/meta-opengraph
-            title=(concat "Locality | " locality.name)
+            title=(concat "Place | " locality.name)
             twitterImageUri=share.twitterImageUri
             description=(concat "Analysing sewage dumps by water companies in " locality.name)
     }}

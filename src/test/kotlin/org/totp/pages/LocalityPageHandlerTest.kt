@@ -1,26 +1,37 @@
 package org.totp.pages
 
+import com.github.jknack.handlebars.io.StringTemplateSource
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Status
+import org.http4k.core.Uri
 import org.http4k.routing.bind
 import org.http4k.routing.routes
+import org.http4k.strikt.header
 import org.http4k.strikt.status
 import org.junit.jupiter.api.Test
+import org.totp.db.StreamData
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.*
+import org.totp.model.data.localityCSOs
+import strikt.api.expectCatching
 import strikt.api.expectThat
+import strikt.assertions.first
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFailure
+import java.time.Clock
 import java.time.Duration
 
-class WaterwayPageHandlerTest {
+class LocalityPageHandlerTest {
+
+    val clock = Clock.systemUTC()
 
     var summaries = listOf(
         CSOTotals(
             constituency = ConstituencyName("Your House"),
-            localities = listOf(LocalityName.of("d")),
+            localities = listOf(LocalityName.Companion.of("v")),
             cso = CSO(
-                company = CompanyName.of("Venture Cap"),
+                company = CompanyName.Companion.of("Venture Cap"),
                 sitename = "Your House",
                 waterway = WaterwayName("Your River"),
                 location = Coordinates(lon = -0.12460789, lat = 51.49993385),
@@ -32,40 +43,28 @@ class WaterwayPageHandlerTest {
     )
 
     val service = routes(
-        "/{company}/{waterway}" bind Method.GET to WaterwayPageHandler(
+        "/{locality}" bind Method.GET to LocalityPageHandler(
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
-            waterwaySpills = waterwayCSOs { summaries },
-            mpFor = { anMP },
-            constituencyRank = {
-                ConstituencyRank(
+            localityTotals = { summaries },
+            localityBoundary = { GeoJSON.Companion.of("some geojson") },
+            localityRank = {
+                LocalityRank(
                     1,
-                    ConstituencyName("Aldershot"),
+                    LocalityName("Aldershot"),
                     10,
+                    zeroMonitoringCount = 10,
                     Duration.ofHours(1),
                     20,
-                    Duration.ZERO
+                    Duration.ZERO,
+                    csoCount = 100,
                 )
             },
-            localityRank = { _ -> null }
+            localityRivers = { listOf(aRiver(1)) },
         )
     )
 
     @Test
-    fun `renders a waterway`() {
-        Html(service(Request(Method.GET, "/venture-cap/your-river")))
-    }
-
-    @Test
-    fun `a river with no overflows is 404`() {
-        // surprisingly there are one or two
-        summaries = listOf()
-        Html(
-            service(
-                Request(
-                    Method.GET,
-                    "/venture-cap/your-river"
-                )
-            )
-        ) { expectThat(it).status.isEqualTo(Status.NOT_FOUND) }
+    fun `renders a place`() {
+        val html = Html(service(Request.Companion(Method.GET, "/york").header("host", "bob.com")))
     }
 }

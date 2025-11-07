@@ -125,14 +125,14 @@ fun LocalityRank.toRenderable(current: Boolean = false): RenderableLocalityRank 
     )
 }
 
-fun LocalityName.toRenderable(current: Boolean): RenderableLocality {
+fun LocalityName.toRenderable(current: Boolean = false): RenderableLocality {
     val slug = toSlug()
 
     return RenderableLocality(
         this,
         current,
         slug,
-        uri = Uri.of("/locality/$slug"),
+        uri = Uri.of("/place/$slug"),
         live = false
     )
 }
