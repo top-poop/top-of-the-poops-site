@@ -248,6 +248,9 @@ fun main() {
                         "/now" bind NowHandler(
                             renderer = renderer, streamData = stream
                         ),
+                        "/now-video" bind NowVideoHandler(
+                            renderer = renderer, streamData = stream
+                        ),
                         "/support" bind SupportUsHandler(renderer = renderer),
                         "/media" bind MediaPageHandler(
                             renderer = renderer, appearances = mediaAppearances

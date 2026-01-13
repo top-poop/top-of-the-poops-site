@@ -54,3 +54,6 @@ Disallow: /
 
 User-agent: PerplexityBot
 Disallow: /
+
+User-agent: IbouBot
+Disallow: /

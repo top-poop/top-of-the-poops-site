@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Top of the Poops - Sewage Overflows Right Now</title>
+    <meta name="description" content="Analysing sewage dumps by water companies in the UK">
+
+    {{> chunks/favicons }}
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+    {{> chunks/meta-leaflet }}
+
+    <style>
+        .map-container {
+            height: 100%;
+            aspect-ratio: 4 / 5;
+        }
+
+        .map-overlay {
+            font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            z-index: 1000;
+        }
+
+        .overlay-inner {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 12px;
+            padding: 15px 25px;
+        }
+
+        #current-date {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+            color: #1e3a8a;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #slider {
+            flex-grow: 1;
+            cursor: pointer;
+            accent-color: #2563eb; /* Stylish blue color */
+        }
+
+        #play-pause-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #play-pause-btn:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="container-fluid" id="map-section">
+    <div class="col-md-12">
+        <div class="map-wrapper">
+            <div class="map-container" id="map"></div>
+
+            <div class="map-overlay">
+                <div class="overlay-inner">
+                    <h2 id="current-date">Loading Timeline...</h2>
+                    <div class="controls">
+                        <input id="slider" type="range" min="0" max="0" step="1" value="0" />
+                        <button id="play-pause-btn">Pause</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    async function loadRainfallTimeline(start, end) {
+        const FIFTEEN_MIN = 900000;
+        const timestamps = [];
+        for (let t = start; t <= end; t += FIFTEEN_MIN) timestamps.push(t);
+
+        return await Promise.all(
+                timestamps.map(async (epoch) => {
+                    try {
+                        const resp = await fetch(`/live/environment-agency/rainfall/grid/${epoch}`);
+                        const boxes = await resp.json();
+
+                        return {
+                            epoch: epoch,
+                            // Each frame is its own self-contained GeoJSON object
+                            geojson: {
+                                type: "FeatureCollection",
+                                features: boxes.map(box => ({
+                                    type: "Feature",
+                                    properties: {rain: box.rain},
+                                    geometry: {
+                                        type: "Polygon",
+                                        coordinates: [[
+                                            [box.xmin, box.ymin], [box.xmax, box.ymin],
+                                            [box.xmax, box.ymax], [box.xmin, box.ymax],
+                                            [box.xmin, box.ymin]
+                                        ]]
+                                    }
+                                }))
+                            }
+                        };
+                    } catch (e) {
+                        // Return an empty frame if fetch fails to keep array length consistent
+                        return {epoch, geojson: {type: "FeatureCollection", features: []}};
+                    }
+                })
+        );
+    }
+
+    const formatNumber = (n, m) => n.toLocaleString(undefined, {
+        minimumFractionDigits: m ? m : 0,
+        maximumFractionDigits: m ? m : 0
+    });
+
+    const myStyle = {
+        "color": "#ff7800",
+        "weight": 5,
+        "opacity": 0.65
+    };
+
+    const map = new maplibregl.Map({
+        container: 'map',
+        style: 'https://top-of-the-poops.org/tiles/styles/v2/style.json',
+        center: [-2.197, 53.769],
+        zoom: 6
+    });
+
+    const sw = [-6.37986, 48.74479];
+    const ne = [2.20468, 55.32934];
+    const bounds = [sw, ne];
+
+    map.fitBounds(bounds, {
+        padding: 0,
+        animate: false
+    });
+
+    const nav = new maplibregl.NavigationControl({
+        showCompass: false,
+        visualizePitch: true
+    });
+
+    map.addControl(nav, 'top-left');
+
+
+    map.on('moveend', function () {
+        var zoom = map.getZoom();
+        var bounds = map.getBounds();
+
+        // Get specific coordinates for the corners
+        var southWest = bounds.getSouthWest();
+        var northEast = bounds.getNorthEast();
+
+        console.log("Current Zoom: " + zoom);
+        console.log("SouthWest Bounds: " + southWest.toString());
+        console.log("NorthEast Bounds: " + northEast.toString());
+    });
+
+    let startTime = 1767866400000;
+    let endTime = startTime + (5 * 60 * 60 * 1000);
+    // let endTime = 1768172400000;
+
+
+    map.on('load', async () => {
+
+        // Setup Source and Layer
+        map.addSource('rainfall-source', {
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features: [] }
+        });
+
+        map.addLayer({
+            id: 'rainfall-layer',
+            type: 'fill',
+            source: 'rainfall-source',
+            paint: {
+                'fill-color': [
+                    'interpolate', ['linear'], ['get', 'rain'],
+                    0, 'transparent',
+                    0.1, '#93c5fd',
+                    1.0, '#2563eb',
+                    5.0, '#1e3a8a'
+                ],
+                'fill-opacity': 0.7
+            }
+        });
+
+        console.log("Starting data fetch...");
+        const timeline = await loadRainfallTimeline(startTime, endTime);
+
+        console.log(timeline)
+
+        if (timeline.length > 0) {
+            console.log(`Ready. Playing ${timeline.length} intervals.`);
+            startPlayback(timeline);
+        }
+    });
+
+    let playbackInterval;
+    let isPaused = false;
+    let currentIndex = 0;
+
+    function startPlayback(timeline) {
+        const slider = document.getElementById('slider');
+        const dateDisplay = document.getElementById('current-date');
+        const btn = document.getElementById('play-pause-btn');
+
+        // Setup slider range
+        slider.max = timeline.length - 1;
+
+        // Update function (Shared by interval and slider input)
+        const updateFrame = (index) => {
+            const frame = timeline[index];
+            map.getSource('rainfall-source').setData(frame.geojson);
+
+            // Update UI
+            dateDisplay.innerText = new Date(frame.epoch).toLocaleString('en-GB', {
+                day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+            });
+            slider.value = index;
+            currentIndex = index;
+        };
+
+        // The Animation Timer
+        const runTimer = () => {
+            playbackInterval = setInterval(() => {
+                if (!isPaused) {
+                    currentIndex = (currentIndex + 1) % timeline.length;
+                    updateFrame(currentIndex);
+                }
+            }, 100);
+        };
+
+        // 1. Handle Slider Input (User dragging)
+        slider.addEventListener('input', (e) => {
+            updateFrame(parseInt(e.target.value));
+        });
+
+        // 2. Handle Play/Pause
+        btn.addEventListener('click', () => {
+            isPaused = !isPaused;
+            btn.innerText = isPaused ? 'Play' : 'Pause';
+        });
+
+        // Start initially
+        runTimer();
+        updateFrame(0);
+    }
+
+</script>
+
+</body>
+</html>
