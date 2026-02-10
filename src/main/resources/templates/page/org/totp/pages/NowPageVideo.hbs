@@ -41,6 +41,9 @@
             font-size: 1.1em;
             color: #1e3a8a;
             text-align: center;
+            font-family: 'Courier New', monospace; /* Monospace prevents jittering numbers */
+            font-weight: 700;
+            white-space: nowrap;
         }
 
         .controls {
@@ -68,6 +71,124 @@
         #play-pause-btn:hover {
             background: #1d4ed8;
         }
+
+        .overlay-inner {
+            transition: background 0.3s ease;
+        }
+        .overlay-inner:hover {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .legend-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            /* Increase width slightly for longer names or set to 'auto' */
+            min-width: 240px;
+            max-width: 320px;
+        }
+
+        .legend-overlay h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #1e3a8a;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 5px;
+        }
+
+        .legend-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 12px; /* Adds a gap between name and count pill */
+            white-space: nowrap; /* Forces everything onto one line */
+        }
+
+        .company-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            border: 1px solid white;
+        }
+
+        .count-pill {
+            flex-shrink: 0; /* Ensures the pill doesn't get squashed */
+            background: rgba(30, 58, 138, 0.1);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .header-overlay {
+            position: absolute;
+            top: 10px;
+            right: 60px; /* Offset for the zoom controls */
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Space between the two boxes */
+            align-items: flex-end; /* Aligns both boxes to the right */
+        }
+
+        .title-box {
+            padding: 10px 20px;
+            border-right: 4px solid #1e3a8a;
+        }
+
+        .time-box {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            min-height: 30px; /* Forces a consistent slim height */
+            border-right: 4px solid #00adef;
+        }
+
+        .title-overlay .overlay-inner {
+            padding: 10px 20px;
+            text-align: right;
+            border-right: 4px solid #1e3a8a; /* Accent bar matching your counts */
+        }
+
+        .header-overlay .overlay-inner {
+            padding: 8px 16px; /* Reduced vertical padding */
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        #storm-title {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1e3a8a;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+
+        .storm-subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #map-section,
+        #map-section .col-md-12 {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
     </style>
 </head>
 <body>
@@ -80,11 +201,30 @@
 
             <div class="map-overlay">
                 <div class="overlay-inner">
-                    <h2 id="current-date">Loading Timeline...</h2>
                     <div class="controls">
-                        <input id="slider" type="range" min="0" max="0" step="1" value="0" />
+                        <input id="slider" type="range" min="0" max="0" step="1" value="0"/>
                         <button id="play-pause-btn">Pause</button>
                     </div>
+                </div>
+            </div>
+
+            <div class="legend-overlay">
+                <div class="overlay-inner">
+                    <h3>Overflows</h3>
+                    <div id="legend-counts">
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-overlay">
+                <div class="overlay-inner title-box">
+                    <h1 id="storm-title">Top Of The Poops</h1>
+                    <div class="storm-subtitle">top-of-the-poops.org</div>
+                    <div class="storm-subtitle">Storm Goretti</div>
+                </div>
+
+                <div class="overlay-inner time-box">
+                    <div id="current-date">Initializing...</div>
                 </div>
             </div>
         </div>
@@ -93,42 +233,113 @@
 
 <script>
 
-    async function loadRainfallTimeline(start, end) {
+    const COMPANY_COLORS = {
+        'Anglian Water': '#00adef',      // Bright Sky Blue
+        'Northumbrian Water': '#1d4ed8', // Deep Royal Blue
+        'Severn Trent Water': '#059669', // Emerald Green
+        'South West Water': '#f59e0b',   // Amber/Orange
+        'Southern Water': '#7c3aed',     // Violet
+        'Thames Water': '#2563eb',       // Classic Blue
+        'United Utilities': '#db2777',   // Pink/Magenta
+        'Wessex Water': '#0891b2',       // Teal
+        'Default': '#64748b'             // Slate Gray
+    };
+
+    const updateLegend = (flowGeojson) => {
+        const counts = {};
+
+        // Count occurrences in this specific frame
+        flowGeojson.features.forEach(f => {
+            const co = f.properties.company;
+            counts[co] = (counts[co] || 0) + 1;
+        });
+
+        const container = document.getElementById('legend-counts');
+
+        // Generate the HTML for the legend items
+        container.innerHTML = Object.keys(counts).sort().map(company => {
+            const color = COMPANY_COLORS[company] || COMPANY_COLORS['Default'];
+            return `
+        <div class="legend-item">
+            <span class="company-name">
+                <span class="company-swatch" style="background: ${color}"></span>
+                ${company}
+            </span>
+            <span class="count-pill">${counts[company]}</span>
+        </div>
+    `;
+        }).join('');
+    };
+
+    async function loadFullTimeline(start, end) {
         const FIFTEEN_MIN = 900000;
         const timestamps = [];
         for (let t = start; t <= end; t += FIFTEEN_MIN) timestamps.push(t);
 
-        return await Promise.all(
-                timestamps.map(async (epoch) => {
-                    try {
-                        const resp = await fetch(`/live/environment-agency/rainfall/grid/${epoch}`);
-                        const boxes = await resp.json();
+        return await Promise.all(timestamps.map(async (epoch) => {
+            try {
+                // Fetch both Rainfall and Overflows simultaneously
+                const [rainRes, flowRes] = await Promise.all([
+                    fetch(`/live/environment-agency/rainfall/grid/${epoch}`),
+                    fetch(`/live/stream/overflowing/${epoch}`)
+                ]);
 
-                        return {
-                            epoch: epoch,
-                            // Each frame is its own self-contained GeoJSON object
-                            geojson: {
-                                type: "FeatureCollection",
-                                features: boxes.map(box => ({
-                                    type: "Feature",
-                                    properties: {rain: box.rain},
-                                    geometry: {
-                                        type: "Polygon",
-                                        coordinates: [[
-                                            [box.xmin, box.ymin], [box.xmax, box.ymin],
-                                            [box.xmax, box.ymax], [box.xmin, box.ymax],
-                                            [box.xmin, box.ymin]
-                                        ]]
-                                    }
-                                }))
-                            }
-                        };
-                    } catch (e) {
-                        // Return an empty frame if fetch fails to keep array length consistent
-                        return {epoch, geojson: {type: "FeatureCollection", features: []}};
+                const rainData = await rainRes.json();
+                const flowData = await flowRes.json();
+
+                return {
+                    epoch,
+                    rainGeojson: transformRainToGeoJson(rainData),
+                    flowGeojson: transformFlowToGeoJSON(flowData, epoch)
+                };
+            } catch (e) {
+                console.log(e)
+                return {epoch, rainGeojson: emptyGeoJSON(), flowGeojson: emptyGeoJSON()};
+            }
+        }));
+    }
+
+    function emptyGeoJSON() {
+        return {type: "FeatureCollection", features: []};
+    }
+
+    function transformRainToGeoJson(boxes) {
+        return {
+            type: "FeatureCollection",
+            features: boxes.map(box => ({
+                type: "Feature",
+                properties: {rain: box.rain},
+                geometry: {
+                    type: "Polygon",
+                    coordinates: [[
+                        [box.xmin, box.ymin], [box.xmax, box.ymin],
+                        [box.xmax, box.ymax], [box.xmin, box.ymax],
+                        [box.xmin, box.ymin]
+                    ]]
+                }
+            }))
+        }
+    }
+
+    function transformFlowToGeoJSON(data, currentEpoch) {
+        return {
+            type: "FeatureCollection",
+            features: data.map(item => {
+                const startTime = new Date(item.started).getTime();
+                // Calculate hours elapsed since overflow started relative to current timeline step
+                const hoursElapsed = Math.max(0, (currentEpoch - startTime) / 3600000);
+
+                return {
+                    type: "Feature",
+                    geometry: {type: "Point", coordinates: [item.loc.lon, item.loc.lat]},
+                    properties: {
+                        company: item.company,
+                        duration: hoursElapsed, // We will use this for circle size
+                        id: item.id
                     }
-                })
-        );
+                };
+            })
+        };
     }
 
     const formatNumber = (n, m) => n.toLocaleString(undefined, {
@@ -163,7 +374,7 @@
         visualizePitch: true
     });
 
-    map.addControl(nav, 'top-left');
+    map.addControl(nav, 'top-right');
 
 
     map.on('moveend', function () {
@@ -179,15 +390,21 @@
         console.log("NorthEast Bounds: " + northEast.toString());
     });
 
-    let startTime = 1767866400000;
-    let endTime = startTime + (5 * 60 * 60 * 1000);
-    // let endTime = 1768172400000;
+    const isoStart = "2026-01-08T06:00:00Z";
+    const isoEnd   = "2026-01-10T06:00:00Z";
 
+    const startTime = Date.parse(isoStart);
+    const endTime = Date.parse(isoEnd)
 
     map.on('load', async () => {
 
         // Setup Source and Layer
         map.addSource('rainfall-source', {
+            type: 'geojson',
+            data: {type: 'FeatureCollection', features: []}
+        });
+
+        map.addSource('overflow-source', {
             type: 'geojson',
             data: { type: 'FeatureCollection', features: [] }
         });
@@ -208,8 +425,46 @@
             }
         });
 
+        map.addLayer({
+            id: 'overflow-layer',
+            type: 'circle',
+            source: 'overflow-source',
+            layout: {
+                'circle-sort-key': ['get', 'duration'], // Older/larger circles drawn on top
+                'visibility': 'visible'
+            },
+            paint: {
+                // Color by Company
+                'circle-color': [
+                    'match', ['get', 'company'],
+                    'Anglian Water', COMPANY_COLORS['Anglian Water'],
+                    'Northumbrian Water', COMPANY_COLORS['Northumbrian Water'],
+                    'Severn Trent Water', COMPANY_COLORS['Severn Trent Water'],
+                    'South West Water', COMPANY_COLORS['South West Water'],
+                    'Southern Water', COMPANY_COLORS['Southern Water'],
+                    'Thames Water', COMPANY_COLORS['Thames Water'],
+                    'United Utilities', COMPANY_COLORS['United Utilities'],
+                    'Wessex Water', COMPANY_COLORS['Wessex Water'],
+                    COMPANY_COLORS['Default'] // Final fallback
+                ],
+                // Size grows with duration (min 5px, max 30px)
+                'circle-radius': [
+                    'interpolate',
+                    ['linear'],
+                    ['get', 'duration'], // This is the hoursElapsed property we calculated
+                    0, 4,                // 0 hours elapsed = 4px radius
+                    6, 10,               // 6 hours elapsed = 10px radius
+                    24, 15,              // 24 hours elapsed = 20px radius
+                    168, 20              // 1 week elapsed = 50px radius (max size)
+                ],
+                'circle-opacity': 0.6,
+                'circle-stroke-width': 0.5,
+                'circle-stroke-color': 'rgba(255,255,255,0.5)',
+            }
+        });
+
         console.log("Starting data fetch...");
-        const timeline = await loadRainfallTimeline(startTime, endTime);
+        const timeline = await loadFullTimeline(startTime, endTime);
 
         console.log(timeline)
 
@@ -223,10 +478,28 @@
     let isPaused = false;
     let currentIndex = 0;
 
+    const btn = document.getElementById('play-pause-btn');
+
+    function togglePlay() {
+        isPaused = !isPaused;
+        btn.innerText = isPaused ? 'Play' : 'Pause';
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.code === 'Space') {
+            e.preventDefault();
+            togglePlay();
+        }
+        if (e.key.toLowerCase() === 'r') {
+            currentIndex = 0; // Jump back to frame 0
+            updateFrame(currentIndex);
+        }
+    });
+
     function startPlayback(timeline) {
         const slider = document.getElementById('slider');
         const dateDisplay = document.getElementById('current-date');
-        const btn = document.getElementById('play-pause-btn');
 
         // Setup slider range
         slider.max = timeline.length - 1;
@@ -234,11 +507,19 @@
         // Update function (Shared by interval and slider input)
         const updateFrame = (index) => {
             const frame = timeline[index];
-            map.getSource('rainfall-source').setData(frame.geojson);
+            map.getSource('rainfall-source').setData(frame.rainGeojson);
+            map.getSource('overflow-source').setData(frame.flowGeojson);
+
+            updateLegend(frame.flowGeojson);
 
             // Update UI
             dateDisplay.innerText = new Date(frame.epoch).toLocaleString('en-GB', {
-                day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false // Set to true if you prefer AM/PM
             });
             slider.value = index;
             currentIndex = index;
@@ -246,13 +527,35 @@
 
         // The Animation Timer
         const runTimer = () => {
+            // Clear any existing interval to prevent speed-up bugs
+            if (playbackInterval) clearInterval(playbackInterval);
+
             playbackInterval = setInterval(() => {
                 if (!isPaused) {
-                    currentIndex = (currentIndex + 1) % timeline.length;
-                    updateFrame(currentIndex);
+                    // Check if we are at the last frame
+                    if (currentIndex < timeline.length - 1) {
+                        currentIndex++;
+                        updateFrame(currentIndex);
+                    } else {
+                        // We reached the end
+                        isPaused = true;
+                        const btn = document.getElementById('play-pause-btn');
+                        btn.innerText = 'Restart'; // Suggest a restart
+
+                        // Optional: stop the interval entirely until 'R' or Play is hit
+                        clearInterval(playbackInterval);
+                    }
                 }
             }, 100);
         };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key.toLowerCase() === 'r') {
+                currentIndex = 0; // Jump back to frame 0
+                updateFrame(currentIndex);
+            }
+        });
 
         // 1. Handle Slider Input (User dragging)
         slider.addEventListener('input', (e) => {
@@ -261,10 +564,21 @@
 
         // 2. Handle Play/Pause
         btn.addEventListener('click', () => {
+            // If we finished the timeline and click the button
+            if (currentIndex >= timeline.length - 1) {
+                currentIndex = 0;
+                isPaused = false;
+                btn.innerText = 'Pause';
+                updateFrame(currentIndex);
+                runTimer(); // Re-start the interval
+                return;
+            }
+
+            // Standard toggle
             isPaused = !isPaused;
             btn.innerText = isPaused ? 'Play' : 'Pause';
+            if (!isPaused) runTimer();
         });
-
         // Start initially
         runTimer();
         updateFrame(0);
