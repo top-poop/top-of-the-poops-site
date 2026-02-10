@@ -1,4 +1,5 @@
 plugins {
+    id("com.github.ben-manes.versions") version "0.53.0"
     id("buildsrc.convention.kotlin-jvm")
     id("buildsrc.convention.kotlin-jib")
     application
