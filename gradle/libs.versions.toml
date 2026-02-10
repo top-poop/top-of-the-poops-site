@@ -1,0 +1,94 @@
+[versions]
+caffeine = "3.1.8"
+redis = "6.1.0"
+faster-xml-uuid = "5.0.0"
+forkhandles = "2.4.0.0"
+google-jib = "3.5.1"
+http4k = '6.24.0.0'
+hikari = "5.0.0"
+junit = "5.14.1"
+jsoup = "1.15.4"
+kondor = "3.6.1"
+kotlin = "2.2.20"
+kotlinxCoroutines = "1.10.2"
+kotlinxDatetime = "0.6.2"
+kotlinxSerializationJSON = "1.8.1"
+kotlinxHtml = "0.8.1"
+opentelemetry-bom = "1.56.0"
+opencsv="5.7.1"
+postgres = "42.7.5"
+pretty-time = "5.0.7.Final"
+strikt = "0.35.1"
+slf4j = "2.0.6"
+
+[libraries]
+fasterxml-uuid = { module = "com.fasterxml.uuid:java-uuid-generator", version.ref = "faster-xml-uuid" }
+
+google-jib = { module = "com.google.cloud.tools:jib-gradle-plugin", version.ref = "google-jib" }
+
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = 'caffeine' }
+caffeine-guava = { module = "com.github.ben-manes.caffeine:guava", version.ref = 'caffeine' }
+
+hikari = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
+postgres = { module = "org.postgresql:postgresql", version.ref = "postgres" }
+
+http4k-client-okhttp = { module = "org.http4k:http4k-client-okhttp", version.ref = 'http4k' }
+http4k-config = { module = "org.http4k:http4k-config", version.ref = 'http4k' }
+http4k-core = { module = "org.http4k:http4k-core", version.ref = 'http4k' }
+http4k-format-core = { module = "org.http4k:http4k-format-core", version.ref = 'http4k' }
+http4k-format-jackson = { module = "org.http4k:http4k-format-jackson", version.ref = 'http4k' }
+http4k-ops-opentelemetry = { module = "org.http4k:http4k-ops-opentelemetry", version.ref = 'http4k' }
+http4k-security-oauth = { module = "org.http4k:http4k-security-oauth", version.ref = 'http4k' }
+http4k-server-undertow = { module = "org.http4k:http4k-server-undertow", version.ref = 'http4k' }
+http4k-template-handlebars = { module = "org.http4k:http4k-template-handlebars", version.ref = 'http4k' }
+http4k-testing-strikt = { module = "org.http4k:http4k-testing-strikt", version.ref = 'http4k' }
+http4k-platform-docker = { module = "org.http4k:http4k-platform-docker", version.ref = 'http4k' }
+
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+
+redis = { module = "redis.clients:jedis", version.ref = "redis" }
+
+jsoup = {module = "org.jsoup:jsoup", version.ref="jsoup"}
+
+kondor = { module = "com.ubertob.kondor:kondor-core", version.ref = "kondor" }
+kondor-tools = { module = "com.ubertob.kondor:kondor-tools", version.ref = "kondor" }
+
+kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlinxHtml = { module = "org.jetbrains.kotlinx:kotlinx-html", version.ref = "kotlinxHtml" }
+kotlinxHtmlJvm = { module = "org.jetbrains.kotlinx:kotlinx-html-jvm", version.ref = "kotlinxHtml" }
+
+opencsv = {module = "com.opencsv:opencsv", version.ref="opencsv"}
+
+pretty-time = { module = "org.ocpsoft.prettytime:prettytime", version.ref = "pretty-time" }
+
+result4k = { module = "dev.forkhandles:result4k", version.ref = "forkhandles" }
+
+strikt-core = { module = "io.strikt:strikt-core", version.ref = "strikt" }
+slf4j-nop = { module = "org.slf4j:slf4j-nop", version.ref="slf4j" }
+
+time4k = { module = "dev.forkhandles:time4k", version.ref = "forkhandles" }
+values4k = { module = "dev.forkhandles:values4k", version.ref = "forkhandles" }
+
+
+[bundles]
+http4k = ["http4k-core", "http4k-config", "http4k-format-core", "http4k-format-jackson", "http4k-ops-opentelemetry", "http4k-platform-docker"]
+http4k-server = ["http4k-server-undertow"]
+http4k-client = ["http4k-client-okhttp"]
+http4k-frontend = ["http4k-template-handlebars", "http4k-security-oauth"]
+
+database= ["hikari", "postgres"]
+
+caffeine = ["caffeine", "caffeine-guava"]
+
+kotlinxHtml = ["kotlinxHtml", "kotlinxHtmlJvm"]
+
+forkhandles = ["result4k", "values4k", "time4k"]
+
+testing = ["junit-jupiter-api", "junit-jupiter-params", "strikt-core", "http4k-testing-strikt"]
+
+[plugins]
+kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

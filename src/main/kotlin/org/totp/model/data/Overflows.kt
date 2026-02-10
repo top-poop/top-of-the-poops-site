@@ -27,10 +27,10 @@ data class CSO(
 )
 
 data class LiveDataCSO(
-    @JsonProperty("p") val site: String,
-    @JsonProperty("cid") val permit: String,
-    @JsonProperty("d") val date: LocalDate,
-    @JsonProperty("a") val category: String,
+    @param:JsonProperty("p") val site: String,
+    @param:JsonProperty("cid") val permit: String,
+    @param:JsonProperty("d") val date: LocalDate,
+    @param:JsonProperty("a") val category: String,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
