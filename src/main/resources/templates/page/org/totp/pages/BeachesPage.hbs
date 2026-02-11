@@ -138,6 +138,11 @@
         Array.from(document.getElementsByClassName("mobile-only")).forEach(it => it.remove())
     }
 
+    const formatNumber = (n, m) => n.toLocaleString(undefined, {
+        minimumFractionDigits: m ? m : 0,
+        maximumFractionDigits: m ? m : 0
+    });
+
     const toKebabCase = str =>
             str &&
             str
@@ -182,7 +187,7 @@
                     mixBlendMode: "multiply",
                     radius: 10,
                 })
-                        .bindTooltip(`${it.bathing} - ${it.total_spill_hours} hours`)
+                        .bindTooltip(`${it.bathing} - ${formatNumber(it.total_spill_hours, 2)} hours`)
                         .on("dblclick", e => navigateToBathing(it.bathing))
         )
 
