@@ -50,6 +50,6 @@ class PlacePageHandlerTest {
 
     @Test
     fun `renders a place`() {
-        val html = Html(service(Request.Companion(Method.GET, "/york").header("host", "bob.com")))
+        val html = Html(service(Request(Method.GET, "/york").header("host", "bob.com")))
     }
 }

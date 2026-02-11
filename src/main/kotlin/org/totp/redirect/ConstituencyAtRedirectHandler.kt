@@ -23,8 +23,8 @@ class ConstituencyAtRedirectHandler(val referenceData: ReferenceData) : HttpHand
             ?.let { slug ->
                 val uri = live(request)?.let { Uri.of("/constituency/$slug/live") } ?: Uri.of("/constituency/$slug")
 
-                Response.Companion(Status.TEMPORARY_REDIRECT).with(Header.LOCATION of uri)
+                Response(Status.TEMPORARY_REDIRECT).with(Header.LOCATION of uri)
             }
-            ?: Response.Companion(Status.NOT_FOUND)
+            ?: Response(Status.NOT_FOUND)
     }
 }

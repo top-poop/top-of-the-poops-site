@@ -37,7 +37,7 @@ object BadgesPlacesHandler {
                 it.placeName.value.lowercase().startsWith(startLetter)
             }
 
-            Response.Companion(Status.OK)
+            Response(Status.OK)
                 .with(
                     viewLens of BadgesLocalitiesPage(
                         pageUriFrom(request),
