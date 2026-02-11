@@ -1,7 +1,7 @@
 package org.totp.db
 
 import org.totp.model.data.ConstituencyName
-import org.totp.model.data.LocalityName
+import org.totp.model.data.PlaceName
 
 class EDM(private val connection: WithConnection) {
 
@@ -13,16 +13,16 @@ class EDM(private val connection: WithConnection) {
         val spills: Double
     )
 
-    data class LocalityAnnualSummary(
-        val locality: LocalityName,
+    data class PlaceAnnualSummary(
+        val placeName: PlaceName,
         val year: Int,
         val hours: Double,
         val spills: Double
     )
 
     fun annualSummariesForLocality(
-        localityName: LocalityName,
-    ): List<LocalityAnnualSummary> {
+        placeName: PlaceName,
+    ): List<PlaceAnnualSummary> {
         return connection.execute(NamedQueryBlock.block("locality-annual-summary") {
             query(
                 sql = """
@@ -40,11 +40,11 @@ group by reporting_year, name1_text
 order by name1_text, reporting_year
                 """.trimIndent(),
                 bind = {
-                    it.set(1, localityName)
+                    it.set(1, placeName)
                 },
                 mapper = {
-                    LocalityAnnualSummary(
-                        locality = localityName,
+                    PlaceAnnualSummary(
+                        placeName = placeName,
                         year = it.getInt("reporting_year"),
                         hours = it.getDouble("total_hours"),
                         spills = it.getDouble("total_spills"),

@@ -7,35 +7,35 @@ import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.GeoJSON
-import org.totp.model.data.LocalityName
+import org.totp.model.data.PlaceName
 import java.time.Duration
 
 
-class BadgesLocalitiesHandlerTest {
+class BadgesPlacesHandlerTest {
 
-    val a = LocalityName("a")
-    val b = LocalityName("b")
+    val a = PlaceName("a")
+    val b = PlaceName("b")
 
 
     val service = routes(
-        "/{letter}" bind Method.GET to BadgesLocalitiesHandler(
+        "/{letter}" bind Method.GET to BadgesPlacesHandler(
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
-            localityRankings = {
+            placeRankings = {
                 listOf(
-                    LocalityRank(
+                    PlaceRank(
                         rank = 1,
                         csoCount = 10,
-                        localityName = a,
+                        placeName = a,
                         overflowCount = 100,
                         duration = Duration.ofHours(1),
                         countDelta = 25,
                         durationDelta = Duration.ofHours(10),
                         zeroMonitoringCount = 1,
                     ),
-                    LocalityRank(
+                    PlaceRank(
                         rank = 2,
                         csoCount = 20,
-                        localityName = b,
+                        placeName = b,
                         overflowCount = 2,
                         duration = Duration.ofHours(2),
                         countDelta = 50,
@@ -44,7 +44,7 @@ class BadgesLocalitiesHandlerTest {
                     )
                 )
             },
-            localityBoundaries = {
+            placeBoundaries = {
                 GeoJSON.of("{}")
             }
         )

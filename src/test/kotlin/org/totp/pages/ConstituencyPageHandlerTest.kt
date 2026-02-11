@@ -31,7 +31,7 @@ class ConstituencyPageHandlerTest {
     var summaries = listOf(
         CSOTotals(
             constituency = ConstituencyName("Your House"),
-            localities = listOf(LocalityName.of("v")),
+            places = listOf(PlaceName.of("v")),
             cso = CSO(
                 company = CompanyName.of("Venture Cap"),
                 sitename = "Your House",

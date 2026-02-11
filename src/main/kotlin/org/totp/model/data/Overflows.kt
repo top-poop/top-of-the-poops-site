@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 data class CSOTotals(
     val constituency: ConstituencyName,
-    val localities: List<LocalityName>,
+    val places: List<PlaceName>,
     val cso: CSO,
     val count: Int,
     val duration: Duration,
@@ -51,7 +51,7 @@ object ConstituencyBoundaries {
 }
 
 object LocalityBoundaries {
-    operator fun invoke(handler: (String) -> GeoJSON?): (LocalityName) -> GeoJSON {
+    operator fun invoke(handler: (String) -> GeoJSON?): (PlaceName) -> GeoJSON {
         return { name ->
             handler(name.toSlug().value) ?: throw IOException("can't find locality boundary for $name")
         }
@@ -107,15 +107,15 @@ object ConstituencyRankings {
 }
 
 object LocalityRankings {
-    operator fun invoke(handler: HttpHandler): () -> List<LocalityRank> {
+    operator fun invoke(handler: HttpHandler): () -> List<PlaceRank> {
         return {
             val response = handler(Request(Method.GET, "spills-by-locality.json"))
 
             TotpJson.mapper.readSimpleList(response.bodyString())
                 .mapIndexed { r, it ->
-                    LocalityRank(
+                    PlaceRank(
                         rank = r + 1,
-                        localityName = LocalityName(it["locality"] as String),
+                        placeName = PlaceName(it["locality"] as String),
                         overflowCount = (it["total_spills"] as Double).toInt(),
                         zeroMonitoringCount = (it["monitoring_zero_count"] as Int),
                         duration = fromEDMHours((it["total_hours"] as Double)),
@@ -234,7 +234,7 @@ object AllSpills {
                 .map {
                     CSOTotals(
                         constituency = ConstituencyName(it["constituency"] as String),
-                        localities = (it["localities"] as List<String>).map { LocalityName.of(it) },
+                        places = (it["localities"] as List<String>).map { PlaceName.of(it) },
                         cso = CSO(
                             company = CompanyName.of(it["company_name"] as String),
                             sitename = it["site_name"] as String,
@@ -257,7 +257,7 @@ object AllSpills {
 fun constituencyCSOs(source: () -> List<CSOTotals>) =
     { name: ConstituencyName -> source().filter { it.constituency == name } }
 
-fun localityCSOs(source: () -> List<CSOTotals>) = { name: LocalityName -> source().filter { name in it.localities } }
+fun placeCSOs(source: () -> List<CSOTotals>) = { name: PlaceName -> source().filter { name in it.places } }
 
 
 fun waterwayCSOs(source: () -> List<CSOTotals>) =
@@ -280,10 +280,10 @@ fun constituencyRivers(csos: () -> List<CSOTotals>, rivers: () -> List<RiverRank
         .sortedBy { it.rank }
 }
 
-fun localityRivers(csos: () -> List<CSOTotals>, rivers: () -> List<RiverRank>) = { name: LocalityName ->
+fun placeRivers(csos: () -> List<CSOTotals>, rivers: () -> List<RiverRank>) = { name: PlaceName ->
     val waterways = csos()
         .asSequence()
-        .filter { name in it.localities }
+        .filter { name in it.places }
         .map { it.cso.company to it.cso.waterway }
         .toSet()
 

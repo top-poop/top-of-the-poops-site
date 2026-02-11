@@ -15,22 +15,6 @@ class ConstituencyLivePageHandlerTest {
 
     val clock = Clock.systemUTC()
 
-    var summaries = listOf(
-        CSOTotals(
-            constituency = ConstituencyName("Your House"),
-            localities = listOf(LocalityName.of("b")),
-            cso = CSO(
-                company = CompanyName.of("Venture Cap"),
-                sitename = "Your House",
-                waterway = WaterwayName("Your River"),
-                location = Coordinates(lon = -0.12460789, lat = 51.49993385),
-            ),
-            count = 100,
-            duration = Duration.ofHours(100),
-            reporting = 0.0f
-        )
-    )
-
     val service = routes(
         "/{constituency}" bind Method.GET to ConstituencyLivePageHandler(
             clock = clock,

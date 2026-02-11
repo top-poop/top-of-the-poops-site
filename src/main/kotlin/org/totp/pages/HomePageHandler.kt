@@ -22,9 +22,9 @@ data class ConstituencyRank(
     val durationDelta: Duration,
 )
 
-data class LocalityRank(
+data class PlaceRank(
     val rank: Int,
-    val localityName: LocalityName,
+    val placeName: PlaceName,
     val overflowCount: Int,
     val zeroMonitoringCount: Int,
     val duration: Duration,

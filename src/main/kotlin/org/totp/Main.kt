@@ -110,9 +110,9 @@ class EDMAnnualConstituencySummary(val edm: EDM) : HttpHandler {
 }
 
 class EDMAnnualLocalitySummary(val edm: EDM) : HttpHandler {
-    val data = TotpJson.autoBody<List<EDM.LocalityAnnualSummary>>().toLens()
+    val data = TotpJson.autoBody<List<EDM.PlaceAnnualSummary>>().toLens()
     val locality = Path.value(Slug).of("locality")
-    override fun invoke(request: Request): Response = slugToLocality[locality(request)]
+    override fun invoke(request: Request): Response = slugToPlace[locality(request)]
         ?.let(edm::annualSummariesForLocality)
         ?.let {
             Response(Status.OK).with(data of it)
@@ -209,8 +209,8 @@ fun main() {
         constituencyRankings().firstOrNull { it.constituencyName == wanted }
     }
 
-    val localityRank = { wanted: LocalityName ->
-        localityRankings().firstOrNull { it.localityName == wanted }
+    val localityRank = { wanted: PlaceName ->
+        localityRankings().firstOrNull { it.placeName == wanted }
     }
 
     val thamesWater = ThamesWater(connection)
@@ -260,7 +260,7 @@ fun main() {
                             constituencyRankings = constituencyRankings,
                             mpFor = mpFor,
                         ),
-                        "/places" bind LocalitiesPageHandler(
+                        "/places" bind PlacesPageHandler(
                             renderer = renderer,
                             areaRankings = localityRankings,
                         ),
@@ -285,7 +285,7 @@ fun main() {
                             waterwaySpills = waterwayCSOs(allSpills),
                             mpFor = mpFor,
                             constituencyRank = constituencyRank,
-                            localityRank = localityRank,
+                            placeRank = localityRank,
                         ),
                         "/constituency/{constituency}" bind ConstituencyPageHandler(
                             clock = clock,
@@ -328,12 +328,12 @@ fun main() {
                             },
                         ),
                         "/locality/{locality}" bind LocalityPlaceRedirectHandler(),
-                        "/place/{locality}" bind LocalityPageHandler(
+                        "/place/{place}" bind PlacePageHandler(
                             renderer = renderer,
-                            localityTotals = localityCSOs(allSpills),
-                            localityBoundary = localityBoundaries,
-                            localityRank = localityRank,
-                            localityRivers = localityRivers(allSpills, riverRankings),
+                            placeTotals = placeCSOs(allSpills),
+                            placeBoundary = localityBoundaries,
+                            placeRank = localityRank,
+                            placeRivers = placeRivers(allSpills, riverRankings),
                         ),
                         "/shellfisheries" bind ShellfisheriesPageHandler(
                             renderer = renderer, shellfishRankings = shellfishRankings
@@ -355,10 +355,10 @@ fun main() {
                                 mpFor = mpFor,
                                 constituencyBoundaries = constituencyBoundaries,
                             ),
-                            "/localities/{letter}" bind BadgesLocalitiesHandler(
+                            "/localities/{letter}" bind BadgesPlacesHandler(
                                 renderer = renderer,
-                                localityRankings = localityRankings,
-                                localityBoundaries = localityBoundaries,
+                                placeRankings = localityRankings,
+                                placeBoundaries = localityBoundaries,
                             ),
                             "/companies" bind BadgesCompaniesHandler(
                                 renderer = renderer,
@@ -422,7 +422,7 @@ fun main() {
                     constituencies = constituencyRankings,
                     riverRankings = riverRankings,
                     beachRankings = beachRankings,
-                    localityRankings = localityRankings,
+                    placeRankings = localityRankings,
                 )
             ),
             "/data" bind static(ResourceLoader.Directory("services/data/datafiles")),

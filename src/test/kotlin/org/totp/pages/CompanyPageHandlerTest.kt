@@ -24,7 +24,7 @@ class CompanyPageHandlerTest {
     var summaries = listOf(
         CSOTotals(
             constituency = ConstituencyName("Water Co"),
-            localities = listOf(LocalityName.of("a")),
+            places = listOf(PlaceName.of("a")),
             cso = CSO(
                 company = CompanyName.of("Water Co"),
                 sitename = "Your House",

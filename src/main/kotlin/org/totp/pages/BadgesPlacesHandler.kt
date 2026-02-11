@@ -8,7 +8,7 @@ import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.GeoJSON
-import org.totp.model.data.LocalityName
+import org.totp.model.data.PlaceName
 import org.totp.model.data.Slug
 import org.totp.model.data.toSlug
 
@@ -16,16 +16,16 @@ import org.totp.model.data.toSlug
 class BadgesLocalitiesPage(
     uri: Uri,
     val year: Int,
-    val localities: List<RenderableLocalityRank>,
+    val places: List<RenderablePlaceRank>,
     val boundaries: List<Pair<Slug, GeoJSON>>,
 ) : PageViewModel(uri)
 
 
-object BadgesLocalitiesHandler {
+object BadgesPlacesHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
-        localityRankings: () -> List<LocalityRank>,
-        localityBoundaries: (LocalityName) -> GeoJSON,
+        placeRankings: () -> List<PlaceRank>,
+        placeBoundaries: (PlaceName) -> GeoJSON,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -33,8 +33,8 @@ object BadgesLocalitiesHandler {
 
         return { request ->
             val startLetter = letter(request)
-            val rankings = localityRankings().filter {
-                it.localityName.value.lowercase().startsWith(startLetter)
+            val rankings = placeRankings().filter {
+                it.placeName.value.lowercase().startsWith(startLetter)
             }
 
             Response.Companion(Status.OK)
@@ -42,11 +42,11 @@ object BadgesLocalitiesHandler {
                     viewLens of BadgesLocalitiesPage(
                         pageUriFrom(request),
                         THE_YEAR,
-                        rankings.sortedBy { it.localityName }.map {
+                        rankings.sortedBy { it.placeName }.map {
                             it.toRenderable(false)
                         },
                         rankings.map {
-                            it.localityName.toSlug() to localityBoundaries(it.localityName)
+                            it.placeName.toSlug() to placeBoundaries(it.placeName)
                         }
                     )
                 )

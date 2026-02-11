@@ -15,71 +15,71 @@ import java.text.NumberFormat
 import kotlin.collections.take
 
 
-val localityNames = readCSV(
+val placeNames = readCSV(
     resource = "/data/localities.csv",
-    mapper = { LocalityName(it[0]) }
+    mapper = { PlaceName(it[0]) }
 ).toSortedSet(Comparator.comparing { it.value })
 
 
-val slugToLocality = localityNames.associateBy { it.toSlug() }
+val slugToPlace = placeNames.associateBy { it.toSlug() }
 
-class LocalityPage(
+class PlacePage(
     uri: Uri,
-    val locality: RenderableLocality,
-    val localities: List<RenderableLocality>,
+    val place: RenderablePlace,
+    val places: List<RenderablePlace>,
     val share: SocialShare,
     val summary: PollutionSummary,
     val geojson: GeoJSON,
     val csos: List<RenderableCSOTotal>,
-    val neighbours: List<RenderableLocality>,
+    val neighbours: List<RenderablePlace>,
     val rivers: List<RenderableRiverRank>
 ) :
     PageViewModel(uri)
 
 
-object LocalityPageHandler {
+object PlacePageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
-        localityTotals: (LocalityName) -> List<CSOTotals>,
-        localityBoundary: (LocalityName) -> GeoJSON,
-        localityRank: (LocalityName) -> LocalityRank?,
-        localityRivers: (LocalityName) -> List<RiverRank>
+        placeTotals: (PlaceName) -> List<CSOTotals>,
+        placeBoundary: (PlaceName) -> GeoJSON,
+        placeRank: (PlaceName) -> PlaceRank?,
+        placeRivers: (PlaceName) -> List<RiverRank>
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
         val slug: PathLens<Slug> =
-            Path.value(Slug).of("locality", "The locality")
+            Path.value(Slug).of("place", "The place")
 
 
         return { request: Request ->
             val slug = slug(request)
 
-            val localities = slugToLocality.map {
+            val places = slugToPlace.map {
                 it.value.toRenderable(
                     current = it.key == slug
                 )
             }
 
-            slugToLocality[slug]?.let { localityName ->
+            slugToPlace[slug]?.let { placeName ->
 
-                val list = localityTotals(localityName).sortedByDescending { it.duration }
+                val list = placeTotals(placeName).sortedByDescending { it.duration }
 
                 val summary = list.summary()
 
                 Response(Status.OK)
                     .with(
-                        viewLens of LocalityPage(
+                        viewLens of PlacePage(
                             pageUriFrom(request).removeQuery(),
-                            locality = localityName.toRenderable(current = true),
-                            localities = localities,
-                            share = share(summary, localityName, slug, pageUriFrom(request)),
+                            place = placeName.toRenderable(current = true),
+                            places = places,
+                            share = share(summary, placeName, slug, pageUriFrom(request)),
                             summary = summary,
-                            geojson = localityBoundary(localityName),
+                            geojson = placeBoundary(placeName),
                             list.map {
                                 it.toRenderable()
                             },
                             emptyList(),
-                            rivers = localityRivers(localityName).take(5).map { it.toRenderable() },
+                            rivers = placeRivers(placeName).take(5).map { it.toRenderable() },
                         )
                     )
             }
@@ -89,7 +89,7 @@ object LocalityPageHandler {
 
     private fun share(
         summary: PollutionSummary,
-        localityName: LocalityName,
+        placeName: PlaceName,
         slug: Slug,
         uri: Uri
     ): SocialShare {
@@ -99,7 +99,7 @@ object LocalityPageHandler {
 
         return SocialShare(
             uri,
-            text = "$localityName had $formatted hours of sewage pollution in ${summary.year}",
+            text = "$placeName had $formatted hours of sewage pollution in ${summary.year}",
             tags = listOf("sewage"),
             via = "sewageuk",
             twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/locality/${slug}-2024.png")

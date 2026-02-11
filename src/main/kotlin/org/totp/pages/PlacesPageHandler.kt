@@ -9,28 +9,28 @@ import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.TotpHandlebars
-import org.totp.model.data.LocalityName
+import org.totp.model.data.PlaceName
 import org.totp.model.data.Slug
 import org.totp.model.data.toSlug
 import java.time.Duration
 
-class LocalitiesPage(
+class PlacesPage(
     uri: Uri,
     var year: Int,
-    val localityTableRows: String
+    val placeTableRows: String
 ) : PageViewModel(uri)
 
-data class RenderableLocality(
-    val name: LocalityName,
+data class RenderablePlace(
+    val name: PlaceName,
     val current: Boolean,
     val slug: Slug,
     val uri: Uri,
     val live: Boolean,
 )
 
-class RenderableLocalityRank(
+class RenderablePlaceRank(
     val rank: Int,
-    val locality: RenderableLocality,
+    val place: RenderablePlace,
     val overflowCount: RenderableCount,
     val zeroMonitoringCount: Int,
     val duration: RenderableDuration,
@@ -60,7 +60,7 @@ class RenderableLocalityRank(
     fun sewage(): Boolean = duration.value > Duration.ZERO
 }
 
-fun tableRows(items: List<RenderableLocalityRank>): String {
+fun tableRows(items: List<RenderablePlaceRank>): String {
     val nf = TotpHandlebars.numberFormat()
 
     return createHTML().tbody {
@@ -68,7 +68,7 @@ fun tableRows(items: List<RenderableLocalityRank>): String {
             tr {
                 td(classes = "align-middle") { +"${r.rank}" }
                 td(classes = "align-middle") {
-                    a("${r.locality.uri}") { +"${r.locality.name}" }
+                    a("${r.place.uri}") { +"${r.place.name}" }
                 }
                 td(classes = "align-middle") { +nf(r.overflowCount.count) }
                 td(classes = "align-middle") {
@@ -86,10 +86,10 @@ fun tableRows(items: List<RenderableLocalityRank>): String {
     }
 }
 
-object LocalitiesPageHandler {
+object PlacesPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
-        areaRankings: () -> List<LocalityRank>,
+        areaRankings: () -> List<PlaceRank>,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -97,10 +97,10 @@ object LocalitiesPageHandler {
 
             Response(Status.OK)
                 .with(
-                    viewLens of LocalitiesPage(
+                    viewLens of PlacesPage(
                         pageUriFrom(request),
                         year = THE_YEAR,
-                        localityTableRows = tableRows(
+                        placeTableRows = tableRows(
                             areaRankings().sortedBy { it.rank }.map {
                                 it.toRenderable()
                             }
@@ -111,11 +111,11 @@ object LocalitiesPageHandler {
     }
 }
 
-fun LocalityRank.toRenderable(current: Boolean = false): RenderableLocalityRank {
-    val name = this.localityName
-    return RenderableLocalityRank(
+fun PlaceRank.toRenderable(current: Boolean = false): RenderablePlaceRank {
+    val name = this.placeName
+    return RenderablePlaceRank(
         rank,
-        locality = name.toRenderable(current),
+        place = name.toRenderable(current),
         overflowCount = RenderableCount(overflowCount),
         zeroMonitoringCount = zeroMonitoringCount,
         duration = duration.toRenderable(),
@@ -125,10 +125,10 @@ fun LocalityRank.toRenderable(current: Boolean = false): RenderableLocalityRank 
     )
 }
 
-fun LocalityName.toRenderable(current: Boolean = false): RenderableLocality {
+fun PlaceName.toRenderable(current: Boolean = false): RenderablePlace {
     val slug = toSlug()
 
-    return RenderableLocality(
+    return RenderablePlace(
         this,
         current,
         slug,

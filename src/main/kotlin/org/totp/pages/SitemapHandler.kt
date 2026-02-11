@@ -54,7 +54,7 @@ object SitemapUris {
         constituencies: () -> List<ConstituencyRank>,
         riverRankings: () -> List<RiverRank>,
         beachRankings: () -> List<BathingRank>,
-        localityRankings: () -> List<LocalityRank>,
+        placeRankings: () -> List<PlaceRank>,
     ): () -> List<Uri> {
         return {
             listOf(
@@ -73,8 +73,8 @@ object SitemapUris {
                     )
                 }
             ).plus(
-                localityRankings().map {
-                    it.localityName.toRenderable().uri
+                placeRankings().map {
+                    it.placeName.toRenderable().uri
                 }
             )
                 .plus(

@@ -20,7 +20,7 @@ class WaterwayPage(
     val share: SocialShare,
     val summary: PollutionSummary,
     val constituencies: List<RenderableConstituencyRank>,
-    val localities: List<RenderableLocalityRank>,
+    val places: List<RenderablePlaceRank>,
     val csos: List<RenderableCSOTotal>,
 ) :
     PageViewModel(uri)
@@ -40,7 +40,7 @@ object WaterwayPageHandler {
         waterwaySpills: (WaterwaySlug, Slug) -> List<CSOTotals>,
         mpFor: (ConstituencyName) -> MP,
         constituencyRank: (ConstituencyName) -> ConstituencyRank?,
-        localityRank: (LocalityName) -> LocalityRank?,
+        placeRank: (PlaceName) -> PlaceRank?,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -65,10 +65,10 @@ object WaterwayPageHandler {
                     .mapNotNull { constituencyRank(it) }
                     .map { it.toRenderable(mpFor) }
 
-                val localities = spills.flatMap { it.localities }
+                val localities = spills.flatMap { it.places }
                     .toSet()
                     .sorted()
-                    .mapNotNull { localityRank(it) }
+                    .mapNotNull { placeRank(it) }
                     .map { it.toRenderable() }
 
                 val summary = spills.summary()
@@ -86,7 +86,7 @@ object WaterwayPageHandler {
                             ),
                             summary = summary,
                             constituencies = constituencies,
-                            localities = localities,
+                            places = localities,
                             csos = spills
                                 .sortedByDescending { it.duration }
                                 .map {

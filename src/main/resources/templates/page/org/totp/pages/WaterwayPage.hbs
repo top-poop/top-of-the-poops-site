@@ -91,10 +91,10 @@
                         <div class="card-header">Places along {{name}}</div>
                         <div class="card-body">
                             <div class="card-text">
-                                {{#each localities}}
-                                    <a href="{{this.locality.uri}}">
+                                {{#each places}}
+                                    <a href="{{this.place.uri}}">
                                         <button class="btn btn-primary mb-2">
-                                            {{this.locality.name}}
+                                            {{this.place.name}}
                                             <span class="badge bg-dark ms-1">{{numberFormat this.overflowCount.count}}</span>
                                         </button>
                                     </a>

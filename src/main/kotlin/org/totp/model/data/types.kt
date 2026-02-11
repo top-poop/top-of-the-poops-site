@@ -17,8 +17,8 @@ class ConstituencyName(value: String) : StringValue(value), ComparableValue<Cons
     companion object : StringValueFactory<ConstituencyName>(::ConstituencyName)
 }
 
-class LocalityName(value: String) : StringValue(value), ComparableValue<LocalityName, String> {
-    companion object : StringValueFactory<LocalityName>(::LocalityName)
+class PlaceName(value: String) : StringValue(value), ComparableValue<PlaceName, String> {
+    companion object : StringValueFactory<PlaceName>(::PlaceName)
 }
 
 class Slug(value: String) : StringValue(value),  ComparableValue<Slug, String> {

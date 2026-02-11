@@ -18,7 +18,7 @@ class WaterwayPageHandlerTest {
     var summaries = listOf(
         CSOTotals(
             constituency = ConstituencyName("Your House"),
-            localities = listOf(LocalityName.of("d")),
+            places = listOf(PlaceName.of("d")),
             cso = CSO(
                 company = CompanyName.of("Venture Cap"),
                 sitename = "Your House",
@@ -46,7 +46,7 @@ class WaterwayPageHandlerTest {
                     Duration.ZERO
                 )
             },
-            localityRank = { _ -> null }
+            placeRank = { _ -> null }
         )
     )
 
