@@ -11,7 +11,6 @@ import org.http4k.events.then
 import org.http4k.filter.*
 import org.http4k.filter.ClientFilters.SetBaseUriFrom
 import org.http4k.lens.*
-import org.http4k.lens.Header.LOCATION
 import org.http4k.routing.ResourceLoader
 import org.http4k.routing.bind
 import org.http4k.routing.routes
@@ -25,6 +24,9 @@ import org.totp.http4k.StandardFilters
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.*
 import org.totp.pages.*
+import org.totp.redirect.ConstituencyAtRedirectHandler
+import org.totp.redirect.LocalityPlaceRedirectHandler
+import org.totp.redirect.OldMapRedirectHandler
 import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.Protocol
 import redis.clients.jedis.UnifiedJedis
@@ -58,24 +60,6 @@ object Resources {
             ResourceLoader.Directory(resourceBase.resolve("assets").toString())
         } else {
             ResourceLoader.Classpath("/assets")
-        }
-    }
-}
-
-object OldMapRedirectHandler {
-    operator fun invoke(): HttpHandler {
-
-        val constituency = Query.value(ConstituencyName).optional("c")
-
-        return { request ->
-            val selected = constituency(request)
-
-            if (selected != null && constituencyNames.contains(selected)) {
-                val slug = selected.toSlug()
-                Response(Status.TEMPORARY_REDIRECT).with(LOCATION of Uri.of("/constituency/$slug"))
-            } else {
-                Response(Status.TEMPORARY_REDIRECT).with(LOCATION of Uri.of("/constituencies"))
-            }
         }
     }
 }
@@ -118,14 +102,6 @@ class EDMAnnualLocalitySummary(val edm: EDM) : HttpHandler {
             Response(Status.OK).with(data of it)
         }
         ?: Response(Status.NOT_FOUND)
-}
-
-class LocalityPlaceRedirectHandler(): HttpHandler {
-    val locality = Path.value(Slug).of("locality")
-    override fun invoke(request: Request): Response {
-        val l = locality(request)
-        return Response(Status.PERMANENT_REDIRECT).with(LOCATION of Uri.of("/place/${l.value}"))
-    }
 }
 
 fun main() {
@@ -287,6 +263,8 @@ fun main() {
                             constituencyRank = constituencyRank,
                             placeRank = localityRank,
                         ),
+                        "/constituency/at/{lat}/{lon}" bind CachingFilters.CacheResponse.MaxAge(Duration.ofDays(1))
+                            .then(ConstituencyAtRedirectHandler(referenceData)),
                         "/constituency/{constituency}" bind ConstituencyPageHandler(
                             clock = clock,
                             renderer = renderer,

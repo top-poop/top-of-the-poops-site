@@ -5,7 +5,52 @@ import org.totp.db.NamedQueryBlock.Companion.block
 import org.totp.model.data.ConstituencyName
 import org.totp.pages.MP
 
+data class GeoLocation(val lat: Double, val lon: Double)
+
 class ReferenceData(private val connection: WithConnection) {
+
+    fun constituencyAt(location: GeoLocation): ConstituencyName? {
+        return connection.execute(block("find-constituency-within") {
+            query(
+                sql = """
+WITH input AS (SELECT ST_SetSRID(ST_MakePoint(? /* lon */, ? /* lat */), 4326) AS pt)
+SELECT p.*
+FROM pcon_july_2024_uk_bfc p,
+     input i
+WHERE ST_Intersects(p.wkb_geometry, i.pt)
+LIMIT 1;                
+            """.trimIndent(),
+                bind = {
+                    it.setDouble(1, location.lon)
+                    it.setDouble(2, location.lat)
+                },
+                mapper = { row ->
+                    row.get(ConstituencyName, "pcon24nm")
+                },
+                )
+        }).firstOrNull()
+    }
+
+    fun constituencyNear(location: GeoLocation): ConstituencyName? {
+        return connection.execute(block("find-constituency-nearest") {
+            query(
+                sql = """
+WITH input AS (SELECT ST_SetSRID(ST_MakePoint(? /* lon */, ? /* lat */), 4326) AS pt)
+SELECT p.*, 1 AS priority
+FROM pcon_july_2024_uk_bfc p, input i
+ORDER BY p.wkb_geometry <-> i.pt
+LIMIT 1;
+            """.trimIndent(),
+                bind = {
+                    it.setDouble(1, location.lon)
+                    it.setDouble(2, location.lat)
+                },
+                mapper = { row ->
+                    row.get(ConstituencyName, "pcon24nm")
+                },
+                )
+        }).firstOrNull()
+    }
 
     fun mps(): List<ConstituencyContact> {
 
