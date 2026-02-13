@@ -20,8 +20,12 @@ export function bbox(geojson) {
 
     const features = geojson.features;
 
+    if ( ! features ) {
+        return undefined;
+    }
+
     if ( features.length === 0) {
-        return undefined
+        return undefined;
     }
 
     return features
