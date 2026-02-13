@@ -86,7 +86,7 @@
                             <div class="form-text mb-1"><i class="bi bi-info-circle me-1"></i>Select the constituency
                                 from the drop-down
                             </div>
-                            <div class="form-text">✔ means we have live data (𝑥 if not) </div>
+                            <div class="form-text">✔ means we have live data (𝑥 if not)</div>
                         </div>
                     </form>
                 </div>
@@ -111,7 +111,10 @@
 
 {{> chunks/footer }}
 
-<script>
+<script type="module">
+
+    import * as maps from '/assets/js/map-common.js';
+
     const myStyle = {
         "color": "#ff7800",
         "weight": 5,
@@ -125,10 +128,11 @@
         maxZoom: 18,
     });
 
-    var gl = L.maplibreGL({
-        style: 'https://top-of-the-poops.org/tiles/styles/v2/style.json',
+    const gl = L.maplibreGL({
+        style: maps.STYLE_URI,
         attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
     }).addTo(map);
+
     const layer = L.geoJSON(JSON.parse(document.getElementById("map-geojson").textContent), {style: myStyle});
     layer.addTo(map);
     map.fitBounds(layer.getBounds());

@@ -287,7 +287,9 @@
 
 {{> chunks/footer }}
 
-<script>
+<script type="module">
+
+    import * as maps from '/assets/js/map-common.js';
 
     const formatNumber = (n, m) => n.toLocaleString(undefined, {
         minimumFractionDigits: m ? m : 0,
@@ -308,7 +310,7 @@
     });
 
     var gl = L.maplibreGL({
-        style: 'https://top-of-the-poops.org/tiles/styles/v2/style.json',
+        style: maps.STYLE_URI,
         attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
     }).addTo(map);
     const layer = L.geoJSON(JSON.parse(document.getElementById("map-geojson").textContent), {style: myStyle});

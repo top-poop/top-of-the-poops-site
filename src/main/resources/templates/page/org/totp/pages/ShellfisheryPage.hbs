@@ -235,7 +235,11 @@
 </div>
 
 {{> chunks/footer }}
-<script>
+
+<script type="module">
+
+    import * as maps from '/assets/js/map-common.js';
+
     const myStyle = {
         "color": "#ff7800",
         "weight": 5,
@@ -250,7 +254,7 @@
     });
 
     var gl = L.maplibreGL({
-        style: 'https://top-of-the-poops.org/tiles/styles/v2/style.json',
+        style: maps.STYLE_URI,
         attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
     }).addTo(map);
 
@@ -334,10 +338,7 @@
     }, null)
 
     map.fitBounds(bounds)
-</script>
 
-
-<script>
     new DataTable('#table-csos', {
         pageLength: 10,
         dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +

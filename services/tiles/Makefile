@@ -45,8 +45,16 @@ upgrade:
 	docker service update --with-registry-auth --image $(FULL_NAME) $(SERVICE)
 
 
+MAP_BASE=osm-latest-uk-ireland
+MAP_MBTILES=$(MAP_BASE).mbtiles
+MAP_PMTILES=$(MAP_BASE).pmtiles
+MAP_OSM=$(MAP_BASE).osm.pbf
+
 .PHONY: map
-map: osm-latest-uk-ireland.mbtiles
+map: $(MAP_PMTILES)
+
+clean-map:
+	rm -f $(MAP_MBTILES) $(MAP_OSM) $(MAP_MBTILES).zst $(MAP_PMTILES)
 
 TILEMAKER=downloads/tilemaker
 PMTILES=downloads/pmtiles
@@ -57,12 +65,17 @@ $(OSM_SOURCE):
 	echo Download $@
 	exit 1
 
-osm-latest-uk-ireland.osm.pbf: $(OSM_SOURCE)
-	osmconvert $< -b=-14.68,48.05,6.77,61.14 --complete-ways --complete-multipolygons --complete-boundaries -o=$@
+$(MAP_MBTILES): $(MAP_OSM)
+	java -Xmx48G -jar downloads/planetiler.jar \
+      --download \
+      --osm-path=$< \
+      --output=$@ \
+      --profile=openmaptiles \
+      --zoom-min=0 \
+      --zoom-max=14
 
-# this takes 78GB ram
-%.mbtiles: %.osm.pbf
-	$(TILEMAKER) --input $< --output $@ --process tm-resources/process-openmaptiles.lua --config tm-resources/config-openmaptiles.json
+$(MAP_OSM): $(OSM_SOURCE)
+	time osmium extract -b -14.68,48.05,6.77,61.14 --strategy=complete_ways $< -o $@
 
 %.pmtiles: %.mbtiles
 	$(PMTILES) convert $< $@

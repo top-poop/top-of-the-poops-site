@@ -43,11 +43,20 @@
       "tilejson": {
         "bounds": [-14.68, 48.05, 6.77, 61.14]
       }
+    },
+    "v4": {
+      "style": "v4.json",
+      "tilejson": {
+        "bounds": [-14.68, 48.05, 6.77, 61.14]
+      }
     }
   },
   "data": {
     "v3": {
       "mbtiles": "/data/map/osm-europe_great-britain.mbtiles"
+    },
+    "v4": {
+      "mbtiles": "/data/map/osm-latest-uk-ireland.mbtiles"
     }
   }
 }

@@ -242,7 +242,10 @@
 </div>
 
 {{> chunks/footer }}
-<script>
+<script type="module">
+
+    import * as maps from '/assets/js/map-common.js';
+
     const myStyle = {
         "color": "#ff7800",
         "weight": 5,
@@ -256,9 +259,8 @@
         maxZoom: 18,
     });
 
-
-    var gl = L.maplibreGL({
-        style: 'https://top-of-the-poops.org/tiles/styles/v2/style.json',
+    const gl = L.maplibreGL({
+        style: maps.STYLE_URI,
         attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
     }).addTo(map);
 

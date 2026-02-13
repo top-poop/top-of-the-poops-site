@@ -323,7 +323,9 @@
 
 </script>
 
-<script>
+<script type="module">
+
+    import * as maps from '/assets/js/map-common.js';
 
     const formatNumber = (n, m) => n.toLocaleString(undefined, {
         minimumFractionDigits: m ? m : 0,
@@ -343,11 +345,13 @@
         maxZoom: 18,
     });
 
-    var gl = L.maplibreGL({
-        style: 'https://top-of-the-poops.org/tiles/styles/v2/style.json',
+    const gl = L.maplibreGL({
+        style: maps.STYLE_URI,
         attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
     }).addTo(map);
+
     const layer = L.geoJSON(JSON.parse(document.getElementById("map-geojson").textContent), {style: myStyle});
+
     layer.addTo(map);
     map.fitBounds(layer.getBounds())
 
@@ -432,10 +436,6 @@
         map.fitBounds(bounds, { padding: [12, 15] })
     }
 
-</script>
-
-
-<script>
     new DataTable('#table-csos', {
         pageLength: 10,
         dom: "<'row'<'col-md-8'p><'col-md-4'f>>" +

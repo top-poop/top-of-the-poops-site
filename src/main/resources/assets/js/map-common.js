@@ -12,3 +12,25 @@ export const COMPANY_COLORS = {
     'Dwr Cymru Welsh Water': '#5227af',
     'Default': '#64748b'             // Slate Gray
 };
+
+export const STYLE_URI = 'https://top-of-the-poops.org/tiles/styles/v4/style.json';
+
+
+export function bbox(geojson) {
+
+    const features = geojson.features;
+
+    if ( features.length === 0) {
+        return undefined
+    }
+
+    return features
+        .filter(f => f.geometry?.type === "Point")          // only points
+        .map(f => f.geometry.coordinates)                  // [[lng, lat], ...]
+        .reduce((bbox, [lng, lat]) => [
+            Math.min(bbox[0], lng),
+            Math.min(bbox[1], lat),
+            Math.max(bbox[2], lng),
+            Math.max(bbox[3], lat)
+        ], [Infinity, Infinity, -Infinity, -Infinity]);
+}

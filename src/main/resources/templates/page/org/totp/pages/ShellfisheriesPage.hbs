@@ -90,6 +90,8 @@
 
 <script type="module">
 
+    import * as maps from '/assets/js/map-common.js';
+
     if ( L.Browser.mobile ) {
         Array.from(document.getElementsByClassName("desktop-only")).forEach(it => it.remove())
     }
@@ -123,7 +125,7 @@
     ])
 
     var gl = L.maplibreGL({
-        style: 'https://top-of-the-poops.org/tiles/styles/v2/style.json',
+        style: maps.STYLE_URI,
         attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
     }).addTo(map);
 
