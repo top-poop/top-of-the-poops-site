@@ -14,6 +14,77 @@
             twitterImageUri=share.twitterImageUri
             description=(concat "All the sewage in bathing areas")
     }}
+  <style>
+    /* Desktop: height ~70% of width */
+    .map-wrapper {
+        position: relative;
+        width: 100%;
+        padding-top: 70%;
+    }
+
+    /* Mobile: height ~120% of width */
+    @media (max-width: 768px) {
+        .map-wrapper {
+            padding-top: 120%;
+        }
+    }
+
+    /* Inner map fills wrapper */
+    #map {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .header-overlay {
+        position: absolute;
+        top: 10px;
+        right: 60px; /* Offset for the zoom controls */
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Space between the two boxes */
+        align-items: flex-end; /* Aligns both boxes to the right */
+    }
+
+    .title-box {
+        padding: 10px 20px;
+        border-right: 4px solid #1e3a8a;
+    }
+
+    .header-overlay .overlay-inner {
+        padding: 8px 16px; /* Reduced vertical padding */
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    #storm-title {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #1e3a8a;
+        letter-spacing: -0.5px;
+        text-transform: uppercase;
+    }
+
+    .storm-subtitle {
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .title-overlay .overlay-inner {
+        padding: 10px 20px;
+        text-align: right;
+        border-right: 4px solid #1e3a8a; /* Accent bar matching your counts */
+    }
+  </style>
 </head>
 <body>
 {{> chunks/navbar }}
@@ -26,16 +97,22 @@
 
 <div class="container">
     <div class="row">
-        <div class="col ">
-            <div id="map" class="map">
-                <div style="display:none" data-map-attribution>
-                    &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors <br/>
-                    Contains OS Data &copy; Crown copyright &amp; database right 2021-2024<br/>
-                    &copy; <a href="https://top-of-the-poops.org">Top of the Poops</a> 2021-2024
+        <div class="col-12">
+            <div id="map-wrapper" class="map-wrapper">
+                <div id="map" class="map"  style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                    <div style="display:none" data-map-attribution>
+                        &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors <br/>
+                        Contains OS Data &copy; Crown copyright &amp; database right 2021-2024<br/>
+                        &copy; <a href="https://top-of-the-poops.org">Top of the Poops</a> 2021-2024
+                    </div>
+                </div>
+                <div class="header-overlay">
+                    <div class="overlay-inner title-box">
+                        <h1 id="storm-title">Top Of The Poops</h1>
+                        <div class="storm-subtitle">Beach Sewage</div>
+                    </div>
                 </div>
             </div>
-            <small class="desktop-only">Double click on map to zoom. Double click on beach to see beach page</small>
-            <small class="mobile-only">Use two fingers to move the map. Double-tap on beach to see beach page</small>
         </div>
     </div>
 
@@ -131,6 +208,8 @@
 </script>
 
 <script type="module">
+    import * as utils from '/assets/js/utils.js';
+    import * as maps from '/assets/js/map-common.js';
 
     if (L.Browser.mobile) {
         Array.from(document.getElementsByClassName("desktop-only")).forEach(it => it.remove())
@@ -138,74 +217,191 @@
         Array.from(document.getElementsByClassName("mobile-only")).forEach(it => it.remove())
     }
 
-    const formatNumber = (n, m) => n.toLocaleString(undefined, {
-        minimumFractionDigits: m ? m : 0,
-        maximumFractionDigits: m ? m : 0
-    });
-
-    const toKebabCase = str =>
-            str &&
-            str
-                    .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
-                    .map(x => x.toLowerCase())
-                    .join('-');
-
     const myStyle = {
         "color": "#ff7800",
         "weight": 5,
         "opacity": 0.65
     };
 
-    const map = L.map("map", {
-        scrollWheelZoom: false,
-        dragging: !L.Browser.mobile,
-        tap: !L.Browser.mobile,
+    function bbox(geojson) {
+
+        const features = geojson.features;
+
+        if ( features.length === 0) {
+            return undefined
+        }
+
+        return features
+                .filter(f => f.geometry?.type === "Point")          // only points
+                .map(f => f.geometry.coordinates)                  // [[lng, lat], ...]
+                .reduce((bbox, [lng, lat]) => [
+                    Math.min(bbox[0], lng),
+                    Math.min(bbox[1], lat),
+                    Math.max(bbox[2], lng),
+                    Math.max(bbox[3], lat)
+                ], [Infinity, Infinity, -Infinity, -Infinity]);
+    }
+
+    function transformBeachesToGeoJSON(data) {
+        return {
+            type: "FeatureCollection",
+            features: data.map(item => {
+                return {
+                    type: "Feature",
+                    geometry: {type: "Point", coordinates: [item.lon, item.lat]},
+                    properties: {
+                        duration: item.total_spill_hours,
+                        name: item.bathing,
+                        company: item.company_name,
+                    }
+                };
+            })
+        };
+    }
+
+    const map = new maplibregl.Map({
+        container: 'map',
+        style: 'https://top-of-the-poops.org/tiles/styles/v3/style.json',
+        zoom: 6,
         maxZoom: 18,
     });
 
-    map.fitBounds([
-        [54.00366, -2.547855],
-        [54.00366, -2.547855]
-    ])
+    map.addControl(new maplibregl.AttributionControl({
+        compact: true,
+        customAttribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
+    }), 'bottom-right');
 
-    var gl = L.maplibreGL({
-        style: 'https://top-of-the-poops.org/tiles/styles/v2/style.json',
-        attribution: document.getElementById("map").querySelector("[data-map-attribution]").innerHTML
-    }).addTo(map);
+    map.scrollZoom.disable();
+
+    if (L.Browser.mobile) {
+        map.dragPan.enable()
+    }
+
+    const nav = new maplibregl.NavigationControl({
+        showCompass: false,
+        visualizePitch: false
+    });
+
+    map.addControl(nav, 'top-right');
+
+    map.on('moveend', function () {
+        var zoom = map.getZoom();
+        var bounds = map.getBounds();
+
+        // Get specific coordinates for the corners
+        var southWest = bounds.getSouthWest();
+        var northEast = bounds.getNorthEast();
+
+        console.log("Current Zoom: " + zoom);
+        console.log("SouthWest Bounds: " + southWest.toString());
+        console.log("NorthEast Bounds: " + northEast.toString());
+    });
 
     const navigateToBathing = (bathing) => {
-        window.location = `/beach/${toKebabCase(bathing)}`;
+        window.location = `/beach/${utils.toKebabCase(bathing)}`;
     }
 
-    const response = await fetch("/data/v1/{{year}}/spills-by-beach.json")
-    if (response.ok) {
-        const beaches = await (response.json())
-        const markers = beaches.map(it => L.circleMarker([it.lat, it.lon], {
-                    color: "#498940",
-                    fillColor: "#942c2c",
-                    fillOpacity: 0.5,
-                    mixBlendMode: "multiply",
-                    radius: 10,
-                })
-                        .bindTooltip(`${it.bathing} - ${formatNumber(it.total_spill_hours, 2)} hours`)
-                        .on("dblclick", e => navigateToBathing(it.bathing))
-        )
+    map.on('load', async () => {
 
-        markers.forEach(it => it.addTo(map))
+        map.fitBounds([
+                    [-8.94, 49.95], [4.98, 55.82]
+                ],
+                {animate: false, padding: 10, maxZoom: 16});
 
-        const geoBounds = map.getBounds();
+        // Setup Source and Layer
+        map.addSource('overflow-source', {
+            type: 'geojson',
+            data: {type: 'FeatureCollection', features: []}
+        });
 
-        const bounds = markers.reduce((acc, m) => {
-            if (acc == null) {
-                return geoBounds != null ? geoBounds.extend(m.getLatLng()) : L.latLngBounds(m.getLatLng(), m.getLatLng());
-            } else {
-                return acc.extend(m.getLatLng())
+        map.addLayer({
+            id: 'overflow-layer',
+            type: 'circle',
+            source: 'overflow-source',
+            layout: {
+                'circle-sort-key': ['get', 'duration'], // Older/larger circles drawn on top
+                'visibility': 'visible'
+            },
+            paint: {
+                // Color by Company
+                'circle-color': [
+                    'match', ['get', 'company'],
+                    'Anglian Water', maps.COMPANY_COLORS['Anglian Water'],
+                    'Northumbrian Water', maps.COMPANY_COLORS['Northumbrian Water'],
+                    'Severn Trent Water', maps.COMPANY_COLORS['Severn Trent Water'],
+                    'South West Water', maps.COMPANY_COLORS['South West Water'],
+                    'Southern Water', maps.COMPANY_COLORS['Southern Water'],
+                    'Thames Water', maps.COMPANY_COLORS['Thames Water'],
+                    'United Utilities', maps.COMPANY_COLORS['United Utilities'],
+                    'Wessex Water', maps.COMPANY_COLORS['Wessex Water'],
+                    'Dwr Cymru Welsh Water', maps.COMPANY_COLORS['Dwr Cymru Welsh Water'],
+                    maps.COMPANY_COLORS['Default'] // Final fallback
+                ],
+                // Size grows with duration (min 5px, max 30px)
+                'circle-radius': [
+                    'interpolate',
+                    ['linear'],
+                    ['get', 'duration'],
+                    0, 8,
+                    15000, 45
+                ],
+                'circle-opacity': 0.6,
+                'circle-stroke-width': 0.5,
+                'circle-stroke-color': 'rgba(255,255,255,0.5)',
             }
-        }, null)
+        });
 
-        map.fitBounds(bounds)
+        fetch("/data/v1/{{year}}/spills-by-beach.json")
+                .then(r => r.json())
+                .then(d => transformBeachesToGeoJSON(d))
+                .then(g => {
+                    map.getSource("overflow-source").setData(g)
+                    refit()
+                });
 
+        new ResizeObserver(() => {
+            refit()
+        }).observe(map.getContainer());
+
+    });
+
+    function refit() {
+        const g = map.getSource("overflow-source")._data;
+        const bb = bbox(g);
+
+        if ( bb ) {
+            map.fitBounds([
+                        [bb[0], bb[1]], [bb[2], bb[3]]
+                    ],
+                    {padding: 10, maxZoom: 16});
+        }
     }
+
+    const tooltip = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false
+    });
+
+    map.on('mousemove', 'overflow-layer', (e) => {
+
+        const feature = e.features[0];
+        const props = feature.properties;
+
+        tooltip
+                .setLngLat(e.lngLat)
+                .setHTML(`${props.company} - ${props.name} - ${utils.formatNumber(props.duration,2 )} hours`)
+                .addTo(map);
+    });
+
+    map.on('mouseleave', 'overflow-layer', () => {
+        tooltip.remove();
+    });
+
+    // .bindTooltip(`${it.bathing} - ${formatNumber(it.total_spill_hours, 2)} hours`)
+    // .on("dblclick", e => navigateToBathing(it.bathing))
+
+
+
 </script>
 
 <div class="container">

@@ -1,0 +1,5 @@
+
+# various tile formats
+*.mbtiles
+*.pbf
+*.mbtiles.zstd
