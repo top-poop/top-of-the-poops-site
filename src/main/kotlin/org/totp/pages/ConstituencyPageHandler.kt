@@ -295,7 +295,7 @@ object ConstituencyPageHandler {
 fun ConstituencyName.toRenderable(
     current: Boolean = false,
     haveLive: Boolean = false,
-    linkLive: Boolean = false
+    linkLive: Boolean = false,
 ): RenderableConstituency {
     val slug = this.toSlug()
     return RenderableConstituency(

@@ -2,7 +2,8 @@ package org.totp.pages
 
 import org.http4k.core.*
 import org.http4k.lens.Path
-import org.http4k.lens.PathLens
+import org.http4k.lens.Query
+import org.http4k.lens.int
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
@@ -25,7 +26,6 @@ data class RenderableStreamCsoSummary(
     val days: RenderableCount,
 )
 
-
 class ConstituencyLivePage(
     pageUri: Uri,
     val asAt: Instant,
@@ -39,8 +39,9 @@ class ConstituencyLivePage(
     val csos: List<RenderableStreamCsoSummary>,
     val csoUri: Uri,
     val rainfallUri: Uri,
-
-    ) : PageViewModel(pageUri)
+    val availableYears: List<ConstituencyLiveYear>,
+    val selectedYear: ConstituencyLiveYear,
+) : PageViewModel(pageUri)
 
 class ConstituencyLiveNotAvailablePage(
     pageUri: Uri,
@@ -49,6 +50,12 @@ class ConstituencyLiveNotAvailablePage(
     val neighbours: List<RenderableConstituency>,
     val constituencies: List<RenderableConstituency>,
 ) : PageViewModel(pageUri)
+
+data class ConstituencyLiveYear(
+    val uri: Uri,
+    val current: Boolean,
+    val year: Int,
+)
 
 object ConstituencyLivePageHandler {
     operator fun invoke(
@@ -65,8 +72,9 @@ object ConstituencyLivePageHandler {
 
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
-        val slug: PathLens<Slug> =
-            Path.value(Slug).of("constituency", "The constituency")
+        val slug = Path.value(Slug).of("constituency", "The constituency")
+
+        val yearParam = Query.int().optional("year")
 
         return { request: Request ->
 
@@ -90,23 +98,43 @@ object ConstituencyLivePageHandler {
                         )
                     }
 
-                val year = 2025
+                val thisPageUri = pageUriFrom(request)
+
+                val currentYear = LocalDate.now().year
+                val selectedYear = yearParam(request) ?: currentYear
+
+                val availableYears = (2025..currentYear).map {
+                    ConstituencyLiveYear(
+                        uri = if (it == currentYear) {
+                            thisPageUri.removeQuery("year")
+                        } else {
+                            thisPageUri.removeQuery("year").query("year", it.toString())
+                        },
+                        current = it == selectedYear,
+                        year = it
+                    )
+                }
 
                 if (liveAvailable.contains(constituencyName)) {
 
                     val liveDataStart = LocalDate.ofInstant(clock.instant(), ZoneId.of("UTC")).minusMonths(3)
 
-
-                    val startDate = LocalDate.of(year, 1, 1)
-                    val endDate = LocalDate.of(year, 12, 31)
+                    val startDate = LocalDate.of(selectedYear, 1, 1)
+                    val endDate = LocalDate.of(selectedYear, 12, 31)
                     val totals = constituencyLiveTotals(constituencyName, startDate, endDate)
                     val hours = totals.duration.toHours()
                     val formatted = NumberFormat.getNumberInstance().format(hours)
 
                     Response(Status.OK).with(
                         viewLens of ConstituencyLivePage(
-                            pageUriFrom(request).removeQuery(),
+                            thisPageUri,
+                            selectedYear = ConstituencyLiveYear(
+                                thisPageUri,
+                                current = selectedYear == currentYear,
+                                year = selectedYear
+                            ),
                             asAt = liveDataLatest(),
+                            availableYears = availableYears,
                             constituency = constituencyName.toRenderable(current = true),
                             mp = mp,
                             geojson = constituencyBoundary(constituencyName),
@@ -114,11 +142,11 @@ object ConstituencyLivePageHandler {
                             constituencies = allConstituencies,
                             summary = totals.toRenderable(),
                             share = SocialShare(
-                                uri = pageUriFrom(request),
+                                uri = thisPageUri,
                                 text = if (hours > 100) {
-                                    "Unbelievable $formatted hours of sewage so far in $year in $constituencyName"
+                                    "Unbelievable $formatted hours of sewage in $selectedYear in $constituencyName"
                                 } else {
-                                    "Unusually, only $formatted hours of sewage so far in $year in $constituencyName"
+                                    "Unusually, only $formatted hours of sewage in $selectedYear in $constituencyName"
                                 },
                                 tags = listOf("sewage"),
                                 via = "sewageuk",
@@ -131,13 +159,12 @@ object ConstituencyLivePageHandler {
                                 .query("since", liveDataStart.toString()),
                             rainfallUri = Uri.of("/live/environment-agency/rainfall/$slug")
                                 .query("since", liveDataStart.toString()),
-
-                            )
+                        )
                     )
                 } else {
                     Response(Status.OK).with(
                         viewLens of ConstituencyLiveNotAvailablePage(
-                            pageUriFrom(request).removeQuery(),
+                            thisPageUri.removeQuery(),
                             constituencyName.toRenderable(current = true),
                             geojson = constituencyBoundary(constituencyName),
                             neighbours = neighbourConstituencies,

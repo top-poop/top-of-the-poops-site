@@ -26,10 +26,18 @@
         }
     </style>
 
-    {{> components/meta-opengraph
-            title=(concat "Live Sewage | " constituency.name " | " (numberFormat summary.duration.hours) " hours so far this year")
-            twitterImageUri=share.twitterImageUri
-    }}
+    {{#if selectedYear.current }}
+        {{> components/meta-opengraph
+                title=(concat "Live Sewage | " constituency.name " | " (numberFormat summary.duration.hours) " hours so far in " selectedYear.year)
+                twitterImageUri=share.twitterImageUri
+        }}
+    {{else}}
+        {{> components/meta-opengraph
+                title=(concat "Live Sewage | " constituency.name " | " (numberFormat summary.duration.hours) " hours in " selectedYear.year )
+                twitterImageUri=share.twitterImageUri
+        }}
+    {{/if}}
+
 </head>
 <body>
 {{> chunks/navbar }}
@@ -39,11 +47,11 @@
         <h1 class="display-4 fw-bold">{{ constituency.name }} - Live Sewage</h1>
         <p class="lead fs-4">
             Polluted by sewage <span class="badge bg-danger fs-5">{{numberFormat summary.duration.hours}} hours</span>
-            this year
+            in {{selectedYear.year}}
             {{#gt summary.duration.years 1}}
                 - That's <em class="text-danger fw-bold">{{numberFormat summary.duration.years}} years</em>
             {{/gt}}
-            so far...
+            {{#if selectedYear.current}}so far..{{/if}}
         </p>
     </div>
 {{/components/jumbotron}}
@@ -68,12 +76,36 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Which Year?</h2>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="year-select" class="form-label fw-bold">Year</label>
+                            <select class="form-select form-select-lg mb-2" name="year" id="year-select">
+                                {{#each availableYears}}
+                                    <option value="{{this.uri}}" {{#if this.current}}selected{{/if}}>{{this.year}}</option>
+                                {{/each}}
+                            </select>
+                            <script>
+                                document.getElementById("year-select")
+                                        .onchange = (e) => {
+                                    window.location = e.target.value;
+                                    return false;
+                                }
+                            </script>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
                     <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Select Another Constituency</h2>
                 </div>
                 <div class="card-body">
                     <form>
                         <div class="form-group">
-                            <label class="form-label fw-bold">Constituency</label>
+                            <label for="constituency-select" class="form-label fw-bold">Constituency</label>
                             <select class="form-select form-select-lg mb-2" name="constituency"
                                     id="constituency-select">
                                 {{#each constituencies}}
@@ -103,10 +135,18 @@
                     <h2 class="h5 mb-0"><i class="bi bi-megaphone-fill me-2"></i>View Annual Sewage Data</h2>
                 </div>
                 <div class="card-body">
-                    You're looking at the totals that we have calculated for sewage in {{constituency.name}} so far this year. It is an estimate, based on very poor quality live data from the Water Companies.
-                    The water companies
-                    report their sewage to the Environment Agency every year in April. You can see report for last year in the
-                    other page.<br/>
+                    {{#if selectedYear.current }}
+                        You're looking at the totals that we have calculated for sewage in {{constituency.name}} so far for {{selectedYear.year}}.
+                        It is an estimate, based on very poor quality live data from the Water Companies.
+                        The water companies
+                        report their sewage to the Environment Agency every year in April. You can see the last reported year in the other page<br/>
+                    {{else}}
+                        You're looking at the totals that we have calculated for sewage in {{constituency.name}} for {{selectedYear.year}}.
+                        It is an estimate, based on very poor quality live data from the Water Companies.
+                        This may not align with the 'official' reported sewage values from the water companies, which is reported in April following
+                        then end of the year - so 2025 numbers are reported in April 2026.
+                        <br/>
+                    {{/if}}
 
                     <a href="{{constituency.uri}}" class="text-decoration-none">
                         <button class="btn btn-danger">
@@ -369,9 +409,6 @@
                 ).addTo(map)
             })
 
-</script>
-
-<script>
     new DataTable('#table-csos', {
         pageLength: 25,
         dom:
