@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 import time
 from typing import List
@@ -10,6 +11,16 @@ from args import enum_parser
 from companies import WaterCompany
 from events import interpret
 from streamdb import Database, StreamEvent
+
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s.%(msecs)03dZ %(levelname)s [%(name)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
 
@@ -47,16 +58,18 @@ if __name__ == '__main__':
 
             for file in unprocessed_files:
 
-                print(f"Processing Events from {file}")
+                logger.info(f"Processing Events from {file}")
                 s = time.time()
 
                 new_events: List[StreamEvent] = []
 
                 features = database.load_file_records(file)
 
+                logger.info(f"Loaded {len(features)} potential events")
+
                 new_cso_features = [f for f in features if f.id not in ids]
                 if new_cso_features:
-                    print(f"Found {len(new_cso_features)} new CSOs")
+                    logger.info(f"Found {len(new_cso_features)} new CSOs")
                     update_materialised_views = True
                     database.insert_cso(company=company, features=new_cso_features)
                     ids = database.load_ids(company=company)
@@ -64,7 +77,7 @@ if __name__ == '__main__':
                 for f in [g for g in features if feature_filter(g)]:
 
                     if f.id == '':
-                        print(f">> Record has no id? file = {file}")
+                        logger.info(f">> Record has no id? file = {file}")
 
                     try:
                         new_event = interpret(ids, file=file, previous=latest_by_id.get(f.id), f=f)
@@ -73,17 +86,17 @@ if __name__ == '__main__':
                             new_events.append(new_event)
 
                     except Exception as e:
-                        print(f"{f.id} error")
+                        logger.info(f"{f.id} error")
                         raise
 
                 if new_events:
                     database.insert_cso_events(events=new_events)
-                    print(f"Inserted {len(new_events)} events in {time.time() - s}")
+                    logger.info(f"Inserted {len(new_events)} events in {time.time() - s}")
 
                 database.mark_processed(file)
                 conn.commit()
 
         if update_materialised_views:
-            print("Updating views...")
+            logger.info("Updating views...")
             with conn.cursor() as cursor:
                 cursor.execute("refresh materialized view stream_cso_grid")

@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import logging
 import os
 from collections import Counter
 from dataclasses import replace
@@ -15,6 +16,15 @@ from secret import env
 from storage import b2_service, CSVFileStorage, SqlliteStorage, StreamCSV, S3Storage
 from stream import FeatureRecord, EventType
 from streamdb import Database
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s.%(msecs)03dZ %(levelname)s [%(name)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
 
@@ -59,20 +69,17 @@ if __name__ == '__main__':
             else:
                 since = most_recent_file.file_time
 
-            to_process = [ts for ts in storage.available(company=company, since=since)]
-
-            print(f"Loading most recent records for {company}")
+            logger.info(f"Loading most recent records for {company}")
 
             most_recent = database.most_recent_records(company=company)
             most_recent_by_id = {x.id: x for x in most_recent}
 
-            for ts in to_process:
-                print(f"Need to process: {company}: {ts}")
+            for ts in storage.available(company=company, since=since):
+                logger.info(f"Need to process: {company}: {ts}")
 
                 file_ref = database.create_file(company=company, file_time=ts)
 
                 features = storage.load(company, ts)
-
 
                 # Some files contain no id for a CSO - we will filter them out
                 # e.g. SevernTrent/20250107161514
@@ -85,7 +92,7 @@ if __name__ == '__main__':
 
                 features_with_ids = [f for f in features if probably_valid(f)]
 
-                print(
+                logger.info(
                     f"File {file_ref.company} {file_ref.file_id}- Records in file {len(features)}, valid {len(features_with_ids)}")
 
                 ## Now we need to filter out any duplicates - mainly a problem for Severn Trent
@@ -104,7 +111,7 @@ if __name__ == '__main__':
                     if counter.most_common(1)[0][1] > 1:
                         print(counter.most_common(5))
 
-                print(f"From {len(features_with_ids)} events, unique is {len(unique_features)}")
+                logger.info(f"From {len(features_with_ids)} events, unique is {len(unique_features)}")
 
                 ids = database.load_ids(company=company)
 
@@ -120,7 +127,7 @@ if __name__ == '__main__':
 
 
                 wanted_features = [f for f in unique_features if want(f)]
-                print(f"Got {len(unique_features)} events, want {len(wanted_features)}")
+                logger.info(f"Got {len(unique_features)} events, want {len(wanted_features)}")
 
                 database.insert_file_events(file=file_ref, features=wanted_features)
                 database.insert_file_content(file=file_ref, features=unique_features)

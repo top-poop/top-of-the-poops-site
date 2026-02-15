@@ -5,7 +5,7 @@ import itertools
 import os
 from dataclasses import asdict, fields, Field
 from io import StringIO
-from typing import List, Dict, Optional, TypeVar, Callable, get_origin, Union, get_args, Tuple, Any
+from typing import List, Dict, Optional, TypeVar, Callable, get_origin, Union, get_args, Tuple, Any, Generator
 
 import boto3
 import botocore.exceptions
@@ -52,7 +52,8 @@ def is_optional(field_type) -> Tuple[bool, Any]:
     return False, field_type
 
 
-def deserialize_field(field_type, value):
+def deserialize_field(field_type, value:str):
+    value = value.strip()
     opt, t = is_optional(field_type)
     if opt:
         if value == "":
@@ -116,7 +117,7 @@ class DwrCymruCSV(CSVFile[DwrCymruRecord]):
 
 class Storage:
 
-    def available(self, company: WaterCompany, since: datetime.datetime) -> List[datetime.datetime]:
+    def available(self, company: WaterCompany, since: datetime.datetime) -> Generator[datetime.datetime, Any, None]:
         raise NotImplementedError()
 
     def load(self, company: WaterCompany, dt: datetime.datetime) -> Optional[str]:
@@ -139,14 +140,16 @@ class SqlliteStorage(Storage):
     def _filename(self, company: WaterCompany, dt: datetime.datetime):
         return f"{company.name}/{dt.strftime('%Y%m%d%H%M%S')}.csv.gz"
 
-    def available(self, company: WaterCompany, since: datetime.datetime) -> List[datetime.datetime]:
-        keys = [k.split('/')[-1].replace('.csv.gz', '') for k in self.cache.keys() if k.startswith(f"{company.name}/")]
-        all_dates = {datetime.datetime.strptime(k, '%Y%m%d%H%M%S').replace(tzinfo=datetime.UTC) for k in keys}
-        dates = {d for d in all_dates if d > since}
-        if self.delegate is not None:
-            dates.update(self.delegate.available(company, since))
+    def available(self, company: WaterCompany, since: datetime.datetime) -> Generator[datetime.datetime, Any, None]:
 
-        return sorted(list(dates))
+        if self.delegate is not None:
+            yield from self.delegate.available(company, since)
+        else:
+            keys = [k.split('/')[-1].replace('.csv.gz', '') for k in self.cache.keys() if k.startswith(f"{company.name}/")]
+            all_dates = {datetime.datetime.strptime(k, '%Y%m%d%H%M%S').replace(tzinfo=datetime.UTC) for k in keys}
+            dates = {d for d in all_dates if d > since}
+            for file in sorted(list(dates)):
+                yield file
 
     def load(self, company: WaterCompany, dt: datetime.datetime) -> Optional[str]:
         filename = self._filename(company, dt)
@@ -158,6 +161,7 @@ class SqlliteStorage(Storage):
             if content is not None:
                 self._put(company, dt, content)
             return content
+        raise FileNotFoundError(f"{company}: can't load {dt} - no such file")
 
     def _put(self, company: WaterCompany, dt: datetime.datetime, content: str):
         self.cache[self._filename(company, dt)] = gzip.compress(content.encode())
@@ -180,20 +184,19 @@ class S3Storage(Storage):
         dates = [datetime.datetime.strptime(k, '%Y%m%d%H%M%S').replace(tzinfo=datetime.UTC) for k in keys]
         return dates
 
-    def available(self, company: WaterCompany, since: datetime.datetime) -> List[datetime.datetime]:
+    def available(self, company: WaterCompany, since: datetime.datetime) -> Generator[datetime.datetime, Any, None]:
 
         start_date = since.date()
         end_date = datetime.date.today()
 
         dates = [start_date + datetime.timedelta(days=x) for x in range((end_date - start_date).days + 1)]
 
-        return sorted(
-            list(
-                itertools.chain.from_iterable(
-                    [[d for d in self._files_on(company=company, date=date) if d > since] for date in dates]
-                )
-            )
-        )
+        for date in dates:
+            files_on_date = [d for d in self._files_on(company=company, date=date) if d > since]
+            for file in files_on_date:
+                yield file
+
+
 
     def migration(self, company: WaterCompany):
 
@@ -277,6 +280,17 @@ def test_round_trip():
     row = csvfile.to_csv([test_item])
     print(row)
     print(csvfile.from_csv(row))
+
+
+def garage_service(aws_access_key_id: str, aws_secret_access_key: str):
+    return boto3.resource(service_name='s3',
+                          region_name='garage',
+                          endpoint_url="http://localhost:3900",
+                          aws_access_key_id=aws_access_key_id,
+                          aws_secret_access_key=aws_secret_access_key,
+                          config=Config(
+                              signature_version='s3v4',
+                          ))
 
 
 def b2_service(aws_access_key_id: str, aws_secret_access_key: str):

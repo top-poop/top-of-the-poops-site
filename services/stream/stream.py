@@ -9,6 +9,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.structures import CaseInsensitiveDict
 from urllib3 import Retry
+from hashlib import sha256
 
 from companies import WaterCompany
 
@@ -72,11 +73,23 @@ class DwrCymruRecord:
             case _:
                 raise ValueError(f"Status '{status}'")
 
+    # we can't use GlobalID - as strangely it changes...
+    # e.g
+    # at 2025/04/03/20250403060538: Beulah WwTW Storm Overflow,SN2921346286 -> 020b5606-0242-4f75-9a2c-d57077865b50
+    # at 2025/08/02/20250802001600: Beulah WwTW Storm Overflow,SN2921346286 -> c8db66fd-710c-42d1-8acf-9dd411ca344f
+    # who would do this? instead we will hash name+location (some names are duplicated too)
+
+    @property
+    def assetid(self) -> str:
+        k = f"{self.assetName}-{self.asset_location}"
+        h = sha256(k.encode('utf-8'))
+        return h.hexdigest()
+
     def as_feature_record(self) -> FeatureRecord:
         et = self._map_status(self.status)
 
         return FeatureRecord(
-            id=self.GlobalID,
+            id=self.assetid,
             status=str(et.value),  # to match ex
             company=WaterCompany.DwrCymru.name,
             statusStart=self.start_date_time_discharge if et == EventType.Start else self.stop_date_time_discharge,
@@ -243,8 +256,8 @@ class DwrCymruAPI(ArcGisFeatureServer[DwrCymruRecord]):
 
     def _convert(self, d: Dict) -> DwrCymruRecord:
         return DwrCymruRecord(
-            assetName=d["asset_name"],
-            asset_location=d["asset_location"],
+            assetName=d["asset_name"].strip(),
+            asset_location=d["asset_location"].strip(),
             status=d["status"],
             GlobalID=d["GlobalID"],
             EditDate=timestamp(d["EditDate"]),

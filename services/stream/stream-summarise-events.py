@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import itertools
 import os
 import pathlib
 from collections import defaultdict
@@ -84,11 +85,17 @@ def row_to_event(row) -> StreamEvent:
 
 
 def aggregate_stream_events(events: Iterable[StreamEvent]) -> CalendarListener:
+
+    count = 0
+
     l = CalendarListener(start=start_date)
     s = StreamEventStream(l)
 
     for event in events:
         s.event(event)
+        count +=1
+        if count % 10_000 == 0:
+            print(f"Processed {count} events so far")
     return l
 
 
@@ -117,7 +124,7 @@ def all_events(connection, since: datetime.date) -> Iterable[StreamEvent]:
         f=row_to_event)
 
 
-def insert_stream_summary(connection, cso_id, allocations):
+def insert_stream_summary(connection, everything):
     with connection.cursor() as cursor:
         execute_batch(
             cur=cursor,
@@ -138,10 +145,20 @@ def insert_stream_summary(connection, cso_id, allocations):
                 "stop": totals[CSOState.STOP],
                 "potential_start": totals[CSOState.POTENTIAL_START],
                 "offline": totals[CSOState.OFFLINE]
-            } for date, totals in allocations],
-            page_size=1000,
+            }   for cso_id, allocations in everything
+                for date, totals in allocations
+            ],
+            page_size=30000,
         )
         connection.commit()
+
+def filter_events(max_date: datetime.datetime, events: Iterable[StreamEvent]) -> Iterable[StreamEvent]:
+    # wessex water reported some events far in the future.
+    for event in events:
+        if event.event_time <= max_date:
+            yield event
+        else:
+            print(f"Skipping because its in the future: {event}")
 
 
 if __name__ == "__main__":
@@ -162,6 +179,9 @@ if __name__ == "__main__":
     if args.restart:
         include_since = datetime.date.min
 
+
+    print(f"Including events since: {include_since}")
+
     events_fn = lambda c: all_events(c, since=start_date)
 
     if args.cso:
@@ -172,21 +192,22 @@ if __name__ == "__main__":
 
         streamdb = Database(connection=conn)
 
-        print(">> Aggregating...")
-        cl = aggregate_stream_events(events=events_fn(conn))
-
         recent = streamdb.most_recent()
-
         print(f">> Most recent file: {recent}")
 
-        print(">> Updating Summary...")
-        for cso_id, calendar in cl.things_at(recent):
-            allocations = calendar.allocations(since=include_since)
+        print(">> Aggregating...")
+        filtered_events = filter_events(recent, events_fn(conn))
 
-            if args.cso:
-                print(allocations)
-            else:
-                insert_stream_summary(conn, cso_id=cso_id, allocations=allocations)
+        cl = aggregate_stream_events(events=filtered_events)
+
+        print(">> Updating Summary...")
+
+        everything = [
+            (cso_id, calendar.allocations(since=include_since))
+            for cso_id, calendar in cl.things_at(recent)
+        ]
+
+        insert_stream_summary(conn, everything)
 
     if args.state:
         try:

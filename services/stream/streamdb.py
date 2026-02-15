@@ -176,7 +176,9 @@ class Database:
                                                   ROW_NUMBER()
                                                   OVER (PARTITION BY e.stream_cso_id ORDER BY e.event_time DESC, stream_files.file_time desc) AS rnk
                                            FROM stream_cso_event as e
-                                                    join stream_files on stream_files.stream_file_id = e.file_id)
+                                                    join stream_files on stream_files.stream_file_id = e.file_id
+                                           where stream_files.company = %(company)s
+                    )
                     SELECT m.stream_id, e.file_id, e.event, e.event_time, e.update_time, m.stream_cso_id
                     FROM stream_cso m
                              JOIN ranked_events e ON m.stream_cso_id = e.stream_cso_id AND e.rnk = 1
@@ -296,5 +298,5 @@ class Database:
                     "lon": feature.lon,
                     "receiving_water": feature.receivingWater
                 } for feature in features],
-                page_size=500,
+                page_size=3000,
             )
