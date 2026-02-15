@@ -36,6 +36,10 @@ if __name__ == '__main__':
 
             most_recent_file = database.most_recent_loaded(company=company)
 
+            if most_recent_file is None:
+                print(f"{company} has no files loaded")
+                continue
+
             gone_away_date = most_recent_file.file_time - silence_gap
 
             print(f"{company} Looking for CSOs that were last seen before {gone_away_date}")

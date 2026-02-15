@@ -1,6 +1,8 @@
 import argparse
 import datetime
+import io
 import itertools
+import logging
 import os
 import pathlib
 from collections import defaultdict
@@ -16,6 +18,13 @@ from stream import EventType
 from streamdb import Database
 from streamdb import StreamEvent
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s.%(msecs)03dZ %(levelname)s [%(name)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+logger = logging.getLogger(__name__)
 
 ## Takes the events from the database, and turns them into a history view of what was overflowing when
 ## so we can show a timeseries of all the CSOs
@@ -125,18 +134,18 @@ def all_events(connection, since: datetime.date) -> Iterable[StreamEvent]:
 
 
 def insert_stream_summary(connection, everything):
+    logger.info(f"Have {len(everything)} items to insert")
     with connection.cursor() as cursor:
+        cursor.execute("""
+   CREATE TEMP TABLE tmp_stream_summary (LIKE stream_summary INCLUDING DEFAULTS INCLUDING CONSTRAINTS) on commit drop;
+                       """)
+
         execute_batch(
             cur=cursor,
-            sql="""insert into stream_summary (stream_cso_id, date, unknown, start, stop, potential_start, offline)
+            sql="""insert into tmp_stream_summary (stream_cso_id, date, unknown, start, stop, potential_start, offline)
                    values (%(stream_cso_id)s, %(date)s, %(unknown)s, %(start)s, %(stop)s, %(potential_start)s,
                            %(offline)s)
-                   on conflict (stream_cso_id, date)
-                       do update set unknown         = excluded.unknown,
-                                     start           = excluded.start,
-                                     stop            = excluded.stop,
-                                     potential_start = excluded.potential_start,
-                                     offline         = excluded.offline""",
+""",
             argslist=[{
                 "stream_cso_id": cso_id,
                 "date": date,
@@ -150,6 +159,21 @@ def insert_stream_summary(connection, everything):
             ],
             page_size=30000,
         )
+
+        logger.info("All rows inserted to temp table")
+
+        cursor.execute("""
+                    INSERT INTO stream_summary
+                    SELECT * FROM tmp_stream_summary
+                        ON CONFLICT (stream_cso_id, date)
+            DO UPDATE SET
+                                           unknown         = EXCLUDED.unknown,
+               start           = EXCLUDED.start,
+                                           stop            = EXCLUDED.stop,
+                                           potential_start = EXCLUDED.potential_start,
+                                           offline         = EXCLUDED.offline
+                    """)
+        logger.info("Copied across")
         connection.commit()
 
 def filter_events(max_date: datetime.datetime, events: Iterable[StreamEvent]) -> Iterable[StreamEvent]:
@@ -178,7 +202,6 @@ if __name__ == "__main__":
 
     if args.restart:
         include_since = datetime.date.min
-
 
     print(f"Including events since: {include_since}")
 
