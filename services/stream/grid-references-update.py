@@ -38,7 +38,6 @@ select_sql = """
              select stream_id, lat, lon
              from stream_cso sc
                       left join stream_cso_grid sg on sc.stream_cso_id = sg.stream_cso_id
-                      left join consents_unique_view cv on sg.grid_reference = cv.effluent_grid_ref
              where sg.grid_reference is null
              """
 
