@@ -10,4 +10,5 @@ COPY *.py /app/
 
 WORKDIR /app
 ENV DB_HOST=postgres
+ENV PYTHONUNBUFFERED=1
 ENTRYPOINT [ "venv/bin/python", "/app/stream-persist-content-dwr-cymru.py" ]
