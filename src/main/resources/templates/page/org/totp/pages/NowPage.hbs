@@ -251,7 +251,10 @@
                                 <tbody>
                                 {{#each summary.companies}}
                                     <tr>
-                                        <td><i class="bi bi-building me-2 text-muted"></i>{{this.company}}</td>
+                                        <td class="align-middle" data-company="{{this.company.name}}">
+                                            <i class="bi bi-building me-1 text-muted"></i>
+                                            <a href="{{this.company.uri}}">{{this.company.name}}</a>
+                                        </td>
                                         <td class="text-end">{{numberFormat this.count.total}}</td>
                                         <td class="text-end fw-bold {{#if
                                                 this.count.start}}text-danger{{/if}}">{{numberFormat
