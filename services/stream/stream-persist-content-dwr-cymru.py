@@ -4,6 +4,7 @@ import os
 from collections import Counter
 from dataclasses import replace
 from datetime import timezone
+from typing import List
 
 import psycopg2
 from psycopg2.extras import DictCursor
@@ -25,6 +26,23 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+
+def insert_stream_cso_lookup(conn, features: List[DwrCymruRecord]):
+    # stream_id, stream_id_old, site_name_consent, site_name_wasc, wfd_waterbody_id, receiving_water
+    logger.info(f"Ensuring {len(features)} CSOs inserted")
+    with conn.cursor() as cursor:
+        for feature in features:
+            cursor.execute("""
+                         insert into stream_lookup (stream_id, stream_id_old, site_name_consent, site_name_wasc, wfd_waterbody_id, receiving_water)
+                         values( %(stream_id)s, null, %(site_name)s, %(site_name)s, null, %(receiving_water)s)
+                        on conflict do nothing
+                         """, {
+                "stream_id": feature.assetid,
+                "site_name": feature.assetName,
+                "receiving_water": feature.Receiving_Water
+            })
+
 
 if __name__ == '__main__':
 
@@ -118,6 +136,8 @@ if __name__ == '__main__':
 
             database.insert_file_events(file=file_ref, features=wanted_features)
             database.insert_file_content(file=file_ref, features=converted_features)
+
+            insert_stream_cso_lookup(conn, unique_features)
 
             most_recent_by_id.update({w.id: replace(w, status=EventType(int(w.status))) for w in wanted_features})
             conn.commit()
