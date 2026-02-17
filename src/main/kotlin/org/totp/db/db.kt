@@ -118,6 +118,10 @@ inline fun <reified T : Value<String>> ResultSet.get(vf: ValueFactory<T, String>
     return vf.of(this.getString(n))
 }
 
+inline fun <reified T : Value<String>> ResultSet.getNullable(vf: ValueFactory<T, String>, n: String): T? {
+    return this.getString(n)?.let { vf.of(it) }
+}
+
 @JvmName("getNullableStringValue")
 inline fun <reified T : Value<String>> ResultSet.getNullable(n: String, f: (String) -> T): T? {
     return getString(n)?.let { f(it) }

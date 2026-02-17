@@ -21,6 +21,8 @@ data class RenderableCSOLiveOverflow(
     val started: Instant,
     val constituency: RenderableConstituency,
     val id: String,
+    val site_name: String,
+    val receiving_water: String,
     val company: CompanyName,
 )
 
@@ -35,7 +37,9 @@ class RenderableCSOLiveData(
                         started = it.started,
                         constituency = it.pcon24nm.toRenderable(linkLive = true),
                         id = it.id.value,
-                        company = it.company
+                        company = it.company,
+                        site_name = it.site_name.value,
+                        receiving_water = it.receiving_water.value
                     )
                 }
             )

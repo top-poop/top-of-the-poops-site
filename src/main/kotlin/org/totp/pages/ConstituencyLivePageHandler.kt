@@ -21,6 +21,8 @@ import java.time.ZoneId
 data class RenderableStreamCsoSummary(
     val company: RenderableCompany,
     val id: String,
+    val site_name: String,
+    val receiving_water: String,
     val location: Coordinates,
     val duration: RenderableDuration,
     val days: RenderableCount,
@@ -182,6 +184,8 @@ fun StreamData.StreamCsoSummary.toRenderable(): RenderableStreamCsoSummary {
     return RenderableStreamCsoSummary(
         company = company.toRenderable(),
         id = id,
+        site_name = site_name.value,
+        receiving_water = receiving_water.value,
         location = location,
         duration = RenderableDuration(duration),
         days = RenderableCount(days),

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Top of the Poops | Constituency - Live Data | {{ constituency.name }}</title>
+    <title>Top of the Poops | Constituency - {{#if selectedYear.current }}Live{{else}}{{ selectedYear.year }}{{/if}} Data| {{ constituency.name }}</title>
     <meta name="description" content="Live sewage dump information for {{ constituency.name }}">
 
     {{> chunks/favicons }}
@@ -44,7 +44,7 @@
 
 {{#> components/jumbotron }}
     <div class="text-center">
-        <h1 class="display-4 fw-bold">{{ constituency.name }} - Live Sewage</h1>
+        <h1 class="display-4 fw-bold">{{ constituency.name }} - {{#if selectedYear.current }}Live{{else}}{{ selectedYear.year }}{{/if}} Sewage</h1>
         <p class="lead fs-4">
             Polluted by sewage <span class="badge bg-danger fs-5">{{numberFormat summary.duration.hours}} hours</span>
             in {{selectedYear.year}}
@@ -289,7 +289,8 @@
                     <thead class="table-light">
                     <tr>
                         <th>Company</th>
-                        <th>CSO ID</th>
+                        <th>Site Name</th>
+                        <th>Receiving Waterway</th>
                         <th class="text-end">Overflow Days</th>
                         <th>Total Duration (hours)</th>
                         <th class="text-end">Total Duration (days)</th>
@@ -298,11 +299,12 @@
                     <tbody>
                     {{#each csos}}
                         <tr data-class="cso" data-lat="{{this.location.lat}}" data-lon="{{this.location.lon}}">
-                            <td data-company="{{this.company.name}}">
+                            <td data-company="{{this.company.name}}" data-id="{{this.id}}">
                                 <i class="bi bi-building me-1 text-muted"></i>
                                 <a href="{{this.company.uri}}">{{this.company.name}}</a>
                             </td>
-                            <td data-id="{{this.id}}">{{this.id}}</td>
+                            <td data-site="{{this.site_name}}">{{this.site_name}}</td>
+                            <td data-water="{{this.receiving_water}}">{{this.receiving_water}}</td>
 
                             <td class="text-end" data-count="{{this.days.count}}">{{numberFormat this.days.count}}</td>
                             <td data-duration="{{this.duration.hours}}"
@@ -347,6 +349,7 @@
         dragging: !L.Browser.mobile,
         tap: !L.Browser.mobile,
         maxZoom: 18,
+        zoomSnap: 0.1
     });
 
     var gl = L.maplibreGL({
@@ -386,6 +389,7 @@
 
     const company = attr("company")
     const id = attr("id")
+    const site = attr("site")
     const count = attr("count", Number)
     const duration = attr("duration", Number)
 
@@ -395,6 +399,7 @@
                     lat: lat(it),
                     lon: lon(it),
                     id: id(it.querySelector("[data-id]")),
+                    site_name: site(it.querySelector("[data-site]")),
                     company: company(it.querySelector("[data-company]")),
                     count: count(it.querySelector("[data-count]")),
                     duration: duration(it.querySelector("[data-duration]")),
@@ -405,7 +410,7 @@
                         [it.lat, it.lon],
                         {icon: durationIcon(it.duration)}
                 ).bindTooltip(
-                        `${it.id}<br/><br/>${formatNumber(it.count)} Dumps / ${formatNumber(it.duration)} hours by ${it.company}`
+                        `${it.site_name}<br/><br/>${formatNumber(it.count)} Dumps / ${formatNumber(it.duration)} hours by ${it.company}`
                 ).addTo(map)
             })
 

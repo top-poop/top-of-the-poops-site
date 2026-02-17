@@ -9,7 +9,9 @@ import org.totp.db.ThamesWater.DatedOverflow
 import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
+import org.totp.model.data.SiteName
 import org.totp.model.data.StreamCompanyName
+import org.totp.model.data.WaterwayName
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
@@ -32,6 +34,8 @@ class StreamData(private val events: Events, private val connection: WithConnect
         val pcon24nm: ConstituencyName,
         val started: Instant,
         val loc: Coordinates,
+        val site_name: SiteName,
+        val receiving_water: WaterwayName,
     )
 
     data class StreamCSOCount(val start: Int, val stop: Int) {
@@ -102,11 +106,12 @@ WITH ranked_events AS (
         stream_cso_event as e
     where e.event_time <= ?
 )
-SELECT gr.pcon24nm, m.stream_company, m.stream_id, m.lat, m.lon, e.event, e.event_time, e.update_time
+SELECT gr.pcon24nm, m.stream_company, m.stream_id, sl.site_name_wasc, sl.site_name_consent, sl.receiving_water, m.lat, m.lon, e.event, e.event_time, e.update_time
 FROM stream_cso m
          join stream_cso_grid sg on m.stream_cso_id = sg.stream_cso_id
          join grid_references gr on sg.grid_reference = gr.grid_reference
          JOIN ranked_events e ON m.stream_cso_id = e.stream_cso_id AND e.rnk = 1
+         left join stream_lookup sl on (m.stream_id = sl.stream_id or m.stream_id = sl.stream_id_old) 
 where event = 'Start' 
 order by m.stream_company, m.stream_id
             """.trimIndent(),
@@ -122,7 +127,9 @@ order by m.stream_company, m.stream_id
                         loc = Coordinates(
                             lat = it.getFloat("lat"),
                             lon = it.getFloat("lon")
-                        )
+                        ),
+                        site_name = it.getNullable(SiteName, "site_name_wasc") ?: it.getNullable(SiteName, "site_name_consent") ?: SiteName.of("Unknown"),
+                        receiving_water = it.getNullable(WaterwayName, "receiving_water") ?: WaterwayName.of("Unknown")
                     )
                 }
             )
@@ -178,6 +185,8 @@ order by pcon24nm;
     data class StreamCsoSummary(
         val company: CompanyName,
         val id: String,
+        val site_name: SiteName,
+        val receiving_water: WaterwayName,
         val location: Coordinates,
         val duration: Duration,
         val days: Int,
@@ -194,6 +203,9 @@ select
     cso.stream_id,
     cso.stream_company,
     cso.lat, cso.lon,
+    sl.site_name_consent,
+    sl.site_name_wasc,
+    sl.receiving_water,
     extract(epoch from sum(start)) as duration_seconds,
     count(*) filter (where start <> interval '0') as count,
         (
@@ -219,8 +231,9 @@ from stream_summary
          join stream_cso as cso on cso.stream_cso_id = stream_summary.stream_cso_id
          join stream_cso_grid on cso.stream_cso_id = stream_cso_grid.stream_cso_id
          join grid_references on stream_cso_grid.grid_reference = grid_references.grid_reference
+         left join stream_lookup sl on (cso.stream_id = sl.stream_id or cso.stream_id = sl.stream_id_old) 
 where grid_references.pcon24nm = ? and date >= ? and date <= ?
-group by cso.stream_cso_id;
+group by cso.stream_cso_id, sl.site_name_consent, sl.site_name_wasc, sl.receiving_water;
                 """.trimIndent(),
                 bind = {
                     it.set(1, startDate)
@@ -238,7 +251,9 @@ group by cso.stream_cso_id;
                             lon = it.getFloat("lon")
                         ),
                         duration = Duration.ofSeconds(it.getLong("duration_seconds")),
-                        days = it.getInt("count")
+                        days = it.getInt("count"),
+                        site_name = it.getNullable(SiteName, "site_name_wasc") ?: it.getNullable(SiteName, "site_name_consent") ?: SiteName.of("Unknown"),
+                        receiving_water = it.getNullable(WaterwayName, "receiving_water") ?: WaterwayName.of("Unknown")
                     )
                 }
             )

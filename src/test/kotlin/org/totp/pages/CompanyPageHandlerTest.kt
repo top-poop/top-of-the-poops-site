@@ -75,7 +75,9 @@ class CompanyPageHandlerTest {
                             company = CompanyName.of("Thames Water"),
                             pcon24nm = ConstituencyName.of("London"),
                             started = clock.instant(),
-                            loc = Coordinates(1, 1)
+                            loc = Coordinates(1, 1),
+                            site_name = SiteName.of("Site Name"),
+                            receiving_water = WaterwayName.of("River Thames")
                         )
                     )
                 )

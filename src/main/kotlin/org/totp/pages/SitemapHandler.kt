@@ -69,7 +69,8 @@ object SitemapUris {
                 constituencies().flatMap {
                     listOf(
                         it.constituencyName.toRenderable().uri,
-                        it.constituencyName.toRenderable(linkLive = true).uri
+                        it.constituencyName.toRenderable(linkLive = true).uri,
+                        it.constituencyName.toRenderable(linkLive = true).uri.query("year", "2025")
                     )
                 }
             ).plus(
