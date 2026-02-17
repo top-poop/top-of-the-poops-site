@@ -405,6 +405,7 @@
                     duration: duration(it.querySelector("[data-duration]")),
                 }
             })
+            .reverse()
             .forEach(it => {
                 L.marker(
                         [it.lat, it.lon],

@@ -485,6 +485,7 @@
                     reporting: reporting(it.querySelector("[data-reporting]")),
                 }
             })
+            .reverse()
             .forEach(it => {
                 L.marker(
                         [it.lat, it.lon],
