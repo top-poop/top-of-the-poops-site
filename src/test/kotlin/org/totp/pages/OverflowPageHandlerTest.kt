@@ -6,11 +6,12 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.testing.RecordingEvents
 import org.junit.jupiter.api.Test
-import org.totp.db.HikariWithConnection
-import org.totp.db.StreamData
-import org.totp.db.datasource
+import org.totp.db.*
 import org.totp.model.TotpHandlebars
 import java.time.Clock
+import java.time.Duration
+import java.time.LocalDate
+import java.time.Month
 
 class OverflowPageHandlerTest {
 
@@ -26,7 +27,23 @@ class OverflowPageHandlerTest {
         "/{id}" bind Method.GET to OverflowPageHandler(
             clock = clock,
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
-            stream = stream
+            stream = stream,
+            annualSewageRainfall = { _, _, _, _ ->
+                AnnualSewageRainfall(
+                    2025, listOf(
+                        MonthlySewageRainfall(
+                            Month.JANUARY, days = listOf(
+                                DailySewageRainfall(
+                                    date = LocalDate.parse("2025-01-01"),
+                                    Duration.ofMinutes(72),
+                                    count = 10,
+                                    rainfall = 100.0
+                                )
+                            )
+                        )
+                    )
+                )
+            }
         )
     )
 

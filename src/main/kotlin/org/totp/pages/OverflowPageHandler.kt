@@ -48,7 +48,11 @@ class OverflowPageHandler(
         val selectedYear = year(request) ?: currentYear
 
         val start = LocalDate.of(selectedYear, 1, 1)
-        val end = start.plusYears(1)
+        val end = if (selectedYear == currentYear) {
+            today.withDayOfMonth(1).plusMonths(1)
+        } else {
+            LocalDate.of(selectedYear + 1, 1, 1)
+        }
 
         val cso = stream.cso(id, start, end)
 
