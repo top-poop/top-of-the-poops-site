@@ -7,10 +7,12 @@ import org.http4k.lens.int
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.db.AnnualSewageRainfall
 import org.totp.db.StreamData
 import org.totp.db.StreamId
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
+import org.totp.model.data.ConstituencyName
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZoneId
@@ -21,11 +23,17 @@ class OverflowPage(
     val monthly: List<StreamData.DatedBucket>,
     val cso: RenderableStreamCsoSummary,
     val selectedYear: RenderableLiveYear,
-    val availableYears: List<RenderableLiveYear>
+    val availableYears: List<RenderableLiveYear>,
+    val annual: RenderableAnnualSewageRainfall
 ) :
     PageViewModel(uri)
 
-class OverflowPageHandler(val clock: Clock, val renderer: TemplateRenderer, val stream: StreamData) : HttpHandler {
+class OverflowPageHandler(
+    val clock: Clock,
+    val renderer: TemplateRenderer,
+    val stream: StreamData,
+    val annualSewageRainfall: (StreamId, ConstituencyName, LocalDate, LocalDate) -> AnnualSewageRainfall,
+) : HttpHandler {
     val id = Path.value(StreamId).of("id", "Overflow Id (stream)")
     val year = Query.int().optional("year")
 
@@ -64,7 +72,8 @@ class OverflowPageHandler(val clock: Clock, val renderer: TemplateRenderer, val 
                         start = start,
                         end = end
                     ),
-                    monthly = stream.csoMonthlyBuckets(id, current=today, start, end)
+                    monthly = stream.csoMonthlyBuckets(id, current = today, start, end),
+                    annual = annualSewageRainfall(id, cso.pcon24nm, start, end).toRenderable()
                 )
             )
         } ?: Response(Status.NOT_FOUND)

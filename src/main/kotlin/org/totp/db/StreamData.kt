@@ -114,7 +114,7 @@ where  m.point && ST_MakeEnvelope(?, ?, ?, ?, 4326);
                         company = it.get(StreamCompanyName, "stream_company").asCompanyName() ?: CompanyName("unknown"),
                         pcon24nm = it.get(ConstituencyName, "pcon24nm"),
                         started = Instant.MIN,
-                        loc = Coordinates(lat=it.getDouble("lat"), lon=it.getDouble("lon")),
+                        loc = Coordinates(lat = it.getDouble("lat"), lon = it.getDouble("lon")),
                         site_name = it.getNullable(SiteName, "site_name_wasc") ?: it.getNullable(
                             SiteName,
                             "site_name_consent"
@@ -122,7 +122,8 @@ where  m.point && ST_MakeEnvelope(?, ?, ?, ?, 4326);
                         receiving_water = it.getNullable(WaterwayName, "receiving_water") ?: WaterwayName.of("Unknown")
                     )
                 }
-            )})
+            )
+        })
     }
 
 
@@ -232,7 +233,7 @@ order by pcon24nm;
         constituency: ConstituencyName,
         startDate: LocalDate, endDate: LocalDate
     ): List<StreamCsoSummary> {
-        return connection.execute(NamedQueryBlock("stream-live-events") {
+        return connection.execute(NamedQueryBlock("by-cso-for-constituency") {
             query(
                 sql = """
 select
@@ -244,26 +245,8 @@ select
     sl.receiving_water,
     grid_references.pcon24nm,
     extract(epoch from sum(start)) as duration_seconds,
-    count(*) filter (where start <> interval '0') as count,
-        (
-        select json_agg(
-                   json_build_object(
-                       'month', to_char(month_start, 'YYYY-MM'),
-                       'count', cnt,
-                       'duration_seconds', dur
-                   )
-                   order by month_start
-               )
-        from (
-            select
-                date_trunc('month', ss.date) as month_start,
-                count(*) filter (where ss.start <> interval '0') as cnt,
-                extract(epoch from sum(ss.start)) as dur
-            from stream_summary ss
-            where ss.stream_cso_id = cso.stream_cso_id and ss.date >= ? and ss.date <= ?
-            group by date_trunc('month', ss.date)
-        ) m
-    ) as counts_by_month
+    count(*) filter (where start <> interval '0') as count
+        
 from stream_summary
          join stream_cso as cso on cso.stream_cso_id = stream_summary.stream_cso_id
          join stream_cso_grid on cso.stream_cso_id = stream_cso_grid.stream_cso_id
@@ -273,11 +256,9 @@ where grid_references.pcon24nm = ? and date >= ? and date <= ?
 group by grid_references.pcon24nm, cso.stream_cso_id, sl.site_name_consent, sl.site_name_wasc, sl.receiving_water;
                 """.trimIndent(),
                 bind = {
-                    it.set(1, startDate)
-                    it.set(2, endDate)
-                    it.set(3, constituency)
-                    it.set(4, startDate)
-                    it.set(5, endDate)
+                    it.set(1, constituency)
+                    it.set(2, startDate)
+                    it.set(3, endDate)
                 },
                 mapper = {
                     streamCsoSummaryFrom(it)
@@ -285,6 +266,61 @@ group by grid_references.pcon24nm, cso.stream_cso_id, sl.site_name_consent, sl.s
             )
         })
     }
+
+    data class DailySummary(val date: LocalDate, val duration: Duration)
+
+    fun dailyByStreamId(streamId: StreamId, start: LocalDate, end: LocalDate): List<DailySummary> {
+        return connection.execute(NamedQueryBlock("daily-by-constituency") {
+            query(
+                sql = """
+select ss.date, extract(epoch from sum(start)) as overflowing, count(distinct stream_cso.stream_cso_id) as cso_count
+from stream_summary ss
+         join stream_cso on stream_cso.stream_cso_id = ss.stream_cso_id
+where stream_cso.stream_id = ? and date >= ? and date <= ?
+group by ss.date
+""",
+                bind = {
+                    it.set(1, streamId.value)
+                    it.set(2, start)
+                    it.set(3, end)
+                },
+                mapper = {
+                    DailySummary(
+                        it.getDate("date").toLocalDate(),
+                        duration = Duration.ofSeconds(it.getLong("overflowing")),
+                    )
+                }
+            )
+        })
+    }
+
+    fun dailyByConstituency(constituency: ConstituencyName, start: LocalDate, end: LocalDate): List<DailySummary> {
+        return connection.execute(NamedQueryBlock("daily-by-constituency") {
+            query(
+                sql = """
+select ss.date, extract(epoch from sum(start)) as overflowing, count(distinct stream_cso.stream_cso_id) as cso_count
+from stream_summary ss
+         join stream_cso on stream_cso.stream_cso_id = ss.stream_cso_id
+         join stream_cso_grid on stream_cso.stream_cso_id = stream_cso_grid.stream_cso_id
+         join grid_references on stream_cso_grid.grid_reference = grid_references.grid_reference
+where grid_references.pcon24nm = ? and date >= ? and date <= ?
+group by grid_references.pcon24nm, ss.date
+""",
+                bind = {
+                    it.set(1, constituency)
+                    it.set(2, start)
+                    it.set(3, end)
+                },
+                mapper = {
+                    DailySummary(
+                        it.getDate("date").toLocalDate(),
+                        duration = Duration.ofSeconds(it.getLong("overflowing")),
+                    )
+                }
+            )
+        })
+    }
+
 
     data class ConstituencyLiveTotal(
         val constituency: ConstituencyName,
@@ -297,7 +333,7 @@ group by grid_references.pcon24nm, cso.stream_cso_id, sl.site_name_consent, sl.s
         startDate: LocalDate,
         endDate: LocalDate
     ): ConstituencyLiveTotal {
-        return connection.execute(NamedQueryBlock("stream-live-events") {
+        return connection.execute(NamedQueryBlock("total-for-constituency") {
             query(
                 sql = """
 select grid_references.pcon24nm, extract(epoch from sum(start)) as overflowing, count(distinct stream_cso.stream_cso_id) as cso_count
@@ -509,7 +545,7 @@ and date >= ? and date < ?
         endDate: LocalDate
     ): List<Thing> {
         var counter = 0
-        return connection.execute(NamedQueryBlock("stream-live-events") {
+        return connection.execute(NamedQueryBlock("event-summary-by-constituency") {
             query(
                 sql = """
 select stream_id,
@@ -557,7 +593,7 @@ order by stream_id, date;
     )
 
     fun cso(id: StreamId, start: LocalDate, end: LocalDate): StreamCsoSummary? {
-        return connection.execute(NamedQueryBlock("stream-live-events") {
+        return connection.execute(NamedQueryBlock("by-cso") {
             querySingle(
                 sql = """
 select

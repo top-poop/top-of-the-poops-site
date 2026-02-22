@@ -7,6 +7,7 @@ import org.http4k.lens.int
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.db.AnnualSewageRainfall
 import org.totp.db.StreamData
 import org.totp.db.StreamId
 import org.totp.http4k.pageUriFrom
@@ -14,10 +15,9 @@ import org.totp.http4k.removeQuery
 import org.totp.model.PageViewModel
 import org.totp.model.data.*
 import java.text.NumberFormat
-import java.time.Clock
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
+import java.time.*
+import java.time.format.TextStyle
+import java.util.*
 
 data class RenderableStreamCsoSummary(
     val company: RenderableCompany,
@@ -41,11 +41,53 @@ class ConstituencyLivePage(
     val summary: RenderableConstituencyLiveTotal,
     val share: SocialShare?,
     val csos: List<RenderableStreamCsoSummary>,
-    val csoUri: Uri,
-    val rainfallUri: Uri,
     val availableYears: List<RenderableLiveYear>,
     val selectedYear: RenderableLiveYear,
+    val annual: RenderableAnnualSewageRainfall,
 ) : PageViewModel(pageUri)
+
+data class RenderableDailySewageRainfall(
+    val date: LocalDate,
+    val duration: RenderableDuration,
+    val count: RenderableCount,
+    val rainfall: Double,
+    val sewageClass: String,
+    val rainfallClass: String
+)
+
+data class RenderableMonthlySewageRainfall(val month: String, val days: List<RenderableDailySewageRainfall>) {
+    val duration = RenderableDuration(days.fold(Duration.ZERO) { acc, item -> acc + item.duration.value })
+    val count = RenderableCount(days.sumOf { it.count.count })
+}
+
+data class RenderableAnnualSewageRainfall(
+    val year: Int,
+    val months: List<RenderableMonthlySewageRainfall>
+) {
+    val duration = RenderableDuration(months.fold(Duration.ZERO) { acc, item -> acc + item.duration.value })
+    val count = RenderableCount(months.sumOf { it.count.count })
+}
+
+fun AnnualSewageRainfall.toRenderable(): RenderableAnnualSewageRainfall {
+    return RenderableAnnualSewageRainfall(
+        year = this.year,
+        months = this.months.map { m ->
+            RenderableMonthlySewageRainfall(
+                m.month.getDisplayName(TextStyle.SHORT, Locale.UK),
+                days = m.days.map { d ->
+                    RenderableDailySewageRainfall(
+                        date = d.date,
+                        duration = RenderableDuration(d.duration),
+                        count = RenderableCount(d.count),
+                        rainfall = d.rainfall,
+                        sewageClass = ((d.duration.toMillis().toDouble() / Duration.ofHours(24).toMillis()).coerceIn(0.0, 1.0) * 6).toInt().let {"sewage-${it}"},
+                        rainfallClass = ((d.rainfall / 25).coerceIn(0.0, 1.0) * 10).toInt().let {"rainfall-${it}"}
+                    )
+                }
+            )
+        }
+    )
+}
 
 class ConstituencyLiveNotAvailablePage(
     pageUri: Uri,
@@ -71,6 +113,7 @@ object ConstituencyLivePageHandler {
         constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
         constituencyLiveTotals: (ConstituencyName, LocalDate, LocalDate) -> StreamData.ConstituencyLiveTotal,
         csoLive: (ConstituencyName, LocalDate, LocalDate) -> List<StreamData.StreamCsoSummary>,
+        annualSewageRainfall: (ConstituencyName, LocalDate, LocalDate) -> AnnualSewageRainfall,
         liveDataLatest: () -> Instant,
     ): HttpHandler {
 
@@ -112,11 +155,12 @@ object ConstituencyLivePageHandler {
                 val availableYears = selectedLiveYears(thisPageUri, currentYear, selectedYear)
 
                 if (liveAvailable.contains(constituencyName)) {
-
-                    val liveDataStart = today.minusMonths(3)
-
                     val startDate = LocalDate.of(selectedYear, 1, 1)
-                    val endDate = LocalDate.of(selectedYear, 12, 31)
+                    val endDate = if ( selectedYear == currentYear ) {
+                        today.withDayOfMonth(1).plusMonths(1)
+                    } else {
+                        LocalDate.of(selectedYear + 1, 1, 1)
+                    }
                     val totals = constituencyLiveTotals(constituencyName, startDate, endDate)
                     val hours = totals.duration.toHours()
                     val formatted = NumberFormat.getNumberInstance().format(hours)
@@ -148,13 +192,10 @@ object ConstituencyLivePageHandler {
                                 via = "sewageuk",
                                 twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2024.png")
                             ),
+                            annual = annualSewageRainfall(constituencyName, startDate, endDate).toRenderable(),
                             csos = csoLive(constituencyName, startDate, endDate)
                                 .map { it.toRenderable() }
                                 .sortedByDescending { it.duration.value },
-                            csoUri = Uri.of("/live/stream/events/constituency/$slug")
-                                .query("since", liveDataStart.toString()),
-                            rainfallUri = Uri.of("/live/environment-agency/rainfall/$slug")
-                                .query("since", liveDataStart.toString()),
                         )
                     )
                 } else {

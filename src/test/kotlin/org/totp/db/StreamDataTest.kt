@@ -10,7 +10,9 @@ import strikt.assertions.isGreaterThan
 import strikt.assertions.isNotNull
 import strikt.assertions.size
 import java.time.Clock
+import java.time.Duration
 import java.time.LocalDate
+import java.time.Month
 
 class StreamDataTest {
 
@@ -119,5 +121,28 @@ class StreamDataTest {
         expectThat(buckets).isNotNull()
     }
 
+    @Test
+    fun daily() {
+        val daily = stream.dailyByConstituency(ConstituencyName.of("Aldershot"), start= LocalDate.parse("2025-01-01"), end= LocalDate.parse("2026-01-01"))
+        expectThat(daily).size.isGreaterThan(0)
+    }
+
+    @Test
+    fun annualdata() {
+
+        val ea = EnvironmentAgency(connection)
+
+        val annual = AnnualLiveSewage(ea, stream)
+
+        val result = annual.byConstituency(ConstituencyName.of("Aldershot"), start= LocalDate.parse("2025-01-01"), end= LocalDate.parse("2026-01-01"))
+
+        expectThat(result.year).isEqualTo(2025)
+        expectThat(result.months).size.isEqualTo(12)
+        expectThat(result.months.first().month).isEqualTo(Month.JANUARY)
+        expectThat(result.months.first().days.size).isEqualTo(31)
+
+        expectThat(result.totalDuration()).isGreaterThan(Duration.ZERO)
+
+    }
 
 }

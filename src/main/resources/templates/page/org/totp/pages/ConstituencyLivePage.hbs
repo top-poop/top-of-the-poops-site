@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Top of the Poops | Constituency - {{#if selectedYear.current }}Live{{else}}{{ selectedYear.year }}{{/if}} Data| {{ constituency.name }}</title>
+    <title>Top of the Poops | Constituency - {{#if selectedYear.current }}
+        Live{{else}}{{ selectedYear.year }}{{/if}} Data| {{ constituency.name }}</title>
     <meta name="description" content="Live sewage dump information for {{ constituency.name }}">
 
     {{> chunks/favicons }}
@@ -23,6 +24,103 @@
             transition: all 0.3s ease;
             border: none;
         }
+
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .day {
+            position: relative;
+            width: 20px;
+            aspect-ratio: 1 / 1;
+            border-radius: 2px;
+            border: 1px solid rgba(0, 0, 0, 0.21);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .day .inner {
+            width: 60%;
+            height: 60%;
+            border-radius: 80%;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .rainfall-0 {
+            background-color: #ffffff;
+        }
+
+        .rainfall-1 {
+            background-color: rgb(247, 251, 255);
+        }
+
+        .rainfall-2 {
+            background-color: rgb(225, 237, 248);
+        }
+
+        .rainfall-3 {
+            background-color: rgb(202, 222, 240);
+        }
+
+        .rainfall-4 {
+            background-color: rgb(171, 207, 230);
+        }
+
+        .rainfall-5 {
+            background-color: rgb(130, 186, 219);
+        }
+
+        .rainfall-6 {
+            background-color: rgb(89, 161, 207);
+        }
+
+        .rainfall-7 {
+            background-color: rgb(55, 135, 192);
+        }
+
+        .rainfall-8 {
+            background-color: rgb(28, 106, 175);
+        }
+
+        .rainfall-9 {
+            background-color: rgb(11, 77, 148);
+        }
+
+        .rainfall-10 {
+            background-color: rgb(8, 48, 107);
+        }
+
+        .sewage-0 {
+            background-color: #ffffff;
+        }
+
+        .sewage-1 {
+            background-color: #f7a974;
+        }
+
+        .sewage-2 {
+            background-color: #fda863;
+        }
+
+        .sewage-3 {
+            background-color: #d44a04;
+        }
+
+        .sewage-4 {
+            background-color: #d44a04;
+        }
+
+        .sewage-5 {
+            background-color: #842904;
+        }
+
+        .sewage-6 {
+            background-color: #842904;
+        }
+
     </style>
 
     {{#if selectedYear.current }}
@@ -43,7 +141,8 @@
 
 {{#> components/jumbotron }}
     <div class="text-center">
-        <h1 class="display-4 fw-bold">{{ constituency.name }} - {{#if selectedYear.current }}Live{{else}}{{ selectedYear.year }}{{/if}} Sewage</h1>
+        <h1 class="display-4 fw-bold">{{ constituency.name }} - {{#if selectedYear.current }}
+            Live{{else}}{{ selectedYear.year }}{{/if}} Sewage</h1>
         <p class="lead fs-4">
             Polluted by sewage <span class="badge bg-danger fs-5">{{numberFormat summary.duration.hours}} hours</span>
             in {{selectedYear.year}}
@@ -83,7 +182,8 @@
                             <label for="year-select" class="form-label fw-bold">Year</label>
                             <select class="form-select form-select-lg mb-2" name="year" id="year-select">
                                 {{#each availableYears}}
-                                    <option value="{{this.uri}}" {{#if this.current}}selected{{/if}}>{{this.year}}</option>
+                                    <option value="{{this.uri}}"
+                                            {{#if this.current}}selected{{/if}}>{{this.year}}</option>
                                 {{/each}}
                             </select>
                             <script>
@@ -135,14 +235,18 @@
                 </div>
                 <div class="card-body">
                     {{#if selectedYear.current }}
-                        You're looking at the totals that we have calculated for sewage in {{constituency.name}} so far for {{selectedYear.year}}.
+                        You're looking at the totals that we have calculated for sewage in {{constituency.name}} so far
+                        for {{selectedYear.year}}.
                         It is an estimate, based on very poor quality live data from the Water Companies.
                         The water companies
-                        report their sewage to the Environment Agency every year in April. You can see the last reported year in the other page<br/>
+                        report their sewage to the Environment Agency every year in April. You can see the last reported
+                        year in the other page<br/>
                     {{else}}
-                        You're looking at the totals that we have calculated for sewage in {{constituency.name}} for {{selectedYear.year}}.
+                        You're looking at the totals that we have calculated for sewage in {{constituency.name}}
+                        for {{selectedYear.year}}.
                         It is an estimate, based on very poor quality live data from the Water Companies.
-                        This may not align with the 'official' reported sewage values from the water companies, which is reported in April following
+                        This may not align with the 'official' reported sewage values from the water companies, which is
+                        reported in April following
                         then end of the year - so 2025 numbers are reported in April 2026.
                         <br/>
                     {{/if}}
@@ -174,7 +278,8 @@
                     </div>
 
                     {{#if share}}
-                        Share this page, post a message, and tell others about the huge problem of sewage pollution across the UK<br/>
+                        Share this page, post a message, and tell others about the huge problem of sewage pollution
+                        across the UK<br/>
                         <div class="gap-2">
                             {{> components/share-social share}}
                         </div>
@@ -212,58 +317,34 @@
                     <h2 class="h5 mb-0"><i class="bi bi-calendar3 me-2"></i>Daily Data</h2>
                 </div>
                 <div class="card-body">
-                    <div class="d-flex">
-                        <div class="me-2">
-                            <i class="bi bi-info-circle-fill fs-4 text-primary"></i>
-                        </div>
-                        <div>
-                            <p class="mb-0">We get information about overflowing CSOs since January 2025. Here
-                                is a chart of the last three months of data for {{constituency.name}}, here you
-                                can see overflows in red, the darker the red,
-                                the more the CSO overflowed that day.</p>
-                            <p class="mb-0 mt-2">Each CSO has a row, the most recent data is on the right hand
-                                side.</p>
-                        </div>
-                    </div>
-
-                    <div class="plot-live observable-plot-container mb-4"
-                         id="live-data"
-                         cso-data-uri="{{csoUri}}"
-                         rainfall-data-uri="{{rainfallUri}}">
-                    </div>
-
-                    <div class="d-flex flex-wrap gap-3 mb-3">
-                        <div class="d-flex align-items-center">
-                                <span class="me-2"
-                                      style="display:inline-block; width:20px; height:20px; background-color: #28A64580; border-radius: 4px;"></span>
-                            <span>Monitoring Online</span>
-                        </div>
-                        <div class="d-flex align-items-center">
-                                <span class="me-2"
-                                      style="display:inline-block; width:20px; height:20px; background-color: #333333; border-radius: 4px;"></span>
-                            <span>Monitoring Offline</span>
-                        </div>
-                        <div class="d-flex align-items-center">
-                                <span class="me-2"
-                                      style="display:inline-block; width:20px; height:20px; background-color: #842904; border-radius: 4px;"></span>
-                            <span>Polluting</span>
-                        </div>
-                        <div class="d-flex align-items-center">
-                                <span class="me-2"
-                                      style="display:inline-block; width:20px; height:20px; background-color: #460d83; border-radius: 4px;"></span>
-                            <span>Potentially Polluting</span>
-                        </div>
-                        <div class="d-flex align-items-center">
-                                <span class="me-2"
-                                      style="display:inline-block; width:20px; height:20px; background-color: #3b9acb80; border-radius: 4px;"></span>
-                            <span>Unknown</span>
-                        </div>
+                    <div class="row">
+                        {{#each annual.months}}
+                            <div class="col-12 col-md-2">
+                                <div class="card">
+                                    <div class="card-header">
+                                        {{ this.month }} - {{ numberFormat this.duration.hours }} hours
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="month-grid">
+                                            {{#each this.days}}
+                                                <div class="day {{this.rainfallClass}}"
+                                                     title="{{this.date}} {{this.duration.hours}} hours, {{ numberFormat this.rainfall}} mm rain"
+                                                     data-date="{{this.date}}">
+                                                    <div class="inner {{this.sewageClass}}"></div>
+                                                </div>
+                                            {{/each}}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {{/each}}
                     </div>
                 </div>
                 <div class="card-footer bg-light">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
                     Daily data is experimental and data is not guaranteed to be accurate. Please
-                    inform us of any issue, we will fix.
+                    inform us of any issue, we will fix.<br/>
+                    Please note: We don't have rainfall data for Wales. If you know where to source it please let us know!
                 </div>
             </div>
         </div>
@@ -422,86 +503,6 @@
                 "<'row mt-3'<'col-sm-12 col-md-5'i>>",
     });
 </script>
-
-<script type="module">
-
-    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
-
-    const colours = {
-        domain: [
-            "r-0", "r-1", "r-2", "r-3", "r-4", "r-5", "r-6", "r-7", "r-8", "r-9", "r-10", // r = rainfall
-            "a-0", "a-4", "a-8", "a-12", "a-16", "a-20", "a-24", // a = available (online)
-            "z-0", "z-4", "z-8", "z-12", "z-16", "z-20", "z-24", // z = offline
-            "o-0", "o-4", "o-8", "o-12", "o-16", "o-20", "o-24", // o = overflowing
-            "p-0", "p-4", "p-8", "p-12", "p-16", "p-20", "p-24", // p = potentially overflowing
-            "u-0", "u-4", "u-8", "u-12", "u-16", "u-20", "u-24", // u = unknown
-        ],
-        range: [
-            '#ffffff', 'rgb(247,251,255)', 'rgb(225,237,248)', 'rgb(202,222,240)',
-            'rgb(171,207, 230)', 'rgb(130,186,219)', 'rgb(89,161,207)', 'rgb(55,135,192)',
-            'rgb(28,106,175)', 'rgb(11,77,148)', 'rgb(8,48,107)',
-            "rgba(40,166,69,0.29)", "rgba(40,166,69,0.42)", "#28A64580", "#28A64580", "#28A64580", "#28A64580", "#28A64580",
-            "rgba(102,102,102,0.6)", "rgba(102,102,102,0.7)", "rgba(110,110,110,0.9)", "#545454", "#444444", "#444444", "#333333",
-            "#f7a974", "#fda863", "#d44a04", "#d44a04", "#d44a04", "#842904", "#842904",
-            "#d4d4e8", "#d4d4e8", "#b2b1d5", "#b2b1d5", "#7363ad", "#7363ad", "#460d83",
-            "rgba(59,154,203,0.24)", "rgba(59,154,203,0.28)", "rgba(59,154,203,0.36)", "#3b9acb80", "#3b9acb80", "#3b9acb80", "#3b9acb80",
-        ],
-    };
-
-    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
-
-    const LiveDataHorizontalPlot = (data) => {
-
-        const count = new Set(data.cso.map(it => it.p)).size + 1
-        const dates = new Array(...new Set(data.cso.map(it => it.d)))
-
-        data.rainfall.forEach(it => it.d = new Date(it.d))
-        data.cso.forEach(it => it.d = new Date(it.d))
-
-        return Plot.plot({
-            color: colours,
-            width: Math.max(1150, vw - 50),
-            height: (5 * count + 50),
-            x: {axis: null},
-            y: {axis: null},
-            marks: [
-                Plot.raster(
-                        data.cso,
-                        {
-                            width: dates.length,
-                            height: count,
-                            fill: 'a',
-                        }
-                ),
-                Plot.axisX({
-                    ticks: 8, label: "Date", tickFormat: (i) => {
-                        return data.cso[i].d.toLocaleDateString();
-                    }
-                })
-            ]
-        });
-    };
-
-    const height = window.innerHeight
-    const width = window.innerWidth
-
-    const element = document.getElementById("live-data");
-    const cso_data = await fetch(element.attributes["cso-data-uri"].value);
-    const rainfall_data = await fetch(element.attributes["rainfall-data-uri"].value);
-    if (cso_data.ok) {
-
-        const rainfall = await (rainfall_data.ok ? rainfall_data.json() : Promise.resolve([]))
-
-        const data = {
-            "cso": await (cso_data.json()),
-            "rainfall": rainfall,
-        }
-
-        element.appendChild(LiveDataHorizontalPlot(data))
-        element.classList.add("horizontal")
-    }
-</script>
-
 
 </body>
 </html>

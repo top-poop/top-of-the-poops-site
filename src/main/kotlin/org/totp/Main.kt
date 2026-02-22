@@ -202,6 +202,8 @@ fun main() {
 
     val edm = EDM(connection)
 
+    val annualLiveSewage = AnnualLiveSewage(environmentAgency, streamData = stream)
+
     val server = Undertow(port = port(environment)).toServer(
         routes(
             "/" bind Method.GET to inboundFilters.then(
@@ -288,7 +290,8 @@ fun main() {
                                     constituencyLiveTotals = stream::totalForConstituency,
                                     constituencyNeighbours = ConstituencyNeighbours(annualData),
                                     liveDataLatest = stream::latestAvailable,
-                                    csoLive = stream::byCsoForConstituency
+                                    csoLive = stream::byCsoForConstituency,
+                                    annualSewageRainfall = annualLiveSewage::byConstituency
                                 ),
                         "/company/{company}" bind CompanyPageHandler(
                             renderer = renderer,
@@ -309,6 +312,7 @@ fun main() {
                             clock = clock,
                             renderer = renderer,
                             stream = stream,
+                            annualSewageRainfall = annualLiveSewage::byCso
                         ),
                         "/locality/{locality}" bind LocalityPlaceRedirectHandler(),
                         "/place/{place}" bind PlacePageHandler(
