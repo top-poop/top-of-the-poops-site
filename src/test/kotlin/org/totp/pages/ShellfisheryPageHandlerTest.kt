@@ -32,7 +32,7 @@ class ShellfisheryPageHandlerTest {
                         duration = Duration.ofHours(22),
                         reporting = 23.3,
                         waterway = WaterwayName.of("waterway"),
-                        location = Coordinates(22, 33),
+                        location = Coordinates(22.0, 33.0),
                         constituency = ConstituencyName.of("Constituency")
                     )
                 )

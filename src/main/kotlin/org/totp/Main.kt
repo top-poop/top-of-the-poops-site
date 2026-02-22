@@ -305,6 +305,11 @@ fun main() {
                                 }
                             },
                         ),
+                        "/overflow/{id}" bind OverflowPageHandler(
+                            clock = clock,
+                            renderer = renderer,
+                            stream = stream,
+                        ),
                         "/locality/{locality}" bind LocalityPlaceRedirectHandler(),
                         "/place/{place}" bind PlacePageHandler(
                             renderer = renderer,
@@ -366,7 +371,8 @@ fun main() {
                         ttl = { Duration.ofMinutes(10) },
                         key = { sha256Key(it.uri) }).then(StreamOverflowingByDate(clock, stream)),
                     "/events/constituency/{constituency}" bind StreamConstituencyEvents(clock, stream),
-                    "/company/{company}/overflow-summary" bind StreamSummary(stream, companyAnnualSummaries)
+                    "/company/{company}/overflow-summary" bind StreamSummary(stream, companyAnnualSummaries),
+                    "/assets/{ne}/{sw}" bind StreamAssetsBoundingBoxHandler(clock, stream)
                 ),
                 "/thames-water" bind routes(
                     "/overflow-summary" bind ThamesWaterSummary(thamesWater),

@@ -48,7 +48,7 @@ class BathingPageHandlerTest {
                         duration = Duration.ofHours(10),
                         reporting = 19.2,
                         waterway = WaterwayName.of("waterway"),
-                        location = Coordinates(10, -10),
+                        location = Coordinates(10.0, -10.0),
                         constituency = ConstituencyName.of("constituency"),
                         beach = BeachName.of("beach")
                     )

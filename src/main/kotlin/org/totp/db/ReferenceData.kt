@@ -3,13 +3,13 @@ package org.totp.db
 import org.http4k.core.Uri
 import org.totp.db.NamedQueryBlock.Companion.block
 import org.totp.model.data.ConstituencyName
+import org.totp.model.data.Coordinates
 import org.totp.pages.MP
 
-data class GeoLocation(val lat: Double, val lon: Double)
 
 class ReferenceData(private val connection: WithConnection) {
 
-    fun constituencyAt(location: GeoLocation): ConstituencyName? {
+    fun constituencyAt(location: Coordinates): ConstituencyName? {
         return connection.execute(block("find-constituency-within") {
             query(
                 sql = """
@@ -31,7 +31,7 @@ LIMIT 1;
         }).firstOrNull()
     }
 
-    fun constituencyNear(location: GeoLocation): ConstituencyName? {
+    fun constituencyNear(location: Coordinates): ConstituencyName? {
         return connection.execute(block("find-constituency-nearest") {
             query(
                 sql = """

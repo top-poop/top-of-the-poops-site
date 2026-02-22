@@ -12,7 +12,6 @@
 
     <link rel="canonical" href="{{ uri  }}"/>
 
-    <!-- Custom Styles -->
     <style>
         .map {
             min-height: 500px;
@@ -299,11 +298,11 @@
                     <tbody>
                     {{#each csos}}
                         <tr data-class="cso" data-lat="{{this.location.lat}}" data-lon="{{this.location.lon}}">
-                            <td data-company="{{this.company.name}}" data-id="{{this.id}}">
+                            <td data-company="{{this.company.name}}" data-id="{{this.id.id}}">
                                 <i class="bi bi-building me-1 text-muted"></i>
                                 <a href="{{this.company.uri}}">{{this.company.name}}</a>
                             </td>
-                            <td data-site="{{this.site_name}}">{{this.site_name}}</td>
+                            <td data-site="{{this.site_name}}"><a href="{{this.id.uri}}">{{this.site_name}}</a></td>
                             <td data-water="{{this.receiving_water}}">{{this.receiving_water}}</td>
 
                             <td class="text-end" data-count="{{this.days.count}}">{{numberFormat this.days.count}}</td>

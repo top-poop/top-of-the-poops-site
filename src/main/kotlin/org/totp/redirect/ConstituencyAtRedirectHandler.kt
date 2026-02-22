@@ -5,8 +5,8 @@ import org.http4k.lens.Header
 import org.http4k.lens.Path
 import org.http4k.lens.Query
 import org.http4k.lens.double
-import org.totp.db.GeoLocation
 import org.totp.db.ReferenceData
+import org.totp.model.data.Coordinates
 import org.totp.model.data.toSlug
 
 class ConstituencyAtRedirectHandler(val referenceData: ReferenceData) : HttpHandler {
@@ -17,7 +17,7 @@ class ConstituencyAtRedirectHandler(val referenceData: ReferenceData) : HttpHand
 
     override fun invoke(request: Request): Response {
 
-        return GeoLocation(lat = lat(request), lon = lon(request))
+        return Coordinates(lat = lat(request), lon = lon(request))
             .let { referenceData.constituencyAt(it) ?: referenceData.constituencyNear(it) }
             ?.toSlug()
             ?.let { slug ->

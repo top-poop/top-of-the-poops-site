@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Top of the Poops | Overflow - {{#if selectedYear.current }}
+        Live{{else}}{{ selectedYear.year }}{{/if}} Data| {{ cso.id.id }}</title>
+    <meta name="description" content="Live sewage dump information for CSO {{ cso.id.id }}">
+
+    {{> chunks/favicons }}
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+    {{> chunks/meta-leaflet }}
+
+    <link rel="canonical" href="{{ uri  }}"/>
+
+    <style>
+        .map {
+            min-height: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0;
+        }
+
+
+        .card {
+            transition: all 0.3s ease;
+            border: none;
+        }
+    </style>
+
+    {{#if selectedYear.current }}
+        {{> components/meta-opengraph
+                title=(concat "Live Sewage | " cso.id.id " | " (numberFormat cso.duration.hours) " hours so far in " selectedYear.year)
+
+        }}
+        <!--        twitterImageUri=share.twitterImageUri-->
+    {{else}}
+        {{> components/meta-opengraph
+                title=(concat "Live Sewage | " cso.id.id " | " (numberFormat cso.duration.hours) " hours in " selectedYear.year )
+        }}
+        <!--        twitterImageUri=share.twitterImageUri-->
+    {{/if}}
+
+</head>
+<body>
+{{> chunks/navbar }}
+
+{{#> components/jumbotron }}
+    <div class="text-center">
+        <h1 class="display-4 fw-bold">{{ cso.id.id }} - {{#if selectedYear.current }}
+            Live{{else}}{{ selectedYear.year }}{{/if}} Sewage</h1>
+        <h2>{{cso.site_name}}</h2>
+        <p class="lead fs-4">
+            Polluted by sewage <span class="badge bg-danger fs-5">{{numberFormat cso.duration.hours}} hours</span>
+            in {{selectedYear.year}}
+            {{#gt cso.duration.years 1}}
+                - That's <em class="text-danger fw-bold">{{numberFormat cso.duration.years}} years</em>
+            {{/gt}}
+            {{#if selectedYear.current}}so far..{{/if}}
+        </p>
+    </div>
+{{/components/jumbotron}}
+
+<div class="container-fluid py-4">
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div id="map" class="map" data-lat="{{ cso.location.lat}}" data-lon="{{ cso.location.lon }}">
+                        <div style="display:none" data-map-attribution>
+                            &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors
+                            <br/>
+                            Contains OS Data &copy; Crown copyright &amp; database right 2021-2024<br/>
+                            &copy; <a href="https://top-of-the-poops.org">Top of the Poops</a> 2021-2024
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                <div class="col">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Which Year?</h2>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="form-group">
+                                    <label for="year-select" class="form-label fw-bold">Year</label>
+                                    <select class="form-select form-select-lg mb-2" name="year" id="year-select">
+                                        {{#each availableYears}}
+                                            <option value="{{this.uri}}"
+                                                    {{#if this.current}}selected{{/if}}>{{this.year}}</option>
+                                        {{/each}}
+                                    </select>
+                                    <script>
+                                        document.getElementById("year-select")
+                                                .onchange = (e) => {
+                                            window.location = e.target.value;
+                                            return false;
+                                        }
+                                    </script>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Water Company</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            {{ cso.company.name }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Waterway</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            {{ cso.receiving_water }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Overflow summary</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            In {{ selectedYear.year }}, overflowed for {{ cso.duration.hours }} hours, on {{ cso.days.count }} days
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Constituency</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{cso.constituency.uri}}" class="text-decoration-none">
+                                <button class="btn">
+                                    <i class="bi bi-geo-fill me-1"></i>
+                                    {{cso.constituency.name}}
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col">
+            {{> chunks/plea }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-clipboard-data me-2"></i>CSO Events for {{ cso.id.id}}
+                        in {{selectedYear.year}}</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex">
+                        <div class="me-2">
+                            <i class="bi bi-info-circle-fill fs-4 text-primary"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0">Here you can see the data reported by the Water Industry 'API' - It's not very 'clean'!
+                            One particular trick that you can see is where the 'Start' date is regularly incremented, which means
+                            that unless you keep an eye on the entire history, which we do, you could be lead to belive that the CSO
+                            started overflowing much later than it did.<br/>
+                            Note also that when the CSO is reported to 'Stop', often the start and end dates of the previous event
+                            doesn't line up with the data. This does vary in reliability between water company.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="table-events" class="table table-hover table-mono">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Poll Date</th>
+                                <th>Status Start</th>
+                                <th>Start</th>
+                                <th>Latest Event Start</th>
+                                <th>Latest Event End</th>
+                                <th>Last Updated</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each events}}
+                                <tr>
+                                    <td>{{ dateFormat this.fileTime 'short' time='short'}}</td>
+                                    <td>{{#if this.statusStart}}{{ dateFormat this.statusStart 'short' time='short'}}{{/if}}</td>
+                                    <td>{{ this.status}}</td>
+                                    <td>{{#if this.latestEventEnd}}{{ dateFormat this.latestEventStart 'short' time='short'}}{{/if}}</td>
+                                    <td>{{#if this.latestEventEnd}}{{ dateFormat this.latestEventEnd 'short' time='short'}}{{/if}}</td>
+                                    <td>{{#if this.lastUpdated}}{{ dateFormat this.lastUpdated 'short' time='short'}}{{/if}}</td>
+                                </tr>
+                            {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col">{{> chunks/data-sources }}</div>
+    </div>
+</div>
+
+{{> chunks/footer }}
+
+<script type="module">
+
+    import * as maps from '/assets/js/map-common.js';
+
+    const myStyle = {
+        "color": "#ff7800",
+        "weight": 5,
+        "opacity": 0.65
+    };
+
+    const attr = (a, tr) => {
+        const attributeName = `data-${a}`
+        const f = tr ? tr : (n => n);
+        return n => f(n.attributes[attributeName].value)
+    };
+
+    const lat = attr("lat", Number)
+    const lon = attr("lon", Number)
+
+    let mapElement = document.getElementById("map");
+
+    let csoLat = lat(mapElement);
+    let csoLon = lon(mapElement);
+
+    const map = L.map("map", {
+        scrollWheelZoom: false,
+        dragging: !L.Browser.mobile,
+        tap: !L.Browser.mobile,
+        maxZoom: 18,
+        zoomSnap: 0.1,
+        zoom: 14,
+        center: [
+            csoLat, csoLon
+        ]
+    });
+
+    var gl = L.maplibreGL({
+        style: maps.STYLE_URI,
+        attribution: mapElement.querySelector("[data-map-attribution]").innerHTML
+    }).addTo(map);
+
+
+    const markerIcon = (colour) => {
+        return L.icon({
+            iconUrl: `/assets/icons/leaflet/marker-icon-${colour}.png`,
+            iconRetinaUrl: `/assets/icons/leaflet/marker-icon-2x-${colour}.png`,
+            iconAnchor: [5, 55],
+            popupAnchor: [10, -44],
+            iconSize: [25, 41]
+        })
+    }
+
+    const markerBlue = markerIcon("blue")
+    const markerRed = markerIcon("red")
+
+    const singleCsoPane = map.createPane('singleCso');
+
+    singleCsoPane.style.zIndex = 650;
+
+    const csoLayer = L.markerClusterGroup({
+        disableClusteringAtZoom: 13,
+    }).addTo(map);
+
+    const singleMarkerLayer = L.layerGroup({pane: 'singleCso'}).addTo(map);
+
+    L.marker(
+            [csoLat, csoLon],
+            {icon: markerRed, pane: 'singleCso'}
+    ).bindTooltip(
+            `{{ cso.id.id }} - {{cso.site_name}} into {{ cso.receiving_water}}`
+    ).addTo(singleMarkerLayer)
+
+
+    let timeout;
+    map.on('moveend', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => updateMarkers(), 250);
+    });
+
+    function updateMarkers() {
+        const bounds = map.getBounds();
+
+        const ne = bounds.getNorthEast();
+        const sw = bounds.getSouthWest();
+
+        fetch(`/live/stream/assets/${ne.lat},${ne.lng}/${sw.lat},${sw.lng}`)
+                .then(res => res.json())
+                .then(data => {
+                    // Clear previous markers
+                    csoLayer.clearLayers();
+
+                    // Add new markers
+                    data.forEach(it => {
+                        let marker = L.marker([it.loc.lat, it.loc.lon], {icon: markerBlue})
+                                .bindTooltip(
+                                        `${it.id.id} - ${it.siteName} into ${ it.receivingWater}`);
+
+                        marker.on('click', () => {
+                            window.location.href = it.id.uri;
+                        });
+
+                        marker.addTo(csoLayer);
+                    });
+                })
+                .catch(err => console.error(err));
+    }
+
+    new DataTable('#table-events', {
+        pageLength: 25,
+        ordering: false,
+        dom:
+                "<'row mb-3'<'offset-md-4 col-md-4'p><'col-md-4'f>>" +
+                "<'row'<'col-sm-12't>>" +
+                "<'row mt-3'<'col-sm-12 col-md-5'i>>",
+    });
+
+    updateMarkers()
+</script>
+
+</body>
+</html>

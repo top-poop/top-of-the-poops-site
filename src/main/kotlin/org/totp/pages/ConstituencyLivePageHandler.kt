@@ -8,6 +8,7 @@ import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.db.StreamData
+import org.totp.db.StreamId
 import org.totp.http4k.pageUriFrom
 import org.totp.http4k.removeQuery
 import org.totp.model.PageViewModel
@@ -20,12 +21,13 @@ import java.time.ZoneId
 
 data class RenderableStreamCsoSummary(
     val company: RenderableCompany,
-    val id: String,
+    val id: RenderableStreamId,
     val site_name: String,
     val receiving_water: String,
     val location: Coordinates,
     val duration: RenderableDuration,
     val days: RenderableCount,
+    val constituency: RenderableConstituency,
 )
 
 class ConstituencyLivePage(
@@ -41,8 +43,8 @@ class ConstituencyLivePage(
     val csos: List<RenderableStreamCsoSummary>,
     val csoUri: Uri,
     val rainfallUri: Uri,
-    val availableYears: List<ConstituencyLiveYear>,
-    val selectedYear: ConstituencyLiveYear,
+    val availableYears: List<RenderableLiveYear>,
+    val selectedYear: RenderableLiveYear,
 ) : PageViewModel(pageUri)
 
 class ConstituencyLiveNotAvailablePage(
@@ -53,7 +55,7 @@ class ConstituencyLiveNotAvailablePage(
     val constituencies: List<RenderableConstituency>,
 ) : PageViewModel(pageUri)
 
-data class ConstituencyLiveYear(
+data class RenderableLiveYear(
     val uri: Uri,
     val current: Boolean,
     val year: Int,
@@ -102,24 +104,16 @@ object ConstituencyLivePageHandler {
 
                 val thisPageUri = pageUriFrom(request)
 
-                val currentYear = LocalDate.now().year
+                val today = LocalDate.ofInstant(clock.instant(), ZoneId.of("UTC"))
+
+                val currentYear = today.year
                 val selectedYear = yearParam(request) ?: currentYear
 
-                val availableYears = (2025..currentYear).map {
-                    ConstituencyLiveYear(
-                        uri = if (it == currentYear) {
-                            thisPageUri.removeQuery("year")
-                        } else {
-                            thisPageUri.removeQuery("year").query("year", it.toString())
-                        },
-                        current = it == selectedYear,
-                        year = it
-                    )
-                }
+                val availableYears = selectedLiveYears(thisPageUri, currentYear, selectedYear)
 
                 if (liveAvailable.contains(constituencyName)) {
 
-                    val liveDataStart = LocalDate.ofInstant(clock.instant(), ZoneId.of("UTC")).minusMonths(3)
+                    val liveDataStart = today.minusMonths(3)
 
                     val startDate = LocalDate.of(selectedYear, 1, 1)
                     val endDate = LocalDate.of(selectedYear, 12, 31)
@@ -130,7 +124,7 @@ object ConstituencyLivePageHandler {
                     Response(Status.OK).with(
                         viewLens of ConstituencyLivePage(
                             thisPageUri,
-                            selectedYear = ConstituencyLiveYear(
+                            selectedYear = RenderableLiveYear(
                                 thisPageUri,
                                 current = selectedYear == currentYear,
                                 year = selectedYear
@@ -180,14 +174,48 @@ object ConstituencyLivePageHandler {
     }
 }
 
+fun selectedLiveYears(
+    thisPageUri: Uri,
+    currentYear: Int,
+    selectedYear: Int
+): List<RenderableLiveYear> {
+    val availableYears = (2025..currentYear).map {
+        RenderableLiveYear(
+            uri = if (it == currentYear) {
+                thisPageUri.removeQuery("year")
+            } else {
+                thisPageUri.removeQuery("year").query("year", it.toString())
+            },
+            current = it == selectedYear,
+            year = it
+        )
+    }
+    return availableYears
+}
+
+data class RenderableStreamId(val id: String, val uri: Uri)
+
 fun StreamData.StreamCsoSummary.toRenderable(): RenderableStreamCsoSummary {
     return RenderableStreamCsoSummary(
         company = company.toRenderable(),
-        id = id,
+        constituency = pcon24nm.toRenderable(linkLive = true),
+        id = id.toRenderable(),
         site_name = site_name.value,
         receiving_water = receiving_water.value,
         location = location,
         duration = RenderableDuration(duration),
         days = RenderableCount(days),
     )
+}
+
+fun StreamId.toRenderable(year: Int? = null): RenderableStreamId {
+    val base = Uri.of("/overflow/${value}")
+
+    val uri = if (year != null) {
+        base.query("year", year.toString())
+    } else {
+        base
+    }
+
+    return RenderableStreamId(value, uri)
 }

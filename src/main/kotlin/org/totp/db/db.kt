@@ -161,6 +161,11 @@ fun ResultSet.get(n: String): Instant {
     return getObject(n, OffsetDateTime::class.java).toInstant()
 }
 
+@JvmName("getInstantNullable")
+fun ResultSet.getNullable(n: String): Instant? {
+    return getObject(n, OffsetDateTime::class.java)?.toInstant()
+}
+
 fun PreparedStatement.set(n: Int, s: String?) {
     if (s == null) {
         setNull(n, Types.VARCHAR)

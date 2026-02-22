@@ -19,6 +19,7 @@ object TotpJson : ConfigurableJackson(
         .value(StreamId)
         .value(WaterwayName)
         .value(BathingName)
+        .value(SiteName)
         .value(BeachName)
 
         .done()

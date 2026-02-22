@@ -6,7 +6,7 @@ import dev.forkhandles.values.StringValue
 import dev.forkhandles.values.StringValueFactory
 import org.totp.extensions.kebabCase
 
-data class Coordinates(val lat: Number, val lon: Number)
+data class Coordinates(val lat: Double, val lon: Double)
 
 
 class GeoJSON(value: String) : StringValue(value) {

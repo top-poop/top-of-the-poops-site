@@ -6,15 +6,12 @@ import org.http4k.events.Event
 import org.http4k.events.Events
 import org.totp.db.NamedQueryBlock.Companion.block
 import org.totp.db.ThamesWater.DatedOverflow
-import org.totp.model.data.CompanyName
-import org.totp.model.data.ConstituencyName
-import org.totp.model.data.Coordinates
-import org.totp.model.data.SiteName
-import org.totp.model.data.StreamCompanyName
-import org.totp.model.data.WaterwayName
+import org.totp.model.data.*
+import java.sql.ResultSet
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.YearMonth
 
 class StreamId(value: String) : StringValue(value) {
     companion object : StringValueFactory<StreamId>(::StreamId)
@@ -94,6 +91,41 @@ order by m.stream_company;
         )
     }
 
+    fun csosWithin(ne: Coordinates, sw: Coordinates): List<StreamCSOLiveOverflow> {
+        return connection.execute(NamedQueryBlock("stream-overflowing-at") {
+            query(
+                sql = """                
+SELECT gr.pcon24nm, m.stream_company, m.stream_id, sl.site_name_wasc, sl.site_name_consent, sl.receiving_water, m.lat, m.lon
+FROM stream_cso m
+         join stream_cso_grid sg on m.stream_cso_id = sg.stream_cso_id
+         join grid_references gr on sg.grid_reference = gr.grid_reference
+         left join stream_lookup sl on (m.stream_id = sl.stream_id or m.stream_id = sl.stream_id_old)
+where  m.point && ST_MakeEnvelope(?, ?, ?, ?, 4326);
+ """,
+                bind = {
+                    it.setDouble(1, sw.lon)
+                    it.setDouble(2, sw.lat)
+                    it.setDouble(3, ne.lon)
+                    it.setDouble(4, ne.lat)
+                },
+                mapper = {
+                    StreamCSOLiveOverflow(
+                        it.get(StreamId, "stream_id"),
+                        company = it.get(StreamCompanyName, "stream_company").asCompanyName() ?: CompanyName("unknown"),
+                        pcon24nm = it.get(ConstituencyName, "pcon24nm"),
+                        started = Instant.MIN,
+                        loc = Coordinates(lat=it.getDouble("lat"), lon=it.getDouble("lon")),
+                        site_name = it.getNullable(SiteName, "site_name_wasc") ?: it.getNullable(
+                            SiteName,
+                            "site_name_consent"
+                        ) ?: SiteName.of("Unknown"),
+                        receiving_water = it.getNullable(WaterwayName, "receiving_water") ?: WaterwayName.of("Unknown")
+                    )
+                }
+            )})
+    }
+
+
     fun overflowingAt(instant: Instant): List<StreamCSOLiveOverflow> {
         return connection.execute(NamedQueryBlock("stream-overflowing-at") {
             query(
@@ -125,10 +157,13 @@ order by m.stream_company, m.stream_id
                         company = it.get(StreamCompanyName, "stream_company").asCompanyName() ?: CompanyName("unknown"),
                         started = it.getTimestamp("event_time").toInstant(),
                         loc = Coordinates(
-                            lat = it.getFloat("lat"),
-                            lon = it.getFloat("lon")
+                            lat = it.getDouble("lat"),
+                            lon = it.getDouble("lon")
                         ),
-                        site_name = it.getNullable(SiteName, "site_name_wasc") ?: it.getNullable(SiteName, "site_name_consent") ?: SiteName.of("Unknown"),
+                        site_name = it.getNullable(SiteName, "site_name_wasc") ?: it.getNullable(
+                            SiteName,
+                            "site_name_consent"
+                        ) ?: SiteName.of("Unknown"),
                         receiving_water = it.getNullable(WaterwayName, "receiving_water") ?: WaterwayName.of("Unknown")
                     )
                 }
@@ -184,12 +219,13 @@ order by pcon24nm;
 
     data class StreamCsoSummary(
         val company: CompanyName,
-        val id: String,
+        val id: StreamId,
         val site_name: SiteName,
         val receiving_water: WaterwayName,
         val location: Coordinates,
         val duration: Duration,
         val days: Int,
+        val pcon24nm: ConstituencyName,
     )
 
     fun byCsoForConstituency(
@@ -206,6 +242,7 @@ select
     sl.site_name_consent,
     sl.site_name_wasc,
     sl.receiving_water,
+    grid_references.pcon24nm,
     extract(epoch from sum(start)) as duration_seconds,
     count(*) filter (where start <> interval '0') as count,
         (
@@ -233,7 +270,7 @@ from stream_summary
          join grid_references on stream_cso_grid.grid_reference = grid_references.grid_reference
          left join stream_lookup sl on (cso.stream_id = sl.stream_id or cso.stream_id = sl.stream_id_old) 
 where grid_references.pcon24nm = ? and date >= ? and date <= ?
-group by cso.stream_cso_id, sl.site_name_consent, sl.site_name_wasc, sl.receiving_water;
+group by grid_references.pcon24nm, cso.stream_cso_id, sl.site_name_consent, sl.site_name_wasc, sl.receiving_water;
                 """.trimIndent(),
                 bind = {
                     it.set(1, startDate)
@@ -243,23 +280,11 @@ group by cso.stream_cso_id, sl.site_name_consent, sl.site_name_wasc, sl.receivin
                     it.set(5, endDate)
                 },
                 mapper = {
-                    StreamCsoSummary(
-                        id = it.getString("stream_id"),
-                        company = it.get(StreamCompanyName, "stream_company").asCompanyName() ?: CompanyName("unknown"),
-                        location = Coordinates(
-                            lat = it.getFloat("lat"),
-                            lon = it.getFloat("lon")
-                        ),
-                        duration = Duration.ofSeconds(it.getLong("duration_seconds")),
-                        days = it.getInt("count"),
-                        site_name = it.getNullable(SiteName, "site_name_wasc") ?: it.getNullable(SiteName, "site_name_consent") ?: SiteName.of("Unknown"),
-                        receiving_water = it.getNullable(WaterwayName, "receiving_water") ?: WaterwayName.of("Unknown")
-                    )
+                    streamCsoSummaryFrom(it)
                 }
             )
         })
     }
-
 
     data class ConstituencyLiveTotal(
         val constituency: ConstituencyName,
@@ -335,6 +360,142 @@ order by date
         })
     }
 
+    data class CSOEvent(
+        val id: StreamId,
+        val fileTime: Instant,
+        val statusStart: Instant?,
+        val status: String,
+        val latestEventStart: Instant?,
+        val latestEventEnd: Instant?,
+        val lastUpdated: Instant?
+    )
+
+    fun eventsForCso(id: StreamId, start: LocalDate, end: LocalDate): List<CSOEvent> {
+        return connection.execute(block("cso-events") {
+            query(
+                sql = """
+select file_time, status, statusstart, latesteventstart, latesteventend, lastupdated
+    from stream_files sf
+    join stream_file_events sfc on sf.stream_file_id = sfc.stream_file_id
+    where sfc.id = ?
+        and sf.file_time >= ? and sf.file_time < ?
+        order by file_time desc
+        ;
+                """.trimMargin(),
+                bind = {
+                    it.set(1, id.value)
+                    it.set(2, start)
+                    it.set(3, end)
+                },
+                mapper = {
+                    CSOEvent(
+                        id,
+                        fileTime = it.get("file_time"),
+                        statusStart = it.getNullable("statusstart"),
+                        status = it.getString("status"),
+                        lastUpdated = it.getNullable("lastupdated"),
+                        latestEventEnd = it.getNullable("latesteventend"),
+                        latestEventStart = it.getNullable("latesteventstart")
+                    )
+                }
+            )
+        })
+    }
+
+    data class DatedBucket(val date: LocalDate, val data: Bucket, val partial: Boolean, val future: Boolean)
+
+    fun csoMonthlyBuckets(id: StreamId, current: LocalDate, start: LocalDate, end: LocalDate): List<DatedBucket> {
+        return connection.execute(block("cso-buckets") {
+            query(
+                sql = """
+with months as (
+    select generate_series(
+        date_trunc('month', ?::date),
+        date_trunc('month', ?::date) - interval '1 month',
+        interval '1 month'
+    )::date as month
+),
+aggregated as (
+    select
+        date_trunc('month', s.date)::date as month,
+        sum(s.stop) as stop,
+        sum(s.offline) as offline,
+        sum(s.start) as start,
+        sum(s.unknown) as unknown,
+        sum(s.potential_start) as potential_start
+    from stream_summary s
+    join stream_cso c
+      on c.stream_cso_id = s.stream_cso_id
+    where c.stream_id = ?
+      and s.date >= ?
+      and s.date < ?
+    group by 1
+)
+select
+    m.month,
+    coalesce(extract(epoch from a.stop), 0) as stop,
+    coalesce(extract(epoch from a.offline), 0) as offline,
+    coalesce(extract(epoch from a.start), 0) as start,
+    coalesce(extract(epoch from a.unknown), 0) as unknown,
+    coalesce(extract(epoch from a.potential_start), 0) as potential_start
+from months m
+left join aggregated a on a.month = m.month
+order by m.month;
+                    """,
+                bind = {
+                    it.set(1, start)
+                    it.set(2, end)
+                    it.set(3, id.value)
+                    it.set(4, start)
+                    it.set(5, end)
+                },
+                mapper = {
+                    val date = it.getDate("month").toLocalDate()
+                    DatedBucket(
+                        date = date,
+                        partial = YearMonth.from(date).equals(YearMonth.from(current)),
+                        future = date.isAfter(current),
+                        data = bucketFrom(it)
+                    )
+                }
+            )
+        })
+    }
+
+    fun eventSummaryForCso(id: StreamId, current: LocalDate, start: LocalDate, end: LocalDate): List<DatedBucket> {
+        return connection.execute(block("cso-buckets") {
+            query(
+                sql = """
+select stream_id,
+       date,
+       extract(epoch from stop) as stop,
+       extract(epoch from offline) as offline,
+       extract(epoch from start) as start,
+       extract(epoch from unknown) as unknown,
+       extract(epoch from potential_start) as potential_start
+from stream_summary
+join stream_cso on stream_cso.stream_cso_id = stream_summary.stream_cso_id
+where stream_id = ?
+and date >= ? and date < ?
+                """.trimIndent(),
+                bind = {
+                    it.setString(1, id.value)
+                    it.set(2, start)
+                    it.set(3, end)
+                },
+                mapper = {
+                    val date = it.getDate("date").toLocalDate()
+                    DatedBucket(
+                        date,
+                        partial = YearMonth.from(date).equals(YearMonth.from(current)),
+                        future = date.isAfter(current),
+                        data = bucketFrom(it)
+                    )
+                }
+            )
+        })
+    }
+
     data class ConstituencyEventMetrics(
         val constituencyName: ConstituencyName,
         val startDate: LocalDate,
@@ -377,13 +538,7 @@ order by stream_id, date;
                         cid = it.getString("stream_id"),
                         d = it.getDate("date").toLocalDate(),
                         a = codeFrom(
-                            Bucket(
-                                online = it.getInt("stop"),
-                                offline = it.getInt("offline"),
-                                overflowing = it.getInt("start"),
-                                unknown = it.getInt("unknown"),
-                                potentially_overflowing = it.getInt("potential_start"),
-                            )
+                            bucketFrom(it)
                         )
                     )
                 }
@@ -392,4 +547,63 @@ order by stream_id, date;
             events(ConstituencyEventMetrics(constituencyName, startDate, endDate, counter))
         }
     }
+
+    private fun bucketFrom(set: ResultSet): Bucket = Bucket(
+        online = set.getInt("stop"),
+        offline = set.getInt("offline"),
+        overflowing = set.getInt("start"),
+        unknown = set.getInt("unknown"),
+        potentially_overflowing = set.getInt("potential_start"),
+    )
+
+    fun cso(id: StreamId, start: LocalDate, end: LocalDate): StreamCsoSummary? {
+        return connection.execute(NamedQueryBlock("stream-live-events") {
+            querySingle(
+                sql = """
+select
+    cso.stream_id,
+    cso.stream_company,
+    cso.lat, cso.lon,
+    sl.site_name_consent,
+    sl.site_name_wasc,
+    sl.receiving_water,
+    pcon24nm,
+    extract(epoch from sum(start)) as duration_seconds,
+    count(*) filter (where start <> interval '0') as count
+from stream_summary
+         join stream_cso as cso on cso.stream_cso_id = stream_summary.stream_cso_id
+         join stream_cso_grid on cso.stream_cso_id = stream_cso_grid.stream_cso_id
+         join grid_references on stream_cso_grid.grid_reference = grid_references.grid_reference
+         left join stream_lookup sl on (cso.stream_id = sl.stream_id or cso.stream_id = sl.stream_id_old)
+where cso.stream_id = ? and date >= ? and date <= ?
+group by cso.stream_id, cso.stream_company, cso.lat, cso.lon, pcon24nm, sl.site_name_consent, sl.site_name_wasc, sl.receiving_water;
+                """.trimIndent(),
+                bind = {
+                    it.set(1, id.value)
+                    it.set(2, start)
+                    it.set(3, end)
+                },
+                mapper = {
+                    streamCsoSummaryFrom(it)
+                }
+            )
+        })
+    }
+
+    private fun streamCsoSummaryFrom(rs: ResultSet): StreamCsoSummary = StreamCsoSummary(
+        id = rs.get(StreamId, "stream_id"),
+        company = rs.get(StreamCompanyName, "stream_company").asCompanyName() ?: CompanyName("unknown"),
+        location = Coordinates(
+            lat = rs.getDouble("lat"),
+            lon = rs.getDouble("lon")
+        ),
+        pcon24nm = rs.get(ConstituencyName, "pcon24nm"),
+        duration = Duration.ofSeconds(rs.getLong("duration_seconds")),
+        days = rs.getInt("count"),
+        site_name = rs.getNullable(SiteName, "site_name_wasc") ?: rs.getNullable(
+            SiteName,
+            "site_name_consent"
+        ) ?: SiteName.of("Unknown"),
+        receiving_water = rs.getNullable(WaterwayName, "receiving_water") ?: WaterwayName.of("Unknown")
+    )
 }

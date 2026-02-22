@@ -1,4 +1,12 @@
 
+
+@font-face {
+    font-family: "JetBrains Mono";
+    src: url("/assets/fonts/JetBrainsMono-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+}
+
 @media screen and (max-width: 961px) {
     .sewage-map {
         min-height: 400px;
@@ -101,7 +109,6 @@ table.table-spills tbody td {
 }
 
 
-
 .m4cw  a:link {
     text-decoration: none;
 }
@@ -109,3 +116,10 @@ table.table-spills tbody td {
 .m4cw a:visited {
     text-decoration: none;
 }
+
+
+.table-mono {
+    font-family: "JetBrains Mono", monospace;
+    font-variant-numeric: tabular-nums;
+}
+
