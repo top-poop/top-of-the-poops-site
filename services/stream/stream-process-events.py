@@ -57,7 +57,7 @@ class EventProcessor:
 
                 features = database.load_file_records(file)
 
-                logger.info(f"{company}: Loaded {len(features)} potential events")
+                # logger.info(f"{company}: Loaded {len(features)} potential events")
 
                 new_cso_features = [f for f in features if f.id not in ids]
                 if new_cso_features:
@@ -83,7 +83,7 @@ class EventProcessor:
 
                 if new_events:
                     database.insert_cso_events(events=new_events)
-                    logger.info(f"{company}: Inserted {len(new_events)} events in {time.time() - s}")
+                    # logger.info(f"{company}: Inserted {len(new_events)} events in {time.time() - s}")
 
                 database.mark_processed(file)
                 conn.commit()

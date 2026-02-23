@@ -19,20 +19,22 @@ def _interpret_type_1(mapping: Dict, file: StreamFile, previous: Optional[Stream
                     event=EventType.Stop,
                     event_time=f.statusStart if f.statusStart is not None else file.file_time,
                     file_id=file.file_id,
-                    update_time=f.lastUpdated if f.statusStart is not None else file.file_time
+                    update_time=f.lastUpdated if f.lastUpdated is not None else file.file_time
                 )
             match previous.event:
-                case EventType.Start:
+                case EventType.Start|EventType.Offline:
+                    event_time = f.statusStart if f.statusStart is not None else file.file_time
+                    if event_time == previous.event_time:
+                        event_time += datetime.timedelta(seconds=1)
                     return StreamEvent(
                         cso_id=mapping[f.id],
-                        event=EventType.Stop,
-                        event_time=f.statusStart if f.statusStart is not None else file.file_time,
+                        event=f.status,
+                        event_time=event_time,
                         file_id=file.file_id,
-                        update_time=f.lastUpdated if f.statusStart is not None else file.file_time
+                        update_time=f.lastUpdated if f.lastUpdated is not None else file.file_time
                     )
                 case EventType.Stop:
                     return None
-            raise NotImplementedError()
         case EventType.Start:
             if previous is None:
                 return StreamEvent(
@@ -43,20 +45,42 @@ def _interpret_type_1(mapping: Dict, file: StreamFile, previous: Optional[Stream
                     update_time=f.lastUpdated
                 )
             match previous.event:
-                case EventType.Stop:
+                case EventType.Stop|EventType.Offline:
+                    event_time = f.statusStart
+                    if event_time == previous.event_time:
+                        event_time += datetime.timedelta(seconds=1)
                     return StreamEvent(
                         cso_id=mapping[f.id],
-                        event=EventType.Start,
-                        event_time=f.statusStart,
+                        event=f.status,
+                        event_time=event_time,
                         file_id=file.file_id,
                         update_time=f.lastUpdated
                     )
                 case EventType.Start:
                     return None
-            raise NotImplementedError()
         case EventType.Offline:
-            # ignore offline for now
-            return None
+            if previous is None:
+                return StreamEvent(
+                    cso_id=mapping[f.id],
+                    event=f.status,
+                    event_time=f.statusStart,
+                    file_id=file.file_id,
+                    update_time=f.lastUpdated
+                )
+            match previous.event:
+                case EventType.Stop|EventType.Start:
+                    event_time = f.statusStart if f.statusStart is not None else file.file_time
+                    if event_time == previous.event_time:
+                        event_time += datetime.timedelta(seconds=1)
+                    return StreamEvent(
+                        cso_id=mapping[f.id],
+                        event=f.status,
+                        event_time=event_time,
+                        file_id=file.file_id,
+                        update_time=f.lastUpdated if f.lastUpdated is not None else file.file_time
+                    )
+                case EventType.Offline:
+                    return None
 
 
 def _bob_ignore(**kwargs):
@@ -107,7 +131,26 @@ def _interpret_type_2(mapping: Dict, file: StreamFile, previous: Optional[Stream
                         file_id=file.file_id,
                         update_time=f.lastUpdated
                     )
-
+        case EventType.Offline:
+            if previous is None:
+                return StreamEvent(
+                    cso_id=mapping[f.id],
+                    event=f.status,
+                    event_time=f.statusStart if f.statusStart else f.lastUpdated,
+                    file_id=file.file_id,
+                    update_time=f.lastUpdated
+                )
+            match previous.event:
+                case EventType.Stop|EventType.Start:
+                    return StreamEvent(
+                        cso_id=mapping[f.id],
+                        event=f.status,
+                        event_time=f.latestEventEnd if f.latestEventEnd is not None else f.lastUpdated,
+                        file_id=file.file_id,
+                        update_time=f.lastUpdated
+                    )
+                case EventType.Offline:
+                    return None
 
 handlers = {
     WaterCompany.Anglian: _interpret_type_1,

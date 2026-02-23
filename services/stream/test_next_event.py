@@ -48,7 +48,17 @@ events_type1 = {
     "severn_trent_time_jump": [
         "Start,2025-01-14 20:05:00.000000 +00:00,2025-01-14 20:05:00.000000 +00:00,",
         "Stop,2025-01-13 12:53:31.000000 +00:00,2025-01-13 12:36:36.000000 +00:00,2025-01-13 12:53:31.000000 +00:00"
-    ]
+    ],
+    "going_offline": [
+        "Stop,2025-12-01 09:30:09.000000 +00:00,2025-11-28 01:30:09.000000 +00:00,2025-12-01 09:17:36.000000 +00:00",
+        "Start,2025-12-01 11:00:09.000000 +00:00,2025-12-01 10:51:20.000000 +00:00,",
+        "Offline,2025-12-01 11:00:09.000000 +00:00,2025-12-01 10:51:20.000000 +00:00,",
+        "Offline,2026-01-28 11:45:03.000000 +00:00,2025-12-01 10:51:20.000000 +00:00,2026-01-28 11:45:03.000000 +00:00",
+        "Offline,2026-02-03 13:45:10.000000 +00:00,2026-02-03 13:36:21.000000 +00:00,2026-02-03 13:36:28.000000 +00:00",
+        "Offline,2026-02-15 16:30:06.000000 +00:00,2026-02-15 16:26:08.000000 +00:00,",
+        "Offline,2026-02-17 02:30:05.000000 +00:00,2026-02-17 02:15:06.000000 +00:00,2026-02-17 02:20:18.000000 +00:00",
+        "Stop,2026-02-17 02:30:05.000000 +00:00,2026-02-17 02:15:06.000000 +00:00,2026-02-17 02:20:18.000000 +00:00"
+    ] # AWS01496
 }
 
 events_type2 = {
@@ -88,6 +98,9 @@ events_type2 = {
         "Offline,2024-12-31 13:30:00.000000 +00:00,2024-12-31 11:15:00.000000 +00:00,,2024-12-31 14:22:55.450000 +00:00",
         "Stop,2024-12-31 14:45:00.000000 +00:00,2024-12-31 11:15:00.000000 +00:00,,2024-12-31 15:53:18.723000 +00:00",
     ],
+    "united_no_time": [
+        "Offline,,,",
+    ],
     "southern_time_jump": [
         "Start,2025-01-05 09:42:39.000000 +00:00,2025-01-05 09:42:39.000000 +00:00,",
         "Stop,2025-01-05 09:42:39.000000 +00:00,2025-01-05 09:42:39.000000 +00:00,2025-01-05 11:15:00.000000 +00:00",
@@ -98,6 +111,12 @@ events_type2 = {
     "southern_time_jump_2": [
         "Start,2025-01-15 13:23:21.000000 +00:00,2025-01-15 13:23:21.000000 +00:00,",
         "Stop,2025-01-15 13:23:00.000000 +00:00,2025-01-15 13:23:00.000000 +00:00,2025-01-15 13:44:00.000000 +00:00",
+    ],
+    "southern_offline": [
+        "Offline,2025-05-27 22:08:09.000000 +00:00,2025-05-27 22:08:09.000000 +00:00,2025-05-27 22:10:36.000000 +00:00",
+        "Start,2025-05-27 22:13:12.000000 +00:00,2025-05-27 22:13:12.000000 +00:00,",
+        "Offline,2025-05-27 22:08:09.000000 +00:00,2025-05-27 22:08:09.000000 +00:00,2025-05-27 22:10:36.000000 +00:00",
+        "Stop,2025-08-24 08:53:16.000000 +00:00,2025-08-24 08:53:16.000000 +00:00,2025-08-24 08:53:16.000000 +00:00"
     ]
 }
 
@@ -107,6 +126,8 @@ def parse_date(s: str) -> Optional[datetime.datetime]:
         return None
     return datetime.datetime.fromisoformat(s)
 
+
+last_updated_for_test = datetime.datetime.now()
 
 def as_feature(company: WaterCompany, s: str):
     ss = s.split(",")
@@ -121,7 +142,7 @@ def as_feature(company: WaterCompany, s: str):
         lat=0,
         lon=0,
         receivingWater='',
-        lastUpdated=datetime.datetime.now()
+        lastUpdated=last_updated_for_test
     )
 
 
@@ -166,7 +187,7 @@ class TestType1:
                                         event=EventType.Stop,
                                         event_time=self.file.file_time,
                                         file_id=TestType1.file.file_id,
-                                        update_time=self.file.file_time)
+                                        update_time=last_updated_for_test)
 
     def test_stop_start_stop(self):
         """stopped: get start with statusStart, then stop with statusStart"""
@@ -207,11 +228,16 @@ class TestType1:
                                         file_id=TestType1.file.file_id,
                                         update_time=events[3].lastUpdated)
 
+    def test_going_offline(self):
+        events = self.events('going_offline')
+        output = apply_events(self.file, events)
+        assert len(output) == 4
+
+
     def test_offline(self):
-        """offline: ignored for now"""
         events = self.events('offline')
         output = apply_events(self.file, events)
-        assert len(output) == 0
+        assert len(output) == 1
 
     def test_northumbrian_time_jump(self):
         """seems time goes backwards in Northumbria"""
@@ -354,6 +380,17 @@ class TestType2:
         assert output[1].event == EventType.Stop
 
         assert output[1].event_time > output[0].event_time
+
+    def test_southern_offline(self):
+        events = self.events('southern_offline')
+        output = apply_events(self.file, events)
+        assert len(output) == 4
+
+    def test_united_no_time(self):
+        events = self.events('united_no_time')
+        output = apply_events(self.file, events)
+        assert len(output) == 1
+
 
 
 events_yorkshire = {

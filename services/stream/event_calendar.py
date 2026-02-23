@@ -112,9 +112,9 @@ class StreamMonitorState(StateMachine):
     offline = State("Offline")
     potentially_overflowing = State("Potentially Overflowing")
 
-    do_start = unknown.to(start) | stop.to(start) | start.to.itself() | potentially_overflowing.to(start)
+    do_start = unknown.to(start) | stop.to(start) | start.to.itself() | potentially_overflowing.to(start) | offline.to(start)
     do_stop = unknown.to(stop) | start.to(stop) | offline.to(stop) | stop.to.itself() | potentially_overflowing.to(stop)
-    do_offline = unknown.to(offline) | stop.to(offline) | offline.to.itself() | start.to(potentially_overflowing)
+    do_offline = unknown.to(offline) | stop.to(offline) | offline.to.itself() | start.to(potentially_overflowing) | potentially_overflowing.to(potentially_overflowing)
 
     def __init__(self, cb):
         super(StreamMonitorState, self).__init__()

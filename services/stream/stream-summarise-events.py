@@ -72,8 +72,8 @@ class StreamEventStream:
                 self.state.do_stop(stream_event=event)
             elif event.event == EventType.Offline:
                 self.state.do_offline(stream_event=event)
-        except statemachine.TransitionNotAllowed:
-            raise IOError(f"Illegal state transition processing {event}")
+        except statemachine.TransitionNotAllowed as e:
+            raise IOError(f"Illegal state transition processing {event}: {e}")
 
     def on_enter_state(self, event, target: State, source, stream_event: StreamEvent):
         self.cb.transition(
