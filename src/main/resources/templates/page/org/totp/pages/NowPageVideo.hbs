@@ -234,6 +234,7 @@
 <script type="module">
 
     import * as maps from '/assets/js/map-common.js';
+    import * as utils from '/assets/js/utils';
 
     const COMPANY_COLORS = maps.COMPANY_COLORS;
 
@@ -333,11 +334,6 @@
             })
         };
     }
-
-    const formatNumber = (n, m) => n.toLocaleString(undefined, {
-        minimumFractionDigits: m ? m : 0,
-        maximumFractionDigits: m ? m : 0
-    });
 
     const myStyle = {
         "color": "#ff7800",

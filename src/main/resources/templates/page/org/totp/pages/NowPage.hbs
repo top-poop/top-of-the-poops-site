@@ -8,6 +8,7 @@
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
     {{> chunks/meta-scripts }}
+    {{> chunks/meta-leaflet }}
 
     {{> components/meta-opengraph
             title=(concat "Live Sewage | " share.text)
@@ -21,77 +22,48 @@
             border: none;
         }
 
-        .map-container {
-            height: clamp(300px, 60vh, 720px);
-            min-height: 300px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        #map-section {
+            padding: 0
         }
 
-        .controls-panel {
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset, 0 2px 6px rgba(0, 0, 0, 0.06);
-        }
-
-        .cassette-controls {
+        .map-wrapper {
             position: relative;
         }
 
-        @media (max-width: 576px) {
-            .card-body.p-0 > .map-container#now {
-                height: clamp(260px, 55vh, 520px);
-            }
-
-            #map-section .card-footer {
-                padding-bottom: 0.5rem;
-            }
-
-            .cassette-controls::before {
-                width: 80px;
-            }
+        .map-container {
+            width: 100%;
+            height: clamp(400px, 75dvh, 1100px);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
-        .control-btn {
-            -webkit-appearance: none;
-            appearance: none;
-            border: 1px solid rgba(0, 0, 0, 0.2);
-            background: linear-gradient(180deg, #ffffff 0%, #f0f3f7 100%);
-            color: #333;
-            width: 42px;
-            height: 42px;
-            padding: 0;
-            margin: 0 6px;
-            border-radius: 12px;
-            display: grid;
-            place-items: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-            transition: transform 0.06s ease, box-shadow 0.2s ease, filter 0.2s ease;
-            cursor: pointer;
+        .legend-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            /* Increase width slightly for longer names or set to 'auto' */
+            min-width: 240px;
+            max-width: 320px;
         }
 
-        .control-btn .bi {
-            font-size: 1.05rem;
+        .legend-overlay h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #1e3a8a;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 5px;
         }
 
-        .control-btn:hover {
-            filter: brightness(1.03);
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-        }
-
-        .control-btn:active {
-            transform: translateY(1px);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 2px 4px rgba(0, 0, 0, 0.08);
-        }
-
-        .control-btn:focus-visible {
-            outline: 2px solid #86b7fe;
-            outline-offset: 2px;
-        }
-
-        @media (prefers-contrast: more) {
-            .control-btn {
-                background: #fff;
-                border-color: #000;
-            }
+        .legend-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 12px; /* Adds a gap between name and count pill */
+            white-space: nowrap; /* Forces everything onto one line */
         }
     </style>
 </head>
@@ -107,177 +79,64 @@
     </div>
 {{/components/jumbotron}}
 
-<div class="container" id="map-section">
-    <div class="row align-items-center">
-        <div class="col-md-8">
-            <div class="card border-0">
-                <div class="card-body p-0">
-                    <div class="map-container" id="now">
-                        <div></div>
-                    </div>
-                    <div class="card-footer cassette-footer bg-white p-1">
-                        <div class="controls-panel bg-info bg-opacity-25 rounded-3 p-3">
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="bi bi-clock-history text-primary me-2"></i>
-                                <h3 id="timeline-controls-title" class="h6 mb-0">Timeline Controls</h3>
-                            </div>
-                            <form>
-                                <div class="d-flex justify-content-center mb-3 cassette-controls"
-                                     aria-label="Timeline controls" role="group"
-                                     aria-labelledby="timeline-controls-title">
-                                    <div class="d-flex align-items-center">
-                                        <button type="button" class="control-btn" id="ctrl-le"
-                                                aria-label="Move to start" title="Move to start"><i
-                                                class="bi bi-chevron-bar-left"></i></button>
-                                        <button type="button" class="control-btn" id="ctrl-ld"
-                                                aria-label="Step back 1 day" title="Step back 1 day"><i
-                                                class="bi bi-chevron-double-left"></i></button>
-                                        <button type="button" class="control-btn" id="ctrl-l"
-                                                aria-label="Step back 1 hour" title="Step back 1 hour"><i
-                                                class="bi bi-chevron-left"></i></button>
-                                        <button type="button" class="control-btn" id="ctrl-r"
-                                                aria-label="Step forward 1 hour" title="Step forward 1 hour"><i
-                                                class="bi bi-chevron-right"></i></button>
-                                        <button type="button" class="control-btn" id="ctrl-rd"
-                                                aria-label="Step forward 1 day" title="Step forward 1 day"><i
-                                                class="bi bi-chevron-double-right"></i></button>
-                                        <button type="button" class="control-btn" id="ctrl-re" aria-label="Move to end"
-                                                title="Move to end"><i class="bi bi-chevron-bar-right"></i></button>
-                                    </div>
-                                </div>
-                                <div class="form-group row align-items-center">
-                                    <label for="dateSlider" class="col-md-4 col-form-label fw-bold">
-                                        <i class="bi bi-calendar-event me-2"></i>
-                                        <span id="dateSliderValue"></span>
-                                    </label>
-                                    <div class="col-md-8">
-                                        <input id="dateSlider" type="range" class="form-range">
-                                        <div class="form-text mt-1" id="timeline-help"><i
-                                                class="bi bi-info-circle me-1"></i>move the slider to show an animation
-                                            of sewage and rainfall across the country
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+<div class="container-fluid" id="map-section">
+    <div class="col-md-12">
+        <div class="map-wrapper">
+            <div class="map-container" id="map"></div>
+            <div id="info-panel" class="legend-overlay">
+                <div id="info-content"></div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="row mb-2">
-                <div class="col">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-primary text-white">
-                            <h2 class="h4 mb-0"><i class="bi bi-map me-2"></i>Map Information</h2>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-4">
-                                <h3 class="h5 fw-bold text-primary mb-3">What am I seeing?</h3>
-                                <p>Here are the CSOs in England that we know are overflowing right now. We are using the
-                                    Water Companies'
-                                    own data, updated every 15 minutes.</p>
-                            </div>
+    </div>
+</div>
 
-                            <div class="mb-4">
-                                <h3 class="h5 fw-bold text-primary mb-3">Map Legend</h3>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item d-flex align-items-center border-0 px-0">
-                                        <span class="badge rounded-pill bg-primary me-2">&nbsp;</span>
-                                        <span>Each dot represents an overflowing CSO</span>
-                                    </li>
-                                    <li class="list-group-item d-flex align-items-center border-0 px-0">
-                                        <span class="badge bg-info me-2"><i class="bi bi-droplet-fill"></i></span>
-                                        <span>Blue squares represent rainfall - darker blue means more rain - we get rainfall data two days delayed,
-                                    so you can't see rainfall for live data, but if you scroll back in time, you can see how much it was raining.</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+<div class="container">
+    <div class="row mt-2">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-table me-2"></i>Overflow Summary by Company</h2>
                 </div>
-            </div>
-            <div class="row mb-2">
-                <div class="col">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-primary text-white">
-                            <h2 class="h4 mb-0"><i class="bi bi-share-fill me-2"></i>Share</h2>
-                        </div>
-                        <div class="card-body">
-                            <div class="gap-1">
-                                {{> components/share-social share}}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-primary text-white">
-                            <h2 class="h4 mb-0"><i class="bi bi-currency-pound me-2"></i>Support Us</h2>
-                        </div>
-                        <div class="card-body">
-                            <div class="alert alert-warning">
-                                <p class="mb-0">With your support we can do more to track and report on
-                                    sewage
-                                    pollution.</p>
-                                <a href="/support" class="btn btn-danger mt-2">
-                                    <i class="bi bi-heart-fill me-1"></i> Support our work
-                                </a>                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mt-2">
-            <div class="col">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-info text-white">
-                        <h2 class="h4 mb-0"><i class="bi bi-table me-2"></i>Overflow Summary by Company</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table id="table-stream-summary" data-id="stream-summary" class="table table-hover">
-                                <thead class="table-light">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="table-stream-summary" data-id="stream-summary" class="table table-hover">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Company</th>
+                                <th class="text-end">Total CSOs</th>
+                                <th class="text-end">Overflowing</th>
+                                <th class="text-end">Not Overflowing</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{#each summary.companies}}
                                 <tr>
-                                    <th>Company</th>
-                                    <th class="text-end">Total CSOs</th>
-                                    <th class="text-end">Overflowing</th>
-                                    <th class="text-end">Not Overflowing</th>
+                                    <td class="align-middle" data-company="{{this.company.name}}">
+                                        <i class="bi bi-building me-1 text-muted"></i>
+                                        <a href="{{this.company.uri}}">{{this.company.name}}</a>
+                                    </td>
+                                    <td class="text-end">{{numberFormat this.count.total}}</td>
+                                    <td class="text-end fw-bold {{#if
+                                            this.count.start}}text-danger{{/if}}">{{numberFormat
+                                            this.count.start}}</td>
+                                    <td class="text-end">{{numberFormat this.count.stop}}</td>
                                 </tr>
-                                </thead>
-                                <tbody>
-                                {{#each summary.companies}}
-                                    <tr>
-                                        <td class="align-middle" data-company="{{this.company.name}}">
-                                            <i class="bi bi-building me-1 text-muted"></i>
-                                            <a href="{{this.company.uri}}">{{this.company.name}}</a>
-                                        </td>
-                                        <td class="text-end">{{numberFormat this.count.total}}</td>
-                                        <td class="text-end fw-bold {{#if
-                                                this.count.start}}text-danger{{/if}}">{{numberFormat
-                                                this.count.start}}</td>
-                                        <td class="text-end">{{numberFormat this.count.stop}}</td>
-                                    </tr>
-                                {{/each}}
-                                </tbody>
-                                <tfoot class="table-light">
-                                <tr>
-                                    <td><strong>Totals</strong></td>
-                                    <td class="text-end">{{numberFormat summary.count.total}}</td>
-                                    <td class="text-end fw-bold text-danger">{{numberFormat summary.count.start}}</td>
-                                    <td class="text-end">{{numberFormat summary.count.stop}}</td>
-                                </tr>
-                                </tfoot>
-                            </table>
-                        </div>
+                            {{/each}}
+                            </tbody>
+                            <tfoot class="table-light">
+                            <tr>
+                                <td><strong>Totals</strong></td>
+                                <td class="text-end">{{numberFormat summary.count.total}}</td>
+                                <td class="text-end fw-bold text-danger">{{numberFormat summary.count.start}}</td>
+                                <td class="text-end">{{numberFormat summary.count.stop}}</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
 
-                        <div class="alert alert-info mt-3 mb-0">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            Yorkshire Water and Scottish Water are not yet included but will be coming soon.
-                        </div>
+                    <div class="alert alert-info mt-3 mb-0">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Yorkshire Water and Scottish Water are not yet included but will be coming soon.
                     </div>
                 </div>
             </div>
@@ -389,166 +248,207 @@
 </div>
 
 <script type="module">
-    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
 
-    function msToTime(ms) {
-        let seconds = (ms / 1000).toFixed(1);
-        let minutes = (ms / (1000 * 60)).toFixed(1);
-        let hours = (ms / (1000 * 60 * 60)).toFixed(1);
-        let days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
-        if (seconds < 60) return seconds + " sec";
-        else if (minutes < 60) return minutes + " min";
-        else if (hours < 24) return hours + " hrs";
-        else return days + " days"
+    import * as maps from '/assets/js/map-common.js';
+    import * as utils from '/assets/js/utils.js';
+
+    const COMPANY_COLORS = maps.COMPANY_COLORS;
+    const scaleFactor = window.innerWidth < 500 ? 0.5 : 1;
+
+    const map = new maplibregl.Map({
+        container: 'map',
+        style: maps.STYLE_URI,
+        scrollZoom: false
+    });
+
+    const sw = [-6.00, 50.00];
+    const ne = [2.00, 55.65];
+    const bounds = [sw, ne];
+
+    const refit = (animate) => {
+        map.fitBounds(bounds, {
+            padding: 20,
+            animate: animate
+        });
     }
 
-    const chart = ({asof, sewage, rainfall, countries, height, width}) => {
-        sewage = sewage.map(
-                e => {
-                    const started = Date.parse(e.started);
-                    const duration = asof - started;
-                    return {
-                        started,
-                        duration,
-                        ...e,
-                    }
-                }
-        )
+    refit(false);
 
-        const rainfallScale = Plot.scale({
-            color: {
-                scheme: "Blues",
-                domain: [0, 10 / 4], // 10 mm/h (7.5mm/h is 'heavy'), but we are every 15 mins
-            }
-        })
+    const nav = new maplibregl.NavigationControl({
+        showCompass: false,
+        visualizePitch: true
+    });
 
-        return Plot.plot(
-                {
-                    projection: {
-                        type: "mercator",
-                        domain: {
-                            type: "MultiPoint",
-                            coordinates: [[-6, 49.9], [1.8, 55.9]],
-                        },
-                    },
-                    margin: 0,
-                    frame: false,
-                    height: height,
-                    width: width,
-                    r: {range: [3, 10], domain: [0, 86400 * 30 * 1000]},
-                    marks: [
-                        Plot.geo(
-                                countries,
-                                {
-                                    fill: "rgba(167,198,167,0.19)",
-                                    stroke: "rgba(0,0,0,0.2)",
-                                    strokeWidth: 2,
-                                    inset: 0,
-                                }
-                        ),
-                        Plot.rect(
-                                rainfall,
-                                {
-                                    x1: "xmin",
-                                    y1: "ymin",
-                                    x2: "xmax",
-                                    y2: "ymax",
-                                    opacity: 0.7,
-                                    filter: d => d.rain > 0,
-                                    fill: d => rainfallScale.apply(d.rain),
-                                    inset: 0,
-                                }
-                        ),
-                        Plot.dot(
-                                sewage,
-                                {
-                                    inset: 0,
-                                    x: d => d.loc.lon,
-                                    y: d => d.loc.lat,
-                                    r: d => d.duration,
-                                    fill: "company",
-                                    opacity: 0.5,
-                                    mixBlendMode: "multiply",
-                                    title: d => `${d.company} ${d.id} - Overflowing since ${d.started} - Duration ${msToTime(d.duration)}`,
-                                }
-                        )
-                    ]
-                }
-        );
-    };
+    map.addControl(nav, 'top-right');
 
-    const countries = await fetch("/data/v1/2024/geo/countries.json").then(it => it.json());
+    let timeout;
 
-    const slider = document.getElementById('dateSlider');
-    const sliderValue = document.getElementById('dateSliderValue');
-    const chartElement = document.getElementById("now")
+    new ResizeObserver( e => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => map.resize(), 250);
+    }).observe(document.getElementById("map"));
 
-    const now = new Date();
+    const infoContent = document.getElementById('info-content');
+    const infoPanel = document.getElementById('info-panel');
 
-    slider.min = Date.parse("2025-01-01T00:00:00Z").valueOf();
-    slider.max = now.getTime();
-    slider.value = slider.max;
-    slider.step = 60 * 60 * 1000;
+    map.on('load', async () => {
 
-    const updateDate = (d) => sliderValue.textContent = d.toLocaleString();
-
-    const actions = {
-        "ctrl-le": () => slider.value = slider.min,
-        "ctrl-ld": () => slider.valueAsNumber -= 86400 * 1000,
-        "ctrl-l": () => slider.valueAsNumber -= 60 * 60 * 1000,
-        "ctrl-r": () => slider.valueAsNumber += 60 * 60 * 1000,
-        "ctrl-rd": () => slider.valueAsNumber += 86400 * 1000,
-        "ctrl-re": () => slider.value = slider.max,
-    }
-
-    Object.keys(actions).forEach(id => {
-        const el = document.getElementById(id);
-        el.addEventListener('click', (_) => {
-            const action = actions[id];
-            if (action != null) {
-                return actions[id]() && slider.dispatchEvent(new Event('input'));
-            }
-        })
-    })
-
-    const doChart = async (date) => {
-
-        updateDate(date);
-
-        let epochMillis = date.getTime();
-
-        const sewage = await fetch(`/live/stream/overflowing/${epochMillis}`)
-        const rainfall = await fetch(`/live/environment-agency/rainfall/grid/${epochMillis}`)
-
-        if (sewage.ok) {
-            const rect = chartElement.getBoundingClientRect();
-            const h = Math.max(300, Math.floor(rect.height));
-
-            chartElement.replaceChildren(
-                    chart({
-                        asof: date,
-                        sewage: await sewage.json(),
-                        rainfall: await rainfall.json(),
-                        countries: countries,
-                        height: h,
-                        width: Math.floor(rect.width)
-                    })
-            );
+        if ( L.Browser.mobile ) {
+            map.dragPan.disable();
         }
+
+        map.addSource('rainfall-source', {
+            type: 'geojson',
+            data: {type: 'FeatureCollection', features: []}
+        });
+
+        map.addSource('overflow-source', {
+            type: 'geojson',
+            data: {type: 'FeatureCollection', features: []}
+        });
+
+        map.addLayer({
+            id: 'rainfall-layer',
+            type: 'fill',
+            source: 'rainfall-source',
+            paint: {
+                'fill-color': [
+                    'interpolate', ['linear'], ['get', 'rain'],
+                    0, 'transparent',
+                    0.1, '#93c5fd',
+                    1.0, '#2563eb',
+                    5.0, '#1e3a8a'
+                ],
+                'fill-opacity': 0.7
+            }
+        });
+
+        map.addLayer({
+            id: 'overflow-layer',
+            type: 'circle',
+            source: 'overflow-source',
+            layout: {
+                'circle-sort-key': ['get', 'duration'], // Older/larger circles drawn on top
+                'visibility': 'visible'
+            },
+            paint: {
+                // Color by Company
+                'circle-color': [
+                    'match', ['get', 'company'],
+                    'Anglian Water', maps.COMPANY_COLORS['Anglian Water'],
+                    'Northumbrian Water', maps.COMPANY_COLORS['Northumbrian Water'],
+                    'Severn Trent Water', maps.COMPANY_COLORS['Severn Trent Water'],
+                    'South West Water', maps.COMPANY_COLORS['South West Water'],
+                    'Southern Water', maps.COMPANY_COLORS['Southern Water'],
+                    'Thames Water', maps.COMPANY_COLORS['Thames Water'],
+                    'United Utilities', maps.COMPANY_COLORS['United Utilities'],
+                    'Wessex Water', maps.COMPANY_COLORS['Wessex Water'],
+                    'Dwr Cymru Welsh Water', maps.COMPANY_COLORS['Dwr Cymru Welsh Water'],
+                    maps.COMPANY_COLORS['Default'] // Final fallback
+                ],
+                'circle-radius': [
+                    'interpolate',
+                    ['linear'],
+                    ['get', 'duration'],
+                    0, 8 * scaleFactor,
+                    3000, 45 * scaleFactor
+                ],
+                'circle-opacity': 0.6,
+                'circle-stroke-width': 0.5,
+                'circle-stroke-color': 'rgba(255,255,255,0.5)',
+            }
+        });
+
+        map.on('mouseenter', 'overflow-layer', (e) => {
+            const feature = e.features[0];
+            infoContent.innerHTML = renderFeature(feature);
+            infoPanel.style.display = 'block';
+        });
+
+        if (L.Browser.mobile) {
+            map.on('click', (e) => {
+                // radius in pixels around the touch point to search for features
+                const radius = 40;
+
+                // Create a bounding box around the click/tap point
+                const bbox = [
+                    [e.point.x - radius, e.point.y - radius],
+                    [e.point.x + radius, e.point.y + radius]
+                ];
+
+                const features = map.queryRenderedFeatures(bbox, { layers: ['overflow-layer'] });
+
+                if (features.length > 0) {
+                    // pick the nearest feature
+                    let nearest = features[0];
+                    let minDistance = Infinity;
+
+                    features.forEach(f => {
+                        const fPoint = map.project(f.geometry.coordinates);
+                        const dx = fPoint.x - e.point.x;
+                        const dy = fPoint.y - e.point.y;
+                        const dist = dx*dx + dy*dy;
+                        if (dist < minDistance) {
+                            nearest = f;
+                            minDistance = dist;
+                        }
+                    });
+
+                    // show info panel for nearest
+                    infoContent.innerHTML = renderFeature(nearest);
+                    infoPanel.style.display = 'block';
+                }
+            });
+        }
+
+        let epochMillis = new Date().getTime();
+
+        fetch(`/live/stream/overflowing/${epochMillis}`)
+                .then(r => r.json())
+                .then(j => transformFlowToGeoJSON(j, epochMillis))
+                .then(gj => map.getSource('overflow-source').setData(gj))
+    });
+
+    function renderFeature(feature) {
+        const props = feature.properties;
+        return `
+        <a href="/overflow/${props.id}"><strong>${props.siteName}</strong></a><br>
+        Company: ${props.company}<br/>
+        <a href="/constituency/at/${props.lat}/${props.lon}?live">Constituency: ${props.pcon24nm}</a><br/>
+        Continuous Duration: ${utils.formatNumber(props.duration)} hours<br>
+      `
     }
 
-    slider.addEventListener('input', (e) => doChart(new Date(e.target.valueAsNumber)))
-    slider.addEventListener('change', (e) => doChart(new Date(e.target.valueAsNumber)))
 
-    // Rerender on resize so the plot height matches the container on desktop
-    window.addEventListener('resize', () => doChart(new Date(Number(slider.value))))
+    function transformFlowToGeoJSON(data, currentEpoch) {
+        return {
+            type: "FeatureCollection",
+            features: data.map(item => {
+                const startTime = new Date(item.started).getTime();
+                const hoursElapsed = Math.max(0, (currentEpoch - startTime) / 3600000);
 
-    doChart(now);
+                return {
+                    type: "Feature",
+                    geometry: {type: "Point", coordinates: [item.loc.lon, item.loc.lat]},
+                    properties: {
+                        siteName: item.site_name,
+                        receivingWater: item.receiving_water,
+                        company: item.company,
+                        pcon24nm: item.pcon24nm,
+                        duration: hoursElapsed,
+                        id: item.id,
+                        lat: item.loc.lat,
+                        lon: item.loc.lon,
+                    }
+                };
+            })
+        };
+    }
+
 
 </script>
 
 {{> chunks/footer }}
-
 
 </body>
 </html>

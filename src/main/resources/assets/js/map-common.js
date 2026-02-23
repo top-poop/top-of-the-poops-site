@@ -38,3 +38,22 @@ export function bbox(geojson) {
             Math.max(bbox[3], lat)
         ], [Infinity, Infinity, -Infinity, -Infinity]);
 }
+
+
+export function boundsToPolygon(bounds) {
+    const [[minLng, minLat], [maxLng, maxLat]] = bounds;
+
+    return {
+        type: "Feature",
+        geometry: {
+            type: "Polygon",
+            coordinates: [[
+                [minLng, minLat],
+                [maxLng, minLat],
+                [maxLng, maxLat],
+                [minLng, maxLat],
+                [minLng, minLat]
+            ]]
+        }
+    };
+}
