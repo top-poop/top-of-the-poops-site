@@ -122,6 +122,17 @@ class StreamDataTest {
     }
 
     @Test
+    fun `cso with no summary rows`() {
+        val buckets = stream.cso(
+            StreamId.of("SWS00014"),
+            start = LocalDate.parse("2026-01-01"),
+            end = LocalDate.parse("2027-01-01")
+        )
+
+        expectThat(buckets).isNotNull()
+    }
+
+    @Test
     fun daily() {
         val daily = stream.dailyByConstituency(ConstituencyName.of("Aldershot"), start= LocalDate.parse("2025-01-01"), end= LocalDate.parse("2026-01-01"))
         expectThat(daily).size.isGreaterThan(0)

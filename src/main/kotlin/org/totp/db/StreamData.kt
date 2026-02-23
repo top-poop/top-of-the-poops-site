@@ -608,22 +608,22 @@ select
     sl.site_name_wasc,
     sl.receiving_water,
     pcon24nm,
-    extract(epoch from sum(start)) as start,
-    extract(epoch from sum(offline)) as offline,
-    extract(epoch from sum(potential_start)) as potential,
+    coalesce(extract(epoch from sum(start)),0) as start,
+    coalesce(extract(epoch from sum(offline)),0) as offline,
+    coalesce(extract(epoch from sum(potential_start)),0) as potential,
     count(*) filter (where start <> interval '0') as count
-from stream_summary
-         join stream_cso as cso on cso.stream_cso_id = stream_summary.stream_cso_id
+from stream_cso cso
+         left join stream_summary on cso.stream_cso_id = stream_summary.stream_cso_id and date >= ? and date <= ?
          join stream_cso_grid on cso.stream_cso_id = stream_cso_grid.stream_cso_id
          join grid_references on stream_cso_grid.grid_reference = grid_references.grid_reference
          left join stream_lookup sl on (cso.stream_id = sl.stream_id or cso.stream_id = sl.stream_id_old)
-where cso.stream_id = ? and date >= ? and date <= ?
+where cso.stream_id = ? 
 group by cso.stream_id, cso.stream_company, cso.lat, cso.lon, pcon24nm, sl.site_name_consent, sl.site_name_wasc, sl.receiving_water;
                 """.trimIndent(),
                 bind = {
-                    it.set(1, id.value)
-                    it.set(2, start)
-                    it.set(3, end)
+                    it.set(1, start)
+                    it.set(2, end)
+                    it.set(3, id.value)
                 },
                 mapper = {
                     streamCsoSummaryFrom(it)
