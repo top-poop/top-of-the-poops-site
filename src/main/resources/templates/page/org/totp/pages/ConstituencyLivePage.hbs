@@ -236,7 +236,7 @@
                     <div class="d-flex flex-wrap gap-2">
                         {{#each neighbours}}
                             <a href="{{this.uri}}" class="text-decoration-none">
-                                <button class="btn btn-outline-secondary">
+                                <button class="btn btn-primary">
                                     <i class="bi bi-geo-fill me-1"></i> {{this.name}}
                                 </button>
                             </a>
@@ -333,7 +333,8 @@
                             <td data-duration="{{this.start.hours}}"
                                 data-order="{{this.start.value.toSeconds}}">{{numberFormat this.start.hours}}
                                 h {{#if this.start.minutes}}{{this.start.minutes}}m{{/if}}</td>
-                            <td class="text-end">{{#if this.unknown.any}}{{numberFormat this.unknown.hours}} h{{else}}-{{/if}}</td>
+                            <td data-order="{{this.unknown.hours}}"
+                                class="text-end">{{#if this.unknown.any}}{{numberFormat this.unknown.hours}} h{{else}}-{{/if}}</td>
                         </tr>
                     {{/each}}
                     </tbody>
