@@ -224,7 +224,9 @@ order by pcon24nm;
         val site_name: SiteName,
         val receiving_water: WaterwayName,
         val location: Coordinates,
-        val duration: Duration,
+        val start: Duration,
+        val offline: Duration,
+        val potential: Duration,
         val days: Int,
         val pcon24nm: ConstituencyName,
     )
@@ -244,7 +246,9 @@ select
     sl.site_name_wasc,
     sl.receiving_water,
     grid_references.pcon24nm,
-    extract(epoch from sum(start)) as duration_seconds,
+    extract(epoch from sum(start)) as start,
+    extract(epoch from sum(offline)) as offline,
+    extract(epoch from sum(potential_start)) as potential,
     count(*) filter (where start <> interval '0') as count
         
 from stream_summary
@@ -604,7 +608,9 @@ select
     sl.site_name_wasc,
     sl.receiving_water,
     pcon24nm,
-    extract(epoch from sum(start)) as duration_seconds,
+    extract(epoch from sum(start)) as start,
+    extract(epoch from sum(offline)) as offline,
+    extract(epoch from sum(potential_start)) as potential,
     count(*) filter (where start <> interval '0') as count
 from stream_summary
          join stream_cso as cso on cso.stream_cso_id = stream_summary.stream_cso_id
@@ -634,7 +640,9 @@ group by cso.stream_id, cso.stream_company, cso.lat, cso.lon, pcon24nm, sl.site_
             lon = rs.getDouble("lon")
         ),
         pcon24nm = rs.get(ConstituencyName, "pcon24nm"),
-        duration = Duration.ofSeconds(rs.getLong("duration_seconds")),
+        start = Duration.ofSeconds(rs.getLong("start")),
+        offline = Duration.ofSeconds(rs.getLong("offline")),
+        potential = Duration.ofSeconds(rs.getLong("potential")),
         days = rs.getInt("count"),
         site_name = rs.getNullable(SiteName, "site_name_wasc") ?: rs.getNullable(
             SiteName,

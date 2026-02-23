@@ -40,6 +40,7 @@ class RenderableDuration(val value: Duration) {
 
     val minutes = value.toMinutes() % 60;
 
+    val any = value > Duration.ofMinutes(1)
 
     val hasMonths = months > 1.0
     val hasYears = years > 1.0

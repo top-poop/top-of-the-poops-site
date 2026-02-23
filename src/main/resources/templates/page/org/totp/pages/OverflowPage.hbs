@@ -128,13 +128,13 @@
 
     {{#if selectedYear.current }}
         {{> components/meta-opengraph
-                title=(concat "Live Sewage | " cso.id.id " | " (numberFormat cso.duration.hours) " hours so far in " selectedYear.year)
+                title=(concat "Live Sewage | " cso.id.id " | " (numberFormat cso.start.hours) " hours so far in " selectedYear.year)
 
         }}
         <!--        twitterImageUri=share.twitterImageUri-->
     {{else}}
         {{> components/meta-opengraph
-                title=(concat "Live Sewage | " cso.id.id " | " (numberFormat cso.duration.hours) " hours in " selectedYear.year )
+                title=(concat "Live Sewage | " cso.id.id " | " (numberFormat cso.start.hours) " hours in " selectedYear.year )
         }}
         <!--        twitterImageUri=share.twitterImageUri-->
     {{/if}}
@@ -149,10 +149,22 @@
             Live{{else}}{{ selectedYear.year }}{{/if}} Sewage</h1>
         <h2>{{cso.site_name}}</h2>
         <p class="lead fs-4">
-            Polluted by sewage <span class="badge bg-danger fs-5">{{numberFormat cso.duration.hours}} hours</span>
+            {{#if cso.start.any}}
+                {{#gt cso.start.hours 0}}
+                    Polluted by sewage <span class="badge bg-danger fs-5">{{numberFormat cso.start.hours}} hours</span>
+                {{else}}
+                    Polluted by sewage <span class="badge bg-danger fs-5">{{numberFormat cso.start.minutes}} minutes</span>
+                {{/gt}}
+            {{else}}
+                No pollution reported
+            {{/if}}
+
+            {{#gt cso.offline.hours 1}}, monitoring offline <span class="badge bg-primary fs-5">{{numberFormat cso.offline.hours}}</span> hours{{/gt}}
+            {{#gt cso.potential.hours 1}}, potential overflows <span class="badge bg-primary fs-5">{{numberFormat cso.potential.hours}}</span> hours{{/gt}}
+
             in {{selectedYear.year}}
-            {{#gt cso.duration.years 1}}
-                - That's <em class="text-danger fw-bold">{{numberFormat cso.duration.years}} years</em>
+            {{#gt cso.start.years 1}}
+                - That's <em class="text-danger fw-bold">{{numberFormat cso.start.years}} years</em>
             {{/gt}}
             {{#if selectedYear.current}}so far..{{/if}}
         </p>
@@ -236,7 +248,20 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex flex-wrap gap-2">
-                            In {{ selectedYear.year }}, overflowed for {{ cso.duration.hours }} hours, on {{ cso.days.count }} days
+                            In {{ selectedYear.year }},
+                            {{#if cso.start.any}}
+                                {{#gt cso.start.hours 0}}
+                                    polluted by sewage {{numberFormat cso.start.hours}} hours on {{ cso.days.count }} days
+                                {{else}}
+                                    polluted by sewage {{numberFormat cso.start.minutes}} minutes
+                                {{/gt}}
+                            {{else}}
+                                no pollution reported
+                            {{/if}}
+
+                            {{#gt cso.offline.hours 1}}<br/>CSO monitoring was offline for {{numberFormat cso.offline.hours}} hours{{/gt}}
+                            {{#gt cso.potential.hours 1}}<br/>CSO went offline when overflowing, so could also have overflowed for additional {{numberFormat cso.potential.hours}} hours{{/gt}}
+
                         </div>
                     </div>
                 </div>
@@ -488,7 +513,7 @@
                                         `${it.id.id} - ${it.siteName} into ${ it.receivingWater}`);
 
                         marker.on('click', () => {
-                            window.location.href = it.id.uri;
+                            window.location.href = it.id.uri + window.location.search;
                         });
 
                         marker.addTo(csoLayer);

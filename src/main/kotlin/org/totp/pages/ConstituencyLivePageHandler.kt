@@ -8,6 +8,7 @@ import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.db.AnnualSewageRainfall
+import org.totp.db.DailySewageRainfall
 import org.totp.db.StreamData
 import org.totp.db.StreamId
 import org.totp.http4k.pageUriFrom
@@ -25,7 +26,9 @@ data class RenderableStreamCsoSummary(
     val site_name: String,
     val receiving_water: String,
     val location: Coordinates,
-    val duration: RenderableDuration,
+    val start: RenderableDuration,
+    val offline: RenderableDuration,
+    val potential: RenderableDuration,
     val days: RenderableCount,
     val constituency: RenderableConstituency,
 )
@@ -80,13 +83,19 @@ fun AnnualSewageRainfall.toRenderable(): RenderableAnnualSewageRainfall {
                         duration = RenderableDuration(d.duration),
                         count = RenderableCount(d.count),
                         rainfall = d.rainfall,
-                        sewageClass = ((d.duration.toMillis().toDouble() / Duration.ofHours(24).toMillis()).coerceIn(0.0, 1.0) * 6).toInt().let {"sewage-${it}"},
+                        sewageClass = calculateSewageClass(d),
                         rainfallClass = ((d.rainfall / 25).coerceIn(0.0, 1.0) * 10).toInt().let {"rainfall-${it}"}
                     )
                 }
             )
         }
     )
+}
+
+private fun calculateSewageClass(d: DailySewageRainfall): String {
+    val scaled = ((d.duration.toMillis().toDouble() / Duration.ofHours(24).toMillis()).coerceIn(0.0, 1.0) * 6).toInt()
+    val index = if (d.duration > Duration.ofMinutes(10)) scaled.coerceAtLeast(1) else scaled
+    return "sewage-${index}"
 }
 
 class ConstituencyLiveNotAvailablePage(
@@ -195,7 +204,7 @@ object ConstituencyLivePageHandler {
                             annual = annualSewageRainfall(constituencyName, startDate, endDate).toRenderable(),
                             csos = csoLive(constituencyName, startDate, endDate)
                                 .map { it.toRenderable() }
-                                .sortedByDescending { it.duration.value },
+                                .sortedByDescending { it.start.value },
                         )
                     )
                 } else {
@@ -244,7 +253,9 @@ fun StreamData.StreamCsoSummary.toRenderable(): RenderableStreamCsoSummary {
         site_name = site_name.value,
         receiving_water = receiving_water.value,
         location = location,
-        duration = RenderableDuration(duration),
+        start = RenderableDuration(start),
+        offline = RenderableDuration(offline),
+        potential = RenderableDuration(potential),
         days = RenderableCount(days),
     )
 }
