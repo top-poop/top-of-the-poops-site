@@ -106,7 +106,7 @@ def aggregate_stream_events(events: Iterable[StreamEvent]) -> CalendarListener:
     return l
 
 
-def events_for_cso(connection, cso_id: str) -> Iterable[StreamEvent]:
+def events_for_cso(connection, cso_id: str, since: datetime.date) -> Iterable[StreamEvent]:
     return select_many(
         connection=connection,
         sql="""
@@ -114,8 +114,12 @@ def events_for_cso(connection, cso_id: str) -> Iterable[StreamEvent]:
             from stream_cso_event
                      join stream_cso sc on stream_cso_event.stream_cso_id = sc.stream_cso_id
             where stream_id = %(cso_id)s
+                and date_trunc('day', event_time) >= %(since)s
             order by stream_cso_event.stream_cso_id, event_time""",
-        params={"cso_id": cso_id},
+        params={
+            "cso_id": cso_id,
+            "since": since
+        },
         f=row_to_event)
 
 
@@ -127,7 +131,9 @@ def all_events(connection, since: datetime.date) -> Iterable[StreamEvent]:
             from stream_cso_event
             where date_trunc('day', event_time) >= %(since)s
             order by stream_cso_id, event_time""",
-        params={"since": since},
+        params={
+            "since": since
+        },
         f=row_to_event)
 
 
@@ -205,7 +211,7 @@ if __name__ == "__main__":
     events_fn = lambda c: all_events(c, since=start_date)
 
     if args.cso:
-        events_fn = lambda c: events_for_cso(c, args.cso)
+        events_fn = lambda c: events_for_cso(c, args.cso,  since=start_date)
 
     pool = psy.connect(db_host)
 
