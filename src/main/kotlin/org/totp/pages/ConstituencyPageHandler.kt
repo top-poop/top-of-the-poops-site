@@ -315,14 +315,18 @@ fun ConstituencyName.toRenderable(
 
 data class RenderableConstituencyLiveTotal(
     val constituency: RenderableConstituency,
-    val duration: RenderableDuration,
+    val start: RenderableDuration,
     val count: RenderableCount,
+    val offline: RenderableDuration,
+    val potential: RenderableDuration,
 )
 
 fun StreamData.ConstituencyLiveTotal.toRenderable(): RenderableConstituencyLiveTotal {
     return RenderableConstituencyLiveTotal(
         constituency = this.constituency.toRenderable(linkLive = true),
-        duration = this.duration.toRenderable(),
+        start = this.start.toRenderable(),
+        offline = this.offline.toRenderable(),
+        potential = this.potential.toRenderable(),
         count = RenderableCount(csoCount),
     )
 }

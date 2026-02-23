@@ -21,7 +21,6 @@
             margin-bottom: 0;
         }
 
-
         .card {
             transition: all 0.3s ease;
             border: none;
@@ -50,79 +49,6 @@
             border-radius: 80%;
             transition: background-color 0.2s ease, transform 0.2s ease;
         }
-
-        .rainfall-0 {
-            background-color: #ffffff;
-        }
-
-        .rainfall-1 {
-            background-color: rgb(247, 251, 255);
-        }
-
-        .rainfall-2 {
-            background-color: rgb(225, 237, 248);
-        }
-
-        .rainfall-3 {
-            background-color: rgb(202, 222, 240);
-        }
-
-        .rainfall-4 {
-            background-color: rgb(171, 207, 230);
-        }
-
-        .rainfall-5 {
-            background-color: rgb(130, 186, 219);
-        }
-
-        .rainfall-6 {
-            background-color: rgb(89, 161, 207);
-        }
-
-        .rainfall-7 {
-            background-color: rgb(55, 135, 192);
-        }
-
-        .rainfall-8 {
-            background-color: rgb(28, 106, 175);
-        }
-
-        .rainfall-9 {
-            background-color: rgb(11, 77, 148);
-        }
-
-        .rainfall-10 {
-            background-color: rgb(8, 48, 107);
-        }
-
-        .sewage-0 {
-            background-color: #ffffff;
-        }
-
-        .sewage-1 {
-            background-color: #f7a974;
-        }
-
-        .sewage-2 {
-            background-color: #fda863;
-        }
-
-        .sewage-3 {
-            background-color: #d44a04;
-        }
-
-        .sewage-4 {
-            background-color: #d44a04;
-        }
-
-        .sewage-5 {
-            background-color: #842904;
-        }
-
-        .sewage-6 {
-            background-color: #842904;
-        }
-
 
     </style>
 
@@ -294,9 +220,7 @@
                             </div>
                     </div>
                 </div>
-
             </div>
-
         </div>
     </div>
 </div>
@@ -314,13 +238,17 @@
                             <div class="col-12 col-md-2">
                                 <div class="card">
                                     <div class="card-header">
-                                        {{ this.month }} - {{ numberFormat this.duration.hours }} hours
+                                        {{ this.month }} - {{ numberFormat this.start.hours }} hours
+                                        {{#if this.potential.any}}, {{ numberFormat this.potential.hours }} potential
+                                        {{else}}
+                                            {{#if this.offline.any }}, {{ numberFormat this.offline.hours }} offline{{/if}}
+                                        {{/if}}
                                     </div>
                                     <div class="card-body">
                                         <div class="month-grid">
                                             {{#each this.days}}
                                                 <div class="day {{this.rainfallClass}}"
-                                                     title="{{this.date}} {{this.duration.hours}} hours, {{ numberFormat this.rainfall}} mm rain"
+                                                     title="{{this.date}} {{this.start.hours}} hours, {{ numberFormat this.rainfall}} mm rain {{#if this.offline.any }}, {{ numberFormat this.offline.hours }}h offline{{/if}}"
                                                      data-date="{{this.date}}">
                                                     <div class="inner {{this.sewageClass}}"></div>
                                                 </div>

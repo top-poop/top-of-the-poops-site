@@ -5,10 +5,25 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.Month
 
-data class DailySewageRainfall(val date: LocalDate, val duration: Duration, val count: Int, val rainfall: Double)
-data class MonthlySewageRainfall(val month: Month, val days: List<DailySewageRainfall>)
-data class AnnualSewageRainfall(val year: Int, val months: List<MonthlySewageRainfall>) {
-    fun totalDuration(): Duration = months.flatMap { it.days.map { it.duration } }
+data class DailySewageRainfall(
+    val date: LocalDate,
+    val start: Duration,
+    val offline: Duration,
+    val potential: Duration,
+    val count: Int,
+    val rainfall: Double
+)
+
+data class MonthlySewageRainfall(
+    val month: Month,
+    val days: List<DailySewageRainfall>
+)
+
+data class AnnualSewageRainfall(
+    val year: Int,
+    val months: List<MonthlySewageRainfall>
+) {
+    fun totalDuration(): Duration = months.flatMap { it.days.map { it.start } }
         .fold(Duration.ZERO) { acc, item -> acc.plus(item) }
 }
 
@@ -20,7 +35,12 @@ class AnnualLiveSewage(val environmentAgency: EnvironmentAgency, val streamData:
         return aggregate(sewage, rainfall, start, end)
     }
 
-    fun byCso(streamId: StreamId, constituencyName: ConstituencyName, start: LocalDate, end: LocalDate): AnnualSewageRainfall {
+    fun byCso(
+        streamId: StreamId,
+        constituencyName: ConstituencyName,
+        start: LocalDate,
+        end: LocalDate
+    ): AnnualSewageRainfall {
         val sewage = streamData.dailyByStreamId(streamId, start, end)
         val rainfall = environmentAgency.rainfallForConstituency(constituencyName, start, end)
 
@@ -44,10 +64,19 @@ class AnnualLiveSewage(val environmentAgency: EnvironmentAgency, val streamData:
             val month = current.month
 
             val dailySewage = sewageByDate[current]?.let {
-                DailySewageRainfall(current, it.duration, 0, 0.0)
+                DailySewageRainfall(
+                    current,
+                    start = it.start,
+                    offline = it.offline,
+                    potential = it.potential,
+                    0,
+                    0.0
+                )
             } ?: DailySewageRainfall(
                 date = current,
-                duration = Duration.ZERO,
+                start = Duration.ZERO,
+                offline = Duration.ZERO,
+                potential = Duration.ZERO,
                 count = 0,
                 rainfall = 0.0
             )

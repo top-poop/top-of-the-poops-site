@@ -29,6 +29,7 @@ data class RenderableStreamCsoSummary(
     val start: RenderableDuration,
     val offline: RenderableDuration,
     val potential: RenderableDuration,
+    val unknown: RenderableDuration,
     val days: RenderableCount,
     val constituency: RenderableConstituency,
 )
@@ -51,7 +52,9 @@ class ConstituencyLivePage(
 
 data class RenderableDailySewageRainfall(
     val date: LocalDate,
-    val duration: RenderableDuration,
+    val start: RenderableDuration,
+    val offline: RenderableDuration,
+    val potential: RenderableDuration,
     val count: RenderableCount,
     val rainfall: Double,
     val sewageClass: String,
@@ -59,7 +62,9 @@ data class RenderableDailySewageRainfall(
 )
 
 data class RenderableMonthlySewageRainfall(val month: String, val days: List<RenderableDailySewageRainfall>) {
-    val duration = RenderableDuration(days.fold(Duration.ZERO) { acc, item -> acc + item.duration.value })
+    val start = RenderableDuration(days.fold(Duration.ZERO) { acc, item -> acc + item.start.value })
+    val offline = RenderableDuration(days.fold(Duration.ZERO) { acc, item -> acc + item.offline.value })
+    val potential = RenderableDuration(days.fold(Duration.ZERO) { acc, item -> acc + item.potential.value })
     val count = RenderableCount(days.sumOf { it.count.count })
 }
 
@@ -67,7 +72,9 @@ data class RenderableAnnualSewageRainfall(
     val year: Int,
     val months: List<RenderableMonthlySewageRainfall>
 ) {
-    val duration = RenderableDuration(months.fold(Duration.ZERO) { acc, item -> acc + item.duration.value })
+    val start = RenderableDuration(months.fold(Duration.ZERO) { acc, item -> acc + item.start.value })
+    val offline = RenderableDuration(months.fold(Duration.ZERO) { acc, item -> acc + item.offline.value })
+    val potential = RenderableDuration(months.fold(Duration.ZERO) { acc, item -> acc + item.potential.value })
     val count = RenderableCount(months.sumOf { it.count.count })
 }
 
@@ -80,11 +87,13 @@ fun AnnualSewageRainfall.toRenderable(): RenderableAnnualSewageRainfall {
                 days = m.days.map { d ->
                     RenderableDailySewageRainfall(
                         date = d.date,
-                        duration = RenderableDuration(d.duration),
+                        start = RenderableDuration(d.start),
+                        offline = RenderableDuration(d.offline),
+                        potential = RenderableDuration(d.potential),
                         count = RenderableCount(d.count),
                         rainfall = d.rainfall,
                         sewageClass = calculateSewageClass(d),
-                        rainfallClass = ((d.rainfall / 25).coerceIn(0.0, 1.0) * 10).toInt().let {"rainfall-${it}"}
+                        rainfallClass = ((d.rainfall / 25).coerceIn(0.0, 1.0) * 10).toInt().let { "rainfall-${it}" }
                     )
                 }
             )
@@ -93,9 +102,25 @@ fun AnnualSewageRainfall.toRenderable(): RenderableAnnualSewageRainfall {
 }
 
 private fun calculateSewageClass(d: DailySewageRainfall): String {
-    val scaled = ((d.duration.toMillis().toDouble() / Duration.ofHours(24).toMillis()).coerceIn(0.0, 1.0) * 6).toInt()
-    val index = if (d.duration > Duration.ofMinutes(10)) scaled.coerceAtLeast(1) else scaled
-    return "sewage-${index}"
+
+    if (d.start >= Duration.ofMinutes(1)) {
+        return "sewage-${indexForDuration(d.start)}"
+    }
+
+    if (d.potential >= Duration.ofMinutes(1)) {
+        return "problem-${indexForDuration(d.potential)}"
+    }
+
+    if (d.offline >= Duration.ofMinutes(1)) {
+        return "offline-${indexForDuration(d.offline)}"
+    }
+
+    return "sewage-0"
+}
+
+private fun indexForDuration(d: Duration): Int {
+    val scaled = ((d.toMillis().toDouble() / Duration.ofHours(24).toMillis()).coerceIn(0.0, 1.0) * 6).toInt()
+    return if (d > Duration.ofMinutes(10)) scaled.coerceAtLeast(1) else scaled
 }
 
 class ConstituencyLiveNotAvailablePage(
@@ -165,13 +190,13 @@ object ConstituencyLivePageHandler {
 
                 if (liveAvailable.contains(constituencyName)) {
                     val startDate = LocalDate.of(selectedYear, 1, 1)
-                    val endDate = if ( selectedYear == currentYear ) {
+                    val endDate = if (selectedYear == currentYear) {
                         today.withDayOfMonth(1).plusMonths(1)
                     } else {
                         LocalDate.of(selectedYear + 1, 1, 1)
                     }
                     val totals = constituencyLiveTotals(constituencyName, startDate, endDate)
-                    val hours = totals.duration.toHours()
+                    val hours = totals.start.toHours()
                     val formatted = NumberFormat.getNumberInstance().format(hours)
 
                     Response(Status.OK).with(
@@ -257,6 +282,7 @@ fun StreamData.StreamCsoSummary.toRenderable(): RenderableStreamCsoSummary {
         offline = RenderableDuration(offline),
         potential = RenderableDuration(potential),
         days = RenderableCount(days),
+        unknown = RenderableDuration(offline + potential)
     )
 }
 

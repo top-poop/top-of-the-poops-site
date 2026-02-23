@@ -34,17 +34,32 @@ class ConstituencyLivePageHandlerTest {
             constituencyLiveTotals = { c, _, _ ->
                 StreamData.ConstituencyLiveTotal(
                     constituency = c,
-                    duration = Duration.ofHours(10),
-                    csoCount = 10
+                    start = Duration.ofHours(10),
+                    offline = Duration.ofHours(1),
+                    potential = Duration.ofHours(2),
+                    csoCount = 10,
                 )
             },
             liveDataLatest = clock::instant,
             csoLive = { c, _, _ -> listOf() },
-            annualSewageRainfall = { c, _, _ -> AnnualSewageRainfall(2025, listOf(
-                MonthlySewageRainfall(Month.JANUARY, days =  listOf(
-                    DailySewageRainfall(date = LocalDate.parse("2025-01-01"), Duration.ofMinutes(72), count = 10, rainfall =  100.0)
-                ))
-            )) }
+            annualSewageRainfall = { c, _, _ ->
+                AnnualSewageRainfall(
+                    2025, listOf(
+                        MonthlySewageRainfall(
+                            Month.JANUARY, days = listOf(
+                                DailySewageRainfall(
+                                    date = LocalDate.parse("2025-01-01"),
+                                    start = Duration.ofMinutes(72),
+                                    offline = Duration.ofMinutes(3),
+                                    potential = Duration.ofMinutes(15),
+                                    count = 10,
+                                    rainfall = 100.0
+                                )
+                            )
+                        )
+                    )
+                )
+            }
         )
     )
 

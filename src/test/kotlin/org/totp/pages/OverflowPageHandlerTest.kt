@@ -35,7 +35,9 @@ class OverflowPageHandlerTest {
                             Month.JANUARY, days = listOf(
                                 DailySewageRainfall(
                                     date = LocalDate.parse("2025-01-01"),
-                                    Duration.ofMinutes(72),
+                                    start = Duration.ofMinutes(72),
+                                    offline = Duration.ofMinutes(72),
+                                    potential = Duration.ofMinutes(72),
                                     count = 10,
                                     rainfall = 100.0
                                 )

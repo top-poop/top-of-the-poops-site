@@ -271,27 +271,33 @@ group by grid_references.pcon24nm, cso.stream_cso_id, sl.site_name_consent, sl.s
         })
     }
 
-    data class DailySummary(val date: LocalDate, val duration: Duration)
+    data class DailySummary(val date: LocalDate, val start: Duration, val offline: Duration, val potential: Duration)
 
     fun dailyByStreamId(streamId: StreamId, start: LocalDate, end: LocalDate): List<DailySummary> {
         return connection.execute(NamedQueryBlock("daily-by-constituency") {
             query(
                 sql = """
-select ss.date, extract(epoch from sum(start)) as overflowing, count(distinct stream_cso.stream_cso_id) as cso_count
+select ss.date, 
+    extract(epoch from sum(start)) as start, 
+    extract(epoch from sum(offline)) as offline, 
+    extract(epoch from sum(potential_start)) as potential, 
+    count(distinct stream_cso.stream_cso_id) as cso_count
 from stream_summary ss
-         join stream_cso on stream_cso.stream_cso_id = ss.stream_cso_id
-where stream_cso.stream_id = ? and date >= ? and date <= ?
+         join stream_cso on stream_cso.stream_cso_id = ss.stream_cso_id and date >= ? and date <= ?
+where stream_cso.stream_id = ? 
 group by ss.date
 """,
                 bind = {
-                    it.set(1, streamId.value)
-                    it.set(2, start)
-                    it.set(3, end)
+                    it.set(1, start)
+                    it.set(2, end)
+                    it.set(3, streamId.value)
                 },
                 mapper = {
                     DailySummary(
                         it.getDate("date").toLocalDate(),
-                        duration = Duration.ofSeconds(it.getLong("overflowing")),
+                        start = Duration.ofSeconds(it.getLong("start")),
+                        offline = Duration.ofSeconds(it.getLong("offline")),
+                        potential = Duration.ofSeconds(it.getLong("potential")),
                     )
                 }
             )
@@ -302,7 +308,11 @@ group by ss.date
         return connection.execute(NamedQueryBlock("daily-by-constituency") {
             query(
                 sql = """
-select ss.date, extract(epoch from sum(start)) as overflowing, count(distinct stream_cso.stream_cso_id) as cso_count
+select ss.date, 
+    extract(epoch from sum(start)) as start, 
+    extract(epoch from sum(offline)) as offline, 
+    extract(epoch from sum(potential_start)) as potential, 
+    count(distinct stream_cso.stream_cso_id) as cso_count
 from stream_summary ss
          join stream_cso on stream_cso.stream_cso_id = ss.stream_cso_id
          join stream_cso_grid on stream_cso.stream_cso_id = stream_cso_grid.stream_cso_id
@@ -318,18 +328,21 @@ group by grid_references.pcon24nm, ss.date
                 mapper = {
                     DailySummary(
                         it.getDate("date").toLocalDate(),
-                        duration = Duration.ofSeconds(it.getLong("overflowing")),
+                        start = Duration.ofSeconds(it.getLong("start")),
+                        offline = Duration.ofSeconds(it.getLong("offline")),
+                        potential = Duration.ofSeconds(it.getLong("potential")),
                     )
                 }
             )
         })
     }
 
-
     data class ConstituencyLiveTotal(
         val constituency: ConstituencyName,
-        val duration: Duration,
-        val csoCount: Int
+        val start: Duration,
+        val csoCount: Int,
+        val offline: Duration,
+        val potential: Duration,
     )
 
     fun totalForConstituency(
@@ -340,31 +353,40 @@ group by grid_references.pcon24nm, ss.date
         return connection.execute(NamedQueryBlock("total-for-constituency") {
             query(
                 sql = """
-select grid_references.pcon24nm, extract(epoch from sum(start)) as overflowing, count(distinct stream_cso.stream_cso_id) as cso_count
-from stream_summary
-         join stream_cso on stream_cso.stream_cso_id = stream_summary.stream_cso_id
+select 
+    grid_references.pcon24nm, 
+    extract(epoch from sum(start)) as start, 
+    extract(epoch from sum(offline)) as offline, 
+    extract(epoch from sum(potential_start)) as potential, 
+    count(distinct stream_cso.stream_cso_id) as cso_count
+from stream_cso 
+         join stream_summary on stream_cso.stream_cso_id = stream_summary.stream_cso_id and date >= ? and date <= ?
          join stream_cso_grid on stream_cso.stream_cso_id = stream_cso_grid.stream_cso_id
          join grid_references on stream_cso_grid.grid_reference = grid_references.grid_reference
-where grid_references.pcon24nm = ? and date >= ? and date <= ?
+where grid_references.pcon24nm = ? 
 group by grid_references.pcon24nm
                 """.trimIndent(),
                 bind = {
-                    it.set(1, constituency)
-                    it.set(2, startDate)
-                    it.set(3, endDate)
+                    it.set(1, startDate)
+                    it.set(2, endDate)
+                    it.set(3, constituency)
                 },
                 mapper = {
                     ConstituencyLiveTotal(
                         constituency = constituency,
-                        duration = Duration.ofSeconds(it.getLong("overflowing")),
+                        start = Duration.ofSeconds(it.getLong("start")),
+                        offline = Duration.ofSeconds(it.getLong("offline")),
+                        potential = Duration.ofSeconds(it.getLong("potential")),
                         csoCount = it.getInt("cso_count")
                     )
                 }
             )
         }).firstOrNull() ?: ConstituencyLiveTotal(
             constituency = constituency,
-            duration = Duration.ZERO,
-            csoCount = 0
+            start = Duration.ZERO,
+            offline = Duration.ZERO,
+            potential = Duration.ZERO,
+            csoCount = 0,
         )
 
     }

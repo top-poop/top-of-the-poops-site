@@ -69,8 +69,10 @@ class ConstituencyPageHandlerTest {
             constituencyLiveTotals = { c, _, _ ->
                 StreamData.ConstituencyLiveTotal(
                     constituency = c,
-                    duration = Duration.ofHours(10),
-                    csoCount = 10
+                    start = Duration.ofHours(10),
+                    offline = Duration.ofHours(0),
+                    potential = Duration.ofHours(5),
+                    csoCount = 10,
                 )
             },
             liveDataLatest = clock::instant,
