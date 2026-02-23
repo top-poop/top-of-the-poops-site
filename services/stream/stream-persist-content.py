@@ -6,9 +6,7 @@ from collections import Counter
 from dataclasses import replace
 from datetime import timezone
 
-import psycopg2
-from psycopg2.extras import DictCursor
-
+import psy
 from args import enum_parser
 from companies import StreamMembers
 from companies import WaterCompany
@@ -16,7 +14,6 @@ from secret import env
 from storage import b2_service, CSVFileStorage, SqlliteStorage, StreamCSV, S3Storage
 from stream import FeatureRecord, EventType
 from streamdb import Database
-
 
 logging.basicConfig(
     level=logging.INFO,
@@ -51,8 +48,9 @@ if __name__ == '__main__':
     else:
         companies = [w for w in StreamMembers if w != WaterCompany.YorkshireWater]
 
-    with psycopg2.connect(host=db_host, database="gis", user="docker", password="docker",
-                          cursor_factory=DictCursor) as conn:
+    pool = psy.connect(db_host)
+
+    with pool.connection() as conn:
 
         database = Database(conn)
 
@@ -134,4 +132,3 @@ if __name__ == '__main__':
 
                 most_recent_by_id.update({w.id: replace(w, status=EventType(int(w.status))) for w in wanted_features})
                 conn.commit()
-

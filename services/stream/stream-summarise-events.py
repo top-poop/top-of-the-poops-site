@@ -1,17 +1,14 @@
 import argparse
 import datetime
-import io
-import itertools
 import logging
 import os
 import pathlib
 from collections import defaultdict
 from typing import Mapping, Optional, Iterable
 
-import psycopg2
-from psycopg2.extras import DictCursor, execute_batch
 from statemachine import statemachine, State
 
+import psy
 from event_calendar import CSOState, state_name_to_cso_state, StreamMonitorState, Calendar
 from psy import select_many
 from stream import EventType
@@ -73,6 +70,8 @@ class StreamEventStream:
                 self.state.do_start(stream_event=event)
             elif event.event == EventType.Stop:
                 self.state.do_stop(stream_event=event)
+            elif event.event == EventType.Offline:
+                self.state.do_offline(stream_event=event)
         except statemachine.TransitionNotAllowed:
             raise IOError(f"Illegal state transition processing {event}")
 
@@ -94,7 +93,6 @@ def row_to_event(row) -> StreamEvent:
 
 
 def aggregate_stream_events(events: Iterable[StreamEvent]) -> CalendarListener:
-
     count = 0
 
     l = CalendarListener(start=start_date)
@@ -102,7 +100,7 @@ def aggregate_stream_events(events: Iterable[StreamEvent]) -> CalendarListener:
 
     for event in events:
         s.event(event)
-        count +=1
+        count += 1
         if count % 10_000 == 0:
             print(f"Processed {count} events so far")
     return l
@@ -137,44 +135,43 @@ def insert_stream_summary(connection, everything):
     logger.info(f"Have {len(everything)} items to insert")
     with connection.cursor() as cursor:
         cursor.execute("""
-   CREATE TEMP TABLE tmp_stream_summary (LIKE stream_summary INCLUDING DEFAULTS INCLUDING CONSTRAINTS) on commit drop;
+                       CREATE
+                       TEMP TABLE tmp_stream_summary (LIKE stream_summary INCLUDING DEFAULTS INCLUDING CONSTRAINTS) on commit drop;
                        """)
 
-        execute_batch(
-            cur=cursor,
-            sql="""insert into tmp_stream_summary (stream_cso_id, date, unknown, start, stop, potential_start, offline)
-                   values (%(stream_cso_id)s, %(date)s, %(unknown)s, %(start)s, %(stop)s, %(potential_start)s,
-                           %(offline)s)
-""",
-            argslist=[{
-                "stream_cso_id": cso_id,
-                "date": date,
-                "unknown": totals[CSOState.UNKNOWN],
-                "start": totals[CSOState.START],
-                "stop": totals[CSOState.STOP],
-                "potential_start": totals[CSOState.POTENTIAL_START],
-                "offline": totals[CSOState.OFFLINE]
-            }   for cso_id, allocations in everything
-                for date, totals in allocations
-            ],
-            page_size=30000,
-        )
+        count = 0
 
-        logger.info("All rows inserted to temp table")
+        with cursor.copy(f"COPY tmp_stream_summary FROM STDIN") as copy:
+            for cso_id, allocations in everything:
+                for date, totals in allocations:
+                    count += 1
+                    copy.write_row((
+                        cso_id,
+                        date,
+                        totals[CSOState.UNKNOWN],
+                        totals[CSOState.START],
+                        totals[CSOState.STOP],
+                        totals[CSOState.POTENTIAL_START],
+                        totals[CSOState.OFFLINE]
+                    ))
+
+        logger.info(f"All {count} rows inserted to temp table")
 
         cursor.execute("""
-                    INSERT INTO stream_summary
-                    SELECT * FROM tmp_stream_summary
-                        ON CONFLICT (stream_cso_id, date)
-            DO UPDATE SET
-                                           unknown         = EXCLUDED.unknown,
-               start           = EXCLUDED.start,
-                                           stop            = EXCLUDED.stop,
-                                           potential_start = EXCLUDED.potential_start,
-                                           offline         = EXCLUDED.offline
-                    """)
+                       INSERT INTO stream_summary
+                       SELECT *
+                       FROM tmp_stream_summary ON CONFLICT (stream_cso_id, date)
+            DO
+                       UPDATE SET
+                           unknown = EXCLUDED.unknown,
+                       start = EXCLUDED.start
+                           , stop = EXCLUDED.stop
+                           , potential_start = EXCLUDED.potential_start
+                           , offline = EXCLUDED.offline
+                       """)
         logger.info("Copied across")
         connection.commit()
+
 
 def filter_events(max_date: datetime.datetime, events: Iterable[StreamEvent]) -> Iterable[StreamEvent]:
     # wessex water reported some events far in the future.
@@ -210,8 +207,9 @@ if __name__ == "__main__":
     if args.cso:
         events_fn = lambda c: events_for_cso(c, args.cso)
 
-    with psycopg2.connect(host=db_host, database="gis", user="docker", password="docker",
-                          cursor_factory=DictCursor) as conn:
+    pool = psy.connect(db_host)
+
+    with pool.connection() as conn:
 
         streamdb = Database(connection=conn)
 

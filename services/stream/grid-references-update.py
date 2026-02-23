@@ -4,13 +4,12 @@ import contextlib
 import logging
 import os
 import sys
+
+import psy
 from psy import *
 import osgb
-import psycopg2
-from psycopg2.extras import DictCursor
 
 T = TypeVar('T')
-
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,6 +18,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
 
 @contextlib.contextmanager
 def smart_open(filename=None):
@@ -50,8 +50,9 @@ if __name__ == "__main__":
 
     update_materialised_views = False
 
-    with psycopg2.connect(host=db_host, database="gis", user="docker", password="docker",
-                          cursor_factory=DictCursor) as conn:
+    pool = psy.connect(db_host)
+
+    with pool.connection() as conn:
         for cso_id, lat, lon in select_many(conn, select_sql, f=lambda row: (row["stream_id"], row["lat"], row["lon"])):
             try:
                 result = osgb.lonlat_to_osgb(lon, lat, digits=5, formatted=False)
@@ -59,16 +60,16 @@ if __name__ == "__main__":
                 with conn.cursor() as cursor:
                     cursor.execute(
                         """
-    insert into grid_references(grid_reference, lat, lon, point, pcon24nm)
-        values (
-                   %(ref)s, 
-                   %(lat)s, 
-                   %(lon)s, 
-                   ST_SETSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326), 
-               (select con.pcon24nm
-                   from pcon_july_2024_uk_bfc con
-                   order by ST_SETSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326) <-> con.wkb_geometry limit 1))
-        on conflict (grid_reference) do nothing
+                        insert into grid_references(grid_reference, lat, lon, point, pcon24nm)
+                        values (%(ref)s,
+                                %(lat)s,
+                                %(lon)s,
+                                ST_SETSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326),
+                                (select con.pcon24nm
+                                 from pcon_july_2024_uk_bfc con
+                                 order by
+                                     ST_SETSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326) < - > con.wkb_geometry limit 1) )
+                        on conflict (grid_reference) do nothing
                         """,
                         {
                             "lat": lat,

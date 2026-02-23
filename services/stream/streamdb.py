@@ -2,8 +2,6 @@ import dataclasses
 import datetime
 from typing import TypeVar, Callable, Tuple, Iterable, List, Dict, Optional
 
-from psycopg2.extras import execute_batch
-
 from companies import WaterCompany
 from stream import FeatureRecord, EventType
 
@@ -58,8 +56,7 @@ class Database:
                                       select company, stream_file_id, file_time
                                       from stream_files
                                       where company = %(company)s
-                                      order by file_time desc
-                                      limit 1
+                                      order by file_time desc limit 1
                                       """, params={"company": company.name},
                                   f=lambda row: StreamFile(company=WaterCompany[row["company"]],
                                                            file_id=row["stream_file_id"],
@@ -73,8 +70,7 @@ class Database:
                 select f.stream_file_id, file_time, process_time
                 from stream_files f
                          join stream_files_processed fp on f.stream_file_id = fp.stream_file_id
-                order by f.file_time desc
-                limit 10
+                order by f.file_time desc limit 10
                 """,
             f=lambda r: r["file_time"])
 
@@ -82,8 +78,7 @@ class Database:
         with self.connection.cursor() as cursor:
             cursor.execute("""
                            insert into stream_files (company, file_time)
-                           values (%(company)s, %(file_time)s)
-                           returning stream_file_id""", {
+                           values (%(company)s, %(file_time)s) returning stream_file_id""", {
                                "company": company.name,
                                "file_time": file_time
                            })
@@ -123,7 +118,7 @@ class Database:
 
     def load_ids(self, company: WaterCompany):
         return {
-            r[0]: r[1]
+            r["stream_id"]: r["stream_cso_id"]
             for r in select_many(
                 connection=self.connection,
                 sql="""select stream_id, stream_cso_id
@@ -174,11 +169,10 @@ class Database:
                 sql="""
                     WITH ranked_events AS (SELECT e.*,
                                                   ROW_NUMBER()
-                                                  OVER (PARTITION BY e.stream_cso_id ORDER BY e.event_time DESC, stream_files.file_time desc) AS rnk
+                                                      OVER (PARTITION BY e.stream_cso_id ORDER BY e.event_time DESC, stream_files.file_time desc) AS rnk
                                            FROM stream_cso_event as e
                                                     join stream_files on stream_files.stream_file_id = e.file_id
-                                           where stream_files.company = %(company)s
-                    )
+                                           where stream_files.company = %(company)s)
                     SELECT m.stream_id, e.file_id, e.event, e.event_time, e.update_time, m.stream_cso_id
                     FROM stream_cso m
                              JOIN ranked_events e ON m.stream_cso_id = e.stream_cso_id AND e.rnk = 1
@@ -202,8 +196,7 @@ class Database:
                 cursor.execute("""
                                insert into stream_cso (stream_company, stream_id, lat, lon, point)
                                VALUES (%(company)s, %(id)s, %(lat)s, %(lon)s,
-                                       st_setsrid(st_makepoint(%(lon)s, %(lat)s), 4326))
-                               on conflict (stream_company, stream_id) do nothing
+                                       st_setsrid(st_makepoint(%(lon)s, %(lat)s), 4326)) on conflict (stream_company, stream_id) do nothing
                                """, {
                                    "company": company.name,
                                    "id": feature.id,
@@ -280,23 +273,17 @@ class Database:
 
     def _insert_records(self, table: str, file: StreamFile, features: List[FeatureRecord]):
         with self.connection.cursor() as cursor:
-            execute_batch(
-                cur=cursor,
-                sql=f"""
-                        insert into {table} (stream_file_id, id, status, statusstart, latesteventstart, latesteventend, lastupdated, lat, lon, receiving_water) 
-                        values ( %(stream_file_id)s, %(id)s, %(status)s, %(status_start)s, %(latest_event_start)s, %(latest_event_end)s, %(last_updated)s, %(lat)s, %(lon)s, %(receiving_water)s)
-                        """,
-                argslist=[{
-                    "stream_file_id": file.file_id,
-                    "id": feature.id,
-                    "status": EventType(int(feature.status)).name,
-                    "status_start": feature.statusStart,
-                    "latest_event_start": feature.latestEventStart,
-                    "latest_event_end": feature.latestEventEnd,
-                    "last_updated": feature.lastUpdated,
-                    "lat": feature.lat,
-                    "lon": feature.lon,
-                    "receiving_water": feature.receivingWater
-                } for feature in features],
-                page_size=3000,
-            )
+            with cursor.copy(f"COPY {table} FROM STDIN") as copy:
+                for feature in features:
+                    copy.write_row(
+                        (file.file_id,
+                         feature.id,
+                         EventType(int(feature.status)).name,
+                         feature.statusStart,
+                         feature.latestEventStart,
+                         feature.latestEventEnd,
+                         feature.lastUpdated,
+                         feature.lat,
+                         feature.lon,
+                         feature.receivingWater)
+                    )

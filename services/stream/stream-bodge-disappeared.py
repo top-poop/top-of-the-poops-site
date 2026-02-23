@@ -2,9 +2,7 @@ import argparse
 import datetime
 import os
 
-import psycopg2
-from psycopg2.extras import DictCursor
-
+import psy
 from args import enum_parser
 from companies import StreamMembers
 from companies import WaterCompany
@@ -27,8 +25,9 @@ if __name__ == '__main__':
 
     silence_gap = datetime.timedelta(weeks=3)
 
-    with psycopg2.connect(host=db_host, database="gis", user="docker", password="docker",
-                          cursor_factory=DictCursor) as conn:
+    pool = psy.connect(db_host)
+
+    with pool.connection() as conn:
 
         database = Database(conn)
 

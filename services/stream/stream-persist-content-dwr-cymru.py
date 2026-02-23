@@ -6,10 +6,9 @@ from dataclasses import replace
 from datetime import timezone
 from typing import List
 
-import psycopg2
-from psycopg2.extras import DictCursor
 import logging
 
+import psy
 from secret import env
 from companies import WaterCompany
 from storage import DwrCymruCSV, garage_service
@@ -72,8 +71,9 @@ if __name__ == '__main__':
 
     company = WaterCompany.DwrCymru
 
-    with psycopg2.connect(host=db_host, database="gis", user="docker", password="docker",
-                          cursor_factory=DictCursor) as conn:
+    pool = psy.connect(db_host)
+
+    with pool.connection() as conn:
 
         database = Database(conn)
 
