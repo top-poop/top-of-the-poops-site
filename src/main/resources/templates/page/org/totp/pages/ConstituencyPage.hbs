@@ -122,13 +122,13 @@
                             <div>
                                 <p class="mb-2">So far this year (as of {{dateFormat live.latest time='short'
                                                                                      date='short'}}) there has been
-                                    <span class="badge bg-danger">{{numberFormat live.total.duration.hours}}
+                                    <span class="badge bg-danger">{{numberFormat live.total.start.hours}}
                                         hours</span>
                                     of sewage overflows, from <span class="badge bg-danger">{{numberFormat
                                             live.total.count.count}}</span> CSOs
-                                    {{#gt live.total.duration.years 1}}
+                                    {{#gt live.total.start.years 1}}
                                         - that's <span class="fw-bold text-danger">{{numberFormat
-                                            live.total.duration.years}} years!</span>
+                                            live.total.start.years}} years!</span>
                                     {{/gt}}</p>
                                 <a href="{{live.total.constituency.uri}}" class="text-decoration-none">
                                     <button class="btn btn-danger">
@@ -218,7 +218,7 @@
                     <div class="d-flex flex-wrap gap-2">
                         {{#each neighbours}}
                             <a href="{{this.constituency.uri}}" class="text-decoration-none">
-                                <button class="btn btn-outline-secondary">
+                                <button class="btn btn-primary">
                                     <i class="bi bi-geo-fill me-1"></i>
                                     {{this.constituency.name}}<span class="badge bg-secondary ms-1">{{numberFormat
                                         this.count.count}}</span>
@@ -240,7 +240,7 @@
                         <div class="d-flex flex-wrap gap-2">
                             {{#each rivers}}
                                 <a href="{{this.river.uri}}" class="text-decoration-none">
-                                    <button class="btn btn-outline-secondary">
+                                    <button class="btn btn-primary">
                                         <i class="bi bi-water me-1"></i>
                                         {{this.river.name}}<span class="badge bg-secondary ms-1">{{numberFormat
                                             this.count.count}}</span>

@@ -53,7 +53,7 @@ class ConstituencyPageHandlerTest {
             mpFor = {
                 anMP
             },
-            constituencyLiveAvailable = { setOf(ConstituencyName("bob")) },
+            constituencyLiveAvailable = { setOf(ConstituencyName("Aldershot")) },
             constituencyNeighbours = { listOf(ConstituencyName("c"), ConstituencyName("d")) },
             constituencyRank = {
                 ConstituencyRank(

@@ -29,7 +29,7 @@ echo $(date) " Find constituencies for new CSOs <<<"
 venv/bin/python grid-references-update.py
 
 echo $(date) " Processing events <<<"
-venv/bin/python stream-summarise-events.py
+venv/bin/python stream-summarise-events.py --restart
 
 echo $(date) " >>> Complete <<<"
 

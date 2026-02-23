@@ -9,9 +9,14 @@ import org.totp.db.AnnualSewageRainfall
 import org.totp.db.DailySewageRainfall
 import org.totp.db.MonthlySewageRainfall
 import org.totp.db.StreamData
+import org.totp.db.StreamId
 import org.totp.model.TotpHandlebars
+import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyName
+import org.totp.model.data.Coordinates
 import org.totp.model.data.GeoJSON
+import org.totp.model.data.SiteName
+import org.totp.model.data.WaterwayName
 import java.time.Clock
 import java.time.Duration
 import java.time.LocalDate
@@ -41,7 +46,20 @@ class ConstituencyLivePageHandlerTest {
                 )
             },
             liveDataLatest = clock::instant,
-            csoLive = { c, _, _ -> listOf() },
+            csoLive = { c, _, _ -> listOf(
+                StreamData.StreamCsoSummary(
+                    CompanyName.of("Thames"),
+                    id = StreamId.of("123"),
+                    site_name = SiteName.of("site name"),
+                    receiving_water = WaterwayName.of("bob"),
+                    location = Coordinates(1.23, 4.56),
+                    start = Duration.ofMinutes(1),
+                    offline = Duration.ofMinutes(2),
+                    potential = Duration.ofMinutes(3),
+                    days = 24,
+                    pcon24nm = ConstituencyName.of("Aldershot")
+                )
+            ) },
             annualSewageRainfall = { c, _, _ ->
                 AnnualSewageRainfall(
                     2025, listOf(
