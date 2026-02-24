@@ -32,9 +32,22 @@
 
         .map-container {
             width: 100%;
-            height: clamp(400px, 75dvh, 1100px);
+            height: clamp(400px, 75vh, 1100px);
             border-radius: 8px;
             overflow: hidden;
+        }
+
+        .map-overlay {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.6);
+            font-size: 14px;
+            font-family: system-ui, sans-serif;
+            cursor: pointer;
+            z-index: 20;
         }
 
         .legend-overlay {
@@ -83,6 +96,9 @@
     <div class="col-md-12">
         <div class="map-wrapper">
             <div class="map-container" id="map"></div>
+            <div id="map-overlay" class="map-overlay">
+                Tap to activate map
+            </div>
             <div id="info-panel" class="legend-overlay">
                 <div id="info-content"></div>
             </div>
@@ -293,10 +309,6 @@
 
     map.on('load', async () => {
 
-        if ( L.Browser.mobile ) {
-            map.dragPan.disable();
-        }
-
         map.addSource('rainfall-source', {
             type: 'geojson',
             data: {type: 'FeatureCollection', features: []}
@@ -366,6 +378,24 @@
         });
 
         if (L.Browser.mobile) {
+
+            const overlay = document.getElementById('map-overlay');
+
+            overlay.style.display = "flex";
+
+            map.dragPan.disable();
+            map.scrollZoom.disable();
+            map.boxZoom.disable();
+            map.keyboard.disable();
+
+            overlay.addEventListener("click", () => {
+                overlay.style.display = "none";
+
+                map.dragPan.enable();
+                map.scrollZoom.enable();
+                map.touchZoomRotate.enable();
+            });
+
             map.on('click', (e) => {
                 // radius in pixels around the touch point to search for features
                 const radius = 40;
