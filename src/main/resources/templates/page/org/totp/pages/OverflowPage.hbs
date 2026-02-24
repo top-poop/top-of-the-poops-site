@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Top of the Poops | Overflow - {{#if selectedYear.current }}
+    <title>Top of the Poops | Overflow Sewage Map - {{#if selectedYear.current }}
         Live{{else}}{{ selectedYear.year }}{{/if}} Data| {{ cso.id.id }}</title>
-    <meta name="description" content="Live sewage dump information for CSO {{ cso.id.id }}">
+    <meta name="description" content="Live sewage map and historic information for CSO {{ cso.id.id }}">
 
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
@@ -71,7 +71,7 @@
 
 {{#> components/jumbotron }}
     <div class="text-center">
-        <h1 class="display-4 fw-bold">{{ cso.id.id }} - {{#if selectedYear.current }}
+        <h1 class="display-4 fw-bold overflow-hidden">{{ truncate cso.id.id n=10}} - {{#if selectedYear.current }}
             Live{{else}}{{ selectedYear.year }}{{/if}} Sewage</h1>
         <h2>{{cso.site_name}}</h2>
         <p class="lead fs-4">
@@ -283,7 +283,7 @@
         <div class="col">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h2 class="h4 mb-0"><i class="bi bi-clipboard-data me-2"></i>CSO Events for {{ cso.id.id}}
+                    <h2 class="h4 mb-0"><i class="bi bi-clipboard-data me-2"></i>CSO Events for {{ truncate cso.id.id n=10}}
                         in {{selectedYear.year}}</h2>
                 </div>
                 <div class="card-body p-4">

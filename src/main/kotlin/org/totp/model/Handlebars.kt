@@ -65,6 +65,7 @@ object TotpHandlebars {
             it.registerHelper("urlencode") { context: Any, _: Options -> context.toString().urlEncoded() }
             it.registerHelper("concat") { context: Any, options -> (listOf(context) + options.params).joinToString("") }
             it.registerHelper("take") { context: Any, options -> (context as Iterable<*>).take(options.hash("n"))}
+            it.registerHelper("truncate") { context: Any, options -> (context as String).take(options.hash("n"))}
         }
     }
 

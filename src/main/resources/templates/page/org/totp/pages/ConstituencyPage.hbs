@@ -2,16 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Top of the Poops | Constituency | {{ constituency.name }}| Polluted by {{join summary.companies
-                                                                                         ', '}}</title>
-    <meta name="description" content="Analysing sewage dumps by water companies in {{ constituency.name }}">
+    <title>Top of the Poops | Constituency Sewage Map | {{ constituency.name }}| Polluted by {{join summary.companies ', '}}</title>
+    <meta name="description" content="Sewage Map for {{ constituency.name }} - Polluted by {{join summary.companies ', '}}">
 
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
     {{> chunks/meta-scripts }}
     {{> chunks/meta-leaflet }}
 
-    <!-- only for constituency page atm -->
     <link rel="canonical" href="{{ uri  }}"/>
 
     <style>
