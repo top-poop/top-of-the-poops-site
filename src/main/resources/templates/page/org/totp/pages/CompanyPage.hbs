@@ -10,6 +10,7 @@
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
     {{> chunks/meta-scripts }}
+    {{> chunks/meta-leaflet }}
 
     <style>
         .card {
@@ -32,6 +33,11 @@
             text-decoration: none;
             color: inherit;
         }
+
+        #live-csos .card .maplibregl-map {
+            max-height: 160px;
+        }
+
     </style>
 
     {{> components/meta-opengraph
@@ -46,48 +52,83 @@
     <div class="row justify-content-md-center align-items-center g-4">
         <div class="col-md-5 offset-md-1">
             <div class="card border-0">
-                <div class="card-body p-4">
-                    <h1 class="display-4 fw-bold text-primary mb-4">{{ company.name }}</h1>
+                <div class="card-body p-4 p-lg-5">
 
-                    <div class="d-flex">
-                        <div class="me-3">
-                            <i class="bi bi-exclamation-circle-fill fs-3"></i>
+                    <!-- Headline -->
+                    <div class="mb-4">
+                        <div class="text-uppercase text-muted small fw-semibold mb-2" style="letter-spacing: .08em;">
+                            EDM Data {{ summary.year }}
                         </div>
-                        <div>
-                            <p class="mb-0 fs-5">Responsible for at least <span
-                                    class="badge bg-danger fs-5">{{numberFormat summary.count.count }}</span>
-                                sewage overflows in {{ summary.year }}</p>
-                            <small class="text-muted">{{> chunks/explain-count summary.count}}</small>
-                        </div>
+
+                        <h1 class="display-5 fw-bold text-dark mb-0" style="line-height: 1.1; letter-spacing: -0.5px;">
+                            {{ company.name }}
+                        </h1>
                     </div>
 
-                    <div class="d-flex">
-                        <div class="me-3">
-                            <i class="bi bi-clock-fill fs-3"></i>
+                    <hr class="my-4 opacity-25">
+
+                    <!-- Lead Statement -->
+                    <p class="fs-5 text-dark mb-5" style="max-width: 800px;">
+                        In {{ summary.year }}, the company was responsible for at least
+                        <span class="fw-bold fs-4">{{numberFormat summary.count.count}}</span> sewage overflows,
+                        lasting a combined
+                        <span class="fw-bold fs-4">{{numberFormat summary.duration.hours}}</span> hours
+                        and affecting
+                        <span class="fw-bold fs-4">{{numberFormat summary.locationCount}}</span> locations.
+                    </p>
+
+                    <!-- Supporting Details -->
+                    <div class="row g-4">
+
+                        <div class="col-md-4">
+                            <div class="border-top pt-3">
+                                <div class="text-uppercase text-muted small fw-semibold mb-2" style="letter-spacing: .08em;">
+                                    Overflows
+                                </div>
+                                <div class="fs-2 fw-bold text-dark mb-1">
+                                    {{numberFormat summary.count.count}}
+                                </div>
+                                <div class="text-muted small">
+                                    {{> chunks/explain-count summary.count}}
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <p class="mb-0 fs-5">These lasted for <span
-                                    class="badge bg-warning text-dark fs-5">{{numberFormat
-                                    summary.duration.hours}}</span> hours</p>
-                            <small class="text-muted">{{> chunks/explain-duration summary.duration}}</small>
+
+                        <div class="col-md-4">
+                            <div class="border-top pt-3">
+                                <div class="text-uppercase text-muted small fw-semibold mb-2" style="letter-spacing: .08em;">
+                                    Duration (Hours)
+                                </div>
+                                <div class="fs-2 fw-bold text-dark mb-1">
+                                    {{numberFormat summary.duration.hours}}
+                                </div>
+                                <div class="text-muted small">
+                                    {{> chunks/explain-duration summary.duration}}
+                                </div>
+                            </div>
                         </div>
+
+                        <div class="col-md-4">
+                            <div class="border-top pt-3">
+                                <div class="text-uppercase text-muted small fw-semibold mb-2" style="letter-spacing: .08em;">
+                                    Locations Affected
+                                </div>
+                                <div class="fs-2 fw-bold text-dark mb-1">
+                                    {{numberFormat summary.locationCount}}
+                                </div>
+                                <div class="text-muted small">
+                                    Across their service area
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <div class="d-flex">
-                        <div class="me-3">
-                            <i class="bi bi-geo-alt-fill fs-3"></i>
-                        </div>
-                        <div>
-                            <p class="mb-0 fs-5">Affecting <span class="badge bg-info fs-5">{{numberFormat
-                                    summary.locationCount}}</span> different locations across their service area</p>
-                        </div>
-                    </div>
-
-                    <div class="gap-2 mt-4">
+                    <div class="mt-5 pt-4 border-top">
                         {{> components/share-social share}}
                     </div>
-                </div>
-            </div>
+
+                </div>            </div>
         </div>
 
         <div class="col-md-4">
@@ -145,65 +186,98 @@
 {{#if live}}
     <div class="container py-4">
         {{#if live.overflowing}}
-            <div class="row mb-4">
+            <div class="row mb-5">
                 <div class="col">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-danger text-white">
-                            <h2 class="h4 mb-0"><i class="bi bi-droplet-fill me-2"></i>{{ company.name }} has <span
-                                    class="badge bg-warning text-dark">{{ live.overflowing.length }}</span> CSOs dumping
-                                sewage right now</h2>
+
+                    <!-- Section Header -->
+                    <div class="mb-4">
+                        <div class="text-uppercase text-muted small fw-semibold mb-2" style="letter-spacing:.08em;">
+                            Live Discharges
                         </div>
-                        <div class="card-body p-4">
-                            <div class="alert alert-info mb-4">
-                                <div class="d-flex">
-                                    <div class="me-3">
-                                        <i class="bi bi-info-circle-fill fs-3"></i>
+
+                        <h2 class="fw-bold text-dark mb-2">
+                            {{ company.name }}
+                        </h2>
+
+                        <p class="fs-5 text-dark mb-0">
+                            Currently reporting
+                            <span class="fw-bold">{{ live.overflowing.length }}</span> active sewage overflows.
+                        </p>
+                    </div>
+
+                    <hr class="opacity-25 mb-4">
+
+                    <!-- Grid -->
+                    <div id="live-csos" class="row row-cols-1 row-cols-md-3 g-4">
+
+                        {{#each (take live.overflowing n=9)}}
+                            <div class="col">
+                                <div class="card h-100 rounded-3 shadow-sm border-0"
+                                     data-lat="{{this.loc.lat}}"
+                                     data-lon="{{this.loc.lon}}">
+
+                                    <!-- Map container -->
+                                    <div class="overflow-hidden rounded-top"
+                                         style="height: 160px;"
+                                         id="map-{{@index}}">
                                     </div>
-                                    <div>
-                                        <p class="mb-0">Here are the ones that have been overflowing for the longest,
-                                            without interruption</p>
-                                        <p class="mb-0 mt-2">We are getting more data collated for each of the CSOs...
-                                            right now we just have the Constituency.
-                                            Unfortunately, the water companies use different names for the CSOs in their
-                                            live data than in the
-                                            annual returns, so it will take a bit of time to link all the data
-                                            up....</p>
+
+                                    <div class="card-body">
+
+                                        <h3 class="fs-5 fw-semibold mb-2">
+                                            <a href="{{this.constituency.uri}}"
+                                               class="text-decoration-none text-dark">
+                                                {{inc @index}}.    {{this.site_name}}
+                                            </a>
+                                        </h3>
+
+                                        <div class="text-muted small mb-1">
+                                            <i class="bi bi-geo-alt me-1"></i>
+                                            {{this.constituency.name}}
+                                        </div>
+
+                                        <div class="text-muted small">
+                                            <i class="bi bi-clock me-1"></i>
+                                            Started {{ago this.started}}
+                                        </div>
+
                                     </div>
+
                                 </div>
                             </div>
+                        {{/each}}
 
-                            <div id="live-csos" class="row row-cols-1 row-cols-md-3 g-4">
-                                {{#each (take live.overflowing n=9)}}
-                                    <div class="col">
-                                        <div class="card border-0 shadow-sm h-100">
-                                            <div class="card-header bg-primary text-white">
-                                                <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>{{inc @index}}
-                                                    . {{this.site_name}}</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <i class="bi bi-map me-2 text-primary"></i>
-                                                    <a href="{{this.id.uri}}">{{this.site_name}}</a>
-                                                </div>
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <i class="bi bi-map me-2 text-primary"></i>
-
-                                                    <a href="{{this.constituency.uri}}"
-                                                       class="text-decoration-none">{{this.constituency.name}}</a>
-                                                </div>
-                                                <div class="d-flex align-items-center">
-                                                    <i class="bi bi-clock-history me-2 text-muted"></i>
-                                                    <small>Started {{ago this.started}}</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {{/each}}
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
+
+            <script type="module">
+                import * as maps from '/assets/js/map-common.js';
+
+                document.querySelectorAll('#live-csos .card').forEach((card, i) => {
+                    const lat = parseFloat(card.dataset.lat);
+                    const lon = parseFloat(card.dataset.lon);
+                    if (isNaN(lat) || isNaN(lon)) return;
+
+                    const mapId = "map-" + i;
+                    const mapEl = document.getElementById(mapId);
+
+                    // Initialize MapLibre directly
+                    const map = new maplibregl.Map({
+                        container: mapEl,
+                        style: maps.STYLE_URI,
+                        center: [lon, lat],
+                        zoom: 10,
+                        interactive: false,   // disable dragging/scroll
+                        attributionControl: false
+                    });
+
+                    new maplibregl.Marker({ color: '#000' })
+                            .setLngLat([lon, lat])
+                            .addTo(map);
+                });;
+            </script>
+
         {{/if}}
 
         <div class="row mb-4">
