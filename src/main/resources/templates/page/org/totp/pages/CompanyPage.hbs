@@ -254,7 +254,7 @@
 
     </div>
     <script type="module">
-        import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/+esm";
+        import * as Plot from "/assets/js/plot-0.6.17/plot.esm.js";
 
         const PlotDailyEDM = (data, width, height) => Plot.plot({
             marginLeft: 40,
@@ -476,7 +476,7 @@
 
 
 <script type="module">
-    import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/+esm";
+    import * as Plot from "/assets/js/plot-0.6.17/plot.esm.js";
 
     const PlotSpillsByCompany = (data, width, height, company_name) => {
         return Plot.plot({
