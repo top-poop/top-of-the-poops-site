@@ -23,7 +23,9 @@ import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.TotpHandlebars.numberFormat
+import org.totp.model.data.BoundingBox
 import org.totp.model.data.CompanyName
+import org.totp.model.data.GeoJSON
 import org.totp.model.data.RenderableCompany
 import org.totp.model.data.RiverRank
 import org.totp.model.data.WaterwayName
@@ -62,7 +64,9 @@ data class RenderableRiverRank(
     val count: RenderableCount,
     val duration: RenderableDuration,
     val countDelta: DeltaValue,
-    val durationDelta: RenderableDurationDelta
+    val durationDelta: RenderableDurationDelta,
+    val bbox: BoundingBox,
+    val geo: GeoJSON
 )
 
 fun RiverRank.toRenderable(): RenderableRiverRank {
@@ -73,7 +77,9 @@ fun RiverRank.toRenderable(): RenderableRiverRank {
         RenderableCount(count),
         duration.toRenderable(),
         countDelta,
-        RenderableDurationDelta(durationDelta)
+        RenderableDurationDelta(durationDelta),
+        bbox = this.bbox,
+        geo = this.geo
     )
 }
 

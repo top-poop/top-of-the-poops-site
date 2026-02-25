@@ -63,6 +63,7 @@ class CompanyPageHandlerTest {
                         DeltaValue.of(10),
                         Duration.ofSeconds(11),
                         loc = Coordinates(1.0,1.0),
+                        geo = GeoJSON(""),
                     )
                 )
             },

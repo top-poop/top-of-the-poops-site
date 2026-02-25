@@ -457,11 +457,13 @@
                 {{#each worstCsos}}
                     <div class="col">
                         <a href="{{this.constituency.uri}}" class="text-decoration-none">
-                            <div class="card rounded-3 shadow-sm border-0 want-map" data-lat="{{this.cso.location.lat}}" data-lon="{{this.cso.location.lon}}">
+                            <div class="card rounded-3 shadow-sm border-0 want-map" data-lat="{{this.cso.location.lat}}"
+                                 data-lon="{{this.cso.location.lon}}">
 
                                 <!-- Map wrapper -->
                                 <div class="map-wrapper" style="height:160px;">
-                                    <div id="worst-map-{{@index}}" class="map-here leaflet-container w-100 h-100 rounded-top"></div>
+                                    <div id="worst-map-{{@index}}"
+                                         class="map-here leaflet-container w-100 h-100 rounded-top"></div>
                                 </div>
 
                                 <!-- Card body -->
@@ -484,7 +486,8 @@
                                     </div>
 
                                     <div class="text-muted small d-flex align-items-center mt-auto">
-                                        <i class="bi bi-exclamation-circle me-1"></i>{{numberFormat this.count.count}} incidents
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{numberFormat this.count.count}}
+                                        incidents
                                         <small class="text-muted ms-1">- {{> chunks/explain-count this.count}}</small>
                                     </div>
                                 </div>
@@ -502,15 +505,7 @@
 <script type="module">
     import * as maps from '/assets/js/map-common.js';
 
-    document.querySelectorAll('.want-map').forEach((card) => {
-        const lat = parseFloat(card.dataset.lat);
-        const lon = parseFloat(card.dataset.lon);
-        if (isNaN(lat) || isNaN(lon)) return;
-
-        // Find the child map container
-        const mapEl = card.querySelector('.map-here');
-        if (!mapEl) return;
-
+    function createMap(mapEl, lat, lon) {
         const map = L.map(mapEl, {
             center: [lat, lon],
             zoom: 13,
@@ -521,8 +516,24 @@
         });
 
         L.tileLayer('https://top-of-the-poops.org/tiles/styles/v3/{z}/{x}/{y}.png', {
-            maxZoom: 19
+            maxZoom: 13
         }).addTo(map);
+
+        requestAnimationFrame(() => map.invalidateSize());
+
+        return map;
+    }
+
+    document.querySelectorAll('.want-map').forEach((card) => {
+        const lat = parseFloat(card.dataset.lat);
+        const lon = parseFloat(card.dataset.lon);
+        if (isNaN(lat) || isNaN(lon)) return;
+
+        // Find the child map container
+        const mapEl = card.querySelector('.map-here');
+        if (!mapEl) return;
+
+        const map = createMap(mapEl, lat, lon);
 
         L.circleMarker([lat, lon], {
             radius: 6,
@@ -532,8 +543,55 @@
             fillOpacity: 0.9
         }).addTo(map);
 
-        requestAnimationFrame(() => map.invalidateSize());
-    });;
+        const geojsonStr = card.dataset.geojson;
+        if ( geojsonStr ) {
+
+            console.log("xxx map ")
+            console.log(geojsonStr)
+            const geojson = JSON.parse(geojsonStr);
+            if (geojson.type === 'LineString') {
+                geojson.coordinates.forEach(([lng, lat]) => {
+                    L.circleMarker([lat, lng], {
+                        radius: 3,
+                        fillColor: 'rgba(52,83,210,0.99)',
+                        color: '#2f5cd6',
+                        weight: 1,
+                        fillOpacity: 0.6
+                    }).addTo(map);
+                });
+                map.fitBounds(L.latLngBounds(geojson.coordinates.map(([lng, lat]) => [lat, lng])), { padding: [5, 5] });
+            }
+        }
+    });
+
+    document.querySelectorAll('.want-map-bbox').forEach((card) => {
+
+        const mapEl = card.querySelector('.map-here');
+        if (!mapEl) return;
+
+        const map = createMap(mapEl, 54.5, -3.0);
+
+        const sw = [parseFloat(card.dataset.latsw), parseFloat(card.dataset.lonsw)];
+        const ne = [parseFloat(card.dataset.latne), parseFloat(card.dataset.lonne)];
+        map.fitBounds(L.latLngBounds(sw, ne));
+
+        const geojsonStr = card.dataset.geojson;
+        if ( geojsonStr ) {
+            const geojson = JSON.parse(geojsonStr);
+            if (geojson.type === 'LineString') {
+                geojson.coordinates.forEach(([lng, lat]) => {
+                    L.circleMarker([lat, lng], {
+                        radius: 3,
+                        fillColor: 'rgba(52,83,210,0.99)',
+                        color: '#2f5cd6',
+                        weight: 1,
+                        fillOpacity: 0.6
+                    }).addTo(map);
+                });
+            }
+        }
+    });
+
 </script>
 
 
@@ -672,7 +730,7 @@
         <div class="col">
 
             <div class="mb-4">
-                <h4 class="fw-bold text-dark mb-2 text-muted">  Rivers Polluted</h4>
+                <h4 class="fw-bold text-dark mb-2 text-muted"> Rivers Polluted</h4>
 
                 <p class="fs-5 text-dark mb-0">
                     Rivers most polluted by {{company.name}} in {{summary.year}}
@@ -686,9 +744,20 @@
                 {{#each rivers}}
                     <div class="col">
                         <a href="{{this.river.uri}}" class="text-decoration-none">
-                            <div class="card rounded-3 shadow-sm border-0">
+                            <div class="card rounded-3 shadow-sm border-0 want-map-bbox"
+                                 data-latne="{{this.bbox.ne.lat}}"
+                                 data-lonne="{{this.bbox.ne.lon}}"
+                                 data-latsw="{{this.bbox.sw.lat}}"
+                                 data-lonsw="{{this.bbox.sw.lon}}"
+                                 data-geojson="{{this.geo}}">
+
+                                <div class="map-wrapper" style="height:160px;">
+                                    <div id="river-map-{{@index}}"
+                                         class="map-here leaflet-container w-100 h-100 rounded-top map-here"></div>
+                                </div>
 
                                 <div class="card-body d-flex flex-column">
+
                                     <h3 class="fs-5 fw-semibold mb-2">
                                         {{inc @index}}. {{this.river.name}}
                                     </h3>
@@ -699,7 +768,8 @@
                                     </div>
 
                                     <div class="text-muted small d-flex align-items-center mt-auto">
-                                        <i class="bi bi-exclamation-circle me-1"></i>{{numberFormat this.count.count}} incidents
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{numberFormat this.count.count}}
+                                        incidents
                                         <small class="text-muted ms-1">- {{> chunks/explain-count this.count}}</small>
                                     </div>
                                 </div>
@@ -711,7 +781,8 @@
             </div>
 
         </div>
-    </div></div>
+    </div>
+</div>
 
 {{#if beaches}}
     <div class="container py-4">
@@ -728,31 +799,34 @@
 
                 <hr class="opacity-25 mb-4">
 
-                <!-- Grid of beaches -->
                 <div class="row row-cols-1 row-cols-md-3 g-4" id="beaches">
                     {{#each beaches}}
                         <div class="col">
                             <a href="{{this.beach.uri}}" class="text-decoration-none">
-                                <div class="card rounded-3 shadow-sm border-0 want-map"  data-lat="{{this.loc.lat}}" data-lon="{{this.loc.lon}}">
+                                <div class="card rounded-3 shadow-sm border-0 want-map"
+                                     data-lat="{{this.loc.lat}}"
+                                     data-lon="{{this.loc.lon}}"
+                                     data-geojson="{{this.geo}}">
 
-                                    <!-- Map wrapper -->
                                     <div class="map-wrapper" style="height:160px;">
-                                        <div id="beach-map-{{@index}}" class="map-here leaflet-container w-100 h-100 rounded-top"></div>
+                                        <div id="beach-map-{{@index}}"
+                                             class="map-here leaflet-container w-100 h-100 rounded-top"></div>
                                     </div>
 
-                                    <!-- Card body -->
                                     <div class="card-body d-flex flex-column">
                                         <h3 class="fs-5 fw-semibold mb-2">
                                             {{inc @index}}. {{this.beach.name}}
                                         </h3>
 
                                         <div class="text-muted small mb-1 d-flex align-items-center">
-                                            <i class="bi bi-clock-fill me-1"></i>{{numberFormat this.duration.hours}} hours
+                                            <i class="bi bi-clock-fill me-1"></i>{{numberFormat this.duration.hours}}
+                                            hours
                                             <small class="text-muted ms-1">- {{> chunks/explain-duration this.duration}}</small>
                                         </div>
 
                                         <div class="text-muted small d-flex align-items-center mt-auto">
-                                            <i class="bi bi-exclamation-circle me-1"></i>{{numberFormat this.count.count}} incidents
+                                            <i class="bi bi-exclamation-circle me-1"></i>{{numberFormat
+                                                this.count.count}} incidents
                                             <small class="text-muted ms-1">- {{> chunks/explain-count this.count}}</small>
                                         </div>
                                     </div>

@@ -62,6 +62,7 @@ class HomepageHandlerTest {
                         DeltaValue.of(10),
                         Duration.ofSeconds(11),
                         loc = Coordinates(1.0,1.0),
+                        geo = GeoJSON(""),
                     )
                 )
             },
@@ -87,7 +88,9 @@ class HomepageHandlerTest {
                         20,
                         Duration.ofHours(22),
                         DeltaValue.of(10),
-                        Duration.ofHours(10)
+                        Duration.ofHours(10),
+                        bbox = BoundingBox(Coordinates(1.0,1.0), Coordinates(1.0, 1.0)),
+                        geo = GeoJSON("")
                     )
                 )
             },

@@ -14,6 +14,7 @@ import org.totp.model.data.BeachName
 import org.totp.model.data.CompanyName
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
+import org.totp.model.data.GeoJSON
 import org.totp.model.data.WaterwayName
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -36,6 +37,7 @@ class BathingPageHandlerTest {
                         DeltaValue.of(10),
                         Duration.ofSeconds(11),
                         loc = Coordinates(1.0,1.0),
+                        geo = GeoJSON(""),
                     )
                 )
             },

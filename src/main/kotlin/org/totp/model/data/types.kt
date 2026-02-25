@@ -8,6 +8,7 @@ import org.totp.extensions.kebabCase
 
 data class Coordinates(val lat: Double, val lon: Double)
 
+data class BoundingBox(val ne: Coordinates, val sw: Coordinates)
 
 class GeoJSON(value: String) : StringValue(value) {
     companion object : StringValueFactory<GeoJSON>(::GeoJSON)

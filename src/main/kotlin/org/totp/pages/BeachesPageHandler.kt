@@ -15,6 +15,7 @@ import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.BathingRank
 import org.totp.model.data.Coordinates
+import org.totp.model.data.GeoJSON
 import org.totp.model.data.RenderableBathingName
 import org.totp.model.data.RenderableCompany
 import org.totp.model.data.toRenderable
@@ -51,6 +52,7 @@ data class RenderableBathingRank(
     val countDelta: DeltaValue,
     val durationDelta: RenderableDurationDelta,
     val loc: Coordinates,
+    val geo: GeoJSON,
 )
 
 fun BathingRank.toRenderable(): RenderableBathingRank {
@@ -62,7 +64,8 @@ fun BathingRank.toRenderable(): RenderableBathingRank {
         duration.toRenderable(),
         countDelta,
         RenderableDurationDelta(durationDelta),
-        loc = loc
+        loc = loc,
+        geo = geo
     )
 }
 

@@ -138,6 +138,7 @@ data class BathingRank(
     val countDelta: DeltaValue,
     val durationDelta: Duration,
     val loc: Coordinates,
+    val geo: GeoJSON,
 )
 
 object BathingRankings {
@@ -155,7 +156,8 @@ object BathingRankings {
                         duration = fromEDMHours(it["total_spill_hours"] as Double),
                         count = (it["total_spill_count"] as Double).toInt(),
                         countDelta = DeltaValue.of((it["spills_increase"] as Double).toInt()),
-                        durationDelta = fromEDMHours(it["hours_increase"] as Double)
+                        durationDelta = fromEDMHours(it["hours_increase"] as Double),
+                        geo = GeoJSON(it["geojson_line"] as String)
                     )
                 }
         }
@@ -193,6 +195,8 @@ data class RiverRank(
     val duration: Duration,
     val countDelta: DeltaValue,
     val durationDelta: Duration,
+    val bbox: BoundingBox,
+    val geo: GeoJSON,
 )
 
 data class ShellfishRank(
@@ -219,7 +223,16 @@ object RiverRankings {
                         duration = fromEDMHours(it["total_hours"] as Double),
                         count = (it["total_count"] as Double).toInt(),
                         countDelta = DeltaValue.of((it["spills_increase"] as Double).toInt()),
-                        durationDelta = fromEDMHours(it["hours_increase"] as Double)
+                        durationDelta = fromEDMHours(it["hours_increase"] as Double),
+                        bbox = BoundingBox(
+                            ne = Coordinates(
+                                it["max_lat"] as Double, it["max_lon"] as Double
+                            ),
+                            sw = Coordinates(
+                                it["min_lat"] as Double, it["min_lon"] as Double
+                            )
+                        ),
+                        geo = GeoJSON.of(it["line_geojson"] as String)
                     )
                 }
         }
