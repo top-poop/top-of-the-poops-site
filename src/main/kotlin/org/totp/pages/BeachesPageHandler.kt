@@ -14,6 +14,7 @@ import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.BathingRank
+import org.totp.model.data.Coordinates
 import org.totp.model.data.RenderableBathingName
 import org.totp.model.data.RenderableCompany
 import org.totp.model.data.toRenderable
@@ -49,6 +50,7 @@ data class RenderableBathingRank(
     val duration: RenderableDuration,
     val countDelta: DeltaValue,
     val durationDelta: RenderableDurationDelta,
+    val loc: Coordinates,
 )
 
 fun BathingRank.toRenderable(): RenderableBathingRank {
@@ -59,7 +61,8 @@ fun BathingRank.toRenderable(): RenderableBathingRank {
         RenderableCount(count),
         duration.toRenderable(),
         countDelta,
-        RenderableDurationDelta(durationDelta)
+        RenderableDurationDelta(durationDelta),
+        loc = loc
     )
 }
 

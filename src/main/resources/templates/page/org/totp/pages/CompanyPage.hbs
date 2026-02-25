@@ -222,13 +222,13 @@
                         {{#each (take live.overflowing n=9)}}
                             <div class="col">
                                 <a href="{{this.constituency.uri}}" class="text-decoration-none">
-                                    <div class="card rounded-3 shadow-sm border-0" data-lat="{{this.loc.lat}}"
+                                    <div class="card rounded-3 shadow-sm border-0 want-map" data-lat="{{this.loc.lat}}"
                                          data-lon="{{this.loc.lon}}">
 
                                         <!-- Map wrapper with fixed height -->
                                         <div class="map-wrapper">
                                             <div id="map-{{@index}}" style="height:160px; width:100%;"
-                                                 class="leaflet-container w-100 rounded-top"></div>
+                                                 class="leaflet-container w-100 rounded-top map-here"></div>
                                         </div>
 
                                         <div class="card-body d-flex flex-column">
@@ -250,41 +250,6 @@
                 </div>
             </div>
 
-            <script type="module">
-                import * as maps from '/assets/js/map-common.js';
-
-                document.querySelectorAll('#live-csos .card').forEach((card, i) => {
-                    const lat = parseFloat(card.dataset.lat);
-                    const lon = parseFloat(card.dataset.lon);
-                    if (isNaN(lat) || isNaN(lon)) return;
-
-                    const mapEl = document.getElementById(`map-${i}`);
-
-                    const map = L.map(mapEl, {
-                        center: [lat, lon],
-                        zoom: 14,
-                        zoomControl: false,
-                        attributionControl: false,
-                        dragging: false,
-                        scrollWheelZoom: false
-                    });
-
-                    // Add raster tile layer (OpenStreetMap standard tiles)
-                    L.tileLayer('https://top-of-the-poops.org/tiles/styles/v3/{z}/{x}/{y}.png', {
-                        maxZoom: 19
-                    }).addTo(map);
-
-                    L.circleMarker([lat, lon], {
-                        radius: 6,
-                        fillColor: '#000',
-                        color: '#333',
-                        weight: 1,
-                        fillOpacity: 0.9
-                    }).addTo(map);
-
-                    requestAnimationFrame(() => map.invalidateSize());
-                });
-            </script>
         {{/if}}
 
         <div class="row mb-4">
@@ -463,58 +428,114 @@
             </div>
         </div>
     </div>
+</div>
 
-    <div class="row mb-4">
+<div class="container">
+
+    <div class="mb-4">
+        <div class="text-uppercase text-muted small fw-semibold mb-2 " style="letter-spacing:.08em;">
+            Annual Report {{summary.year}}
+        </div>
+
+        <h1 class="fw-bold text-dark mb-2 border-bottom">{{ company.name }} </h1>
+    </div>
+
+    <div class="row mb-5">
         <div class="col">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-danger text-white">
-                    <h2 class="h4 mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>2024 - Worst
-                        Locations: {{ company.name }}</h2>
-                </div>
-                <div class="card-body p-4">
-                    <div class="row row-cols-1 row-cols-md-3 g-4">
-                        {{#each worstCsos}}
-                            <div class="col">
-                                <div class="card border-0 shadow-sm h-100">
-                                    <div class="card-header bg-primary text-white">
-                                        <h5 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>{{inc @index}}
-                                            . {{this.cso.sitename}}</h5>
+
+            <div class="mb-4">
+                <h4 class="fw-bold text-dark mb-2 text-muted">Worst Locations</h4>
+
+                <p class="fs-5 text-dark mb-0">
+                    The locations with the worst sewage overflows in {{summary.year}}
+                </p>
+            </div>
+
+            <hr class="opacity-25 mb-4">
+
+            <div class="row row-cols-1 row-cols-md-3 g-4" id="worst-csos">
+                {{#each worstCsos}}
+                    <div class="col">
+                        <a href="{{this.constituency.uri}}" class="text-decoration-none">
+                            <div class="card rounded-3 shadow-sm border-0 want-map" data-lat="{{this.cso.location.lat}}" data-lon="{{this.cso.location.lon}}">
+
+                                <!-- Map wrapper -->
+                                <div class="map-wrapper" style="height:160px;">
+                                    <div id="worst-map-{{@index}}" class="map-here leaflet-container w-100 h-100 rounded-top"></div>
+                                </div>
+
+                                <!-- Card body -->
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="fs-5 fw-semibold mb-2">
+                                        {{inc @index}}. {{this.cso.sitename}}
+                                    </h3>
+
+                                    <div class="text-muted small mb-1 d-flex align-items-center">
+                                        <i class="bi bi-geo-alt me-1"></i>{{this.constituency.name}}
                                     </div>
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <i class="bi bi-map me-2 text-primary"></i>
-                                            <a href="{{this.constituency.uri}}"
-                                               class="text-decoration-none">{{this.constituency.name}}</a>
-                                        </div>
 
-                                        <div class="d-flex align-items-center mb-3">
-                                            <i class="bi bi-water me-2 text-info"></i>
-                                            <a href="{{this.cso.waterway.uri}}"
-                                               class="text-decoration-none">{{this.cso.waterway.name}}</a>
-                                        </div>
+                                    <div class="text-muted small mb-1 d-flex align-items-center">
+                                        <i class="bi bi-water me-1"></i>{{this.cso.waterway.name}}
+                                    </div>
 
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-clock-fill me-2"></i>
-                                            <span>{{numberFormat this.duration.hours}} hours</span>
-                                            <small class="text-muted">
-                                                - {{> chunks/explain-duration this.duration}}</small>
-                                        </div>
+                                    <div class="text-muted small mb-1 d-flex align-items-center">
+                                        <i class="bi bi-clock-fill me-1"></i>{{numberFormat this.duration.hours}} hours
+                                        <small class="text-muted ms-1">- {{> chunks/explain-duration this.duration}}</small>
+                                    </div>
 
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-exclamation-circle me-2"></i>
-                                            <span>{{numberFormat this.count.count}} incidents</span>
-                                            <small class="text-muted"> - {{> chunks/explain-count this.count}}</small>
-                                        </div>
+                                    <div class="text-muted small d-flex align-items-center mt-auto">
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{numberFormat this.count.count}} incidents
+                                        <small class="text-muted ms-1">- {{> chunks/explain-count this.count}}</small>
                                     </div>
                                 </div>
+
                             </div>
-                        {{/each}}
+                        </a>
                     </div>
-                </div>
+                {{/each}}
             </div>
+
         </div>
     </div>
 </div>
+
+<script type="module">
+    import * as maps from '/assets/js/map-common.js';
+
+    document.querySelectorAll('.want-map').forEach((card) => {
+        const lat = parseFloat(card.dataset.lat);
+        const lon = parseFloat(card.dataset.lon);
+        if (isNaN(lat) || isNaN(lon)) return;
+
+        // Find the child map container
+        const mapEl = card.querySelector('.map-here');
+        if (!mapEl) return;
+
+        const map = L.map(mapEl, {
+            center: [lat, lon],
+            zoom: 13,
+            zoomControl: false,
+            attributionControl: false,
+            dragging: false,
+            scrollWheelZoom: false
+        });
+
+        L.tileLayer('https://top-of-the-poops.org/tiles/styles/v3/{z}/{x}/{y}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        L.circleMarker([lat, lon], {
+            radius: 6,
+            fillColor: '#000',
+            color: '#333',
+            weight: 1,
+            fillOpacity: 0.9
+        }).addTo(map);
+
+        requestAnimationFrame(() => map.invalidateSize());
+    });;
+</script>
+
 
 <script type="module">
     import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/+esm";
@@ -647,90 +668,101 @@
 </script>
 
 <div class="container py-4">
-    <div class="row mb-4">
+    <div class="row mb-5">
         <div class="col">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h2 class="h4 mb-0"><i class="bi bi-water me-2"></i>2024 - Rivers Polluted by {{ company.name }}
-                    </h2>
-                </div>
-                <div class="card-body p-4">
-                    <div class="row row-cols-1 row-cols-md-3 g-4">
-                        {{#each rivers}}
-                            <div class="col">
-                                <a class="quiet-link" href="{{this.river.uri}}">
-                                    <div class="card border-0 shadow-sm h-100 hover-shadow">
-                                        <div class="card-header bg-primary text-white">
-                                            <h5 class="mb-0"><i class="bi bi-water me-2"></i>{{inc @index}}
-                                                . {{this.river.name}}</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center">
-                                                <i class="bi bi-clock-fill me-2"></i>
-                                                <h5 class="mb-0">{{numberFormat this.duration.hours}} hours</h5>
-                                                <small class="text-muted">
-                                                    - {{> chunks/explain-duration this.duration}}</small>
-                                            </div>
 
-                                            <div class="d-flex align-items-center">
-                                                <i class="bi bi-exclamation-circle me-2"></i>
-                                                <span>{{numberFormat this.count.count}} incidents</span>
-                                                <small class="text-muted">
-                                                    - {{> chunks/explain-count this.count}}</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        {{/each}}
-                    </div>
-                </div>
+            <div class="mb-4">
+                <h4 class="fw-bold text-dark mb-2 text-muted">  Rivers Polluted</h4>
+
+                <p class="fs-5 text-dark mb-0">
+                    Rivers most polluted by {{company.name}} in {{summary.year}}
+                </p>
             </div>
+
+            <hr class="opacity-25 mb-4">
+
+            <!-- Grid of rivers -->
+            <div class="row row-cols-1 row-cols-md-3 g-4" id="rivers">
+                {{#each rivers}}
+                    <div class="col">
+                        <a href="{{this.river.uri}}" class="text-decoration-none">
+                            <div class="card rounded-3 shadow-sm border-0">
+
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="fs-5 fw-semibold mb-2">
+                                        {{inc @index}}. {{this.river.name}}
+                                    </h3>
+
+                                    <div class="text-muted small mb-1 d-flex align-items-center">
+                                        <i class="bi bi-clock-fill me-1"></i>{{numberFormat this.duration.hours}} hours
+                                        <small class="text-muted ms-1">- {{> chunks/explain-duration this.duration}}</small>
+                                    </div>
+
+                                    <div class="text-muted small d-flex align-items-center mt-auto">
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{numberFormat this.count.count}} incidents
+                                        <small class="text-muted ms-1">- {{> chunks/explain-count this.count}}</small>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </a>
+                    </div>
+                {{/each}}
+            </div>
+
         </div>
-    </div>
-</div>
+    </div></div>
 
 {{#if beaches}}
     <div class="container py-4">
-        <div class="row mb-4">
+        <div class="row mb-5">
             <div class="col">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-info text-white">
-                        <h2 class="h4 mb-0"><i class="bi bi-tsunami me-2"></i>2024 - Beaches Polluted
-                            by {{ company.name }}</h2>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="row row-cols-1 row-cols-md-3 g-4">
-                            {{#each beaches}}
-                                <div class="col">
-                                    <a class="quiet-link" href="{{this.beach.uri}}">
-                                        <div class="card border-0 shadow-sm h-100 hover-shadow">
-                                            <div class="card-header bg-primary text-white">
-                                                <h5 class="mb-0"><i class="bi bi-umbrella-beach me-2"></i>{{inc @index}}
-                                                    . {{this.beach.name}}</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="bi bi-clock-fill me-2"></i>
-                                                    <h5 class="mb-0">{{numberFormat this.duration.hours}} hours</h5>
-                                                    <small class="text-muted">
-                                                        - {{> chunks/explain-duration this.duration}}</small>
-                                                </div>
 
-                                                <div class="d-flex align-items-center">
-                                                    <i class="bi bi-exclamation-circle me-2"></i>
-                                                    <span>{{numberFormat this.count.count}} incidents</span>
-                                                    <small class="text-muted">
-                                                        - {{> chunks/explain-count this.count}}</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                            {{/each}}
-                        </div>
-                    </div>
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-2 text-muted">Beaches Polluted</h4>
+
+                    <p class="fs-5 text-dark mb-0">
+                        Beached most polluted by  {{company.name}} in {{summary.year}}
+                    </p>
                 </div>
+
+                <hr class="opacity-25 mb-4">
+
+                <!-- Grid of beaches -->
+                <div class="row row-cols-1 row-cols-md-3 g-4" id="beaches">
+                    {{#each beaches}}
+                        <div class="col">
+                            <a href="{{this.beach.uri}}" class="text-decoration-none">
+                                <div class="card rounded-3 shadow-sm border-0 want-map"  data-lat="{{this.loc.lat}}" data-lon="{{this.loc.lon}}">
+
+                                    <!-- Map wrapper -->
+                                    <div class="map-wrapper" style="height:160px;">
+                                        <div id="beach-map-{{@index}}" class="map-here leaflet-container w-100 h-100 rounded-top"></div>
+                                    </div>
+
+                                    <!-- Card body -->
+                                    <div class="card-body d-flex flex-column">
+                                        <h3 class="fs-5 fw-semibold mb-2">
+                                            {{inc @index}}. {{this.beach.name}}
+                                        </h3>
+
+                                        <div class="text-muted small mb-1 d-flex align-items-center">
+                                            <i class="bi bi-clock-fill me-1"></i>{{numberFormat this.duration.hours}} hours
+                                            <small class="text-muted ms-1">- {{> chunks/explain-duration this.duration}}</small>
+                                        </div>
+
+                                        <div class="text-muted small d-flex align-items-center mt-auto">
+                                            <i class="bi bi-exclamation-circle me-1"></i>{{numberFormat this.count.count}} incidents
+                                            <small class="text-muted ms-1">- {{> chunks/explain-count this.count}}</small>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </a>
+                        </div>
+                    {{/each}}
+                </div>
+
             </div>
         </div>
     </div>

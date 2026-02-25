@@ -137,6 +137,7 @@ data class BathingRank(
     val duration: Duration,
     val countDelta: DeltaValue,
     val durationDelta: Duration,
+    val loc: Coordinates,
 )
 
 object BathingRankings {
@@ -149,6 +150,7 @@ object BathingRankings {
                     BathingRank(
                         rank = r + 1,
                         beach = BathingName(it["bathing"] as String),
+                        loc = Coordinates(it["lat"] as Double, it["lon"] as Double),
                         company = CompanyName(it["company_name"] as String),
                         duration = fromEDMHours(it["total_spill_hours"] as Double),
                         count = (it["total_spill_count"] as Double).toInt(),

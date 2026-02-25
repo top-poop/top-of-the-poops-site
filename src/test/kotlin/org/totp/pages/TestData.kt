@@ -3,6 +3,7 @@ package org.totp.pages
 import org.totp.model.data.BathingName
 import org.totp.model.data.BathingRank
 import org.totp.model.data.CompanyName
+import org.totp.model.data.Coordinates
 import org.totp.model.data.RiverRank
 import org.totp.model.data.WaterwayName
 import java.time.Duration
@@ -15,7 +16,8 @@ val aBeach = BathingRank(
     10,
     Duration.ofHours(1),
     DeltaValue.of(10),
-    Duration.ofSeconds(11)
+    Duration.ofSeconds(11),
+    loc = Coordinates(1.0,1.0),
 )
 
 

@@ -61,7 +61,8 @@ class CompanyPageHandlerTest {
                         10,
                         Duration.ofHours(1),
                         DeltaValue.of(10),
-                        Duration.ofSeconds(11)
+                        Duration.ofSeconds(11),
+                        loc = Coordinates(1.0,1.0),
                     )
                 )
             },
@@ -97,9 +98,9 @@ class CompanyPageHandlerTest {
         expectThat(html).twitterImageUri()
             .isEqualTo("https://top-of-the-poops.org/badges/company/water-co-2024.png")
 
-        expectThat(html.select("h2").map { it.text() })
-            .one { contains("2024 - Rivers Polluted by Water Co") }
-            .one { contains("2024 - Beaches Polluted by Water Co") }
+        expectThat(html.select("h4").map { it.text() })
+            .one { contains("Rivers Polluted") }
+            .one { contains("Beaches Polluted") }
 
         expectThat(response.bodyString()) {
             contains("1,234")
