@@ -227,7 +227,7 @@ fun main() {
                             streamSummary = stream::summary
                         ),
                         "/now" bind NowHandler(
-                            renderer = renderer, streamData = stream
+                            renderer = renderer, clock = clock, streamData = stream
                         ),
                         "/now-video" bind NowVideoHandler(
                             renderer = renderer, streamData = stream

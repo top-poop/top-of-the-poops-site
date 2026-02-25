@@ -62,6 +62,7 @@ class CompanyPage(
     val worstCsos: List<RenderableCSOTotal>,
     val share: SocialShare,
     val live: RenderableCSOLiveData?,
+    val link: WaterCompanyLink,
 ) : PageViewModel(uri)
 
 
@@ -139,6 +140,7 @@ object CompanyPageHandler {
                             pageUriFrom(request),
                             year = mostRecent.year,
                             company = name.toRenderable(),
+                            link = WaterCompanyLink(true, company),
                             csoUri = Uri.of("/assets/images/top-of-the-poops-cso-$slug.png"),
                             summary = mostRecent,
                             info = company,

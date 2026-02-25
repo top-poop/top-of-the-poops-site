@@ -466,6 +466,37 @@ select file_time, status, statusstart, latesteventstart, latesteventend, lastupd
 
     data class DatedBucket(val date: LocalDate, val data: Bucket, val partial: Boolean, val future: Boolean)
 
+    data class CompanyBucket(val company: StreamCompanyName, val bucket: Bucket)
+
+    fun totalsByCompany(start: LocalDate, end: LocalDate): List<CompanyBucket> {
+        return connection.execute(block("cso-buckets") {
+            query(
+                sql = """
+select stream_company,
+       coalesce(extract(epoch from sum(stop)),0) as stop,
+       coalesce(extract(epoch from sum(start)),0) as start,
+       coalesce(extract(epoch from sum(offline)),0) as offline,
+       coalesce(extract(epoch from sum(unknown)),0) as unknown,
+       coalesce(extract(epoch from sum(potential_start)),0) as potential_start,
+       count(*) filter (where start <> interval '0') as count
+    from stream_cso cso
+    join stream_summary ss on cso.stream_cso_id = ss.stream_cso_id and ss.date >= ? and ss.date < ?
+group by stream_company
+                    """,
+                bind = {
+                    it.set(1, start)
+                    it.set(2, end)
+                },
+                mapper = {
+                    CompanyBucket(
+                        it.get(StreamCompanyName, "stream_company"),
+                        bucketFrom(it)
+                    )
+                }
+            )});
+    }
+
+
     fun csoMonthlyBuckets(id: StreamId, current: LocalDate, start: LocalDate, end: LocalDate): List<DatedBucket> {
         return connection.execute(block("cso-buckets") {
             query(
@@ -610,13 +641,6 @@ order by stream_id, date;
         }
     }
 
-    private fun bucketFrom(set: ResultSet): Bucket = Bucket(
-        online = set.getInt("stop"),
-        offline = set.getInt("offline"),
-        overflowing = set.getInt("start"),
-        unknown = set.getInt("unknown"),
-        potentially_overflowing = set.getInt("potential_start"),
-    )
 
     fun cso(id: StreamId, start: LocalDate, end: LocalDate): StreamCsoSummary? {
         return connection.execute(NamedQueryBlock("by-cso") {
@@ -673,3 +697,11 @@ group by cso.stream_id, cso.stream_company, cso.lat, cso.lon, pcon24nm, sl.site_
         receiving_water = rs.getNullable(WaterwayName, "receiving_water") ?: WaterwayName.of("Unknown")
     )
 }
+
+fun bucketFrom(rs: ResultSet): Bucket = Bucket(
+    online = Duration.ofSeconds(rs.getLong("stop")),
+    offline = Duration.ofSeconds(rs.getLong("offline")),
+    start = Duration.ofSeconds(rs.getLong("start")),
+    unknown = Duration.ofSeconds(rs.getLong("unknown")),
+    potential = Duration.ofSeconds(rs.getLong("potential_start")),
+)

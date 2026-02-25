@@ -1,15 +1,16 @@
 package org.totp.db
 
+import java.time.Duration
 import java.time.LocalDate
 import kotlin.math.ceil
 
 
 data class Bucket(
-    val online: Int,
-    val offline: Int,
-    val overflowing: Int,
-    val unknown: Int,
-    val potentially_overflowing: Int
+    val online: Duration,
+    val offline: Duration,
+    val start: Duration,
+    val unknown: Duration,
+    val potential: Duration
 )
 
 data class Thing(val p: String, val cid: String, val d: LocalDate, val a: String)
@@ -21,9 +22,9 @@ fun _key(c: String, td: Int): String {
 }
 
 fun codeFrom(total: Bucket): String {
-    if (total.overflowing > 0) return _key("o", total.overflowing)
-    if (total.potentially_overflowing > 0) return _key("p", total.potentially_overflowing)
-    if (total.offline > 0) return _key("z", total.offline)
-    if (total.unknown > 0) return _key("u", total.unknown)
-    return _key("a", total.online)
+    if (total.start > Duration.ZERO) return _key("o", total.start.seconds.toInt())
+    if (total.potential > Duration.ZERO) return _key("p", total.potential.seconds.toInt())
+    if (total.offline > Duration.ZERO) return _key("z", total.offline.seconds.toInt())
+    if (total.unknown > Duration.ZERO) return _key("u", total.unknown.seconds.toInt())
+    return _key("a", total.online.seconds.toInt())
 }

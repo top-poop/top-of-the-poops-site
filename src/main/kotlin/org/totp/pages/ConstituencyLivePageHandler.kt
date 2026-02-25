@@ -11,6 +11,7 @@ import org.totp.db.AnnualSewageRainfall
 import org.totp.db.DailySewageRainfall
 import org.totp.db.StreamData
 import org.totp.db.StreamId
+import org.totp.extensions.sumDuration
 import org.totp.http4k.pageUriFrom
 import org.totp.http4k.removeQuery
 import org.totp.model.PageViewModel
@@ -62,9 +63,9 @@ data class RenderableDailySewageRainfall(
 )
 
 data class RenderableMonthlySewageRainfall(val month: String, val days: List<RenderableDailySewageRainfall>) {
-    val start = RenderableDuration(days.fold(Duration.ZERO) { acc, item -> acc + item.start.value })
-    val offline = RenderableDuration(days.fold(Duration.ZERO) { acc, item -> acc + item.offline.value })
-    val potential = RenderableDuration(days.fold(Duration.ZERO) { acc, item -> acc + item.potential.value })
+    val start = RenderableDuration(days.sumDuration { it.start.value })
+    val offline = RenderableDuration(days.sumDuration { it.offline.value })
+    val potential = RenderableDuration(days.sumDuration { it.potential.value })
     val count = RenderableCount(days.sumOf { it.count.count })
 }
 
@@ -72,9 +73,9 @@ data class RenderableAnnualSewageRainfall(
     val year: Int,
     val months: List<RenderableMonthlySewageRainfall>
 ) {
-    val start = RenderableDuration(months.fold(Duration.ZERO) { acc, item -> acc + item.start.value })
-    val offline = RenderableDuration(months.fold(Duration.ZERO) { acc, item -> acc + item.offline.value })
-    val potential = RenderableDuration(months.fold(Duration.ZERO) { acc, item -> acc + item.potential.value })
+    val start = RenderableDuration(months.sumDuration { it.start.value })
+    val offline = RenderableDuration(months.sumDuration { it.offline.value })
+    val potential = RenderableDuration(months.sumDuration { it.potential.value })
     val count = RenderableCount(months.sumOf { it.count.count })
 }
 

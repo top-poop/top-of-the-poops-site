@@ -7,7 +7,6 @@ import java.sql.ResultSet
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
-import kotlin.math.ceil
 
 class ThamesWater(private val connection: WithConnection) {
 
@@ -73,7 +72,8 @@ order by date
 
     fun overflowingRightNow(): List<CSOLiveOverflow> {
         return connection.execute(NamedQueryBlock("overflowing-right-now") {
-            query(sql = """                
+            query(
+                sql = """                
 with overflowing as (
     SELECT * FROM (
                       SELECT *, ROW_NUMBER() OVER (PARTITION BY reference_consent_id ORDER BY date_time DESC) rn
@@ -107,7 +107,11 @@ order by date_time
 //    },
 
 
-    fun eventSummaryForConstituency(constituencyName: ConstituencyName, startDate: LocalDate, endDate: LocalDate): List<Thing> {
+    fun eventSummaryForConstituency(
+        constituencyName: ConstituencyName,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): List<Thing> {
         return connection.execute(NamedQueryBlock("event-summary-for") {
             query(
                 sql = """
@@ -115,11 +119,11 @@ order by date_time
                         permit_id,
                         discharge_site_name,
                         st.date,
-                        extract(epoch from online) as online,
+                        extract(epoch from online) as stop,
                         extract(epoch from offline) as offline,
-                        extract(epoch from overflowing) as overflowing,
+                        extract(epoch from overflowing) as start,
                         extract(epoch from unknown) as unknown,
-                        extract(epoch from potentially_overflowing) as potentially_overflowing
+                        extract(epoch from potentially_overflowing) as potential_start
                     from summary_thames st
                              join consents_unique_view c on st.permit_id = c.permit_number
                              join grid_references g on c.effluent_grid_ref = g.grid_reference
@@ -146,11 +150,11 @@ order by date_time
                         permit_id,
                         discharge_site_name,
                         st.date,
-                        extract(epoch from online) as online,
+                        extract(epoch from online) as stop,
                         extract(epoch from offline) as offline,
-                        extract(epoch from overflowing) as overflowing,
+                        extract(epoch from overflowing) as start,
                         extract(epoch from unknown) as unknown,
-                        extract(epoch from potentially_overflowing) as potentially_overflowing
+                        extract(epoch from potentially_overflowing) as potential_start
                     from summary_thames st
                              join consents_unique_view c on st.permit_id = c.permit_number
                     where permit_id = ? and date >= ? and date <= ?
@@ -173,13 +177,7 @@ order by date_time
         cid = it.getString("permit_id"),
         d = it.getDate("date").toLocalDate(),
         a = codeFrom(
-            Bucket(
-                online = it.getInt("online"),
-                offline = it.getInt("offline"),
-                overflowing = it.getInt("overflowing"),
-                unknown = it.getInt("unknown"),
-                potentially_overflowing = it.getInt("potentially_overflowing"),
-            )
+            bucketFrom(it)
         )
     )
 
@@ -192,7 +190,8 @@ order by date_time
 
     fun worstCSOsInPeriod(startDate: LocalDate, endDate: LocalDate): List<CSOSummary> {
         return connection.execute(NamedQueryBlock("") {
-            query(sql = """
+            query(
+                sql = """
 select
     permit_id,
     discharge_site_name,

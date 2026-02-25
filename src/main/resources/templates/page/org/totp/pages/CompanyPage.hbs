@@ -252,59 +252,6 @@
 
         {{/if}}
 
-        <div class="row mb-4">
-            <div class="col">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h2 class="h4 mb-0"><i class="bi bi-graph-up me-2"></i>How many Sewage Overflows are dumping
-                            sewage?</h2>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="alert alert-info mb-4">
-                            <div class="d-flex">
-                                <div class="me-3">
-                                    <i class="bi bi-info-circle-fill fs-3"></i>
-                                </div>
-                                <div>
-                                    <p class="mb-0">We have live data for {{company.name}} so we can track what happens
-                                        every day - given
-                                        that overflows are supposed to happen on an 'exceptional' basis only - does the
-                                        chart
-                                        indicate that?</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <div class="d-flex flex-wrap gap-3 mb-3">
-                                <div class="d-flex align-items-center">
-                                    <span class="me-2"
-                                          style="display:inline-block; width:20px; height:20px; background-color: #44beff; border-radius: 4px;"></span>
-                                    <span>Total CSOs monitored</span>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <span class="me-2"
-                                          style="display:inline-block; width:20px; height:20px; background-color: #ff4444; border-radius: 4px;"></span>
-                                    <span>CSOs overflowing (30+ mins)</span>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <span class="me-2"
-                                          style="display:inline-block; width:20px; height:20px; background-color: #bbbbbb; border-radius: 4px;"></span>
-                                    <span>CSOs offline (30+ mins)</span>
-                                </div>
-                            </div>
-
-                            <p class="mb-3">There is daily updated information on all constituencies covered
-                                by {{company.name}}</p>
-
-                            <div id="edm-spills" class="plot-chart"
-                                 data-uri="/live/stream/company/{{company.slug}}/overflow-summary">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
     <script type="module">
         import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6.14/+esm";
@@ -362,73 +309,6 @@
 
 {{/if}}
 
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="h4 mb-0"><i class="bi bi-bar-chart-fill me-2"></i>2024 - By Water Company</h2>
-                </div>
-                <div class="card-body p-4">
-                    <div class="alert alert-info mb-4">
-                        <div class="d-flex">
-                            <div class="me-3">
-                                <i class="bi bi-info-circle-fill fs-3"></i>
-                            </div>
-                            <div>
-                                <p class="mb-0">How does each water company compare? These are the totals by company for
-                                    each. The totals are
-                                    really high, counting things in hours doesn't make
-                                    it very easy to think about. Here we show how many years of continuous sewage dumps
-                                    happened
-                                    in a single year, by water company.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="chart-container mb-3">
-                        <div style="height: 300px;" id="plot-company-totals" data-company-name="{{company.name}}"
-                             data-uri="/data/v1/2024/spills-by-company.json"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mb-4">
-        <div class="col">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="h4 mb-0"><i class="bi bi-graph-up me-2"></i>2024 - Asset Spill Duration Comparison</h2>
-                </div>
-                <div class="card-body p-4">
-                    <div class="alert alert-info mb-4">
-                        <div class="d-flex">
-                            <div class="me-3">
-                                <i class="bi bi-info-circle-fill fs-3"></i>
-                            </div>
-                            <div>
-                                <p class="mb-0">It isn't like there are just a few outliers... the problem exists across
-                                    the entire estate of water assets.
-                                    Here we show a 'cumulative frequency diagram' - where the number of CSOs that dumped
-                                    sewage for a time, or longer, is shown. You can see that many CSOs dumped sewage
-                                    into a river for months and months.</p>
-
-                                <p class="mb-0 mt-2"><strong>{{company.name}}</strong> is highlighted in the plot below
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="chart-container mb-3">
-                        <div style="height: 300px;" id="plot-company-comparison" data-company-name="{{company.name}}"
-                             data-uri="/data/v1/2024/spills-all.json"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="container">
 
@@ -830,7 +710,6 @@
                                             <small class="text-muted ms-1">- {{> chunks/explain-count this.count}}</small>
                                         </div>
                                     </div>
-
                                 </div>
                             </a>
                         </div>
@@ -841,6 +720,128 @@
         </div>
     </div>
 {{/if}}
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-graph-up me-2"></i>How many Sewage Overflows are dumping
+                        sewage?</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-info-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">We have live data for {{company.name}} so we can track what happens
+                                    every day - given
+                                    that overflows are supposed to happen on an 'exceptional' basis only - does the
+                                    chart
+                                    indicate that?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex flex-wrap gap-3 mb-3">
+                            <div class="d-flex align-items-center">
+                                    <span class="me-2"
+                                          style="display:inline-block; width:20px; height:20px; background-color: #44beff; border-radius: 4px;"></span>
+                                <span>Total CSOs monitored</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                    <span class="me-2"
+                                          style="display:inline-block; width:20px; height:20px; background-color: #ff4444; border-radius: 4px;"></span>
+                                <span>CSOs overflowing (30+ mins)</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                    <span class="me-2"
+                                          style="display:inline-block; width:20px; height:20px; background-color: #bbbbbb; border-radius: 4px;"></span>
+                                <span>CSOs offline (30+ mins)</span>
+                            </div>
+                        </div>
+
+                        <p class="mb-3">There is daily updated information on all constituencies covered
+                            by {{company.name}}</p>
+
+                        <div id="edm-spills" class="plot-chart"
+                             data-uri="/live/stream/company/{{company.slug}}/overflow-summary">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-bar-chart-fill me-2"></i>2024 - By Water Company</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-info-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">How does each water company compare? These are the totals by company for
+                                    each. The totals are
+                                    really high, counting things in hours doesn't make
+                                    it very easy to think about. Here we show how many years of continuous sewage dumps
+                                    happened
+                                    in a single year, by water company.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container mb-3">
+                        <div style="height: 300px;" id="plot-company-totals" data-company-name="{{company.name}}"
+                             data-uri="/data/v1/2024/spills-by-company.json"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0"><i class="bi bi-graph-up me-2"></i>2024 - Asset Spill Duration Comparison</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-info-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">It isn't like there are just a few outliers... the problem exists across
+                                    the entire estate of water assets.
+                                    Here we show a 'cumulative frequency diagram' - where the number of CSOs that dumped
+                                    sewage for a time, or longer, is shown. You can see that many CSOs dumped sewage
+                                    into a river for months and months.</p>
+
+                                <p class="mb-0 mt-2"><strong>{{company.name}}</strong> is highlighted in the plot below
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container mb-3">
+                        <div style="height: 300px;" id="plot-company-comparison" data-company-name="{{company.name}}"
+                             data-uri="/data/v1/2024/spills-all.json"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="container py-4">
     <div class="row mb-4">
