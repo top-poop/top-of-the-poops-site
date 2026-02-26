@@ -45,6 +45,7 @@ private val streamEABiMap = HashBiMap.create(
         StreamCompanyName.of("Southern") to CompanyName.of("Southern Water"),
         StreamCompanyName.of("ThamesWater") to CompanyName.of("Thames Water"),
         StreamCompanyName.of("UnitedUtilities") to CompanyName.of("United Utilities"),
+        StreamCompanyName.of("YorkshireWater") to CompanyName.of("Yorkshire Water"),
         StreamCompanyName.of("WessexWater") to CompanyName.of("Wessex Water"),
         StreamCompanyName.of("DwrCymru") to CompanyName.of("Dwr Cymru Welsh Water"),
     )

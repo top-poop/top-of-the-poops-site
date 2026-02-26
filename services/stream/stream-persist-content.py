@@ -11,7 +11,7 @@ from args import enum_parser
 from companies import StreamMembers
 from companies import WaterCompany
 from secret import env
-from storage import b2_service, CSVFileStorage, SqlliteStorage, StreamCSV, S3Storage
+from storage import b2_service, CSVFileStorage, SqlliteStorage, StreamCSV, S3Storage, garage_service
 from stream import FeatureRecord, EventType
 from streamdb import Database
 
@@ -27,14 +27,23 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Attempt to parse events from stream status files")
     parser.add_argument("--company", type=enum_parser(WaterCompany), nargs="+", help="company (default: all)")
+    parser.add_argument("--garage", action="store_true")
 
     args = parser.parse_args()
 
-    s3 = b2_service(
-        env("AWS_ACCESS_KEY_ID", "s3_key_id"),
-        env("AWS_SECRET_ACCESS_KEY", "s3_secret_key")
-    )
-    bucket = s3.Bucket(env("STREAM_BUCKET_NAME", "stream_bucket_name"))
+    if args.garage:
+        s3 = garage_service(
+            env("GARAGE_ACCESS_KEY_ID", "garage_key_id"),
+            env("GARAGE_SECRET_ACCESS_KEY", "garage_secret_key")
+        )
+        bucket = s3.Bucket(env("GARAGE_BUCKET_NAME", "garage_bucket_name"))
+    else:
+        s3 = b2_service(
+            env("AWS_ACCESS_KEY_ID", "s3_key_id"),
+            env("AWS_SECRET_ACCESS_KEY", "s3_secret_key")
+        )
+        bucket = s3.Bucket(env("STREAM_BUCKET_NAME", "stream_bucket_name"))
+
 
     storage = CSVFileStorage(
         SqlliteStorage(delegate=S3Storage(bucket)),

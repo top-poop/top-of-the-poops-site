@@ -51,10 +51,10 @@ if __name__ == '__main__':
 
     if args.garage:
         s3 = garage_service(
-            env("GARAGE_ACCESS_KEY_ID", "s3_key_id"),
-            env("GARAGE_SECRET_ACCESS_KEY", "s3_secret_key")
+            env("GARAGE_ACCESS_KEY_ID", "garage_key_id"),
+            env("GARAGE_SECRET_ACCESS_KEY", "garage_secret_key")
         )
-        bucket = s3.Bucket(env("GARAGE_BUCKET_NAME", "stream_bucket_name"))
+        bucket = s3.Bucket(env("GARAGE_BUCKET_NAME", "garage_bucket_name"))
     else:
         s3 = b2_service(
             env("AWS_ACCESS_KEY_ID", "s3_key_id"),
