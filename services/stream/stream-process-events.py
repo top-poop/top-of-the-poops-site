@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
     event_processor = EventProcessor(pool, feature_filter)
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=8) as executor:
         futures = [executor.submit(event_processor.process_events, company) for company in companies]
 
         results = []

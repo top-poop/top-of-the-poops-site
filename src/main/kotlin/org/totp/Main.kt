@@ -35,6 +35,7 @@ import sha256Key
 import java.time.Clock
 import java.time.Duration
 import java.util.Locale
+import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 import java.util.logging.LogManager
@@ -108,6 +109,7 @@ class EDMAnnualLocalitySummary(val edm: EDM) : HttpHandler {
 fun main() {
 
     Locale.setDefault(Locale.UK)
+    TimeZone.setDefault(TimeZone.getTimeZone("Europe/London"))
 
     val isDevelopment =
         EnvironmentKey.boolean().required("DEVELOPMENT_MODE", "Fake data server (local files) & hot reload")

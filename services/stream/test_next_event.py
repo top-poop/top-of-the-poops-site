@@ -117,6 +117,12 @@ events_type2 = {
         "Start,2025-05-27 22:13:12.000000 +00:00,2025-05-27 22:13:12.000000 +00:00,",
         "Offline,2025-05-27 22:08:09.000000 +00:00,2025-05-27 22:08:09.000000 +00:00,2025-05-27 22:10:36.000000 +00:00",
         "Stop,2025-08-24 08:53:16.000000 +00:00,2025-08-24 08:53:16.000000 +00:00,2025-08-24 08:53:16.000000 +00:00"
+    ],
+    "united_start_offline_stop": [
+        "Stop,2024-12-19 08:29:22.200000 +00:00,2024-12-18 21:53:44.700000 +00:00,2024-12-19 08:29:22.200000 +00:00,2024-12-31 12:22:57.178000 +00:00",
+        "Start,2025-04-06 22:31:21.000000 +00:00,2025-04-06 22:31:21.000000 +00:00,,2025-04-06 22:57:36.979000 +00:00",
+        "Offline,2025-04-07 09:09:04.000000 +00:00,2024-12-18 21:53:44.700000 +00:00,2024-12-19 08:29:22.200000 +00:00,2025-04-07 09:09:56.984000 +00:00",
+        "Stop,2025-05-12 12:42:17.170000 +00:00,2024-12-18 21:53:44.700000 +00:00,2024-12-19 08:29:22.200000 +00:00,2025-05-12 12:42:17.170000 +00:00"
     ]
 }
 
@@ -127,7 +133,7 @@ def parse_date(s: str) -> Optional[datetime.datetime]:
     return datetime.datetime.fromisoformat(s)
 
 
-last_updated_for_test = datetime.datetime.now()
+last_updated_for_test = datetime.datetime.now(tz=datetime.UTC)
 
 def as_feature(company: WaterCompany, s: str):
     ss = s.split(",")
@@ -161,8 +167,15 @@ def apply_events(file: StreamFile, fs: List[FeatureRecord]) -> List[StreamEvent]
 
 
 class TestType1:
+
+    file_time = datetime.datetime.now(tz=datetime.UTC)
+
     company = WaterCompany.Anglian
-    file = StreamFile(company=WaterCompany.Anglian, file_id='1234', file_time=datetime.datetime.now())
+    file = StreamFile(
+        company=WaterCompany.Anglian,
+        file_id='1234',
+        file_time=file_time
+    )
 
     def events(self, scenario: str) -> List[FeatureRecord]:
         return [as_feature(company=self.company, s=s) for s in events_type1[scenario]]
@@ -250,15 +263,18 @@ class TestType1:
         assert output[2].event_time == events[2].statusStart
         assert output[3].event == EventType.Stop
 
-    def test_no_event_time(self):
+    def test_no_event_time_uses_file_time(self):
         """deliberately give unhandled case that will force event start to be None, which will fail"""
-        with pytest.raises(Exception):
-            events = self.events("initial_stop")
-            events.append(
-                FeatureRecord('feature-id', EventType.Start, self.company, statusStart=None, latestEventStart=None,
-                              latestEventEnd=None, lastUpdated=None, lat=0, lon=0, receivingWater=''))
-            output = apply_events(self.file, events)
-            print(output)
+        events = self.events("initial_stop")
+        events.append(
+            FeatureRecord('feature-id', EventType.Start, self.company, statusStart=None, latestEventStart=None,
+                          latestEventEnd=None, lastUpdated=None, lat=0, lon=0, receivingWater=''))
+        output = apply_events(self.file, events)
+        assert len(output) == 2
+        assert output[0].event == EventType.Stop
+        assert output[1].event == EventType.Start
+        assert output[1].event_time == TestType1.file_time
+
 
     def test_severn_trent_time_jumping_backwards(self):
         events = self.events('severn_trent_time_jump')
@@ -330,15 +346,51 @@ class TestType2:
                                         update_time=events[0].lastUpdated)
 
     def test_stop_offline_stop(self):
-        """offline while stopped - ignore offlines for now"""
+        """offline while stopped"""
         events = self.events('stop_offline_stop')
         output = apply_events(self.file, events)
-        assert len(output) == 1
+        assert len(output) == 3
         assert output[0] == StreamEvent(cso_id='cso-id',
                                         event=EventType.Stop,
                                         event_time=events[0].statusStart,
                                         file_id=TestType2.file.file_id,
                                         update_time=events[0].lastUpdated)
+        assert output[1] == StreamEvent(cso_id='cso-id',
+                                        event=EventType.Offline,
+                                        event_time=last_updated_for_test,
+                                        file_id=TestType2.file.file_id,
+                                        update_time=events[1].lastUpdated)
+        assert output[2] == StreamEvent(cso_id='cso-id',
+                                        event=EventType.Stop,
+                                        event_time=last_updated_for_test + datetime.timedelta(seconds=1),
+                                        file_id=TestType2.file.file_id,
+                                        update_time=events[2].lastUpdated)
+
+    def test_united_start_offline_stop(self):
+        """offline while stopped"""
+        events = self.events('united_start_offline_stop')
+        output = apply_events(self.file, events)
+        assert len(output) == 4
+        assert output[0] == StreamEvent(cso_id='cso-id',
+                                        event=EventType.Stop,
+                                        event_time=events[0].statusStart,
+                                        file_id=TestType2.file.file_id,
+                                        update_time=events[0].lastUpdated)
+        assert output[1] == StreamEvent(cso_id='cso-id',
+                                        event=EventType.Start,
+                                        event_time=events[1].statusStart,
+                                        file_id=TestType2.file.file_id,
+                                        update_time=events[1].lastUpdated)
+        assert output[2] == StreamEvent(cso_id='cso-id',
+                                        event=EventType.Offline,
+                                        event_time=events[2].statusStart,
+                                        file_id=TestType2.file.file_id,
+                                        update_time=events[2].lastUpdated)
+        assert output[3] == StreamEvent(cso_id='cso-id',
+                                        event=EventType.Stop,
+                                        event_time=events[3].statusStart,
+                                        file_id=TestType2.file.file_id,
+                                        update_time=events[3].lastUpdated)
 
     def test_initial_stop_nulls(self):
         """wessex water will give stops with all nulls apart from last updated"""
@@ -355,11 +407,13 @@ class TestType2:
         """for some CSOs there is no end time, particularly when there is an Offline event in there"""
         events = self.events('united_no_event_end')
         output = apply_events(self.file, events)
-        assert len(output) == 2
+        assert len(output) == 3
         assert output[0].event == EventType.Start
         assert output[0].event_time == events[0].statusStart
-        assert output[1].event == EventType.Stop
-        assert output[1].event_time == events[2].lastUpdated
+        assert output[1].event == EventType.Offline
+        assert output[1].event_time == events[1].statusStart
+        assert output[2].event == EventType.Stop
+        assert output[2].event_time == events[2].statusStart
 
     def test_southern_time_jumping_backward(self):
         events = self.events('southern_time_jump')

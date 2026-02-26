@@ -287,3 +287,16 @@ class Database:
                          feature.lon,
                          feature.receivingWater)
                     )
+
+    def load_file_events_for(self, company: WaterCompany, stream_id: str) -> Iterable[FeatureRecord]:
+        return list(select_many(self.connection,
+                                sql="""
+                                    select *
+                                    from stream_files sf
+                                             join stream_file_events sfc on sf.stream_file_id = sfc.stream_file_id
+                                    where sfc.id = %(id)s
+                                    order by sf.file_time
+                                    """,
+                                params={"id": stream_id},
+                                f=lambda row: self._record_from_row(company, row))
+                    )
