@@ -42,6 +42,51 @@
             height: 160px !important;
         }
 
+        .metric-card {
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 14px;
+            background: #ffffff;
+            transition: all .2s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+        }
+
+        .metric-title {
+            letter-spacing: .12em;
+            font-size: .75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #6c757d;
+        }
+
+        .metric-value {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -.02em;
+        }
+
+        .metric-footer {
+            font-size: .85rem;
+            color: #6c757d;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        #live-summary-chart {
+            width: 100%;
+            height: 200px;
+            max-width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            #live-summary-chart {
+                height: 150px;
+            }
+        }
+
     </style>
 
     {{> components/meta-opengraph
@@ -249,10 +294,172 @@
                     </div>
                 </div>
             </div>
-
         {{/if}}
-
     </div>
+
+    <div class="container px-4 mb-4">
+        <div class="mb-4">
+            <div class="text-uppercase text-muted small fw-semibold mb-2 " style="letter-spacing:.08em;">
+                Live data summary
+            </div>
+
+            <h1 class="fw-bold text-dark mb-2 border-bottom">{{ company.name }} </h1>
+
+            <p class="fs-5 text-dark mb-0">
+                A summary of the live overflow notifications - available since Jan 2025<br/>
+                The data unfortunately is quite poor quality, so our estimates may differ from the official figures,
+                when they come out. These are estimates based on {{company.name}} data
+            </p>
+
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card metric-card h-100 p-4">
+                    <div class="metric-title mb-3">
+                        Total {{ liveSummary.lastYear.year }}<br/>
+                    </div>
+
+                    <div class="metric-value text-dark mb-3">
+                        {{numberFormat liveSummary.lastYear.duration.hours}} hours
+                    </div>
+
+                    <div class="metric-footer pt-3">
+                        {{> chunks/explain-duration liveSummary.lastYear.duration}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card metric-card h-100 p-4">
+                    <div class="metric-title mb-3">
+                        This year {{liveSummary.thisYear.year}} - so far
+                    </div>
+
+                    <div class="metric-value text-dark mb-3">
+                        {{numberFormat liveSummary.thisYear.duration.hours}} hours
+                    </div>
+
+                    <div class="metric-footer pt-3">
+                        {{> chunks/explain-duration liveSummary.thisYear.duration}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card metric-card h-100 p-4">
+                    <div class="metric-title mb-3">
+                        This month
+                    </div>
+
+                    <div class="metric-value text-dark mb-3">
+                        {{ numberFormat liveSummary.currentMonth.hours }} hours
+                    </div>
+
+                    <div class="metric-footer pt-3">
+                        {{> chunks/explain-duration liveSummary.currentMonth }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col w-100 mb-5">
+                <div id="live-summary-chart" data-json="{{ liveSummary.data }}"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+
+        import * as Plot from "/assets/js/plot-0.6.17/plot.esm.js";
+        import * as utils from "/assets/js/utils.js"
+
+        const element = document.getElementById("live-summary-chart");
+        const rect = element.getBoundingClientRect()
+
+        function plot(data) {
+
+            const processed = data.map(d => ({
+                ...d,
+                date: new Date(d.date),
+                year: new Date(d.date).getFullYear().toString(),
+                month: new Date(d.date).getMonth(),
+                hours: d.overflowingSeconds / ( 3600 * 24 ),
+            }));
+
+            const yearColors = {
+                2026: "red",
+                2025: "gray",
+                // 2027: "blue",
+            };
+
+            return Plot.plot({
+                width: rect.width,
+                height: rect.height,
+
+                marginLeft: 10,
+                marginBottom: 20,
+
+                x: {
+                    tickFormat: i => ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i],
+                    label: "Month",
+                    domain: [0,11]
+                },
+
+                y: {
+                    grid: true,
+                    gridOpacity: 0.08,
+                    tickSize: 0,
+                    label: null,
+                    zero: true
+                },
+
+                color: {
+                    domain: Object.keys(yearColors),
+                    range: Object.values(yearColors),
+                    legend: true
+                },
+
+                marks: [
+                    Plot.text(processed, {
+                        text: d => `${utils.formatNumber(d.hours)} h`,
+                        x: "month",
+                        y: "hours",
+                        curve: "catmull-rom",
+                        z: "year",
+                        dy: -15,
+                    }),
+
+                    Plot.line(processed, {
+                        x: "month",
+                        y: "hours",
+                        curve: "catmull-rom",
+                        stroke: "year",
+                        strokeWidth: 3,
+                        z: "year"
+                    }),
+
+                    Plot.dot(processed, {
+                        x: "month",
+                        y: "hours",
+                        r: 6,
+                        fill: "year",
+                        title: d => `${d.date.toLocaleDateString("en-GB", { year: "numeric", month: "short" })} - ${utils.formatNumber(d.hours)} hours`,
+                        z: "year"
+                    })
+                ]
+            })
+        }
+
+        const data = element.dataset.json;
+        if (data) {
+                const json = JSON.parse(data)
+                element.appendChild(plot(json));
+        }
+    </script>
+
+
     <script type="module">
         import * as Plot from "/assets/js/plot-0.6.17/plot.esm.js";
 
@@ -269,15 +476,6 @@
                 grid: false,
             },
             marks: [
-                Plot.lineY(
-                        data,
-                        {
-                            x: d => new Date(d.date),
-                            y: d => d.edm_count,
-                            stroke: '#44beff',
-                            title: d => `${d.date}: ${d.edm_count} CSOs Monitored`,
-                        }
-                ),
                 Plot.lineY(
                         data,
                         {
@@ -424,10 +622,7 @@
         }).addTo(map);
 
         const geojsonStr = card.dataset.geojson;
-        if ( geojsonStr ) {
-
-            console.log("xxx map ")
-            console.log(geojsonStr)
+        if (geojsonStr) {
             const geojson = JSON.parse(geojsonStr);
             if (geojson.type === 'LineString') {
                 geojson.coordinates.forEach(([lng, lat]) => {
@@ -439,7 +634,7 @@
                         fillOpacity: 0.6
                     }).addTo(map);
                 });
-                map.fitBounds(L.latLngBounds(geojson.coordinates.map(([lng, lat]) => [lat, lng])), { padding: [5, 5] });
+                map.fitBounds(L.latLngBounds(geojson.coordinates.map(([lng, lat]) => [lat, lng])), {padding: [5, 5]});
             }
         }
     });
@@ -456,7 +651,7 @@
         map.fitBounds(L.latLngBounds(sw, ne));
 
         const geojsonStr = card.dataset.geojson;
-        if ( geojsonStr ) {
+        if (geojsonStr) {
             const geojson = JSON.parse(geojsonStr);
             if (geojson.type === 'LineString') {
                 geojson.coordinates.forEach(([lng, lat]) => {
@@ -747,11 +942,6 @@
 
                     <div class="mb-4">
                         <div class="d-flex flex-wrap gap-3 mb-3">
-                            <div class="d-flex align-items-center">
-                                    <span class="me-2"
-                                          style="display:inline-block; width:20px; height:20px; background-color: #44beff; border-radius: 4px;"></span>
-                                <span>Total CSOs monitored</span>
-                            </div>
                             <div class="d-flex align-items-center">
                                     <span class="me-2"
                                           style="display:inline-block; width:20px; height:20px; background-color: #ff4444; border-radius: 4px;"></span>

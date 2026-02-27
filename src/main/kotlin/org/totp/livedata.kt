@@ -57,7 +57,7 @@ class StreamOverflowingByDate(val clock: Clock, val streamData: StreamData) : Ht
 
 class ThamesWaterSummary(val thamesWater: ThamesWater) : HttpHandler {
 
-    val response = TotpJson.autoBody<List<ThamesWater.DatedOverflow>>().toLens()
+    val response = TotpJson.autoBody<List<DatedOverflow>>().toLens()
 
     override fun invoke(request: Request): Response {
         return Response(Status.OK).with(response of thamesWater.infrastructureSummary())
@@ -67,12 +67,12 @@ class ThamesWaterSummary(val thamesWater: ThamesWater) : HttpHandler {
 private val THAMES_WATER_LIVE_DATA_START = LocalDate.parse("2023-01-01")
 private val STREAM_LIVE_DATA_START = LocalDate.parse("2025-01-01")
 
-class StreamSummary(
+class StreamDailySummary(
     val streamData: StreamData,
     val companySummaries: () -> List<CompanyAnnualSummary>
 ) : HttpHandler {
 
-    val response = TotpJson.autoBody<List<ThamesWater.DatedOverflow>>().toLens()
+    val response = TotpJson.autoBody<List<DatedOverflow>>().toLens()
     val slug = Path.value(Slug).of("company", "The company")
 
     override fun invoke(request: Request): Response {
@@ -81,12 +81,7 @@ class StreamSummary(
 
         return companySummaries().firstOrNull { it.name.toSlug() == slug }?.let { company ->
             company.name.asStreamCompanyName()?.let { streamCompany ->
-                Response(Status.OK).with(response of streamData.infrastructureSummary(streamCompany)).with(
-                    cacheControl of listOf(
-                        "public",
-                        MaxAgeTtl(Duration.ofMinutes(5)).toHeaderValue()
-                    ).joinToString(",")
-                )
+                Response(Status.OK).with(response of streamData.dailyOverflowingByCompany(streamCompany))
             }
         }
             ?: Response(Status.NOT_FOUND)

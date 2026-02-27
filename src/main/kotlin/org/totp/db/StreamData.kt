@@ -5,7 +5,6 @@ import dev.forkhandles.values.StringValueFactory
 import org.http4k.events.Event
 import org.http4k.events.Events
 import org.totp.db.NamedQueryBlock.Companion.block
-import org.totp.db.ThamesWater.DatedOverflow
 import org.totp.model.data.*
 import java.sql.ResultSet
 import java.time.Duration
@@ -388,11 +387,54 @@ group by grid_references.pcon24nm
             potential = Duration.ZERO,
             csoCount = 0,
         )
-
     }
 
-    fun infrastructureSummary(company: StreamCompanyName): List<DatedOverflow> {
-        return connection.execute(block("infrastructureSummary") {
+    fun monthlyOverflowingByCompany(company: StreamCompanyName): List<DatedOverflow> {
+        return connection.execute(block("stream-overflowing-monthly-by-company") {
+            query(
+                sql = """
+select
+    cso.stream_company,
+    date_trunc('month', date)::date as month,
+    count(distinct cso.stream_cso_id) as edm_count,
+    extract(epoch from sum(start)) as overflowingSeconds,
+       count(distinct case
+        when start > interval '30 minutes'
+        then cso.stream_cso_id
+    end) as overflowing,
+
+    count(distinct case
+        when offline > interval '30 minutes'
+        then cso.stream_cso_id
+    end) as offline
+    
+from stream_summary ss
+join stream_cso cso
+  on ss.stream_cso_id = cso.stream_cso_id
+where stream_company = ?
+group by
+    cso.stream_company,
+    date_trunc('month', date)
+order by month;
+""",
+                bind = {
+                    it.setString(1, company.value)
+                },
+                mapper = {
+                    DatedOverflow(
+                        it.getDate("month").toLocalDate(),
+                        it.getInt("edm_count"),
+                        it.getInt("overflowing"),
+                        it.getLong("overflowingSeconds"),
+                        it.getInt("offline")
+                    )
+                }
+            )
+        }).filter { it.date.isAfter(LocalDate.parse("2024-12-31")) }
+    }
+
+    fun dailyOverflowingByCompany(company: StreamCompanyName): List<DatedOverflow> {
+        return connection.execute(block("stream-overflowing-daily-by-company") {
             query(
                 sql = """
 select cso.stream_company, date,
@@ -414,7 +456,7 @@ order by date
                         it.getDate("date").toLocalDate(),
                         it.getInt("edm_count"),
                         it.getInt("overflowing"),
-                        it.getInt("overflowingSeconds"),
+                        it.getLong("overflowingSeconds"),
                         it.getInt("offline")
                     )
                 }
@@ -493,7 +535,8 @@ group by stream_company
                         bucketFrom(it)
                     )
                 }
-            )});
+            )
+        });
     }
 
 

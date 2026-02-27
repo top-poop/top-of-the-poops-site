@@ -8,6 +8,14 @@ import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 
+data class DatedOverflow(
+    val date: LocalDate,
+    val edm_count: Int,
+    val overflowing: Int,
+    val overflowingSeconds: Long,
+    val offline: Int
+)
+
 class ThamesWater(private val connection: WithConnection) {
 
 
@@ -29,13 +37,7 @@ class ThamesWater(private val connection: WithConnection) {
         }).toSet()
     }
 
-    data class DatedOverflow(
-        val date: LocalDate,
-        val edm_count: Int,
-        val overflowing: Int,
-        val overflowingSeconds: Int,
-        val offline: Int
-    )
+
 
     fun infrastructureSummary(): List<DatedOverflow> {
         return connection.execute(block("infrastructureSummary") {
@@ -54,7 +56,7 @@ order by date
                         it.getDate("date").toLocalDate(),
                         it.getInt("edm_count"),
                         it.getInt("overflowing"),
-                        it.getInt("overflowingSeconds"),
+                        it.getLong("overflowingSeconds"),
                         it.getInt("offline")
                     )
                 }

@@ -5,13 +5,13 @@ import org.http4k.lens.Path
 import org.http4k.lens.value
 import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
+import org.totp.db.DatedOverflow
 import org.totp.db.StreamData.StreamCSOLiveOverflow
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.*
 import java.text.NumberFormat
-import java.time.Duration
-import java.time.Instant
+import java.time.*
 
 class CSOLiveData(
     val overflowing: List<StreamCSOLiveOverflow>
@@ -63,6 +63,7 @@ class CompanyPage(
     val share: SocialShare,
     val live: RenderableCSOLiveData?,
     val link: WaterCompanyLink,
+    val liveSummary: RenderableLiveSummary,
 ) : PageViewModel(uri)
 
 
@@ -72,6 +73,13 @@ data class CompanyAnnualSummary(
     val spillCount: Int,
     val duration: Duration,
     val locationCount: Int,
+)
+
+data class RenderableLiveSummary(
+    val lastYear: RenderableCompanyAnnualSummary,
+    val thisYear: RenderableCompanyAnnualSummary,
+    val currentMonth: RenderableDuration,
+    val data: String
 )
 
 data class RenderableCompanyAnnualSummary(
@@ -97,15 +105,18 @@ data class WaterCompanyLink(
     val company: WaterCompany,
 )
 
+
 object CompanyPageHandler {
     operator fun invoke(
+        clock: Clock,
         renderer: TemplateRenderer,
         companySummaries: () -> List<CompanyAnnualSummary>,
         waterCompanies: () -> List<WaterCompany>,
         riverRankings: () -> List<RiverRank>,
         bathingRankings: () -> List<BathingRank>,
         csoTotals: () -> List<CSOTotals>,
-        companyLivedata: (CompanyName) -> CSOLiveData?
+        companyLivedata: (CompanyName) -> CSOLiveData?,
+        monthly: (CompanyName) -> List<DatedOverflow>,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
         val slug = Path.value(Slug).of("company", "The company")
@@ -134,15 +145,17 @@ object CompanyPageHandler {
                     .take(6)
                     .map { it.toRenderable() }
 
+                val renderableCompany = name.toRenderable()
                 Response(Status.OK)
                     .with(
                         viewLens of CompanyPage(
                             pageUriFrom(request),
                             year = mostRecent.year,
-                            company = name.toRenderable(),
+                            company = renderableCompany,
                             link = WaterCompanyLink(true, company),
                             csoUri = Uri.of("/assets/images/top-of-the-poops-cso-$slug.png"),
                             summary = mostRecent,
+                            liveSummary = bodgeLiveSummary(clock, company.name, monthly(company.name)),
                             info = company,
                             links = companies.map {
                                 WaterCompanyLink(it.name == name, it)
@@ -170,5 +183,36 @@ object CompanyPageHandler {
                 Response(Status.NOT_FOUND)
             }
         }
+    }
+
+    fun bodgeLiveSummary(
+        clock: Clock,
+        name: CompanyName,
+        monthly: List<DatedOverflow>
+    ): RenderableLiveSummary {
+
+        val today = LocalDate.ofInstant(clock.instant(), ZoneId.systemDefault())
+
+        val thisYearData = monthly.filter { it.date.year == today.year }
+        val lastYearData = monthly.filter { it.date.year == today.year - 1 }
+
+        fun summary(overflows: List<DatedOverflow>): RenderableCompanyAnnualSummary = RenderableCompanyAnnualSummary(
+            company = name.toRenderable(),
+            year = today.year,
+            count = RenderableCount(overflows.sumOf { it.overflowing }),
+            duration = RenderableDuration(Duration.ofSeconds(overflows.sumOf { it.overflowingSeconds })),
+            locationCount = overflows.sumOf { it.edm_count },
+        )
+
+        return RenderableLiveSummary(
+            thisYear = thisYearData.let { summary(it) },
+            lastYear = lastYearData.let { summary(it) },
+            currentMonth = RenderableDuration(Duration.ofSeconds(thisYearData.first {
+                Month.from(it.date) == Month.from(
+                    today
+                )
+            }.overflowingSeconds)),
+            data = TotpJson.mapper.writeValueAsString(monthly),
+        )
     }
 }

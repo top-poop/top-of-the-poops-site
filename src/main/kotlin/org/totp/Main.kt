@@ -34,8 +34,7 @@ import redisCacheFilter
 import sha256Key
 import java.time.Clock
 import java.time.Duration
-import java.util.Locale
-import java.util.TimeZone
+import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 import java.util.logging.LogManager
@@ -298,7 +297,9 @@ fun main() {
                                     csoLive = stream::byCsoForConstituency,
                                     annualSewageRainfall = annualLiveSewage::byConstituency
                                 ),
-                        "/company/{company}" bind CompanyPageHandler(
+                        "/company/{company}" bind cacheForTen().then(
+                            CompanyPageHandler(
+                            clock = clock,
                             renderer = renderer,
                             companySummaries = companyAnnualSummaries,
                             waterCompanies = waterCompanies,
@@ -312,7 +313,8 @@ fun main() {
                                             .sortedBy { it.started })
                                 }
                             },
-                        ),
+                            monthly = { stream.monthlyOverflowingByCompany(it.asStreamCompanyName()!!) }
+                        )),
                         "/overflow/{id}" bind OverflowPageHandler(
                             clock = clock,
                             renderer = renderer,
@@ -378,9 +380,11 @@ fun main() {
                         events,
                         prefix = "stream",
                         ttl = { Duration.ofMinutes(10) },
-                        key = { sha256Key(it.uri) }).then(StreamOverflowingByDate(clock, stream)),
+                        key = { sha256Key(it.uri) }).then(
+                        StreamOverflowingByDate(clock, stream)
+                    ),
                     "/events/constituency/{constituency}" bind StreamConstituencyEvents(clock, stream),
-                    "/company/{company}/overflow-summary" bind StreamSummary(stream, companyAnnualSummaries),
+                    "/company/{company}/overflow-summary" bind StreamDailySummary(stream, companyAnnualSummaries),
                     "/assets/{ne}/{sw}" bind StreamAssetsBoundingBoxHandler(clock, stream)
                 ),
                 "/thames-water" bind routes(
@@ -399,13 +403,7 @@ fun main() {
                         key = { sha256Key(it.uri) }).then(EnvironmentAgencyGrid(clock, environmentAgency))
                 ),
             ).withFilter(
-                CachingFilters.CacheResponse.FallbackCacheControl(
-                    defaultCacheTimings = DefaultCacheTimings(
-                        maxAge = MaxAgeTtl(Duration.ofMinutes(30)),
-                        staleIfErrorTtl = StaleIfErrorTtl(Duration.ofMinutes(60)),
-                        staleWhenRevalidateTtl = StaleWhenRevalidateTtl(Duration.ofMinutes(60))
-                    )
-                )
+                cacheForTen()
             ),
             "/data-new/locality/{locality}/annual-pollution" bind EDMAnnualLocalitySummary(edm),
             "/data-new/constituency/{constituency}/annual-pollution" bind EDMAnnualConstituencySummary(edm),
@@ -429,6 +427,14 @@ fun main() {
     events(ServerStartedEvent(Uri.of("http://localhost:" + server.port()), isDevelopmentEnvironment))
     server.block()
 }
+
+private fun cacheForTen(): Filter = CachingFilters.CacheResponse.FallbackCacheControl(
+    defaultCacheTimings = DefaultCacheTimings(
+        maxAge = MaxAgeTtl(Duration.ofMinutes(10)),
+        staleIfErrorTtl = StaleIfErrorTtl(Duration.ofMinutes(15)),
+        staleWhenRevalidateTtl = StaleWhenRevalidateTtl(Duration.ofMinutes(15))
+    )
+)
 
 fun silenceUndertowLogging() {
     LogManager.getLogManager().getLogger("").level = Level.WARNING
