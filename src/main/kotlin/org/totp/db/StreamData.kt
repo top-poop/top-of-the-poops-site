@@ -90,8 +90,8 @@ order by m.stream_company;
         )
     }
 
-    fun csosWithin(ne: Coordinates, sw: Coordinates): List<StreamCSOLiveOverflow> {
-        return connection.execute(NamedQueryBlock("stream-overflowing-at") {
+    fun csosWithinBBox(ne: Coordinates, sw: Coordinates): List<StreamCSOLiveOverflow> {
+        return connection.execute(NamedQueryBlock("stream-csos-within-bbox") {
             query(
                 sql = """                
 SELECT gr.pcon24nm, m.stream_company, m.stream_id, sl.site_name_wasc, sl.site_name_consent, sl.receiving_water, m.lat, m.lon

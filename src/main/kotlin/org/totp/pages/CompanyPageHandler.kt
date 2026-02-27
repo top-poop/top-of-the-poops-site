@@ -193,20 +193,23 @@ object CompanyPageHandler {
 
         val today = LocalDate.ofInstant(clock.instant(), ZoneId.systemDefault())
 
-        val thisYearData = monthly.filter { it.date.year == today.year }
-        val lastYearData = monthly.filter { it.date.year == today.year - 1 }
+        val thisYear = today.year
+        val lastYear = thisYear - 1
 
-        fun summary(overflows: List<DatedOverflow>): RenderableCompanyAnnualSummary = RenderableCompanyAnnualSummary(
+        val thisYearData = monthly.filter { it.date.year == thisYear }
+        val lastYearData = monthly.filter { it.date.year == lastYear }
+
+        fun summary(year: Int, overflows: List<DatedOverflow>): RenderableCompanyAnnualSummary = RenderableCompanyAnnualSummary(
             company = name.toRenderable(),
-            year = today.year,
+            year = year,
             count = RenderableCount(overflows.sumOf { it.overflowing }),
             duration = RenderableDuration(Duration.ofSeconds(overflows.sumOf { it.overflowingSeconds })),
             locationCount = overflows.sumOf { it.edm_count },
         )
 
         return RenderableLiveSummary(
-            thisYear = thisYearData.let { summary(it) },
-            lastYear = lastYearData.let { summary(it) },
+            thisYear = summary(thisYear, thisYearData),
+            lastYear = summary(lastYear, lastYearData),
             currentMonth = RenderableDuration(Duration.ofSeconds(thisYearData.first {
                 Month.from(it.date) == Month.from(
                     today

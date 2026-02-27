@@ -41,7 +41,7 @@ class StreamAssetsBoundingBoxHandler(val clock: Clock, val stream: StreamData): 
         val ne = ne(request)
         val sw = sw(request)
 
-        return Response(Status.OK).with(jsonResponse of stream.csosWithin(ne,sw).map {
+        return Response(Status.OK).with(jsonResponse of stream.csosWithinBBox(ne,sw).map {
             StreamAssetBoundingBoxResult(
                 id = it.id.toRenderable(),
                 company = it.company.toRenderable(),
