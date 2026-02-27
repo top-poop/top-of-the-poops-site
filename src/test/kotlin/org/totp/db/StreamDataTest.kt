@@ -47,8 +47,14 @@ class StreamDataTest {
     }
 
     @Test
-    fun infrastructureSummary() {
-        stream.infrastructureSummary(StreamCompanyName("Anglian"))
+    fun dailyOverflowingByCompany() {
+        stream.dailyOverflowingByCompany(StreamCompanyName("Anglian"))
+    }
+
+    @Test
+    fun monthlyOverflowingByCompany() {
+        val data = stream.monthlyOverflowingByCompany(StreamCompanyName("Anglian"))
+        expectThat(data).size.isGreaterThan(0)
     }
 
     @Test

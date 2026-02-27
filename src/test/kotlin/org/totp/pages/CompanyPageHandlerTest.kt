@@ -5,6 +5,7 @@ import org.http4k.core.Request
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
+import org.totp.db.DatedOverflow
 import org.totp.db.StreamData
 import org.totp.db.StreamId
 import org.totp.model.TotpHandlebars
@@ -16,6 +17,7 @@ import strikt.assertions.one
 import java.io.File
 import java.time.Clock
 import java.time.Duration
+import java.time.LocalDate
 
 class CompanyPageHandlerTest {
 
@@ -39,6 +41,7 @@ class CompanyPageHandlerTest {
 
     val service = routes(
         "/{company}" bind Method.GET to CompanyPageHandler(
+            clock = clock,
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
             companySummaries = {
                 listOf(
@@ -83,7 +86,10 @@ class CompanyPageHandlerTest {
                         )
                     )
                 )
-            }
+            },
+            monthly = { _ -> listOf(
+                DatedOverflow(LocalDate.now(), edm_count = 10, overflowing = 10, overflowingSeconds = 100, offline = 10)
+            ) }
         )
     )
 

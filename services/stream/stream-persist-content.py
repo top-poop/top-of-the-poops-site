@@ -55,7 +55,7 @@ if __name__ == '__main__':
     if args.company:
         companies = args.company
     else:
-        companies = [w for w in StreamMembers if w != WaterCompany.YorkshireWater]
+        companies = StreamMembers
 
     pool = psy.connect(db_host)
 

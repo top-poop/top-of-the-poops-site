@@ -104,7 +104,7 @@ if __name__ == '__main__':
     if args.company:
         companies = args.company
     else:
-        companies = [w for w in WaterCompany if w != WaterCompany.YorkshireWater]
+        companies = WaterCompany
 
     if args.id:
         feature_filter = lambda x: x.id == args.id

@@ -68,7 +68,7 @@ if __name__ == "__main__":
                                 (select con.pcon24nm
                                  from pcon_july_2024_uk_bfc con
                                  order by
-                                     ST_SETSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326) < - > con.wkb_geometry limit 1) )
+                                     ST_SETSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326) <-> con.wkb_geometry limit 1) )
                         on conflict (grid_reference) do nothing
                         """,
                         {
