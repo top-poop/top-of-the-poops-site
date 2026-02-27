@@ -236,6 +236,10 @@ if __name__ == "__main__":
 
         insert_stream_summary(conn, everything)
 
+        print(">> Updating views...")
+        conn.execute("refresh materialized view daily_cso")
+        conn.execute("refresh materialized view monthly_cso")
+
     if args.state:
         try:
             from statemachine.contrib.diagram import DotGraphMachine
@@ -245,3 +249,4 @@ if __name__ == "__main__":
             dot.write_png(pathlib.Path("stream-state-transitions.png"))
         except Exception as e:
             print(f"Can't generate graph: {e}")
+    print(">> Complete...")

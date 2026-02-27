@@ -393,28 +393,8 @@ group by grid_references.pcon24nm
         return connection.execute(block("stream-overflowing-monthly-by-company") {
             query(
                 sql = """
-select
-    cso.stream_company,
-    date_trunc('month', date)::date as month,
-    count(distinct cso.stream_cso_id) as edm_count,
-    extract(epoch from sum(start)) as overflowingSeconds,
-       count(distinct case
-        when start > interval '30 minutes'
-        then cso.stream_cso_id
-    end) as overflowing,
-
-    count(distinct case
-        when offline > interval '30 minutes'
-        then cso.stream_cso_id
-    end) as offline
-    
-from stream_summary ss
-join stream_cso cso
-  on ss.stream_cso_id = cso.stream_cso_id
+select * from monthly_cso
 where stream_company = ?
-group by
-    cso.stream_company,
-    date_trunc('month', date)
 order by month;
 """,
                 bind = {
@@ -437,16 +417,7 @@ order by month;
         return connection.execute(block("stream-overflowing-daily-by-company") {
             query(
                 sql = """
-select cso.stream_company, date,
-       count(*) as edm_count,
-       extract(epoch from sum(start)) as overflowingSeconds,
-       count(case when start > interval '30m' then 1 end) as overflowing,
-       count(case when offline > interval '30m' then 1 end) as offline
-from stream_summary ss
-    join stream_cso cso on ss.stream_cso_id = cso.stream_cso_id
-where stream_company = ?
-group by cso.stream_company, date
-order by date
+select * from daily_cso where stream_company = ? order by date
 """,
                 bind = {
                     it.setString(1, company.value)
