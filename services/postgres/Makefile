@@ -35,4 +35,8 @@ deploy:
 .PHONY: upgrade
 upgrade:
 	@test $(shell docker context show) = $(TOTP_CONTEXT)
-	docker service update --with-registry-auth --image $(FULL_NAME) $(SERVICE)
+	docker service update \
+      --mount-add type=tmpfs,target=/dev/shm,tmpfs-size=2g \
+      --image $(FULL_NAME) \
+      --with-registry-auth $(SERVICE)
+
