@@ -4,12 +4,12 @@ import os
 import pathlib
 from collections import defaultdict
 
-import psycopg2
-from psycopg2.extras import execute_values
 import requests as requests
 
 from ea import EnvironmentAgencyAPI
-from psy import select_one
+from psy import select_one, connect
+
+
 
 class DateArgAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -28,10 +28,9 @@ def process_date(connection, api: EnvironmentAgencyAPI, on_date, known_stations)
 
         print(f"Inserting {len(rows)} records")
 
-        execute_values(cur=cursor,
-                       sql="insert into rainfall_readings(station_id, date_time, reading_mm) values %s",
-                       argslist=rows
-                       )
+        with cursor.copy(f"COPY rainfall_readings FROM STDIN") as copy:
+            for row in rows:
+                copy.write_row(row)
 
         connection.commit()
 
@@ -59,10 +58,12 @@ if __name__ == "__main__":
 
     db_host = os.environ.get("DB_HOST", "localhost")
 
-    with psycopg2.connect(host=db_host, database="gis", user="docker", password="docker") as conn:
+    pool = connect(db_host)
+
+    with pool.connection() as conn:
 
         if args.update:
-            d: datetime.datetime = select_one(conn, "select max(date_trunc('day', date_time)) from rainfall_readings")[0]
+            d: datetime.datetime = select_one(conn, "select max(date_trunc('day', date_time)) as last_updated from rainfall_readings")["last_updated"]
             if d is not None:
                 start_date = d.date() + a_day
 
