@@ -118,3 +118,42 @@
     background-color: rgb(57, 42, 109);
 }
 
+.month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    justify-items: center;
+}
+
+.day {
+    position: relative;
+    width: 24px;
+    aspect-ratio: 1 / 1;
+    border-radius: 8px 8px 2px 2px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.day .inner {
+    width: 12px;
+    height: 12px;
+    border-radius: 0 50% 50% 50%;
+    transform: rotate(45deg);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    margin-top: 2px;
+}
+
+.day.rainfall-0 {
+    border-color: rgba(0,0,0,0.05);
+    background-color: transparent;
+}
+
+
+.day.rainfall-0 .inner.sewage-0 {
+    display: none;
+}

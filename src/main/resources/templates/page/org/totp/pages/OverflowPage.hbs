@@ -26,30 +26,6 @@
             border: none;
         }
 
-        .month-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-        }
-
-        .day {
-            position: relative;
-            width: 20px;
-            aspect-ratio: 1 / 1;
-            border-radius: 2px;
-            border: 1px solid rgba(0, 0, 0, 0.21);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .day .inner {
-            width: 60%;
-            height: 60%;
-            border-radius: 80%;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-        }
-
     </style>
 
     {{#if selectedYear.current }}
