@@ -299,22 +299,25 @@ fun main() {
                                 ),
                         "/company/{company}" bind cacheForTen().then(
                             CompanyPageHandler(
-                            clock = clock,
-                            renderer = renderer,
-                            companySummaries = companyAnnualSummaries,
-                            waterCompanies = waterCompanies,
-                            riverRankings = riverRankings,
-                            bathingRankings = beachRankings,
-                            csoTotals = allSpills,
-                            companyLivedata = { name ->
-                                name.asStreamCompanyName()?.let {
-                                    CSOLiveData(
-                                        stream.overflowingAt(clock.instant()).filter { it.company == name }
-                                            .sortedBy { it.started })
+                                clock = clock,
+                                renderer = renderer,
+                                companySummaries = companyAnnualSummaries,
+                                waterCompanies = waterCompanies,
+                                riverRankings = riverRankings,
+                                bathingRankings = beachRankings,
+                                csoTotals = allSpills,
+                                companyLivedata = { name ->
+                                    name.asStreamCompanyName()?.let {
+                                        CSOLiveData(
+                                            stream.overflowingAt(clock.instant()).filter { it.company == name }
+                                                .sortedBy { it.started })
+                                    }
+                                },
+                                monthly = {
+                                    it.asStreamCompanyName()?.let { stream.monthlyOverflowingByCompany(it) }
+                                        ?: emptyList()
                                 }
-                            },
-                            monthly = { stream.monthlyOverflowingByCompany(it.asStreamCompanyName()!!) }
-                        )),
+                            )),
                         "/overflow/{id}" bind OverflowPageHandler(
                             clock = clock,
                             renderer = renderer,
