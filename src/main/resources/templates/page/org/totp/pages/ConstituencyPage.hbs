@@ -81,8 +81,9 @@
                             <select class="form-select form-select-lg mb-2" name="constituency"
                                     id="constituency-select">
                                 {{#each constituencies}}
-                                    <option value="{{this.uri}}" {{#if this.current}}selected{{/if}}>{{#if this.live}}
-                                        ✔ {{else}}- {{/if}}{{this.name}}</option>
+                                    <option value="{{this.uri}}" {{#if this.current}}selected{{/if}}>{{#if
+                                            this.live}}
+                                        ✔ {{else}}𝑥 {{/if}}{{this.name}}</option>
                                 {{/each}}
                             </select>
                             <script>
@@ -92,10 +93,11 @@
                                     return false;
                                 }
                             </script>
-                            <div class="form-text mb-1"><i class="bi bi-info-circle me-1"></i>Select the constituency
+                            <div class="form-text mb-1"><i class="bi bi-info-circle me-1"></i>Select the
+                                constituency
                                 from the drop-down
                             </div>
-                            <div class="form-text">✔ means we have live data</div>
+                            <div class="form-text">✔ means we have live data (𝑥 if not)</div>
                         </div>
                     </form>
                 </div>
