@@ -210,11 +210,9 @@ object CompanyPageHandler {
         return RenderableLiveSummary(
             thisYear = summary(thisYear, thisYearData),
             lastYear = summary(lastYear, lastYearData),
-            currentMonth = RenderableDuration(Duration.ofSeconds(thisYearData.first {
-                Month.from(it.date) == Month.from(
-                    today
-                )
-            }.overflowingSeconds)),
+            currentMonth = RenderableDuration(Duration.ofSeconds(thisYearData.firstOrNull {
+                Month.from(it.date) == Month.from(today)
+            }?.overflowingSeconds ?: 0)), // first of the month
             data = TotpJson.mapper.writeValueAsString(monthly),
         )
     }
