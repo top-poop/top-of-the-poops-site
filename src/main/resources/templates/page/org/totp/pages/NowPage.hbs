@@ -122,6 +122,7 @@
                                 <th>Company</th>
                                 <th class="text-end">Total CSOs</th>
                                 <th class="text-end">Overflowing</th>
+                                <th class="text-end">Offline</th>
                                 <th class="text-end">Not Overflowing</th>
                             </tr>
                             </thead>
@@ -136,6 +137,7 @@
                                     <td class="text-end fw-bold {{#if
                                             this.count.start}}text-danger{{/if}}">{{numberFormat
                                             this.count.start}}</td>
+                                    <td class="text-end fw-bold text-muted">{{numberFormat this.count.offline}}</td>
                                     <td class="text-end">{{numberFormat this.count.stop}}</td>
                                 </tr>
                             {{/each}}
@@ -145,6 +147,7 @@
                                 <td><strong>Totals</strong></td>
                                 <td class="text-end">{{numberFormat summary.count.total}}</td>
                                 <td class="text-end fw-bold text-danger">{{numberFormat summary.count.start}}</td>
+                                <td class="text-end fw-bold text-muted">{{numberFormat summary.count.offline}}</td>
                                 <td class="text-end">{{numberFormat summary.count.stop}}</td>
                             </tr>
                             </tfoot>

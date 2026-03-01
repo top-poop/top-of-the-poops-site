@@ -61,7 +61,7 @@ class HomepageHandlerTest {
                         Duration.ofHours(1),
                         DeltaValue.of(10),
                         Duration.ofSeconds(11),
-                        loc = Coordinates(1.0,1.0),
+                        loc = Coordinates(1.0, 1.0),
                         geo = GeoJSON(""),
                     )
                 )
@@ -89,7 +89,7 @@ class HomepageHandlerTest {
                         Duration.ofHours(22),
                         DeltaValue.of(10),
                         Duration.ofHours(10),
-                        bbox = BoundingBox(Coordinates(1.0,1.0), Coordinates(1.0, 1.0)),
+                        bbox = BoundingBox(Coordinates(1.0, 1.0), Coordinates(1.0, 1.0)),
                         geo = GeoJSON("")
                     )
                 )
@@ -107,7 +107,15 @@ class HomepageHandlerTest {
             },
             companies = { listOf(aWaterCompany) },
             mpFor = { MP("mp1", "con", "handle1", Uri.of("https://example.com/1")) },
-            streamSummary = { StreamData.StreamOverflowSummary(StreamData.StreamCSOCount(123, 45), emptyList()) }
+            streamSummary = {
+                StreamData.StreamOverflowSummary(
+                    StreamData.StreamCSOCount(
+                        start = 123,
+                        stop = 45,
+                        offline = 50
+                    ), emptyList()
+                )
+            }
         )
     )
 
