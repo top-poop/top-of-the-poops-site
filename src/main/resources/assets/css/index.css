@@ -45,10 +45,15 @@ table.table-spills tbody td {
 }
 
 .leaflet-container {
-    min-height: 500px;
-    height: 50vw;
+    height: 500px;
     display: flex;
     flex-direction: column;
+}
+
+@media screen and (min-width: 768px) {
+    .leaflet-container {
+        height: 90vh;
+    }
 }
 
 .delta-negative {
