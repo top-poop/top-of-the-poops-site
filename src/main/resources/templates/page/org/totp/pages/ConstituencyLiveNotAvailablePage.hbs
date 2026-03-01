@@ -13,12 +13,6 @@
     <link rel="canonical" href="{{ uri  }}"/>
 
     <style>
-        .map {
-            min-height: 500px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
         .card {
             transition: all 0.3s ease;
             border: none;
@@ -88,6 +82,18 @@
                             <div class="form-text">✔ means we have live data (𝑥 if not)</div>
                         </div>
                     </form>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-megaphone-fill me-2"></i>View Annual Sewage Data</h2>
+                </div>
+                <div class="card-body">
+                    <a href="{{constituency.uri}}" class="text-decoration-none">
+                        <button class="btn btn-danger">
+                            <i class="bi bi-info-circle-fill me-1"></i>Switch to Annual Information
+                        </button>
+                    </a>
                 </div>
             </div>
         </div>
