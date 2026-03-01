@@ -21,6 +21,7 @@ class StreamData(private val events: Events, private val connection: WithConnect
     enum class StreamEvent(val dbName: String) {
         Start("Start"),
         Stop("Stop"),
+        Offline("Offline"),
         Unknown("Unknown")
     }
 
@@ -34,7 +35,7 @@ class StreamData(private val events: Events, private val connection: WithConnect
         val receiving_water: WaterwayName,
     )
 
-    data class StreamCSOCount(val start: Int, val stop: Int) {
+    data class StreamCSOCount(val start: Int, val stop: Int, val offline: Int) {
         val total = start + stop
     }
 
@@ -50,18 +51,20 @@ class StreamData(private val events: Events, private val connection: WithConnect
         connection.execute(NamedQueryBlock("stream-overflow-summary") {
             query(
                 sql = """
-WITH ranked_events AS (
-    SELECT
-        e.*,
-        ROW_NUMBER() OVER (PARTITION BY e.stream_cso_id ORDER BY e.event_time DESC) AS rnk
-    FROM
-        stream_cso_event as e
-)
-SELECT m.stream_company, count(*) as count, e.event
+SELECT
+    m.stream_company,
+    e.event,
+    COUNT(*) AS count
 FROM stream_cso m
-         JOIN ranked_events e ON m.stream_cso_id = e.stream_cso_id AND e.rnk = 1
-group by m.stream_company, e.event
-order by m.stream_company;                                  
+JOIN LATERAL (
+    SELECT e.*
+    FROM stream_cso_event e
+    WHERE e.stream_cso_id = m.stream_cso_id
+    ORDER BY e.event_time DESC
+    LIMIT 1
+) e ON true
+GROUP BY m.stream_company, e.event
+ORDER BY m.stream_company, e.event;                               
                 """.trimIndent(),
                 mapper = {
                     val company = it.getString("stream_company")
@@ -76,7 +79,8 @@ order by m.stream_company;
                 company = StreamCompanyName.of(it.key),
                 count = StreamCSOCount(
                     start = it.value[StreamEvent.Start.dbName] ?: 0,
-                    stop = it.value[StreamEvent.Stop.dbName] ?: 0
+                    stop = it.value[StreamEvent.Stop.dbName] ?: 0,
+                    offline = it.value[StreamEvent.Offline.dbName] ?: 0,
                 )
             )
         }.toList()
@@ -84,7 +88,8 @@ order by m.stream_company;
         return StreamOverflowSummary(
             count = StreamCSOCount(
                 start = companies.sumOf { it.count.start },
-                stop = companies.sumOf { it.count.stop }
+                stop = companies.sumOf { it.count.stop },
+                offline = companies.sumOf { it.count.offline }
             ),
             companies = companies
         )
@@ -130,22 +135,34 @@ where  m.point && ST_MakeEnvelope(?, ?, ?, ?, 4326);
         return connection.execute(NamedQueryBlock("stream-overflowing-at") {
             query(
                 sql = """                
-WITH ranked_events AS (
-    SELECT
-        e.*,
-        ROW_NUMBER() OVER (PARTITION BY e.stream_cso_id ORDER BY e.event_time DESC, e.update_time DESC) AS rnk
-    FROM
-        stream_cso_event as e
-    where e.event_time <= ?
-)
-SELECT gr.pcon24nm, m.stream_company, m.stream_id, sl.site_name_wasc, sl.site_name_consent, sl.receiving_water, m.lat, m.lon, e.event, e.event_time, e.update_time
+SELECT
+    gr.pcon24nm,
+    m.stream_company,
+    m.stream_id,
+    sl.site_name_wasc,
+    sl.site_name_consent,
+    sl.receiving_water,
+    m.lat,
+    m.lon,
+    e.event,
+    e.event_time,
+    e.update_time
 FROM stream_cso m
-         join stream_cso_grid sg on m.stream_cso_id = sg.stream_cso_id
-         join grid_references gr on sg.grid_reference = gr.grid_reference
-         JOIN ranked_events e ON m.stream_cso_id = e.stream_cso_id AND e.rnk = 1
-         left join stream_lookup sl on (m.stream_id = sl.stream_id or m.stream_id = sl.stream_id_old) 
-where event = 'Start' 
-order by m.stream_company, m.stream_id
+         JOIN stream_cso_grid sg
+              ON m.stream_cso_id = sg.stream_cso_id
+         JOIN grid_references gr
+              ON sg.grid_reference = gr.grid_reference
+         JOIN LATERAL (
+    SELECT e.*
+    FROM stream_cso_event e
+    WHERE e.stream_cso_id = m.stream_cso_id
+      AND e.event_time <= ?
+    ORDER BY e.event_time DESC
+    LIMIT 1
+    ) e ON e.event = 'Start'
+         LEFT JOIN stream_lookup sl
+                   ON (m.stream_id = sl.stream_id OR m.stream_id = sl.stream_id_old)
+ORDER BY m.stream_company, m.stream_id;
             """.trimIndent(),
                 bind = {
                     it.set(1, instant)
