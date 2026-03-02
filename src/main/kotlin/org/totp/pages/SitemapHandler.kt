@@ -4,16 +4,18 @@ import org.http4k.core.*
 import org.http4k.lens.Header.CONTENT_TYPE
 import org.totp.db.StreamId
 import org.totp.model.data.BathingRank
+import org.totp.model.data.CompanyName
 import org.totp.model.data.RiverRank
 import org.totp.model.data.toRenderable
 import java.io.StringWriter
+import java.time.Clock
 import java.time.Instant
 import javax.xml.stream.XMLOutputFactory
 
 data class SitemapEntry(val uri: Uri, val updated: Instant? = null)
 
 private fun Uri.sitemap() = SitemapEntry(this)
-private fun Uri.sitemap(updated: Instant) = SitemapEntry(this, updated)
+private fun Uri.sitemap(updated: Instant?) = SitemapEntry(this, updated)
 
 class SitemapXml(val base: Uri) {
 
@@ -22,7 +24,7 @@ class SitemapXml(val base: Uri) {
     }
 
     fun createSitemapXml(
-        uris: List<SitemapEntry>,
+        entries: List<SitemapEntry>,
     ): String {
         val sw = StringWriter()
         val writer = factory.createXMLStreamWriter(sw)
@@ -32,13 +34,22 @@ class SitemapXml(val base: Uri) {
         writer.setDefaultNamespace(nsURI)
         writer.writeStartElement(nsURI, "urlset")
 
-        uris.map {
-            base.extend(it.uri)
-        }.forEach { uri ->
+        entries.forEach {
             writer.writeStartElement("url")
-            writer.writeStartElement("loc")
-            writer.writeCharacters(uri.toString())
-            writer.writeEndElement()
+
+            it.uri.also {
+                writer.writeStartElement("loc")
+                writer.writeCharacters(base.extend(it).toString())
+                writer.writeEndElement()
+            }
+
+            it.updated?.also {
+                writer.writeStartElement("lastmod")
+                writer.writeCharacters(it.toString())
+                writer.writeEndElement()
+            }
+
+
             writer.writeEndElement()
         }
 
@@ -56,7 +67,7 @@ class SitemapIndexXml(val base: Uri) {
     }
 
     fun createIndex(
-        sitemapUris: List<SitemapEntry>
+        entries: List<SitemapEntry>
     ): String {
 
         val sw = StringWriter()
@@ -67,13 +78,21 @@ class SitemapIndexXml(val base: Uri) {
         writer.setDefaultNamespace(nsURI)
         writer.writeStartElement(nsURI, "sitemapindex")
 
-        sitemapUris.map {
-            base.extend(it.uri)
-        }.forEach { uri ->
+        entries.forEach {
             writer.writeStartElement("sitemap")
-            writer.writeStartElement("loc")
-            writer.writeCharacters(uri.toString())
-            writer.writeEndElement()
+
+            it.uri.also {
+                writer.writeStartElement("loc")
+                writer.writeCharacters(base.extend(it).toString())
+                writer.writeEndElement()
+            }
+
+            it.updated?.also {
+                writer.writeStartElement("lastmod")
+                writer.writeCharacters(it.toString())
+                writer.writeEndElement()
+            }
+
             writer.writeEndElement()
         }
 
@@ -100,16 +119,44 @@ abstract class AbstractSitemapHandler(siteBaseUri: Uri) : HttpHandler {
 }
 
 class SitemapConstituencyUris(
+    val clock: Clock,
     siteBaseUri: Uri,
     val constituencies: () -> List<ConstituencyRank>
 ) :
     AbstractSitemapHandler(siteBaseUri) {
-    override fun entries(): List<SitemapEntry> = constituencies().flatMap {
-        listOf(
-            it.constituencyName.toRenderable().uri,
-            it.constituencyName.toRenderable(linkLive = true).uri,
-            it.constituencyName.toRenderable(linkLive = true).uri.query("year", "2025")
-        ).map(Uri::sitemap)
+    override fun entries(): List<SitemapEntry> {
+
+        val lastUpdated = previousQuarterUtc(clock.instant())
+
+        return constituencies()
+            .sortedBy { it.constituencyName }
+            .flatMap {
+                listOf(
+                    it.constituencyName.toRenderable().uri.sitemap(),
+                    it.constituencyName.toRenderable(linkLive = true).uri.sitemap(lastUpdated),
+                    it.constituencyName.toRenderable(linkLive = true).uri.query("year", "2025").sitemap()
+                )
+            }
+    }
+}
+
+class SitemapCompanyUris(
+    val clock: Clock,
+    siteBaseUri: Uri,
+    val constituencies: () -> List<CompanyName>
+) :
+    AbstractSitemapHandler(siteBaseUri) {
+    override fun entries(): List<SitemapEntry> {
+
+        val lastUpdated = previousQuarterUtc(clock.instant())
+
+        return constituencies()
+            .sortedBy { it.value }
+            .flatMap {
+                listOf(
+                    it.toRenderable().uri.sitemap(lastUpdated),
+                )
+            }
     }
 }
 
@@ -117,9 +164,10 @@ class SitemapPlaceUris(
     siteBaseUri: Uri,
     val places: () -> List<PlaceRank>
 ) : AbstractSitemapHandler(siteBaseUri) {
-    override fun entries(): List<SitemapEntry> = places().flatMap {
-        listOf(it.placeName.toRenderable().uri)
-    }.map(Uri::sitemap)
+    override fun entries(): List<SitemapEntry> = places()
+        .flatMap {
+            listOf(it.placeName.toRenderable().uri)
+        }.map(Uri::sitemap)
 }
 
 class SitemapBeachUris(
@@ -145,19 +193,35 @@ class SitemapRiverUris(
             .map(Uri::sitemap)
 }
 
+fun previousQuarterUtc(input: Instant): Instant {
+    val quarterSeconds = 15 * 60L
+    val floored = (input.epochSecond / quarterSeconds) * quarterSeconds
+    return Instant.ofEpochSecond(floored)
+}
+
 class SitemapOverflowUris(
+    val clock: Clock,
     siteBaseUri: Uri,
-    val rivers: () -> List<StreamId>
+    val ids: () -> List<StreamId>,
+    val year: Int? = null
 ) : AbstractSitemapHandler(siteBaseUri) {
-    override fun entries(): List<SitemapEntry> =
-        rivers()
+    override fun entries(): List<SitemapEntry> {
+
+        val lastUpdated = if (year == null) {
+            previousQuarterUtc(clock.instant())
+        } else {
+            null
+        }
+
+        return ids()
+            .sortedBy { it.value }
             .flatMap {
                 listOf(
-                    it.toRenderable().uri,
-                    it.toRenderable(2025).uri
+                    it.toRenderable(year).uri,
                 )
             }
-            .map(Uri::sitemap)
+            .map { it.sitemap(updated = lastUpdated) }
+    }
 }
 
 class SitemapStaticUris(

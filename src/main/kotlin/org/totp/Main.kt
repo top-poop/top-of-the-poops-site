@@ -421,16 +421,20 @@ fun main() {
                     Uri.of("constituencies"),
                     Uri.of("rivers"),
                     Uri.of("places"),
-                    Uri.of("overflows"),
+                    Uri.of("companies"),
+                    Uri.of("overflows-live"), // have to split as only allowed 50k pages / file
+                    Uri.of("overflows-2025"),
                 )
             ),
             "/sitemap" bind routes(
                 "static" bind SitemapStaticUris(siteBaseUri),
                 "beaches" bind SitemapBeachUris(siteBaseUri, beachRankings),
-                "constituencies" bind SitemapConstituencyUris(siteBaseUri, constituencyRankings),
+                "constituencies" bind SitemapConstituencyUris(clock, siteBaseUri, constituencyRankings),
                 "rivers" bind SitemapRiverUris(siteBaseUri, riverRankings),
                 "places" bind SitemapPlaceUris(siteBaseUri, placeRankings),
-                "overflows" bind SitemapOverflowUris(siteBaseUri, stream::knownCsos)
+                "companies" bind SitemapCompanyUris(clock, siteBaseUri, { companyAnnualSummaries().map { it.name }.toSet().toList() }),
+                "overflows-live" bind SitemapOverflowUris(clock, siteBaseUri, stream::knownCsos),
+                "overflows-2025" bind SitemapOverflowUris(clock, siteBaseUri, stream::knownCsos, 2025)
             ),
             "/data" bind static(ResourceLoader.Directory("services/data/datafiles")),
             "/assets" bind static(Resources.assets(isDevelopmentEnvironment)),
