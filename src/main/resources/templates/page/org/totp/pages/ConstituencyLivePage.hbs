@@ -241,6 +241,7 @@
                                         <div class="month-grid">
                                             {{#each this.days}}
                                                 <div class="day {{this.rainfallClass}}"
+                                                     tabindex="0"
                                                      title="{{this.date}} {{this.start.hours}} hours, {{ numberFormat this.rainfall}} mm rain {{#if this.offline.any }}, {{ numberFormat this.offline.hours }}h offline{{/if}}"
                                                      data-date="{{this.date}}">
                                                     <div class="inner {{this.sewageClass}}"></div>

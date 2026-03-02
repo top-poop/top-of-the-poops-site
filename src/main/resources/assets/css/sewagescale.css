@@ -157,3 +157,45 @@
 .day.rainfall-0 .inner.sewage-0 {
     display: none;
 }
+
+/* Tooltip for mobile (on focus/tap) */
+.day:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 1px;
+    z-index: 10;
+}
+
+.day:focus::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 20;
+    pointer-events: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    min-width: 150px;
+    text-align: center;
+}
+
+/* Tooltip arrow */
+.day:focus::before {
+    content: "";
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.85);
+    z-index: 20;
+}
+
+.day:focus {
+    cursor: pointer;
+}
