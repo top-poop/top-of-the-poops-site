@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.GeoJSON
 import org.totp.model.data.PlaceName
+import strikt.api.expectThat
+import strikt.assertions.first
+import strikt.assertions.isEqualTo
 import java.time.Duration
 
 
@@ -44,8 +47,8 @@ class BadgesPlacesHandlerTest {
                     )
                 )
             },
-            placeBoundaries = {
-                GeoJSON.of("{}")
+            placeBoundaries = { name ->
+                GeoJSON.of("geojson-${name.value}")
             }
         )
     )
@@ -53,5 +56,16 @@ class BadgesPlacesHandlerTest {
     @Test
     fun `renders the badges  page`() {
         val html = Html(service(Request(Method.GET, "/a")))
+
+        expectThat(html)
+            .select("#a-2024")
+            .first()
+            .attribute("data-name").isEqualTo("a")
+
+        expectThat(html)
+            .select("#boundary-a")
+            .first()
+            .text().isEqualTo("geojson-a")
+
     }
 }

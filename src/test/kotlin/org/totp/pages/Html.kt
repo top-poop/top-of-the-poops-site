@@ -22,6 +22,10 @@ fun Assertion.Builder<Element>.attribute(name: String): DescribeableBuilder<Stri
     return get { this.attr(name) }
 }
 
+fun Assertion.Builder<Element>.text(): DescribeableBuilder<String> {
+    return get { this.text() }
+}
+
 fun Assertion.Builder<Document>.twitterImageUri(): DescribeableBuilder<String> {
     return this.select("meta[name='twitter:image']").first().attribute("content")
 }

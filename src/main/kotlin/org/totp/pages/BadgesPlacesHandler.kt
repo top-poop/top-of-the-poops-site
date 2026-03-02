@@ -13,7 +13,7 @@ import org.totp.model.data.Slug
 import org.totp.model.data.toSlug
 
 
-class BadgesLocalitiesPage(
+class BadgesPlacesPage(
     uri: Uri,
     val year: Int,
     val places: List<RenderablePlaceRank>,
@@ -39,7 +39,7 @@ object BadgesPlacesHandler {
 
             Response(Status.OK)
                 .with(
-                    viewLens of BadgesLocalitiesPage(
+                    viewLens of BadgesPlacesPage(
                         pageUriFrom(request),
                         THE_YEAR,
                         rankings.sortedBy { it.placeName }.map {
