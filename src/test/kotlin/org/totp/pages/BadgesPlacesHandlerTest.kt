@@ -66,6 +66,5 @@ class BadgesPlacesHandlerTest {
             .select("#boundary-a")
             .first()
             .text().isEqualTo("geojson-a")
-
     }
 }
