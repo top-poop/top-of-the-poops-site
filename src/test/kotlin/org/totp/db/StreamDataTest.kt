@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.StreamCompanyName
 import strikt.api.expectThat
+import strikt.assertions.contains
 import strikt.assertions.isEqualTo
 import strikt.assertions.isGreaterThan
 import strikt.assertions.isNotNull
@@ -85,11 +86,13 @@ class StreamDataTest {
 
     @Test
     fun eventsForCso() {
-        expectThat(stream.eventsForCso(
-            StreamId.of("AWS00532"),
-            start = LocalDate.parse("2026-01-01"),
-            end = LocalDate.parse("2026-02-01")
-        )).size.isGreaterThan(1)
+        expectThat(
+            stream.eventsForCso(
+                StreamId.of("AWS00532"),
+                start = LocalDate.parse("2026-01-01"),
+                end = LocalDate.parse("2026-02-01")
+            )
+        ).size.isGreaterThan(1)
     }
 
     @Test
@@ -140,13 +143,17 @@ class StreamDataTest {
 
     @Test
     fun daily() {
-        val daily = stream.dailyByConstituency(ConstituencyName.of("Aldershot"), start= LocalDate.parse("2025-01-01"), end= LocalDate.parse("2026-01-01"))
+        val daily = stream.dailyByConstituency(
+            ConstituencyName.of("Aldershot"),
+            start = LocalDate.parse("2025-01-01"),
+            end = LocalDate.parse("2026-01-01")
+        )
         expectThat(daily).size.isGreaterThan(0)
     }
 
     @Test
     fun totals() {
-        val daily = stream.totalsByCompany(start= LocalDate.parse("2025-01-01"), end= LocalDate.parse("2026-01-01"))
+        val daily = stream.totalsByCompany(start = LocalDate.parse("2025-01-01"), end = LocalDate.parse("2026-01-01"))
         expectThat(daily).size.isGreaterThan(0)
     }
 
@@ -157,7 +164,11 @@ class StreamDataTest {
 
         val annual = AnnualLiveSewage(ea, stream)
 
-        val result = annual.byConstituency(ConstituencyName.of("Aldershot"), start= LocalDate.parse("2025-01-01"), end= LocalDate.parse("2026-01-01"))
+        val result = annual.byConstituency(
+            ConstituencyName.of("Aldershot"),
+            start = LocalDate.parse("2025-01-01"),
+            end = LocalDate.parse("2026-01-01")
+        )
 
         expectThat(result.year).isEqualTo(2025)
         expectThat(result.months).size.isEqualTo(12)
@@ -168,4 +179,8 @@ class StreamDataTest {
 
     }
 
+    @Test
+    fun known() {
+        expectThat(stream.knownCsos()).contains(StreamId.of("SWS00656"))
+    }
 }

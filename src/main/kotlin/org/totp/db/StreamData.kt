@@ -727,6 +727,19 @@ group by cso.stream_id, cso.stream_company, cso.lat, cso.lon, pcon24nm, sl.site_
         ) ?: SiteName.of("Unknown"),
         receiving_water = rs.getNullable(WaterwayName, "receiving_water") ?: WaterwayName.of("Unknown")
     )
+
+
+    fun knownCsos(): List<StreamId> {
+        return connection.execute(NamedQueryBlock("by-cso") {
+            query(
+                sql = """
+select stream_id from stream_cso order by 1                    
+                """.trimIndent(),
+                mapper = { it.get(StreamId, "stream_id") }
+            )
+        })
+    }
+
 }
 
 fun bucketFrom(rs: ResultSet): Bucket = Bucket(

@@ -24,21 +24,39 @@ class SitemapHandlerTest {
     val uriWithParams = "/page?thing=thing&bob=bob"
     val uriPlain = "/page"
 
-    val service = routes(
-        "/sitemap.xml" bind Method.GET to SitemapHandler(
-            siteBaseUri = Uri.of("https://totp.example.com"),
-            uris = {
-                listOf(
-                    Uri.of(uriPlain),
-                    Uri.of(uriWithParams),
-                )
-            },
-        )
+    val base = Uri.of("https://totp.example.com")
+    val app = routes(
+        "/sitemap.xml" bind Method.GET to SitemapIndexHandler(
+            base = base.appendToPath("sitemap"),
+            locations = listOf(
+                Uri.of("places"),
+                Uri.of("beaches"),
+            )
+        ),
+        "/sitemap/places" bind Method.GET to object : AbstractSitemapHandler(base) {
+            override fun entries(): List<SitemapEntry> {
+                return listOf(Uri.of(uriPlain), Uri.of(uriWithParams)).map { SitemapEntry(it) }
+            }
+        }
     )
 
     @Test
+    fun `renders the index`() {
+        val response = app(Request(Method.GET, "/sitemap.xml"))
+
+        expectThat(response) {
+            get { status }.isEqualTo(Status.OK)
+            contentType.isEqualTo(ContentType.TEXT_XML)
+            bodyString.isXml.and {
+                queryString("/sitemapindex/sitemap[1]/loc").isEqualTo("https://totp.example.com/sitemap/places")
+                queryString("/sitemapindex/sitemap[2]/loc").isEqualTo("https://totp.example.com/sitemap/beaches")
+            }
+        }
+    }
+
+    @Test
     fun `renders the sitemap`() {
-        val response = service(Request(Method.GET, "/sitemap.xml"))
+        val response = app(Request(Method.GET, "/sitemap/places"))
 
         expectThat(response) {
             get { status }.isEqualTo(Status.OK)

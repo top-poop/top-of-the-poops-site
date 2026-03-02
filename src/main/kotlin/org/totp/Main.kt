@@ -165,7 +165,7 @@ fun main() {
     val beachRankings = memoize(BathingRankings(annualData))
     val shellfishRankings = memoize(ShellfishRankings(annualData))
     val constituencyRankings = memoize(ConstituencyRankings(annualData))
-    val localityRankings = memoize(LocalityRankings(annualData))
+    val placeRankings = memoize(LocalityRankings(annualData))
 
     val mpFor = mpForConstituency(referenceData::mps)
 
@@ -190,7 +190,7 @@ fun main() {
     }
 
     val localityRank = { wanted: PlaceName ->
-        localityRankings().firstOrNull { it.placeName == wanted }
+        placeRankings().firstOrNull { it.placeName == wanted }
     }
 
     val thamesWater = ThamesWater(connection)
@@ -207,6 +207,8 @@ fun main() {
     val edm = EDM(connection)
 
     val annualLiveSewage = AnnualLiveSewage(environmentAgency, streamData = stream)
+
+    val siteBaseUri = Uri.of("https://top-of-the-poops.org")
 
     val server = Undertow(port = port(environment)).toServer(
         routes(
@@ -244,7 +246,7 @@ fun main() {
                         ),
                         "/places" bind PlacesPageHandler(
                             renderer = renderer,
-                            areaRankings = localityRankings,
+                            areaRankings = placeRankings,
                         ),
                         "/beaches" bind BeachesPageHandler(
                             renderer = renderer, bathingRankings = beachRankings
@@ -354,7 +356,7 @@ fun main() {
                             ),
                             "/localities/{letter}" bind BadgesPlacesHandler(
                                 renderer = renderer,
-                                placeRankings = localityRankings,
+                                placeRankings = placeRankings,
                                 placeBoundaries = localityBoundaries,
                             ),
                             "/companies" bind BadgesCompaniesHandler(
@@ -411,13 +413,24 @@ fun main() {
             "/data-new/locality/{locality}/annual-pollution" bind EDMAnnualLocalitySummary(edm),
             "/data-new/constituency/{constituency}/annual-pollution" bind EDMAnnualConstituencySummary(edm),
             "/map.html" bind OldMapRedirectHandler(),
-            "/sitemap.xml" bind SitemapHandler(
-                siteBaseUri = Uri.of("https://top-of-the-poops.org"), uris = SitemapUris(
-                    constituencies = constituencyRankings,
-                    riverRankings = riverRankings,
-                    beachRankings = beachRankings,
-                    placeRankings = localityRankings,
+            "/sitemap.xml" bind SitemapIndexHandler(
+                siteBaseUri.extend(Uri.of("/sitemap")),
+                listOf(
+                    Uri.of("static"),
+                    Uri.of("beaches"),
+                    Uri.of("constituencies"),
+                    Uri.of("rivers"),
+                    Uri.of("places"),
+                    Uri.of("overflows"),
                 )
+            ),
+            "/sitemap" bind routes(
+                "static" bind SitemapStaticUris(siteBaseUri),
+                "beaches" bind SitemapBeachUris(siteBaseUri, beachRankings),
+                "constituencies" bind SitemapConstituencyUris(siteBaseUri, constituencyRankings),
+                "rivers" bind SitemapRiverUris(siteBaseUri, riverRankings),
+                "places" bind SitemapPlaceUris(siteBaseUri, placeRankings),
+                "overflows" bind SitemapOverflowUris(siteBaseUri, stream::knownCsos)
             ),
             "/data" bind static(ResourceLoader.Directory("services/data/datafiles")),
             "/assets" bind static(Resources.assets(isDevelopmentEnvironment)),
