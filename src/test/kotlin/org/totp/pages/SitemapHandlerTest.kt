@@ -19,7 +19,7 @@ import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
 
 
-class SitemapPageHandlerTest {
+class SitemapHandlerTest {
 
     val uriWithParams = "/page?thing=thing&bob=bob"
     val uriPlain = "/page"

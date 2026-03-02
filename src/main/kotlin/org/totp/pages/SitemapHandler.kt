@@ -7,43 +7,55 @@ import org.totp.model.data.RiverRank
 import java.io.StringWriter
 import javax.xml.stream.XMLOutputFactory
 
-object SitemapHandler {
-    operator fun invoke(siteBaseUri: Uri, uris: () -> List<Uri>): HttpHandler {
-        val factory = XMLOutputFactory.newFactory().also {
-            it.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, true)
+class SitemapXml(val base: Uri) {
+
+    val factory = XMLOutputFactory.newFactory().also {
+        it.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, true)
+    }
+
+    fun createSitemapXml(
+        uris: List<Uri>,
+    ): String {
+        val sw = StringWriter()
+        val writer = factory.createXMLStreamWriter(sw)
+
+        writer.writeStartDocument()
+        val nsURI = "http://www.sitemaps.org/schemas/sitemap/0.9"
+        writer.setDefaultNamespace(nsURI)
+        writer.writeStartElement(nsURI, "urlset")
+
+        uris.map {
+            it
+                .scheme(base.scheme)
+                .host(base.host)
+                .port(base.port)
+        }.forEach { uri ->
+            writer.writeStartElement("url")
+            writer.writeStartElement("loc")
+            writer.writeCharacters(uri.toString())
+            writer.writeEndElement()
+            writer.writeEndElement()
         }
 
-        return { request ->
+        writer.writeEndElement()
+        writer.writeEndDocument()
 
-            val sw = StringWriter()
-            val writer = factory.createXMLStreamWriter(sw)
+        return sw.toString()
+    }
+}
 
-            writer.writeStartDocument()
-            val nsURI = "http://www.sitemaps.org/schemas/sitemap/0.9"
-            writer.setDefaultNamespace(nsURI)
-            writer.writeStartElement(nsURI, "urlset")
+object SitemapHandler {
 
-            uris().map {
-                it
-                    .scheme(siteBaseUri.scheme)
-                    .host(siteBaseUri.host)
-                    .port(siteBaseUri.port)
-            }.forEach { uri ->
-                writer.writeStartElement("url")
-                writer.writeStartElement("loc")
-                writer.writeCharacters(uri.toString())
-                writer.writeEndElement()
-                writer.writeEndElement()
-            }
+    operator fun invoke(siteBaseUri: Uri, uris: () -> List<Uri>): HttpHandler {
 
-            writer.writeEndElement()
-            writer.writeEndDocument()
+        val sitemapXml = SitemapXml(siteBaseUri)
 
+        return {
             Response(Status.OK)
                 .with(
                     CONTENT_TYPE of ContentType.TEXT_XML
                 ).body(
-                    sw.toString()
+                    sitemapXml.createSitemapXml(uris())
                 )
         }
     }
