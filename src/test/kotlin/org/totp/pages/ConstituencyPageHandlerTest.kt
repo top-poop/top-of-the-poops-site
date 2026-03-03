@@ -62,7 +62,8 @@ class ConstituencyPageHandlerTest {
                     10,
                     Duration.ofHours(1),
                     20,
-                    Duration.ZERO
+                    Duration.ZERO,
+                    csoCount = 10
                 )
             },
             constituencyRivers = { listOf(aRiver(1)) },

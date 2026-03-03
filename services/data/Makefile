@@ -69,8 +69,6 @@ DATAFILES_2024=$(DATAFILES)/v1/2024
 DATA_2024_SQL=$(wildcard sql/v1/2024/*.sql)
 DATA_2024_GENERATED=$(foreach sql,$(DATA_2024_SQL),$(DATAFILES_2024)/$(basename $(notdir $(sql))).json)
 
-DATA_2024_LIVE=$(DATAFILES_2024)/spills-live-overflows-by-rainfall-thames-water.json $(DATAFILES_2024)/spills-live-summary-thames-water.json
-
 GEO_2024_SQL=$(wildcard sql/v1/2024/geo/*.sql)
 GEO_2024_GENERATED=$(foreach sql,$(GEO_2024_SQL),$(DATAFILES_2024)/geo/$(basename $(notdir $(sql))).json)
 
@@ -90,8 +88,6 @@ provided: $(PROVIDED)
 
 .PHONY: .FORCE
 .FORCE:
-
-$(DATA_2024_LIVE): .FORCE
 
 $(DATAFILES)/v1/2024/%.json: sql/v1/2024/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_JSON)
 	@mkdir -p $(dir $@)

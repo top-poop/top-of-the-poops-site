@@ -20,6 +20,7 @@ data class ConstituencyRank(
     val duration: Duration,
     val countDelta: Int,
     val durationDelta: Duration,
+    val csoCount: Int,
 )
 
 data class PlaceRank(

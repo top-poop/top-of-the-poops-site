@@ -93,7 +93,8 @@ class LoadingJsonDatafilesTest {
     "mp_name": "SC",
     "mp_party": "C",
     "mp_uri": "http://example.com/sc",
-    "twitter_handle": "@example"
+    "twitter_handle": "@example",
+    "cso_count": 12
   }]"""
 
         val rankings = ConstituencyRankings(

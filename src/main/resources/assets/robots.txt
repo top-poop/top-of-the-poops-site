@@ -59,6 +59,7 @@ User-agent: PerplexityBot
 Disallow: /
 
 User-agent: ClaudeBot
+User-agent: Claude-SearchBot
 Disallow: /
 
 User-agent: IbouBot

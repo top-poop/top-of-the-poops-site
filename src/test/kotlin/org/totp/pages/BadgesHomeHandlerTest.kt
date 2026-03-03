@@ -23,7 +23,8 @@ class BadgesHomeHandlerTest {
                         100,
                         Duration.ofHours(1),
                         25,
-                        Duration.ofHours(10)
+                        Duration.ofHours(10),
+                        csoCount =24,
                     )
                 )
             },

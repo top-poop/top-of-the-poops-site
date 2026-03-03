@@ -99,7 +99,8 @@ object ConstituencyRankings {
                         count = (it["total_spills"] as Double).toInt(),
                         duration = fromEDMHours((it["total_hours"] as Double)),
                         countDelta = (it["spills_increase"] as Double).toInt(),
-                        durationDelta = fromEDMHours(it["hours_increase"] as Double)
+                        durationDelta = fromEDMHours(it["hours_increase"] as Double),
+                        csoCount = (it["cso_count"] as Int)
                     )
                 }
         }

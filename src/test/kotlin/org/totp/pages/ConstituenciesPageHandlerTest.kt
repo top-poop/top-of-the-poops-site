@@ -28,7 +28,7 @@ class ConstituenciesPageHandlerTest {
                         100,
                         Duration.ofHours(1),
                         25,
-                        Duration.ofHours(10)
+                        Duration.ofHours(10), csoCount = 20,
                     ),
                     ConstituencyRank(
                         2,
@@ -36,7 +36,7 @@ class ConstituenciesPageHandlerTest {
                         2,
                         Duration.ofHours(2),
                         50,
-                        Duration.ofHours(20)
+                        Duration.ofHours(20), csoCount = 324,
                     )
                 )
             },

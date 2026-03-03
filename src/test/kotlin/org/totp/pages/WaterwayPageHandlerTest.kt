@@ -43,7 +43,8 @@ class WaterwayPageHandlerTest {
                     10,
                     Duration.ofHours(1),
                     20,
-                    Duration.ZERO
+                    Duration.ZERO,
+                    csoCount =23,
                 )
             },
             placeRank = { _ -> null }
