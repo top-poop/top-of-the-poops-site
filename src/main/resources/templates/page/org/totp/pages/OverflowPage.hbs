@@ -161,8 +161,8 @@
                                 no pollution reported
                             {{/if}}
 
-                            {{#gt cso.offline.hours 1}}<br/>CSO monitoring was offline for {{numberFormat cso.offline.hours}} hours{{/gt}}
-                            {{#gt cso.potential.hours 1}}<br/>CSO went offline when overflowing, so could also have overflowed for additional {{numberFormat cso.potential.hours}} hours{{/gt}}
+                            {{#gt cso.offline.hours 1}}<br/>{{> g/cso }} monitoring was offline for {{numberFormat cso.offline.hours}} hours{{/gt}}
+                            {{#gt cso.potential.hours 1}}<br/>{{> g/cso }} went offline when overflowing, so could also have overflowed for additional {{numberFormat cso.potential.hours}} hours{{/gt}}
 
                         </div>
                     </div>
@@ -260,7 +260,7 @@
         <div class="col">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h2 class="h4 mb-0"><i class="bi bi-clipboard-data me-2"></i>CSO Events for {{ truncate cso.id.id n=10}}
+                    <h2 class="h4 mb-0"><i class="bi bi-clipboard-data me-2"></i>Events for {{ truncate cso.id.id n=10}}
                         in {{selectedYear.year}}</h2>
                 </div>
                 <div class="card-body p-4">
@@ -271,9 +271,8 @@
                         <div>
                             <p class="mb-0">Here you can see the data reported by the Water Industry 'API' - It's not very 'clean'!
                             One particular trick that you can see is where the 'Start' date is regularly incremented, which means
-                            that unless you keep an eye on the entire history, which we do, you could be lead to belive that the CSO
-                            started overflowing much later than it did.<br/>
-                            Note also that when the CSO is reported to 'Stop', often the start and end dates of the previous event
+                            that unless you keep an eye on the entire history, which we do, you could be lead to believe that the overflow started much later than it did.<br/>
+                            Note also that when the overflow is reported to 'Stop', often the start and end dates of the previous event
                             doesn't line up with the data. This does vary in reliability between water company.
                             </p>
                         </div>

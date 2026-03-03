@@ -56,7 +56,6 @@
     </div>
 {{/components/jumbotron}}
 
-
 <div class="container-fluid py-5">
     <div class="row justify-content-md-center g-4 sewage-columns-equal-height">
         <div class="col-md-5">
@@ -70,9 +69,8 @@
                 <div class="card-body">
                     <h2 class="card-title fw-bold text-danger mb-3">A Petri Dish for E.Coli</h2>
 
-                    <p class="card-text">Here are all the CSOs in England & Wales that 'overflowed' in {{ year }} -
-                        Scotland data is coming soon! - dumping raw or
-                        minimally treated sewage into fragile chalk streams, rivers, onto beaches and into shellfish
+                    <p class="card-text">Here are all the {{> g/cso }}s in England, Wales & Scotland that 'overflowed' in {{ year }}
+                        - dumping raw or minimally treated sewage into fragile chalk streams, rivers, onto beaches and into shellfish
                         areas.</p>
                     <p class="card-text">Each colour represents a different Water Company, the size of each dot relates
                         to how long each
@@ -85,7 +83,7 @@
                     <div class="alert alert-info p-3 mb-3">
                         <div class="d-flex align-items-center mb-2">
                             <span class="badge bg-primary fs-5">{{numberFormat summary.count.start}}</span>
-                            <h5 class="ms-2">CSOs are overflowing right now</h5>
+                            <h5 class="ms-2">{{> g/cso }}s are overflowing right now</h5>
                         </div>
                         <a href="/now" class="btn btn-danger">See live sewage overflows</a>
                     </div>

@@ -127,3 +127,73 @@ table.table-spills tbody td {
     font-variant-numeric: tabular-nums;
 }
 
+
+.glossary-word {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dotted #555;
+  outline: none;  
+  display: inline; 
+  font-weight: 500;
+}
+
+
+.glossary-word .glossary-popup {
+  display: none;
+  position: absolute;
+  bottom: 125%;        /* above the word */
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 200px;
+  max-width: 400px;    /* ensures wrapping */
+  width: max-content;
+  background-color: #333;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  white-space: normal;  /* allows wrapping */
+  text-align: center;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  pointer-events: none;
+  word-wrap: break-word;
+}
+
+.glossary-word .glossary-popup::after {
+  content: '';
+  position: absolute;
+  top: 100%;     
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+.glossary-word:hover .glossary-popup,
+.glossary-word:focus-within .glossary-popup {
+  display: block;
+}
+
+.glossary-word .glossary-popup {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.glossary-word:hover .glossary-popup,
+.glossary-word:focus-within .glossary-popup {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .glossary-word .glossary-popup {
+    bottom: auto;
+    top: 125%; 
+  }
+  .glossary-word .glossary-popup::after {
+    top: -12px;
+    border-color: transparent transparent #333 transparent;
+  }
+}

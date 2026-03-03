@@ -212,11 +212,11 @@
                         <div>
                             <p class="mb-0">Reporting refers to how much of the time the monitoring was active.
                                 {{#eq summary.lowReportingCount 0}}
-                                    In this place all the declared CSOs appeared to have monitoring enabled for
+                                    In this place all the declared {{> g/cso }}s appeared to have monitoring enabled for
                                     more than 50% of the year
                                 {{else}}
                                     In this place {{summary.lowReportingCount}} of the total {{summary.csoCount}}
-                                    CSO locations
+                                    {{> g/cso }} locations
                                     had reporting enabled for less than
                                     half the year.
                                     {{#gt summary.zeroReportingCount 0}}
