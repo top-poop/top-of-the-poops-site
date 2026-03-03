@@ -499,7 +499,7 @@ select file_time, status, statusstart, latesteventstart, latesteventend, lastupd
     data class CompanyBucket(val company: StreamCompanyName, val bucket: Bucket)
 
     fun totalsByCompany(start: LocalDate, end: LocalDate): List<CompanyBucket> {
-        return connection.execute(block("cso-buckets") {
+        return connection.execute(block("stream-totals-by-company") {
             query(
                 sql = """
 select stream_company,
@@ -529,7 +529,7 @@ group by stream_company
 
 
     fun csoMonthlyBuckets(id: StreamId, current: LocalDate, start: LocalDate, end: LocalDate): List<DatedBucket> {
-        return connection.execute(block("cso-buckets") {
+        return connection.execute(block("stream-monthly-cso-buckets") {
             query(
                 sql = """
 with months as (
@@ -587,7 +587,7 @@ order by m.month;
     }
 
     fun eventSummaryForCso(id: StreamId, current: LocalDate, start: LocalDate, end: LocalDate): List<DatedBucket> {
-        return connection.execute(block("cso-buckets") {
+        return connection.execute(block("stream-cso-event-summary") {
             query(
                 sql = """
 select stream_id,
