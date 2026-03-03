@@ -27,6 +27,10 @@ create table stream_file_events
 
 create unique index stream_file_events_idx1 on stream_file_events (stream_file_id, id);
 
+CREATE INDEX idx_stream_file_events_id_stream_file_id
+    ON stream_file_events (id, stream_file_id);
+
+
 drop table if exists stream_file_content cascade;
 
 create table stream_file_content
