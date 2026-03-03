@@ -45,6 +45,9 @@ Disallow:/
 User-Agent: meta-externalagent
 Disallow: /
 
+User-Agent: meta-webindexer
+Disallow: /
+
 User-Agent: turnitinbot
 Disallow: /
 
