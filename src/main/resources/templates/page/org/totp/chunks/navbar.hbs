@@ -17,18 +17,20 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/now">LIVE Sewage</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLive" role="button" data-bs-toggle="dropdown" aria-expanded="false">Live Data</a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownLive">
+                            <li><a class="dropdown-item" href="/now">Live Overflows<div class="small text-muted">Show all the sewage happening right now</div></a></li>
+                        </ul>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownData" role="button"
-                           data-bs-toggle="dropdown" aria-expanded="false">Annual Data</a>
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownData" role="button" data-bs-toggle="dropdown" aria-expanded="false">Annual Data</a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownData">
-                            <li><a class="dropdown-item" href="/places">Places</a></li>
-                            <li><a class="dropdown-item" href="/constituencies">Constituencies</a></li>
-                            <li><a class="dropdown-item" href="/beaches">Beaches</a></li>
-                            <li><a class="dropdown-item" href="/rivers">Rivers</a></li>
-                            <li><a class="dropdown-item" href="/shellfisheries">Shellfisheries</a></li>
+                            <li><a class="dropdown-item" href="/beaches">Beaches<div class="small text-muted">Sewage overflows affecting beaches</div></a></li>
+                            <li><a class="dropdown-item" href="/constituencies">Constituencies<div class="small text-muted">Discover sewage in your constituency</div></a></li>
+                            <li><a class="dropdown-item" href="/places">Places<div class="small text-muted">Find your town or city and see sewage overflows near you</div></a></li>
+                            <li><a class="dropdown-item" href="/rivers">Rivers<div class="small text-muted">Sewage overflows affecting rivers</div></a></li>
+                            <li><a class="dropdown-item" href="/shellfisheries">Shellfisheries<div class="small text-muted">Sewage overflows affecting areas that produce shellfish</div></a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
