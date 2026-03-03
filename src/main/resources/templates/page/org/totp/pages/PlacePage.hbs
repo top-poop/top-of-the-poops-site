@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <title>Top of the Poops | Place | {{ place.name }}| Polluted by {{join summary.companies ', '}}</title>
-    <meta name="description" content="Analysing sewage dumps by water companies in {{ place.name }}">
+    <meta name="description" content="Sewage Map for {{ place.name }} - Polluted by {{join summary.companies ', '}}">
 
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
@@ -29,7 +29,7 @@
     {{> components/meta-opengraph
             title=(concat "Place | " place.name)
             twitterImageUri=share.twitterImageUri
-            description=(concat "Analysing sewage dumps by water companies in " place.name)
+            description=(concat "Sewage Map for " constituency.name)
     }}
 </head>
 <body>
