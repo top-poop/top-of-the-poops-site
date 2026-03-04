@@ -3,13 +3,15 @@
 <head>
     <meta charset="utf-8"/>
     <title>Top of the Poops | Rivers</title>
-    <meta name="description" content="Analysing sewage dumps by water companies">
+    <meta name="description" content="Find how much sewage was dumped in rivers near you in {{year}}">
 
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
     {{> chunks/meta-scripts }}
 
-    {{> components/meta-opengraph title="Rivers" }}
+    {{> components/meta-opengraph title="Rivers"
+            description=(concat "Find how much sewage was dumped in rivers near you in " year)
+    }}
 
 </head>
 <body>
