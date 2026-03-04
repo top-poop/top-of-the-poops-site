@@ -38,16 +38,16 @@ class WaterwayName(value: String) : StringValue(value), ComparableValue<Waterway
 
 private val streamEABiMap = HashBiMap.create(
     mapOf(
-        StreamCompanyName.of("Anglian") to CompanyName.of("Anglian Water"),
-        StreamCompanyName.of("Northumbrian") to CompanyName.of("Northumbrian Water"),
-        StreamCompanyName.of("SevernTrent") to CompanyName.of("Severn Trent Water"),
-        StreamCompanyName.of("SouthWestWater") to CompanyName.of("South West Water"),
-        StreamCompanyName.of("Southern") to CompanyName.of("Southern Water"),
-        StreamCompanyName.of("ThamesWater") to CompanyName.of("Thames Water"),
-        StreamCompanyName.of("UnitedUtilities") to CompanyName.of("United Utilities"),
-        StreamCompanyName.of("YorkshireWater") to CompanyName.of("Yorkshire Water"),
-        StreamCompanyName.of("WessexWater") to CompanyName.of("Wessex Water"),
-        StreamCompanyName.of("DwrCymru") to CompanyName.of("Dwr Cymru Welsh Water"),
+        StreamCompanyName.of("Anglian") to CompanyNames.anglianWater,
+        StreamCompanyName.of("Northumbrian") to CompanyNames.northumrianWater,
+        StreamCompanyName.of("SevernTrent") to CompanyNames.severnTrentWater,
+        StreamCompanyName.of("SouthWestWater") to CompanyNames.southWestWater,
+        StreamCompanyName.of("Southern") to CompanyNames.southernWater,
+        StreamCompanyName.of("ThamesWater") to CompanyNames.thamesWater,
+        StreamCompanyName.of("UnitedUtilities") to CompanyNames.unitedUtilities,
+        StreamCompanyName.of("YorkshireWater") to CompanyNames.yorkshireWater,
+        StreamCompanyName.of("WessexWater") to CompanyNames.wessexWater,
+        StreamCompanyName.of("DwrCymru") to CompanyNames.dwrCymru,
     )
 )
 

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Top of the Poops | Search</title>
+    <meta name="description" content="Search Top of the Poops - By Constituency, River, Town, Overflow...">
+
+    {{> chunks/favicons }}
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
+    <script src="/assets/js/htmx-2.0.8-min.js"></script>
+
+    {{> components/meta-opengraph title="Search"
+            description=(concat "Search all of Top Of The Poops - By Constituency, River, Town, Overflow...")
+    }}
+
+    <style>
+        .htmx-indicator {
+            display: none;
+            font-size: 0.8em;
+            margin-top: 4px;
+            color: #666;
+        }
+
+        .htmx-request .htmx-indicator {
+            display: block;
+        }
+
+        mark {
+            background-color: #ffd54f;
+            color: #000;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .letter-spacing-1 {
+            letter-spacing: 0.08em;
+        }
+
+        #search::placeholder {
+            font-weight: normal;
+            color: #6c757d;
+        }
+
+    </style>
+</head>
+<body>
+{{> chunks/navbar }}
+
+<div id="spinner" class="htmx-indicator">Loading...</div>
+
+{{#> components/jumbotron }}
+    Search Top Of The Poops
+{{/components/jumbotron}}
+
+<div class="container mt-5">
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-10">
+            <div class="mb-3">
+                <div class="small text-uppercase text-muted fw-semibold letter-spacing-1">
+                    Search the database
+                </div>
+                <div class="text-muted">
+                    Companies · Constituencies · Rivers · Towns & Villages · Sewage Overflows · CSOs
+                </div>
+            </div>
+
+            <div class="position-relative">
+
+                <input
+                        id="search"
+                        type="text"
+                        name="q"
+                        class="form-control form-control-lg fw-bold text-center
+         rounded-pill px-4
+         border-2 border-secondary shadow-sm"
+                        placeholder="Type your search..."
+                        autocomplete="off"
+                        autofocus
+
+                        hx-get="/search/q"
+                        hx-trigger="keyup changed delay:300ms load pageshow"
+                        hx-target="#results"
+                        hx-swap="innerHTML"
+
+                        onkeydown="if(event.key==='Escape'){ closeResults() }"
+                        onfocus="showResultsIfAny()"
+                        onblur="setTimeout(hideResults, 100)"
+                />
+
+                <div id="results"
+                     class="list-group position-absolute w-100 mt-1 shadow mb-5"
+                     style="z-index: 1000;"
+                     onmousedown="event.preventDefault()">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    window.addEventListener('pageshow', () => {
+        showResultsIfAny()
+    });
+
+    document.body.addEventListener('htmx:afterSwap', (evt) => {
+        if (evt.target.id === 'results') {
+            showResultsIfAny()
+        }
+    });
+
+    const input = document.getElementById('search');
+    const results = document.getElementById('results');
+
+    function hideResults() {
+        if (input.value.trim() !== '' && results.innerHTML.trim() !== '') {
+            results.style.display = 'block';
+            console.log("hiding")
+        }
+
+    }
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown') {
+            const first = results.querySelector('a');
+            if (first) {
+                e.preventDefault();
+                first.focus();
+            }
+        }
+    });
+
+    results.addEventListener('keydown', (e) => {
+        const items = Array.from(results.querySelectorAll('a'));
+        const currentIndex = items.indexOf(document.activeElement);
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (currentIndex < items.length - 1) {
+                items[currentIndex + 1].focus();
+            }
+        }
+
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (currentIndex > 0) {
+                items[currentIndex - 1].focus();
+            } else {
+                input.focus(); // back to search box
+            }
+        }
+
+        if (e.key === 'Escape') {
+            results.style.display = 'none';
+            input.focus();
+        }
+    });
+
+    function showResultsIfAny() {
+        const r = document.getElementById('results');
+        if (r.innerHTML.trim() !== '') {
+            r.style.display = 'block';
+            console.log("showing")
+        }
+    }
+
+    function closeResults() {
+        const r = document.getElementById('results');
+        r.innerHTML = '';
+        r.style.display = 'none';
+        console.log("zapping and closing")
+    }
+</script>
+
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col">{{> chunks/data-sources }}</div>
+    </div>
+</div>
+
+{{> chunks/footer }}
+
+</body>
+</html>

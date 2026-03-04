@@ -19,6 +19,12 @@ open class PageViewModel(val uri: Uri) : ViewModel {
     }
 }
 
+open class FragmentViewModel : ViewModel {
+    override fun template(): String {
+        return "fragments/${javaClass.simpleName}"
+    }
+}
+
 object TotpHandlebars {
     fun templates() = HandlebarsTemplates(handlebarsConfiguration())
 
@@ -32,10 +38,9 @@ object TotpHandlebars {
                 )
             }
             it.registerHelper("ago") { context: Any, _: Options ->
-                if ( context is Instant) {
+                if (context is Instant) {
                     PrettyTime(Instant.now()).format(context)
-                }
-                else {
+                } else {
                     throw IllegalArgumentException("Expected instant not $context")
                 }
             }
@@ -64,8 +69,18 @@ object TotpHandlebars {
             it.registerHelper("maybe") { context: Any?, _: Options -> context?.let { it.toString() } ?: "" }
             it.registerHelper("urlencode") { context: Any, _: Options -> context.toString().urlEncoded() }
             it.registerHelper("concat") { context: Any, options -> (listOf(context) + options.params).joinToString("") }
-            it.registerHelper("take") { context: Any, options -> (context as Iterable<*>).take(options.hash("n"))}
-            it.registerHelper("truncate") { context: Any, options -> (context as String).take(options.hash("n"))}
+            it.registerHelper("take") { context: Any, options -> (context as Iterable<*>).take(options.hash("n")) }
+            it.registerHelper("truncate") { context: Any, options -> (context as String).take(options.hash("n")) }
+            it.registerHelper("highlight") { context: Any, options: Options ->
+                val text = context.toString()
+                val word = options.hash<String>("h")
+                if (word.isNullOrBlank()) {
+                    text
+                } else {
+                    val pattern = Regex(word, RegexOption.IGNORE_CASE)
+                    pattern.replace(text) { "<mark>${it.value}</mark>" }
+                }
+            }
         }
     }
 

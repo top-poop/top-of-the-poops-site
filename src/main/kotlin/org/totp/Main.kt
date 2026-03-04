@@ -27,6 +27,7 @@ import org.totp.pages.*
 import org.totp.redirect.ConstituencyAtRedirectHandler
 import org.totp.redirect.LocalityPlaceRedirectHandler
 import org.totp.redirect.OldMapRedirectHandler
+import org.totp.search.Searcher
 import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.Protocol
 import redis.clients.jedis.UnifiedJedis
@@ -334,6 +335,15 @@ fun main() {
                             placeRank = localityRank,
                             placeRivers = placeRivers(allSpills, riverRankings),
                         ),
+                        "/search" bind routes(
+                            "/" bind SearchPageHandler(renderer),
+                            "/q" bind cacheFor(Duration.ofMinutes(20)).then(
+                                SearchResultsHandler(
+                                    renderer,
+                                    Searcher(connection, riverRankings)::search
+                                )
+                            ),
+                        ),
                         "/shellfisheries" bind ShellfisheriesPageHandler(
                             renderer = renderer, shellfishRankings = shellfishRankings
                         ),
@@ -432,7 +442,10 @@ fun main() {
                 "constituencies" bind SitemapConstituencyUris(clock, siteBaseUri, constituencyRankings),
                 "rivers" bind SitemapRiverUris(siteBaseUri, riverRankings),
                 "places" bind SitemapPlaceUris(siteBaseUri, placeRankings),
-                "companies" bind SitemapCompanyUris(clock, siteBaseUri, { companyAnnualSummaries().map { it.name }.toSet().toList() }),
+                "companies" bind SitemapCompanyUris(
+                    clock,
+                    siteBaseUri,
+                    { companyAnnualSummaries().map { it.name }.toSet().toList() }),
                 "overflows-live" bind SitemapOverflowUris(clock, siteBaseUri, stream::knownCsos),
                 "overflows-2025" bind SitemapOverflowUris(clock, siteBaseUri, stream::knownCsos, 2025)
             ),
@@ -448,11 +461,15 @@ fun main() {
     server.block()
 }
 
-private fun cacheForTen(): Filter = CachingFilters.CacheResponse.FallbackCacheControl(
+private fun cacheForTen(): Filter = cacheFor(Duration.ofMinutes(10))
+
+operator fun Duration.times(n: Long): Duration = this.multipliedBy(n)
+
+private fun cacheFor(duration: Duration): Filter = CachingFilters.CacheResponse.FallbackCacheControl(
     defaultCacheTimings = DefaultCacheTimings(
-        maxAge = MaxAgeTtl(Duration.ofMinutes(10)),
-        staleIfErrorTtl = StaleIfErrorTtl(Duration.ofMinutes(15)),
-        staleWhenRevalidateTtl = StaleWhenRevalidateTtl(Duration.ofMinutes(15))
+        maxAge = MaxAgeTtl(duration),
+        staleIfErrorTtl = StaleIfErrorTtl(duration * 2),
+        staleWhenRevalidateTtl = StaleWhenRevalidateTtl(duration * 2)
     )
 )
 
