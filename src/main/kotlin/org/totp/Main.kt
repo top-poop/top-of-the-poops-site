@@ -228,6 +228,7 @@ fun main() {
                         "/" bind HomepageHandler(
                             renderer = renderer,
                             constituencyRankings = constituencyRankings,
+                            companySummaries = unifiedAnnualData::unified,
                             bathingRankings = beachRankings,
                             riverRankings = riverRankings,
                             appearances = mediaAppearances,

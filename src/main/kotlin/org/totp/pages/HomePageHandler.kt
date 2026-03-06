@@ -5,6 +5,7 @@ import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.THE_YEAR
 import org.totp.db.StreamData
+import org.totp.extensions.sumDuration
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.*
@@ -61,8 +62,7 @@ fun ShellfishRank.toRenderable(): RenderableShellfishRank {
 class HomePage(
     uri: Uri,
     val year: Int,
-    val totalCount: Int,
-    val totalDuration: RenderableDuration,
+    val allTime: RenderableDuration,
     val constituencyRankings: List<RenderableConstituencyRank>,
     val companies: List<WaterCompany>,
     val beachRankings: List<RenderableBathingRank>,
@@ -78,6 +78,7 @@ object HomepageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
         constituencyRankings: () -> List<ConstituencyRank>,
+        companySummaries: () -> List<CompanyAnnualSummary>,
         bathingRankings: () -> List<BathingRank>,
         riverRankings: () -> List<RiverRank>,
         shellfishRankings: () -> List<ShellfishRank>,
@@ -97,15 +98,14 @@ object HomepageHandler {
             val totalSpills = rankings.sumOf { it.count }
             val totalSpillsRounded = (floor(totalSpills / 1000.0) * 1000).toInt()
 
-            val lastYearTotal = rankings.map { it.duration }.reduce { acc, duration -> acc + duration }
+            val totalAllTime = companySummaries().sumDuration { it.duration }.toRenderable()
 
             Response(Status.OK)
                 .with(
                     viewLens of HomePage(
                         pageUriFrom(request),
                         year = THE_YEAR,
-                        totalSpillsRounded,
-                        lastYearTotal.toRenderable(),
+                        totalAllTime,
                         rankings.take(10).map { it.toRenderable(mpFor) },
                         companies(),
                         bathingRankings().take(10).map { it.toRenderable() },

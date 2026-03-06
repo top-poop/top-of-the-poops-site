@@ -49,18 +49,21 @@ object TotpHandlebars {
             it.registerHelpers(ConditionalHelpers::class.java)
             it.registerHelper("numberFormat1") { context: Any, _: Options ->
                 if (context is Number) {
-                    val instance = NumberFormat.getNumberInstance()
-                    instance.also {
-                        it.maximumFractionDigits = 1
-                    }
-                        .format(context)
+                    numberFormat(digits=1)(context)
+                } else {
+                    throw IllegalArgumentException("Wrong type for context")
+                }
+            }
+            it.registerHelper("numberFormat0") { context: Any, _: Options ->
+                if (context is Number) {
+                    numberFormat(digits=0)(context)
                 } else {
                     throw IllegalArgumentException("Wrong type for context")
                 }
             }
             it.registerHelper("numberFormat") { context: Any, _: Options ->
                 if (context is Number) {
-                    numberFormat()(context)
+                    numberFormat(digits=2)(context)
                 } else {
                     throw IllegalArgumentException("Wrong type for context")
                 }
@@ -84,9 +87,9 @@ object TotpHandlebars {
         }
     }
 
-    fun numberFormat(): (Number) -> String {
+    fun numberFormat(digits: Int = 2): (Number) -> String {
         val nf = NumberFormat.getNumberInstance().also {
-            it.maximumFractionDigits = 2
+            it.maximumFractionDigits = digits
         }
         return { nf.format(it) }
     }
