@@ -154,6 +154,7 @@ class StreamDataTest {
     @Test
     fun totals() {
         val daily = stream.totalsByCompany(start = LocalDate.parse("2025-01-01"), end = LocalDate.parse("2026-01-01"))
+        print(daily)
         expectThat(daily).size.isGreaterThan(0)
     }
 
@@ -169,6 +170,8 @@ class StreamDataTest {
             start = LocalDate.parse("2025-01-01"),
             end = LocalDate.parse("2026-01-01")
         )
+
+        print(result)
 
         expectThat(result.year).isEqualTo(2025)
         expectThat(result.months).size.isEqualTo(12)

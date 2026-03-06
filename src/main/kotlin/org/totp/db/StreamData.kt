@@ -189,7 +189,7 @@ ORDER BY m.stream_company, m.stream_id;
     }
 
     fun latestAvailable(): Instant {
-        return connection.execute(NamedQueryBlock("stream-have-live-data") {
+        return connection.execute(NamedQueryBlock("stream-latest-available") {
             query(
                 sql = """
 select f.stream_file_id, file_time, process_time
@@ -206,7 +206,7 @@ limit 1
     }
 
     fun haveLiveDataForCompanies(): Set<StreamCompanyName> {
-        return connection.execute(NamedQueryBlock("stream-have-live-data") {
+        return connection.execute(NamedQueryBlock("stream-have-live-data-company") {
             query(
                 sql = """
 select distinct stream_company from stream_cso                    
@@ -219,7 +219,7 @@ select distinct stream_company from stream_cso
     }
 
     fun haveLiveDataForConstituencies(): Set<ConstituencyName> {
-        return connection.execute(NamedQueryBlock("stream-have-live-data") {
+        return connection.execute(NamedQueryBlock("stream-have-live-data-constituency") {
             query(
                 sql = """
 select distinct pcon24nm
@@ -290,7 +290,7 @@ group by grid_references.pcon24nm, cso.stream_cso_id, sl.site_name_consent, sl.s
     data class DailySummary(val date: LocalDate, val start: Duration, val offline: Duration, val potential: Duration)
 
     fun dailyByStreamId(streamId: StreamId, start: LocalDate, end: LocalDate): List<DailySummary> {
-        return connection.execute(NamedQueryBlock("daily-by-constituency") {
+        return connection.execute(NamedQueryBlock("daily-by-overflow-id") {
             query(
                 sql = """
 select ss.date, 
