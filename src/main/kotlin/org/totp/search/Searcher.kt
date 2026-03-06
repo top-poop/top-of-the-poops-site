@@ -145,7 +145,7 @@ limit 50
                     text = it.companyName.value,
                     uri = it.companyName.toRenderable().uri,
                     type = SearchResultType.WaterCompany,
-                    weight = 1.0
+                    weight = 0.0,
                 )
             }
     }
@@ -183,8 +183,14 @@ limit 50
 
         val futures = executor.invokeAll(tasks, 2, TimeUnit.SECONDS)
 
-        return futures.flatMap { future ->
-            if (future.isCancelled) emptyList() else future.get()
-        }
+        val resultsUnordered = futures.flatMap { future -> if (future.isCancelled) emptyList() else future.get() }
+
+        return resultsUnordered.sortedWith(compareBy<WeightedSearchResult> { when(it.type) {
+            SearchResultType.WaterCompany -> 0
+            SearchResultType.Constituency -> 1
+            SearchResultType.Place -> 2
+            SearchResultType.River -> 3
+            SearchResultType.Overflow -> 4
+        } }.thenDescending (compareBy { it.weight }))
     }
 }
