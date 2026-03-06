@@ -117,6 +117,9 @@ class HomepageHandlerTest {
                         offline = 50
                     ), emptyList()
                 )
+            },
+            companySummaries = {
+                listOf(CompanyAnnualSummary(Source.EA, CompanyName.of("Anglian"), year = 2025, spillCount = 100, duration = Duration.ofHours(100), locationCount = 100))
             }
         )
     )

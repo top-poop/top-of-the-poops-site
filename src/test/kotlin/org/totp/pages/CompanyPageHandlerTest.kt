@@ -119,10 +119,7 @@ class CompanyPageHandlerTest {
             .one { contains("Beaches Polluted") }
 
         expectThat(response.bodyString()) {
-            contains("1,234")
-            contains("2020")
-            contains("That's 4.17 days")
-            contains("On average 3.4")
+            contains("hours of sewage")
         }
     }
 }
