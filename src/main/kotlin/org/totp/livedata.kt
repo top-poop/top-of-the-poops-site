@@ -72,11 +72,12 @@ class SpillsByCompanyHandler(val clock: Clock, val summaries: () -> List<Company
     val lens = TotpJson.autoBody<List<SpillsByCompanyDto>>().toLens()
 
     override fun invoke(request: Request): Response {
-        return Response(Status.OK).with(lens of summaries().map {
+        val annualSummaries = summaries()
+        return Response(Status.OK).with(lens of annualSummaries.map {
             SpillsByCompanyDto(
                 reporting_year = it.year,
                 company_name = it.name,
-                hours = it.duration.seconds / 3600.0
+                hours = it.duration.toHours().toDouble()
             )
         })
     }

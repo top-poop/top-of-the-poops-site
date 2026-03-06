@@ -2,6 +2,7 @@ package org.totp.db
 
 import org.http4k.testing.RecordingEvents
 import org.junit.jupiter.api.Test
+import org.totp.extensions.sumDuration
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.StreamCompanyName
 import strikt.api.expectThat
@@ -179,6 +180,32 @@ class StreamDataTest {
         expectThat(result.totalDuration()).isGreaterThan(Duration.ZERO)
 
     }
+
+    @Test
+    fun `annual total matches sum of monthly`() {
+
+        val unified = UnifiedAnnualData(clock, stream) { emptyList() }
+
+        val company = StreamCompanyName.of("Anglian")
+
+        val totals2025 = stream.totalsByCompany(start = LocalDate.parse("2025-01-01"), end = LocalDate.parse("2026-01-01"))
+
+        val totalUsingYear = totals2025.filter { it.company == company }.sumDuration { it.bucket.start }
+
+        val monthly = stream.monthlyOverflowingByCompany(company)
+
+        val totalUsingMonth = monthly.filter { it.date.year == 2025}.sumDuration { Duration.ofSeconds(it.overflowingSeconds) }
+
+        expectThat(totalUsingYear).isEqualTo(totalUsingMonth)
+
+        val unifiedTotals = unified.unified()
+            .filter { it.name == company.asCompanyName()!! }
+            .filter { it.year == 2025 }
+            .sumDuration { it.duration }
+
+        expectThat(unifiedTotals).isEqualTo(totalUsingMonth)
+    }
+
 
     @Test
     fun known() {

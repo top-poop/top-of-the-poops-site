@@ -39,7 +39,7 @@ class UnifiedAnnualData(
     private fun streamTotalsForYear(year: Int): List<CompanyAnnualSummary> {
         return cache.get(year) {
             val start = LocalDate.of(year, 1, 1)
-            val end = LocalDate.of(year, 12, 31)
+            val end = LocalDate.of(year + 1, 1, 1)
             streamData.totalsByCompany(start, end)
                 .map {
                     CompanyAnnualSummary(

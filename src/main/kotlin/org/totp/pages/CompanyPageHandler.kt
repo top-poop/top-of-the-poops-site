@@ -7,6 +7,7 @@ import org.http4k.template.TemplateRenderer
 import org.http4k.template.viewModel
 import org.totp.db.DatedOverflow
 import org.totp.db.StreamData.StreamCSOLiveOverflow
+import org.totp.extensions.sumDuration
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.*
@@ -64,6 +65,7 @@ class CompanyPage(
     val live: RenderableCSOLiveData?,
     val link: WaterCompanyLink,
     val liveSummary: RenderableLiveSummary,
+    val allTime: RenderableAllTime,
 ) : PageViewModel(uri)
 
 enum class Source {
@@ -109,6 +111,10 @@ data class WaterCompanyLink(
     val company: WaterCompany,
 )
 
+data class RenderableAllTime(
+    val duration: RenderableDuration,
+    val count: RenderableCount
+)
 
 object CompanyPageHandler {
     operator fun invoke(
@@ -149,6 +155,12 @@ object CompanyPageHandler {
                     .take(6)
                     .map { it.toRenderable() }
 
+
+                val allTime = RenderableAllTime(
+                    applicable.sumDuration { it.duration }.toRenderable(),
+                    RenderableCount(applicable.sumOf { it.spillCount })
+                )
+
                 val renderableCompany = name.toRenderable()
                 Response(Status.OK)
                     .with(
@@ -159,6 +171,7 @@ object CompanyPageHandler {
                             link = WaterCompanyLink(true, company),
                             csoUri = Uri.of("/assets/images/top-of-the-poops-cso-$slug.png"),
                             summary = mostRecent,
+                            allTime = allTime,
                             liveSummary = bodgeLiveSummary(clock, company.name, monthly(company.name)),
                             info = company,
                             links = companies.map {
@@ -207,7 +220,7 @@ object CompanyPageHandler {
             company = name.toRenderable(),
             year = year,
             count = RenderableCount(overflows.sumOf { it.overflowing }),
-            duration = RenderableDuration(Duration.ofSeconds(overflows.sumOf { it.overflowingSeconds })),
+            duration = RenderableDuration(overflows.sumDuration { Duration.ofSeconds(it.overflowingSeconds) }),
             locationCount = overflows.sumOf { it.edm_count },
         )
 

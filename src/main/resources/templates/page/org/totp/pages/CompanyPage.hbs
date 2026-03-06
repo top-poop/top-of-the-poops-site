@@ -97,16 +97,15 @@
 <body>
 {{> chunks/navbar }}
 
-<div class="container-fluid py-5">
+<div class="container-fluid">
     <div class="row justify-content-md-center align-items-center g-4">
         <div class="col-md-5 offset-md-1">
             <div class="card border-0">
                 <div class="card-body p-4 p-lg-5">
 
-                    <!-- Headline -->
                     <div class="mb-4">
                         <div class="text-uppercase text-muted small fw-semibold mb-2" style="letter-spacing: .08em;">
-                            EDM Data {{ summary.year }}
+                            Company Summary
                         </div>
 
                         <h1 class="display-5 fw-bold text-dark mb-0" style="line-height: 1.1; letter-spacing: -0.5px;">
@@ -116,70 +115,22 @@
 
                     <hr class="my-4 opacity-25">
 
-                    <!-- Lead Statement -->
+                    <h1 class="display-4 fw-bold text-dark" style="line-height: 1.1; letter-spacing: -0.5px;">
+                        {{ numberFormat allTime.duration.hours }} hours of sewage
+                    </h1>
+
                     <p class="fs-5 text-dark mb-5" style="max-width: 800px;">
-                        In {{ summary.year }}, the company was responsible for at least
-                        <span class="fw-bold fs-4">{{numberFormat summary.count.count}}</span> sewage overflows,
-                        lasting a combined
-                        <span class="fw-bold fs-4">{{numberFormat summary.duration.hours}}</span> hours
-                        and affecting
-                        <span class="fw-bold fs-4">{{numberFormat summary.locationCount}}</span> locations.
+                        This decade, every year, {{ company.name }} has allowed its 'Sewage Overflows' to pour raw or minimally
+                        filtered sewage, combined with rainwater, into rivers, streams, and seas.
                     </p>
-
-                    <!-- Supporting Details -->
-                    <div class="row g-4">
-
-                        <div class="col-md-4">
-                            <div class="border-top pt-3">
-                                <div class="text-uppercase text-muted small fw-semibold mb-2"
-                                     style="letter-spacing: .08em;">
-                                    Overflows
-                                </div>
-                                <div class="fs-2 fw-bold text-dark mb-1">
-                                    {{numberFormat summary.count.count}}
-                                </div>
-                                <div class="text-muted small">
-                                    {{> chunks/explain-count summary.count}}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="border-top pt-3">
-                                <div class="text-uppercase text-muted small fw-semibold mb-2"
-                                     style="letter-spacing: .08em;">
-                                    Duration (Hours)
-                                </div>
-                                <div class="fs-2 fw-bold text-dark mb-1">
-                                    {{numberFormat summary.duration.hours}}
-                                </div>
-                                <div class="text-muted small">
-                                    {{> chunks/explain-duration summary.duration}}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="border-top pt-3">
-                                <div class="text-uppercase text-muted small fw-semibold mb-2"
-                                     style="letter-spacing: .08em;">
-                                    Locations Affected
-                                </div>
-                                <div class="fs-2 fw-bold text-dark mb-1">
-                                    {{numberFormat summary.locationCount}}
-                                </div>
-                                <div class="text-muted small">
-                                    Across their service area
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
+                    <p class="fs-5 text-dark mb-5" style="max-width: 800px;">
+                        What does this huge number even mean? It's like a single sewage pipe dumping continuously for
+                        <b>{{ numberFormat allTime.duration.years }}</b> years.
+                    </p>
 
                     <div class="mt-5 pt-4 border-top">
                         {{> components/share-social share}}
                     </div>
-
                 </div>
             </div>
         </div>
@@ -191,6 +142,32 @@
                          src="{{ csoUri }}"/>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col w-100 mb-5">
+
+            <div class="mb-4">
+                <div class="text-uppercase text-muted small fw-semibold mb-2" style="letter-spacing: .08em;">
+                   Continuous Sewage Dumps by {{company.name}}
+                </div>
+
+                <h1 class="display-5 fw-bold text-dark mb-0" style="line-height: 1.1; letter-spacing: -0.5px;">
+                    2020 - 2026
+                </h1>
+            </div>
+
+            <p class="fs-5 text-dark mb-5">
+                We are not finished with 2026 yet. Think that things have improved? Scroll down, you can find the rainfall
+                graphs for the UK. The sewage overflows and rainfall seem to be very correlated. When it rains, they pollute.
+                Also, when it doesn't rain, a lot of the time.
+            </p>
+
+
+            <div style="height: 300px;" id="plot-company-all-time" data-uri="/live/combined/spills-by-company.json" data-company="{{company.name}}"></div>
         </div>
     </div>
 </div>
@@ -398,8 +375,8 @@
                 width: rect.width,
                 height: rect.height,
 
-                marginLeft: 10,
-                marginBottom: 20,
+                marginLeft: 60,
+                marginBottom: 30,
 
                 x: {
                     tickFormat: i => ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i],
@@ -669,20 +646,84 @@
 
 </script>
 
-
 <script type="module">
     import * as Plot from "/assets/js/plot-0.6.17/plot.esm.js";
+    import * as utils from "/assets/js/utils.js"
 
-    const PlotSpillsByCompany = (data, width, height) => {
+    const PlotSpillsByCompanyAllTime = (data, width, height, company) => {
         return Plot.plot({
-            // marginLeft: 100,
+            marginLeft: 50,
             // marginBottom: 30,
             width: width,
             height: height,
             y: {
                 grid: true,
                 zero: true,
-                label: "Years of Continuous Dumping ↑",
+                label: "Hours of Continuous Dumping ↑",
+            },
+            color: {
+                domain: [false, true],
+                range: ["#ccc", "#2f5cd6"]
+            },
+            x: {
+                grid: false,
+                domain: [2020, 2021, 2022, 2023, 2024, 2025, 2026],
+                tickFormat: d => `${d}`,
+                label: "Year",
+            },
+            marks: [
+                Plot.line(
+                        data,
+                        {
+                            x: "reporting_year",
+                            y: (d) => d.hours,
+                            z: "company_name",
+                            curve: "catmull-rom",
+                            strokeWidth: 3,
+                            stroke: d => d.company_name === company,
+                            sort: (d) => d.company_name === company ? 1 : 0
+                        }
+                ),
+                Plot.dot(
+                        data,
+                        {
+                            x: "reporting_year",
+                            y: (d) => d.hours,
+                            z: "company_name",
+                            r: d => d.company_name === company ? 8 : 2,
+                            title: (d) => `${d.company_name} - ${d.reporting_year} - ${utils.formatNumber(d.hours)} hours`,
+                            tip: true,
+                            stroke: d => d.company_name === company ? '#1f4299': '#ccc',
+                            fill: d => d.company_name === company ? (d.reporting_year === 2026 ? '#971f99' : '#1f4299') : '#333',
+                            sort: (d) => d.company_name === company ? 1 : 0,
+                        }
+                ),
+            ]
+        })
+    };
+
+    const div = document.getElementById("plot-company-all-time");
+    const response = await fetch(div.attributes["data-uri"].value);
+    const rect = div.getBoundingClientRect()
+    if (response.ok) {
+        div.appendChild(PlotSpillsByCompanyAllTime(await response.json(), rect.width, rect.height, div.attributes["data-company"].value))
+    }
+</script>
+
+
+<script type="module">
+    import * as Plot from "/assets/js/plot-0.6.17/plot.esm.js";
+
+    const PlotSpillsByYear = (data, width, height) => {
+        return Plot.plot({
+            marginLeft: 60,
+            // marginBottom: 30,
+            width: width,
+            height: height,
+            y: {
+                grid: true,
+                zero: true,
+                label: "Hours of Continuous Dumping ↑",
             },
             color: {
                 legend: true
@@ -691,13 +732,14 @@
                 grid: false,
                 domain: [2020, 2021, 2022, 2023, 2024, 2025, 2026],
                 tickFormat: d => `${d}`,
+                label: "Year",
             },
             marks: [
                 Plot.barY(
                         data,
                         {
                             x: "reporting_year",
-                            y: (d) => d.hours / (750.5 * 12),
+                            y: (d) => d.hours,
                             fill: "company_name",
                             tip: true,
                             opacity: 0.7,
@@ -827,7 +869,7 @@
     const response = await fetch(div.attributes["data-uri"].value);
     const rect = div.getBoundingClientRect()
     if (response.ok) {
-        div.appendChild(PlotSpillsByCompany(await response.json(), rect.width, rect.height))
+        div.appendChild(PlotSpillsByYear(await response.json(), rect.width, rect.height))
     }
 
     const divr = document.getElementById("plot-rainfall-totals");
