@@ -21,9 +21,7 @@ class StreamDataTest {
 
     val clock = Clock.systemUTC()
 
-    val connection = HikariWithConnection(lazy { datasource() })
-
-    val stream = StreamData(events, connection)
+    val stream = StreamData(events, testDbConnection)
 
     @Test
     fun eventSummaryForConstituency() {
@@ -161,7 +159,7 @@ class StreamDataTest {
     @Test
     fun annualdata() {
 
-        val ea = EnvironmentAgency(connection)
+        val ea = EnvironmentAgency(testDbConnection)
 
         val annual = AnnualLiveSewage(ea, stream)
 

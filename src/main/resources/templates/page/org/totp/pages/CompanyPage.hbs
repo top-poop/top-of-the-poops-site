@@ -673,7 +673,7 @@
 <script type="module">
     import * as Plot from "/assets/js/plot-0.6.17/plot.esm.js";
 
-    const PlotSpillsByCompany = (data, width, height, company_name) => {
+    const PlotSpillsByCompany = (data, width, height) => {
         return Plot.plot({
             // marginLeft: 100,
             // marginBottom: 30,
@@ -689,11 +689,11 @@
             },
             x: {
                 grid: false,
-                domain: [2020, 2021, 2022, 2023, 2024],
+                domain: [2020, 2021, 2022, 2023, 2024, 2025, 2026],
                 tickFormat: d => `${d}`,
             },
             marks: [
-                Plot.areaY(
+                Plot.barY(
                         data,
                         {
                             x: "reporting_year",
@@ -703,6 +703,45 @@
                             opacity: 0.7,
                         }
                 ),
+            ]
+        })
+    };
+
+    const PlotRainfallByYear = (data, width, height) => {
+        return Plot.plot({
+            width: width,
+            height: height,
+            y: {
+                grid: true,
+                label: "Rainfall as % of long term ↑",
+                domain: [80,120]
+            },
+            color: {
+                legend: true
+            },
+            x: {
+                grid: false,
+                domain: [2020, 2021, 2022, 2023, 2024, 2025, 2026],
+                tickFormat: d => `${d}`,
+            },
+            marks: [
+                Plot.ruleY([100], {stroke: "red"}),
+                Plot.line(
+                        data,
+                        {
+                            x: "y",
+                            y: "v",
+                            curve: "catmull-rom",
+                            strokeWidth: 3,
+                            tip: true,
+                            opacity: 0.7,
+                        }
+                ),
+                Plot.dot(data, {
+                    x: "y",
+                    y: "v",
+                    r: 6,
+                })
             ]
         })
     };
@@ -788,7 +827,21 @@
     const response = await fetch(div.attributes["data-uri"].value);
     const rect = div.getBoundingClientRect()
     if (response.ok) {
-        div.appendChild(PlotSpillsByCompany(await response.json(), rect.width, rect.height, div.attributes["data-company-name"].value))
+        div.appendChild(PlotSpillsByCompany(await response.json(), rect.width, rect.height))
+    }
+
+    const divr = document.getElementById("plot-rainfall-totals");
+    const rectr = divr.getBoundingClientRect()
+    const rainfall = [
+        {"y": 2020, "v": 114},
+        {"y": 2021, "v": 93},
+        {"y": 2022, "v": 90},
+        {"y": 2023, "v": 111},
+        {"y": 2024, "v": 107},
+        {"y": 2025, "v": 90},
+    ]
+    if (response.ok) {
+        divr.appendChild(PlotRainfallByYear(rainfall, rectr.width, rectr.height))
     }
 
     const divc = document.getElementById("plot-company-comparison");
@@ -972,7 +1025,7 @@
         <div class="col">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h2 class="h4 mb-0"><i class="bi bi-bar-chart-fill me-2"></i>2024 - By Water Company</h2>
+                    <h2 class="h4 mb-0"><i class="bi bi-bar-chart-fill me-2"></i>All Sewage By Water Company</h2>
                 </div>
                 <div class="card-body p-4">
                     <div class="alert alert-info mb-4">
@@ -981,19 +1034,33 @@
                                 <i class="bi bi-info-circle-fill fs-3"></i>
                             </div>
                             <div>
-                                <p class="mb-0">How does each water company compare? These are the totals by company for
+                                <p>How does each water company compare? These are the totals by company for
                                     each. The totals are
                                     really high, counting things in hours doesn't make
                                     it very easy to think about. Here we show how many years of continuous sewage dumps
-                                    happened
-                                    in a single year, by water company.</p>
+                                    happened in a single year, by water company.</p>
+                                <p class="mb-0">Please note: 2025 & 2026 numbers do not include Scottish Water and are estimates based on so-called 'live data' from the Water Industry.</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="chart-container mb-3">
-                        <div style="height: 300px;" id="plot-company-totals" data-company-name="{{company.name}}"
-                             data-uri="/data/v1/2024/spills-by-company.json"></div>
+                        <div style="height: 300px;" id="plot-company-totals" data-uri="/live/combined/spills-by-company.json"></div>
+                    </div>
+
+                    <div class="alert alert-info mt-5 mb-1">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="bi bi-info-circle-fill fs-3"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">Here is the rainfall data from the <a href="https://www.metoffice.gov.uk/research/climate/maps-and-data/summaries/index">Met Office</a> - Overflows follow the same pattern!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container mb-3">
+                        <div style="height: 300px;" id="plot-rainfall-totals"></div>
                     </div>
                 </div>
             </div>

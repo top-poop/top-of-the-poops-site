@@ -389,6 +389,7 @@ object CompanyAnnualSummaries {
             TotpJson.mapper.readSimpleList(response.bodyString())
                 .map {
                     CompanyAnnualSummary(
+                        source = Source.EA,
                         CompanyName.of(it["company_name"] as String),
                         it["reporting_year"] as Int,
                         (it["count"] as Double).toInt(),

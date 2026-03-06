@@ -17,6 +17,7 @@ import org.http4k.routing.routes
 import org.http4k.routing.static
 import org.http4k.server.Undertow
 import org.http4k.template.TemplateRenderer
+import org.http4k.template.viewModel
 import org.totp.db.*
 import org.totp.events.ServerStartedEvent
 import org.totp.extensions.Defect
@@ -212,6 +213,8 @@ fun main() {
 
     val annualLiveSewage = AnnualLiveSewage(environmentAgency, streamData = stream)
 
+    val unifiedAnnualData = UnifiedAnnualData(clock, stream, companyAnnualSummaries)
+
     val siteBaseUri = Uri.of("https://top-of-the-poops.org")
 
     val server = Undertow(port = port(environment)).toServer(
@@ -307,7 +310,7 @@ fun main() {
                             CompanyPageHandler(
                                 clock = clock,
                                 renderer = renderer,
-                                companySummaries = companyAnnualSummaries,
+                                companySummaries = unifiedAnnualData::unified,
                                 waterCompanies = waterCompanies,
                                 riverRankings = riverRankings,
                                 bathingRankings = beachRankings,
@@ -405,6 +408,7 @@ fun main() {
                     "/company/{company}/overflow-summary" bind StreamDailySummary(stream, companyAnnualSummaries),
                     "/assets/{ne}/{sw}" bind StreamAssetsBoundingBoxHandler(clock, stream)
                 ),
+                "/combined/spills-by-company.json" bind SpillsByCompanyHandler(clock, unifiedAnnualData::unified),
                 "/thames-water" bind routes(
                     "/overflow-summary" bind ThamesWaterSummary(thamesWater),
                 ),

@@ -10,14 +10,11 @@ import org.totp.model.data.ShellfisheryName
 
 class ManglingShellfishAreaNamesTest {
 
-
-    val connection = HikariWithConnection(lazy { datasource() })
-
     @Test
     @Disabled("not actually a test")
     fun something() {
 
-        val u: Unit = connection.execute(NamedQueryBlock("something") {
+        val u: Unit = testDbConnection.execute(NamedQueryBlock("something") {
 
             val names = query(
                 sql = "select distinct shellfishery from edm_consent_view where shellfishery is not null",

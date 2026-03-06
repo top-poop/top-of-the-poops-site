@@ -19,9 +19,7 @@ class OverflowPageHandlerTest {
 
     val events = RecordingEvents()
 
-    val connection = HikariWithConnection(lazy { datasource() })
-
-    val stream = StreamData(events, connection)
+    val stream = StreamData(events, testDbConnection)
 
     val service = routes(
         "/{id}" bind Method.GET to OverflowPageHandler(

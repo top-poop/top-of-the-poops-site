@@ -66,8 +66,12 @@ class CompanyPage(
     val liveSummary: RenderableLiveSummary,
 ) : PageViewModel(uri)
 
+enum class Source {
+    EA, Stream
+}
 
 data class CompanyAnnualSummary(
+    val source: Source,
     val name: CompanyName,
     val year: Int,
     val spillCount: Int,
@@ -134,7 +138,7 @@ object CompanyPageHandler {
 
                 val companies = waterCompanies()
 
-                val mostRecent = applicable.first().toRenderable()
+                val mostRecent = applicable.first { it.source == Source.EA}.toRenderable()
                 val name = mostRecent.company.name
 
                 val company = companies.first { it.name == name }

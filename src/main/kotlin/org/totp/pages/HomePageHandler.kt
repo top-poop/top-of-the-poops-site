@@ -97,7 +97,7 @@ object HomepageHandler {
             val totalSpills = rankings.sumOf { it.count }
             val totalSpillsRounded = (floor(totalSpills / 1000.0) * 1000).toInt()
 
-            val totalDuration = rankings.map { it.duration }.reduce { acc, duration -> acc + duration }
+            val lastYearTotal = rankings.map { it.duration }.reduce { acc, duration -> acc + duration }
 
             Response(Status.OK)
                 .with(
@@ -105,7 +105,7 @@ object HomepageHandler {
                         pageUriFrom(request),
                         year = THE_YEAR,
                         totalSpillsRounded,
-                        totalDuration.toRenderable(),
+                        lastYearTotal.toRenderable(),
                         rankings.take(10).map { it.toRenderable(mpFor) },
                         companies(),
                         bathingRankings().take(10).map { it.toRenderable() },

@@ -6,17 +6,10 @@ import dev.forkhandles.values.Value
 import dev.forkhandles.values.ValueFactory
 import org.http4k.events.Event
 import org.http4k.events.Events
-import org.postgresql.util.PGInterval
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.sql.*
-import java.time.Clock
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDate
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
+import java.time.*
 import java.util.concurrent.TimeUnit
 import javax.sql.DataSource
 
@@ -25,10 +18,6 @@ interface WithConnection {
 }
 
 class NamedQueryBlock<T>(val queryName: String?, val block: Connection.() -> T) {
-    fun prefixedWith(prefix: String): NamedQueryBlock<T> {
-        return NamedQueryBlock(prefix + "_" + (queryName ?: "unnamed"), block)
-    }
-
     companion object {
         fun <T> block(name: String, block: Connection.() -> T)  = NamedQueryBlock(name, block)
     }

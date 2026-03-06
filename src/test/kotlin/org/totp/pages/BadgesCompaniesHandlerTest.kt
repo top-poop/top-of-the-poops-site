@@ -19,6 +19,7 @@ class BadgesCompaniesHandlerTest {
             companySummaries = {
                 listOf(
                     CompanyAnnualSummary(
+                        source = Source.EA,
                         CompanyName.of("Water Co"),
                         2020,
                         1234,

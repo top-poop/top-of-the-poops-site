@@ -7,17 +7,14 @@ import org.http4k.core.Uri
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
-import org.totp.db.HikariWithConnection
 import org.totp.db.ReferenceData
-import org.totp.db.datasource
+import org.totp.db.testDbConnection
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
 class ConstituencyAtRedirectHandlerTest {
 
-    val connection = HikariWithConnection(lazy { datasource() })
-
-    val rd = ReferenceData(connection)
+    val rd = ReferenceData(testDbConnection)
 
     val handler = routes("/c/at/{lat}/{lon}" bind ConstituencyAtRedirectHandler(rd))
 

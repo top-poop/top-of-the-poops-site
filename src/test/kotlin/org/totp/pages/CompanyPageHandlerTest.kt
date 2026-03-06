@@ -46,6 +46,7 @@ class CompanyPageHandlerTest {
             companySummaries = {
                 listOf(
                     CompanyAnnualSummary(
+                        source = Source.EA,
                         CompanyName.of("Water Co"),
                         2020,
                         1234,
@@ -65,7 +66,7 @@ class CompanyPageHandlerTest {
                         Duration.ofHours(1),
                         DeltaValue.of(10),
                         Duration.ofSeconds(11),
-                        loc = Coordinates(1.0,1.0),
+                        loc = Coordinates(1.0, 1.0),
                         geo = GeoJSON(""),
                     )
                 )
@@ -87,9 +88,17 @@ class CompanyPageHandlerTest {
                     )
                 )
             },
-            monthly = { _ -> listOf(
-                DatedOverflow(LocalDate.now(), edm_count = 10, overflowing = 10, overflowingSeconds = 100, offline = 10)
-            ) }
+            monthly = { _ ->
+                listOf(
+                    DatedOverflow(
+                        LocalDate.now(),
+                        edm_count = 10,
+                        overflowing = 10,
+                        overflowingSeconds = 100,
+                        offline = 10
+                    )
+                )
+            }
         )
     )
 

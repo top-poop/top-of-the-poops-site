@@ -10,10 +10,7 @@ import java.time.LocalDate
 
 class ThamesWaterTest {
 
-
-    val connection = HikariWithConnection(lazy { datasource() })
-
-    val tw = ThamesWater(connection)
+    val tw = ThamesWater(testDbConnection)
 
     @Test
     fun worst() {

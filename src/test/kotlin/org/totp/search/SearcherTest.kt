@@ -2,8 +2,7 @@ package org.totp.search
 
 import org.http4k.testing.RecordingEvents
 import org.junit.jupiter.api.Test
-import org.totp.db.HikariWithConnection
-import org.totp.db.datasource
+import org.totp.db.testDbConnection
 import org.totp.model.data.*
 import org.totp.pages.DeltaValue
 import strikt.api.expectThat
@@ -17,9 +16,7 @@ class SearcherTest {
 
     val executor = Executors.newFixedThreadPool(5)
 
-    val connection = HikariWithConnection(lazy { datasource() })
-
-    val searcher = Searcher(events, connection, executor, {
+    val searcher = Searcher(events, testDbConnection, executor, {
         listOf(
             RiverRank(
                 1, river = WaterwayName.of("River Thames"),

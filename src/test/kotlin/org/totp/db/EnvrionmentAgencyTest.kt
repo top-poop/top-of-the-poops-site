@@ -3,7 +3,6 @@ package org.totp.db
 import org.junit.jupiter.api.Test
 import org.totp.model.data.ConstituencyName
 import strikt.api.expectThat
-import strikt.assertions.contains
 import strikt.assertions.isGreaterThan
 import strikt.assertions.size
 import java.time.Instant
@@ -11,10 +10,7 @@ import java.time.LocalDate
 
 class EnvrionmentAgencyTest {
 
-
-    val connection = HikariWithConnection(lazy { datasource() })
-    val tw = EnvironmentAgency(connection)
-
+    val tw = EnvironmentAgency(testDbConnection)
 
     @Test
     fun eventSummaryForConstituency() {

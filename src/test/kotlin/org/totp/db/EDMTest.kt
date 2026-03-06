@@ -10,10 +10,7 @@ import strikt.assertions.size
 
 class EDMTest {
 
-
-    val connection = HikariWithConnection(lazy { datasource() })
-
-    val tw = EDM(connection)
+    val tw = EDM(testDbConnection)
 
     @Test
     fun annualSummary() {

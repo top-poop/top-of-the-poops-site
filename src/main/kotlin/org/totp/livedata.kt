@@ -7,6 +7,7 @@ import org.http4k.core.*
 import org.http4k.filter.MaxAgeTtl
 import org.http4k.lens.*
 import org.totp.db.*
+import org.totp.model.data.CompanyName
 import org.totp.model.data.Slug
 import org.totp.model.data.TotpJson
 import org.totp.model.data.toSlug
@@ -52,6 +53,32 @@ class StreamOverflowingByDate(val clock: Clock, val streamData: StreamData) : Ht
                 cacheControl of listOf("public", maxAge.toHeaderValue()).joinToString(",")
             )
         }
+    }
+}
+
+data class SpillsByCompanyDto(val reporting_year: Int, val company_name: CompanyName, val hours: Double)
+
+class SpillsByCompanyHandler(val clock: Clock, val summaries: () -> List<CompanyAnnualSummary>): HttpHandler {
+    /*
+      {
+    "reporting_year": 2020,
+    "company_name": "Anglian Water",
+    "hours": 170546.61,
+    "count": 17428.0,
+    "location_count": 609
+      },
+     */
+
+    val lens = TotpJson.autoBody<List<SpillsByCompanyDto>>().toLens()
+
+    override fun invoke(request: Request): Response {
+        return Response(Status.OK).with(lens of summaries().map {
+            SpillsByCompanyDto(
+                reporting_year = it.year,
+                company_name = it.name,
+                hours = it.duration.seconds / 3600.0
+            )
+        })
     }
 }
 
@@ -145,7 +172,6 @@ class EnvironmentAgencyRainfall(val clock: Clock, val environmentAgency: Environ
     }
 }
 
-@Suppress("IDENTITY_SENSITIVE_OPERATIONS_WITH_VALUE_TYPE")
 class EnvironmentAgencyGrid(val clock: Clock, val environmentAgency: EnvironmentAgency) : HttpHandler {
 
     val response = TotpJson.autoBody<List<EnvironmentAgency.RainfallGrid>>().toLens()

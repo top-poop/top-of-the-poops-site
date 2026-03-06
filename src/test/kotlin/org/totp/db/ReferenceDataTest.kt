@@ -10,10 +10,7 @@ import strikt.assertions.isNull
 
 class ReferenceDataTest {
 
-
-    val connection = HikariWithConnection(lazy { datasource() })
-
-    val tw = ReferenceData(connection)
+    val tw = ReferenceData(testDbConnection)
 
     @Test
     fun mps() {

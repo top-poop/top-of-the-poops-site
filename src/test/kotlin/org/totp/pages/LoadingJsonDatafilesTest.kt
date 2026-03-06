@@ -114,19 +114,6 @@ class LoadingJsonDatafilesTest {
     }
 
 
-    fun uriHavingFileContent(uri: Uri, file: File): RoutingHttpHandler {
-        expectThat(uri.path).isNotBlank()
-        if (!file.exists()) {
-            throw IllegalArgumentException("given files does not exist  $file")
-        }
-        val handler: HttpHandler = { Response(Status.OK).body(file.readText()) }
-        return EnsureSuccessfulResponse().then(
-            routes(
-                uri.path bind Method.GET to handler,
-            )
-        )
-    }
-
     @Test
     fun `loading river rankings 2024`() {
         val remote = uriHavingFileContent(
@@ -208,4 +195,17 @@ class LoadingJsonDatafilesTest {
         val service = ConstituencyNeighbours(remote)
         expectThat(service(ConstituencyName("Aldershot"))).size.isEqualTo(6)
     }
+}
+
+fun uriHavingFileContent(uri: Uri, file: File): RoutingHttpHandler {
+    expectThat(uri.path).isNotBlank()
+    if (!file.exists()) {
+        throw IllegalArgumentException("given files does not exist  $file")
+    }
+    val handler: HttpHandler = { Response(Status.OK).body(file.readText()) }
+    return EnsureSuccessfulResponse().then(
+        routes(
+            uri.path bind Method.GET to handler,
+        )
+    )
 }
