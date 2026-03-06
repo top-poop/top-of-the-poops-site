@@ -1,9 +1,14 @@
 package org.totp.search
 
 import org.http4k.core.Uri
+import org.http4k.events.Event
+import org.http4k.events.Events
 import org.totp.db.*
 import org.totp.model.data.*
 import org.totp.pages.toRenderable
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.TimeUnit
 
 enum class SearchResultType {
     Constituency, Place, Overflow, WaterCompany, River
@@ -17,7 +22,14 @@ data class WeightedSearchResult(
     val weight: Double
 )
 
-class Searcher(private val connection: WithConnection, val rivers: () -> List<RiverRank>) {
+data class SearchEvent(val term: String) : Event
+
+class Searcher(
+    private val events: Events,
+    private val connection: WithConnection,
+    private val executor: ExecutorService,
+    val rivers: () -> List<RiverRank>
+) {
 
     private fun searchConstituencies(query: String): List<WeightedSearchResult> {
         return connection.execute(NamedQueryBlock("search-constituencies") {
@@ -159,12 +171,20 @@ limit 50
             return listOf()
         }
 
-        val constituencies = searchConstituencies(query)
-        val places = searchPlaces(query)
-        val overflows = searchOverflows(query)
-        val companies = searchCompanies(query)
-        val rivers = searchRivers(query)
+        events(SearchEvent(query))
 
-        return companies + constituencies + places + rivers + overflows
+        val tasks = listOf(
+            Callable { searchConstituencies(query) },
+            Callable { searchPlaces(query) },
+            Callable { searchOverflows(query) },
+            Callable { searchCompanies(query) },
+            Callable { searchRivers(query) }
+        )
+
+        val futures = executor.invokeAll(tasks, 2, TimeUnit.SECONDS)
+
+        return futures.flatMap { future ->
+            if (future.isCancelled) emptyList() else future.get()
+        }
     }
 }

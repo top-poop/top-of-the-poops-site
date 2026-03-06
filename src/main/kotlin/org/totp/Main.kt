@@ -36,6 +36,7 @@ import sha256Key
 import java.time.Clock
 import java.time.Duration
 import java.util.*
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 import java.util.logging.LogManager
@@ -139,6 +140,8 @@ fun main() {
         .then(EventFilters.AddServiceName("pages")).then(AutoMarshallingEvents(TotpJson))
 
     val renderer = Resources.templates(devMode = isDevelopmentEnvironment)
+
+    val executor = Executors.newFixedThreadPool(6)
 
     val inboundFilters = StandardFilters.incoming(events, debugging(environment))
     val outboundFilters = StandardFilters.outgoing(events)
@@ -340,7 +343,7 @@ fun main() {
                             "/q" bind cacheFor(Duration.ofMinutes(20)).then(
                                 SearchResultsHandler(
                                     renderer,
-                                    Searcher(connection, riverRankings)::search
+                                    Searcher(events, connection, executor,riverRankings)::search
                                 )
                             ),
                         ),
