@@ -45,6 +45,10 @@ class PlacePageHandlerTest {
                 )
             },
             placeRivers = { listOf(aRiver(1)) },
+            mpFor = { null},
+            placeConstituency = { ConstituencyName.of("Aldershot") },
+            constituencyNeighbours = { emptyList() },
+            constituencyRank = { null }
         )
     )
 

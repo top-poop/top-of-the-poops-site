@@ -91,7 +91,7 @@
 
     {{> components/meta-opengraph
             title=(concat "Company | " company.name)
-            description=(concat "Sewage Maps and Statistics for " company.name " - " allTime.duration.hours " hours of sewage since 2020")
+            description=(concat "Sewage Maps and Statistics for " company.name " - " (numberFormat allTime.duration.hours) " hours of sewage since 2020")
             twitterImageUri=share.twitterImageUri
     }}
 </head>

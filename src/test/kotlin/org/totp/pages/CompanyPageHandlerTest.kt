@@ -10,8 +10,10 @@ import org.totp.db.StreamData
 import org.totp.db.StreamId
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.*
+import strikt.api.Assertion
 import strikt.api.expectThat
 import strikt.assertions.contains
+import strikt.assertions.first
 import strikt.assertions.isEqualTo
 import strikt.assertions.one
 import java.io.File
