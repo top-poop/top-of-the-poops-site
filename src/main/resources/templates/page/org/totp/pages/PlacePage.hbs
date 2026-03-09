@@ -146,6 +146,46 @@
                          data-uri="/data-new/locality/{{place.slug}}/annual-pollution"></div>
                 </div>
             </div>
+            {{#if constituencyRank}}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="h5 mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Constituency for {{place.name}}</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{constituencyRank.constituency.uri}}" class="text-decoration-none">
+                                <button class="btn btn-primary">
+                                    <i class="bi bi-geo-fill me-1"></i>
+                                    {{constituencyRank.constituency.name}}<span
+                                        class="badge bg-secondary ms-1">{{numberFormat
+                                        constituencyRank.count.count}}</span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {{/if}}
+            {{#if constituencyNeighbours}}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="h5 mb-0"><i class="bi bi-graph-up me-2"></i>Nearby Constituencies</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+
+                            {{#each constituencyNeighbours}}
+                                <a href="{{constituency.uri}}" class="text-decoration-none">
+                                    <button class="btn btn-primary">
+                                        <i class="bi bi-geo-fill me-1"></i>
+                                        {{this.constituency.name}}<span class="badge bg-secondary ms-1">{{numberFormat
+                                            this.count.count}}</span>
+                                    </button>
+                                </a>
+                            {{/each}}
+                        </div>
+                    </div>
+                </div>
+            {{/if}}
             {{#if rivers}}
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-primary text-white">
@@ -171,6 +211,22 @@
                     <h2 class="h5 mb-0"><i class="bi bi-megaphone-fill me-2"></i>Take Action</h2>
                 </div>
                 <div class="card-body">
+                    {{#if constituencyRank.mp}}
+                    <div class="alert alert-light mb-3">
+                        <div class="d-flex">
+                            <div class="me-2">
+                                <i class="bi bi-person-fill fs-4 text-primary"></i>
+                            </div>
+                            <div>
+                                <p class="mb-0">Your local MP is <a href="{{constituencyRank.mp.uri}}" class="fw-bold">{{constituencyRank.mp.name}}</a>
+                                    ({{constituencyRank.mp.party}}) - Find out more
+                                    about their interests, donors, and voting at <a href="{{constituencyRank.mp.uri}}">They Work For
+                                        You</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    {{/if}}
+
                     <div class="gap-2">
                         Share this page, post a message, and tell others about the huge problem of sewage pollution across the UK<br/>
                         {{> components/share-social share}}

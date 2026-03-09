@@ -3,6 +3,7 @@ package org.totp.db
 import org.junit.jupiter.api.Test
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
+import org.totp.model.data.PlaceName
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isGreaterThan
@@ -21,6 +22,12 @@ class ReferenceDataTest {
     fun `constituency by location`() {
         expectThat(tw.constituencyAt(Coordinates(50.826, -2.308)))
             .isEqualTo(ConstituencyName("West Dorset"))
+    }
+
+    @Test
+    fun `constituency for place`() {
+        expectThat(tw.constituencyFor(PlaceName.of("Normandy")))
+            .isEqualTo(ConstituencyName("Surrey Heath"))
     }
 
     @Test

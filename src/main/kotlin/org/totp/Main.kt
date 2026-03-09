@@ -217,6 +217,7 @@ fun main() {
 
     val siteBaseUri = Uri.of("https://top-of-the-poops.org")
 
+    val constituencyNeighbours = ConstituencyNeighbours(annualData)
     val server = Undertow(port = port(environment)).toServer(
         routes(
             "/" bind Method.GET to inboundFilters.then(
@@ -289,7 +290,7 @@ fun main() {
                             constituencyLiveAvailable = constituencyLiveAvailable,
                             constituencyLiveTotals = stream::totalForConstituency,
                             mpFor = mpFor,
-                            constituencyNeighbours = ConstituencyNeighbours(annualData),
+                            constituencyNeighbours = constituencyNeighbours,
                             constituencyRank = constituencyRank,
                             constituencyRivers = constituencyRivers(allSpills, riverRankings),
                             liveDataLatest = stream::latestAvailable
@@ -302,7 +303,7 @@ fun main() {
                                     mpFor = mpFor,
                                     constituencyLiveAvailable = constituencyLiveAvailable,
                                     constituencyLiveTotals = stream::totalForConstituency,
-                                    constituencyNeighbours = ConstituencyNeighbours(annualData),
+                                    constituencyNeighbours = constituencyNeighbours,
                                     liveDataLatest = stream::latestAvailable,
                                     csoLive = stream::byCsoForConstituency,
                                     annualSewageRainfall = annualLiveSewage::byConstituency
@@ -341,6 +342,10 @@ fun main() {
                             placeBoundary = localityBoundaries,
                             placeRank = localityRank,
                             placeRivers = placeRivers(allSpills, riverRankings),
+                            mpFor =  mpFor,
+                            placeConstituency = referenceData::constituencyFor,
+                            constituencyNeighbours = constituencyNeighbours,
+                            constituencyRank = constituencyRank
                         ),
                         "/search" bind routes(
                             "/" bind SearchPageHandler(renderer),

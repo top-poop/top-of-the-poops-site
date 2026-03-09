@@ -4,10 +4,32 @@ import org.http4k.core.Uri
 import org.totp.db.NamedQueryBlock.Companion.block
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
+import org.totp.model.data.PlaceName
 import org.totp.pages.MP
 
 
 class ReferenceData(private val connection: WithConnection) {
+
+    fun constituencyFor(place: PlaceName): ConstituencyName {
+        return connection.execute(block("find-constituency-for-place") {
+            query(
+                sql = """
+SELECT
+    p.pcon24nm
+FROM pcon_july_2024_uk_bfc p
+         JOIN os_open_built_up_areas a
+              ON ST_Contains(p.wkb_geometry, ST_PointOnSurface(a.geometry))
+WHERE a.name1_text = ?
+            """.trimIndent(),
+                bind = {
+                    it.setString(1, place.value)
+                },
+                mapper = { row ->
+                    row.get(ConstituencyName, "pcon24nm")
+                },
+            )
+        }).first()
+    }
 
     fun constituencyAt(location: Coordinates): ConstituencyName? {
         return connection.execute(block("find-constituency-within") {
@@ -27,7 +49,7 @@ LIMIT 1;
                 mapper = { row ->
                     row.get(ConstituencyName, "pcon24nm")
                 },
-                )
+            )
         }).firstOrNull()
     }
 
@@ -48,7 +70,7 @@ LIMIT 1;
                 mapper = { row ->
                     row.get(ConstituencyName, "pcon24nm")
                 },
-                )
+            )
         }).firstOrNull()
     }
 

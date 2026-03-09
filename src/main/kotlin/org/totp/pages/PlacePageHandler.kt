@@ -31,7 +31,8 @@ class PlacePage(
     val summary: PollutionSummary,
     val geojson: GeoJSON,
     val csos: List<RenderableCSOTotal>,
-    val neighbours: List<RenderablePlace>,
+    val constituencyRank: RenderableConstituencyRank?,
+    val constituencyNeighbours: List<RenderableConstituencyRank>,
     val rivers: List<RenderableRiverRank>
 ) :
     PageViewModel(uri)
@@ -43,7 +44,11 @@ object PlacePageHandler {
         placeTotals: (PlaceName) -> List<CSOTotals>,
         placeBoundary: (PlaceName) -> GeoJSON,
         placeRank: (PlaceName) -> PlaceRank?,
-        placeRivers: (PlaceName) -> List<RiverRank>
+        placeRivers: (PlaceName) -> List<RiverRank>,
+        mpFor: (ConstituencyName) -> MP?,
+        placeConstituency: (PlaceName) -> ConstituencyName,
+        constituencyNeighbours: (ConstituencyName) -> List<ConstituencyName>,
+        constituencyRank: (ConstituencyName) -> ConstituencyRank?,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 
@@ -65,6 +70,13 @@ object PlacePageHandler {
                 val list = placeTotals(placeName).sortedByDescending { it.duration }
 
                 val summary = list.summary()
+                val constituencyName = placeConstituency(placeName)
+
+                val neighbours = constituencyNeighbours(constituencyName)
+                    .sorted()
+                    .mapNotNull { constituencyRank(it) }
+                    .map { it.toRenderable(mpFor) }
+
 
                 Response(Status.OK)
                     .with(
@@ -78,8 +90,9 @@ object PlacePageHandler {
                             list.map {
                                 it.toRenderable()
                             },
-                            emptyList(),
+                            constituencyRank = constituencyRank(constituencyName)?.toRenderable(mpFor),
                             rivers = placeRivers(placeName).take(5).map { it.toRenderable() },
+                            constituencyNeighbours = neighbours.take(8)
                         )
                     )
             }
