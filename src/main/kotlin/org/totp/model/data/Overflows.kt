@@ -12,6 +12,7 @@ import java.time.LocalDate
 
 data class CSOTotals(
     val constituency: ConstituencyName,
+    val senedd: SeneddName?,
     val places: List<PlaceName>,
     val cso: CSO,
     val count: Int,
@@ -94,6 +95,28 @@ object ConstituencyRankings {
                 .mapIndexed { r, it ->
                     val constituencyName = ConstituencyName(it["constituency"] as String)
                     ConstituencyRank(
+                        rank = r + 1,
+                        constituencyName = constituencyName,
+                        count = (it["total_spills"] as Double).toInt(),
+                        duration = fromEDMHours((it["total_hours"] as Double)),
+                        countDelta = (it["spills_increase"] as Double).toInt(),
+                        durationDelta = fromEDMHours(it["hours_increase"] as Double),
+                        csoCount = (it["cso_count"] as Int)
+                    )
+                }
+        }
+    }
+}
+
+object SeneddRankings {
+    operator fun invoke(handler: HttpHandler): () -> List<SeneddRank> {
+        return {
+            val response = handler(Request(Method.GET, "spills-by-senedd.json"))
+
+            TotpJson.mapper.readSimpleList(response.bodyString())
+                .mapIndexed { r, it ->
+                    val constituencyName = SeneddName.of(it["senedd"] as String)
+                    SeneddRank(
                         rank = r + 1,
                         constituencyName = constituencyName,
                         count = (it["total_spills"] as Double).toInt(),
@@ -250,6 +273,7 @@ object AllSpills {
                 .map {
                     CSOTotals(
                         constituency = ConstituencyName(it["constituency"] as String),
+                        senedd = (it["senedd"] as String?)?.let(SeneddName::of),
                         places = (it["localities"] as List<String>).map { PlaceName.of(it) },
                         cso = CSO(
                             company = CompanyName.of(it["company_name"] as String),

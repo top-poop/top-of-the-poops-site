@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-import psycopg2
-from utils import smart_open
+from utils import smart_open, connect
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="run sql script and make json")
@@ -10,7 +9,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    with psycopg2.connect(host="localhost", database="gis", user="docker", password="docker") as conn:
+    pool = connect("localhost")
+
+    with pool.connection() as conn:
 
         with open(args.script) as s:
             script = s.read()
@@ -20,4 +21,4 @@ if __name__ == "__main__":
 
             with smart_open(args.output) as fp:
                 for row in cursor.fetchall():
-                    fp.write("".join([str(c) for c in row]))
+                    fp.write("".join([str(c) for c in row.values()]))

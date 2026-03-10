@@ -170,12 +170,17 @@ fun main() {
     val beachRankings = memoize(BathingRankings(annualData))
     val shellfishRankings = memoize(ShellfishRankings(annualData))
     val constituencyRankings = memoize(ConstituencyRankings(annualData))
+    val seneddRankings = memoize(SeneddRankings(annualData))
     val placeRankings = memoize(LocalityRankings(annualData))
 
     val mpFor = mpForConstituency(referenceData::mps)
 
     val constituencyBoundaries = ConstituencyBoundaries(
         Boundaries(SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient))
+    )
+
+    val seneddBoundaries = ConstituencyBoundaries(
+        Boundaries(SetBaseUriFrom(Uri.of("/senedd")).then(dataClient))
     )
 
     val localityBoundaries = LocalityBoundaries(
@@ -252,6 +257,10 @@ fun main() {
                             renderer = renderer,
                             constituencyRankings = constituencyRankings,
                             mpFor = mpFor,
+                        ),
+                        "/senedd-constituencies" bind SeneddConstituenciesPageHandler(
+                            renderer = renderer,
+                            seneddConstituencies = seneddRankings,
                         ),
                         "/places" bind PlacesPageHandler(
                             renderer = renderer,

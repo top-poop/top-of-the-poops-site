@@ -9,7 +9,7 @@
     {{> chunks/meta-styles }}
     {{> chunks/meta-scripts }}
 
-    {{> components/meta-opengraph title="Constituencies"
+    {{> components/meta-opengraph title="Senedd Constituencies"
         description=(concat "Find how much sewage was dumped in your constituency in " year)
     }}
 
@@ -32,7 +32,6 @@
             height: 90vh;
         }
     </style>
-
 </head>
 <body>
 {{> chunks/navbar }}
@@ -49,7 +48,7 @@
         <div class="col">
             {{#> components/section title=(concat "Constituencies Ranked for " year)}}
 
-                <p>Here are all the constituencies in England and Wales that had sewage overflows in 2024</p>
+                <p>Here are all the Senedd constituencies in Wales that had sewage overflows in 2024</p>
 
                 <p><b>Click</b> on the constituency name to see more details...</p>
 
@@ -61,15 +60,26 @@
                         <tr>
                             <td>Rank</td>
                             <td>Constituency</td>
-                            <td>MP</td>
-                            <td>MP Party</td>
                             <td>Sewage Dumps</td>
                             <td>Change</td>
                             <td>Duration</td>
                             <td>Change</td>
                         </tr>
                         </thead>
-                        {{{constituenciesTableRows}}}
+                        <tbody>
+                        {{#each rankings}}
+                            <tr>
+                                <td>{{this.rank}}</td>
+                                <td><a href="{{this.name.uri}}">{{this.name.name}}</a></td>
+                                <td data-sort="{{this.count.count}}">{{numberFormat this.count.count}}</td>
+                                <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat
+                                        this.countDelta.value}}</td>
+                                <td data-sort={{this.duration.hours}}>{{numberFormat this.duration.hours}}</td>
+                                <td class="align-middle {{>components/class-delta this.durationDelta}}">{{numberFormat
+                                        this.durationDelta.hours}}</td>
+                            </tr>
+                        {{/each}}
+                        </tbody>
                     </table>
                 </div>
             {{/components/section}}
@@ -91,7 +101,7 @@
                         type: "mercator",
                         domain: {
                             type: "MultiPoint",
-                            coordinates: [[-6, 50.0], [1.8, 57.9]],
+                            coordinates: [[-5.394287,51.383781], [-2.334595,53.438991]],
                         },
                     },
                     color: {
@@ -102,17 +112,17 @@
                             fill: d => d.properties.total_hours,
                             title: d => `${d.properties.constituency}: ${utils.formatNumber(d.properties.total_hours)} hours of sewage`,
                             stroke: "black",
+                            strokeOpacity: 0.5,
                         }),
                     ]
                 }));
     };
 
-    const r = await fetch("/data/v1/{{year}}/geo/choropleth.json");
+    const r = await fetch("/data/v1/{{year}}/geo/choropleth-senedd.json");
     if (r.ok) {
         chart(await r.json())
     }
 </script>
-
 
 <script>
     new DataTable('#table-constituency',

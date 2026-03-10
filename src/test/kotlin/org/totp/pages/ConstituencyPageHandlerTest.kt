@@ -31,6 +31,7 @@ class ConstituencyPageHandlerTest {
     var summaries = listOf(
         CSOTotals(
             constituency = ConstituencyName("Your House"),
+            senedd = SeneddName.of("Senedd"),
             places = listOf(PlaceName.of("v")),
             cso = CSO(
                 company = CompanyName.of("Venture Cap"),

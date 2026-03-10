@@ -4,6 +4,9 @@ import re
 import sys
 import os
 import unicodedata
+from psycopg.rows import dict_row
+from psycopg_pool import ConnectionPool
+
 
 
 def kebabcase(s):
@@ -35,6 +38,18 @@ def iter_row(cursor, size=10):
         for row in rows:
             yield row
 
+def connect(db_host) -> ConnectionPool:
+    return ConnectionPool(
+        min_size=1,
+        max_size=10,
+        kwargs={
+            "host": db_host,
+            "dbname": "gis",
+            "user": "docker",
+            "password": "docker",
+            "row_factory": dict_row
+        },
+    )
 
 @contextlib.contextmanager
 def smart_open(filename=None):

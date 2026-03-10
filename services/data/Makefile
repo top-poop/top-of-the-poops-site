@@ -76,6 +76,7 @@ PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAF
 
 generated-data: generated-2024 \
 	$(DATAFILES)/constituencies/.uptodate \
+	$(DATAFILES)/senedd/.uptodate \
 	$(DATAFILES)/beaches/.uptodate \
 	$(DATAFILES)/shellfisheries/.uptodate \
 	$(DATAFILES)/localities/.uptodate \
@@ -84,7 +85,6 @@ generated-data: generated-2024 \
 generated-2024: $(DATA_2024_GENERATED) $(GEO_2024_GENERATED) $(PROVIDED)
 
 provided: $(PROVIDED)
-
 
 .PHONY: .FORCE
 .FORCE:
@@ -96,6 +96,13 @@ $(DATAFILES)/v1/2024/%.json: sql/v1/2024/$(basename $(notdir %)).sql $(PYTHON) $
 $(DATAFILES)/v1/2024/geo/%.json:  sql/v1/2024/geo/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_TEXT)
 	@mkdir -p $(dir $@)
 	$(PYTHON) $(SQL_TO_TEXT) $< | jq -r tostring > $@
+
+
+$(DATAFILES)/senedd/.uptodate: $(PYTHON) geometry.py senedd.sql utils.py
+	rm -rf $(DATAFILES)/senedd
+	@mkdir $(DATAFILES)/senedd
+	$(PYTHON) geometry.py senedd.sql $(DATAFILES)/senedd
+	touch $@
 
 
 $(DATAFILES)/constituencies/.uptodate: $(PYTHON) geometry.py constituencies.sql utils.py

@@ -2,11 +2,10 @@
 import argparse
 import datetime
 import json
-import psycopg2
 from decimal import Decimal
 from typing import Any
 
-from utils import smart_open
+from utils import smart_open, connect
 
 class MultipleJsonEncoders:
     """
@@ -63,7 +62,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    with psycopg2.connect(host="localhost", database="gis", user="docker", password="docker") as conn:
+    pool = connect("localhost")
+
+    with pool.connection() as conn:
 
         with open(args.script) as s:
             script = s.read()
@@ -71,12 +72,7 @@ if __name__ == "__main__":
         with conn.cursor() as cursor:
             cursor.execute(script)
 
-            columns = [desc[0] for desc in cursor.description]
-
-            result = []
-
-            for row in cursor.fetchall():
-                result.append(dict(zip(columns, row)))
+            result = list(cursor.fetchall())
 
             if len(result) == 1:
                 result = result[0]

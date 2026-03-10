@@ -18,6 +18,10 @@ class ConstituencyName(value: String) : StringValue(value), ComparableValue<Cons
     companion object : StringValueFactory<ConstituencyName>(::ConstituencyName)
 }
 
+class SeneddName(value: String) : StringValue(value), ComparableValue<SeneddName, String> {
+    companion object : StringValueFactory<SeneddName>(::SeneddName)
+}
+
 class SiteName(value: String) : StringValue(value), ComparableValue<SiteName, String> {
     companion object : StringValueFactory<SiteName>(::SiteName)
 }
@@ -77,18 +81,11 @@ class ShellfisheryName(value: String) : StringValue(value), ComparableValue<Shel
     companion object : StringValueFactory<ShellfisheryName>(::ShellfisheryName)
 }
 
-fun ShellfisheryName.toSlug() = Slug.of(value.kebabCase())
-
 class ShellfishAreaName(value: String) : StringValue(value), ComparableValue<ShellfishAreaName, String> {
     companion object : StringValueFactory<ShellfishAreaName>(::ShellfishAreaName)
 }
-
-fun BathingName.toSlug() = Slug.of(value.kebabCase())
 
 /** name of a beach, as designated "sensitive area bathing" */
 class BeachName(value: String) : StringValue(value), ComparableValue<BeachName, String> {
     companion object : StringValueFactory<BeachName>(::BeachName)
 }
-
-fun CompanyName.toSlug(): Slug = Slug.of(value.kebabCase())
-

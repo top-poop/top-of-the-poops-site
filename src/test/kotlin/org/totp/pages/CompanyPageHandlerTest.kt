@@ -28,6 +28,7 @@ class CompanyPageHandlerTest {
     var summaries = listOf(
         CSOTotals(
             constituency = ConstituencyName("Water Co"),
+            senedd = SeneddName.of("Senedd"),
             places = listOf(PlaceName.of("a")),
             cso = CSO(
                 company = CompanyName.of("Water Co"),

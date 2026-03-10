@@ -24,6 +24,16 @@ data class ConstituencyRank(
     val csoCount: Int,
 )
 
+data class SeneddRank(
+    val rank: Int,
+    val constituencyName: SeneddName,
+    val count: Int,
+    val duration: Duration,
+    val countDelta: Int,
+    val durationDelta: Duration,
+    val csoCount: Int,
+)
+
 data class PlaceRank(
     val rank: Int,
     val placeName: PlaceName,
