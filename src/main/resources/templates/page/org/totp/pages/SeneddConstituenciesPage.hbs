@@ -62,6 +62,7 @@
                             <td>Constituency</td>
                             <td>Sewage Dumps</td>
                             <td>Change</td>
+                            <td>Duration (Hours)</td>
                             <td>Duration</td>
                             <td>Change</td>
                         </tr>
@@ -75,6 +76,7 @@
                                 <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat
                                         this.countDelta.value}}</td>
                                 <td data-sort={{this.duration.hours}}>{{numberFormat this.duration.hours}}</td>
+                                <td data-sort={{this.duration.hours}}>{{this.duration.explain}}</td>
                                 <td class="align-middle {{>components/class-delta this.durationDelta}}">{{numberFormat
                                         this.durationDelta.hours}}</td>
                             </tr>

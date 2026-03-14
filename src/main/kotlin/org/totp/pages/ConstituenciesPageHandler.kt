@@ -12,6 +12,9 @@ import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.TotpHandlebars
 import org.totp.model.data.ConstituencyName
+import org.totp.pages.nf
+import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.time.Duration
 
 class ConstituenciesPage(
@@ -32,6 +35,10 @@ class DeltaValue(value: Int) : IntValue(value), Delta {
     override fun isNegative() = value < 0
 }
 
+private val nf = NumberFormat.getNumberInstance().also {
+    it.maximumFractionDigits = 2
+}
+
 class RenderableDuration(val value: Duration) {
     val hours = value.toHours()
     val days = hours / 24.0
@@ -44,6 +51,19 @@ class RenderableDuration(val value: Duration) {
 
     val hasMonths = months > 1.0
     val hasYears = years > 1.0
+    val hasDays = days > 1.0
+
+    fun explain(): String {
+        return if ( hasYears ) {
+            "${nf.format(years)} years"
+        } else if (hasMonths) {
+            "${nf.format(months)} months"
+        } else if (hasDays) {
+            "${nf.format(days)} days"
+        } else {
+            "${nf.format(hours)} hours"
+        }
+    }
 }
 
 fun Duration.toRenderable() = RenderableDuration(this)
@@ -91,6 +111,7 @@ fun tableRows(items: List<RenderableConstituencyRank>): String {
                     +nf(r.countDelta.value)
                 }
                 td(classes = "align-middle") { +nf(r.duration.hours) }
+                td(classes = "align-middle") { +r.duration.explain() }
                 td(classes = "align-middle") {
                     classes += classesFor(r.durationDelta)
                     +nf(r.durationDelta.hours)
