@@ -54,6 +54,7 @@ DATAFILES=datafiles
 BADGES=$(DATAFILES)
 
 CONSTITUENCY_BADGES=$(BADGES)/constituency
+SENEDD_CONSTITUENCY_BADGES=$(BADGES)/senedd-constituency
 LOCALITY_BADGES=$(BADGES)/locality
 HOME_BADGES=$(BADGES)/home
 COMPANY_BADGES=$(BADGES)/company
@@ -71,6 +72,7 @@ python: $(PYTHON)
 
 
 TMP_CON_ORIG=tmp/constituencies
+TMP_SCON_ORIG=tmp/senedd-constituencies
 TMP_LOC_ORIG=tmp/locality
 TMP_HOME_ORIG=tmp/home
 TMP_COMPANY_ORIG=tmp/companies
@@ -78,6 +80,9 @@ TMP_RIVERS_ORIG=tmp/waterway
 
 CONSTITUENCY_ORIG=$(wildcard $(TMP_CON_ORIG)/*.png)
 CONSTITUENCY_QUANT=$(foreach png,$(CONSTITUENCY_ORIG),$(CONSTITUENCY_BADGES)/$(notdir $(png)))
+
+SENEDD_CONSTITUENCY_ORIG=$(wildcard $(TMP_SCON_ORIG)/*.png)
+SENEDD_CONSTITUENCY_QUANT=$(foreach png,$(SENEDD_CONSTITUENCY_ORIG),$(SENEDD_CONSTITUENCY_BADGES)/$(notdir $(png)))
 
 LOCALITY_ORIG=$(wildcard $(TMP_LOC_ORIG)/*.png)
 LOCALITY_QUANT=$(foreach png,$(LOCALITY_ORIG),$(LOCALITY_BADGES)/$(notdir $(png)))
@@ -92,9 +97,13 @@ RIVERS_ORIG=$(wildcard $(TMP_RIVERS_ORIG)/*.png)
 RIVERS_QUANT=$(foreach png,$(RIVERS_ORIG),$(RIVERS_BADGES)/$(notdir $(png)))
 
 .PHONY: quantised
-quantised: $(CONSTITUENCY_QUANT) $(HOME_QUANT) $(COMPANY_QUANT) $(RIVERS_QUANT) $(LOCALITY_QUANT)
+quantised: $(CONSTITUENCY_QUANT) $(SENEDD_CONSTITUENCY_QUANT) $(HOME_QUANT) $(COMPANY_QUANT) $(RIVERS_QUANT) $(LOCALITY_QUANT)
 
 $(CONSTITUENCY_BADGES)/%.png: $(TMP_CON_ORIG)/%.png
+	@mkdir -p $(@D)
+	pngcrush $< $@
+
+$(SENEDD_CONSTITUENCY_BADGES)/%.png: $(TMP_SCON_ORIG)/%.png
 	@mkdir -p $(@D)
 	pngcrush $< $@
 
@@ -124,6 +133,10 @@ generate-constituency-badges:
 		$(NPM) run save-elements http://localhost:8000/private/badges/constituencies/$${letter} $(TMP_CON_ORIG); \
 	done
 
+generate-senedd-constituency-badges:
+	@mkdir -p $(TMP_SCON_ORIG)
+	$(NPM) run save-elements http://localhost:8000/private/badges/senedd-constituencies $(TMP_SCON_ORIG); \
+
 generate-locality-badges:
 	@mkdir -p $(TMP_CON_ORIG)
 	for letter in a b c d e f g h i j k l m n o p q r s t u v w x y z; do \
@@ -140,4 +153,4 @@ generate-rivers-badges:
 
 
 .PHONY: generated-data
-generated-data: generate-company-badges generate-constituency-badges generate-home-badges generate-locality-badges
+generated-data: generate-company-badges generate-constituency-badges generate-senedd-constituency-badges generate-home-badges generate-locality-badges

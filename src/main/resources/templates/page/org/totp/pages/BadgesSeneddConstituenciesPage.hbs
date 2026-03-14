@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+
+    <style>
+        svg {
+            /*height: 263px;*/
+            /*left: 0;*/
+            position: absolute;
+            top: 10px;
+        }
+
+        img {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            top: 150px;
+            left: 400px;
+            opacity: 0.4;
+        }
+
+        svg[class^="plot-"] {
+            background: rgba(0, 0, 0, 0);
+            height: 263px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ms-3 mt-3">
+    {{#each constituencies}}
+        <div style="width: 526px; height:263px; overflow: clip"
+             id="{{this.constituency.slug}}-2024" data-name="{{this.constituency.name}}" data-slug="{{this.constituency.slug}}"
+             class="twitter-badge constituency mb-2">
+            <div class="card  h-100  rounded-lg ">
+                <img src="/assets/poop.png"/>
+                <div class="card-body" style="background-color: #f9f7ef">
+                    <h5 class="card-title"
+                        style="font-size:2.5rem;font-weight:500;line-height:1.2">{{this.constituency.name}}</h5>
+                    <p class="card-text">Polluted by <b>#sewage</b>
+                        <span class="align-middle display-2" style="font-size:2.5rem;font-weight:500">{{numberFormat this.count.count}}</span>times in 2024
+                    </p>
+
+                    <div class="row align-middle">
+                        <div class="col">
+                            <p class="card-text"><small class="text-muted">{{>chunks/explain-count this.count}}</small></p>
+                            <p class="card-text"><small class="text-muted">Red dots are CSOs with no reporting</small></p>
+                        </div>
+                    </div>
+
+                    <div class="row align-middle mt-1">
+                        <div class="col">
+                            <p class="card-text"><small class="text-muted">top-of-the-poops.org</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {{/each}}
+</div>
+
+<div style="display:none">
+    {{#each boundaries}}
+        <div id="boundary-{{this.first}}">{{this.second}}</div>
+    {{/each}}
+</div>
+
+<div id="maybe-complete">
+
+</div>
+
+<script type="module">
+    import * as Plot from "/assets/js/plot-0.6.17/plot.esm.js";
+
+    const chart = (feature, items) => {
+        return Plot.plot(
+                {
+                    projection: {
+                        type: "mercator",
+                        domain: feature,
+                    },
+                    height: 263,
+                    r: {range: [5, 15], domain: [0, 5000]},
+                    marks: [
+                        Plot.geo(
+                                feature,
+                                {
+                                    fill: "rgb(2,46,4)",
+                                    fillOpacity: 0.1,
+                                    stroke: "#000000",
+                                    strokeWidth: 4,
+                                    strokeOpacity: 0.2,
+                                }
+                        ),
+                        Plot.dot(
+                                items.filter(d => d.spill_count > 0),
+                                {
+                                    x: "lon",
+                                    y: "lat",
+                                    r: "total_spill_hours",
+                                    fill: "company_name",
+                                    opacity: 0.7,
+                                    mixBlendMode: "multiply",
+                                }
+                        ),
+                        Plot.dot(
+                                items.filter(d => d.reporting_percent == 0.0),
+                                {
+                                    x: "lon",
+                                    y: "lat",
+                                    r: 10,
+                                    fill: '#cd1919',
+                                    opacity: 0.7,
+                                    mixBlendMode: "multiply",
+                                }
+                        )
+                    ]
+                }
+        )
+                ;
+    }
+
+    const response = await fetch("/data/v1/2024/spills-all.json");
+
+    if (response.ok) {
+
+        const spills = await (response.json());
+
+        Array.from(document.querySelectorAll(".constituency"))
+                .map(it => {
+                    const slug = it.getAttribute("data-slug")
+                    const geojson = JSON.parse(document.getElementById(`boundary-${slug}`).textContent);
+
+                    const el = it.querySelector(".card")
+
+                    const name = it.getAttribute("data-name")
+
+                    const relevant = spills
+                            .filter(it => it.senedd == name)
+
+                    el.insertAdjacentElement('afterbegin', chart(geojson, relevant));
+
+                });
+
+        const complete = document.createElement("div")
+        complete.setAttribute("id", "complete")
+        document.getElementById("maybe-complete").appendChild(complete)
+
+    }
+</script>
+
+</body>
+</html>

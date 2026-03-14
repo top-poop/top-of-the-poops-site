@@ -418,6 +418,11 @@ fun main() {
                                         mpFor = mpFor,
                                         constituencyBoundaries = constituencyBoundaries,
                                     ),
+                                    "/senedd-constituencies" bind BadgesSeneddConstituenciesHandler(
+                                        renderer = renderer,
+                                        constituencyRankings = seneddConstituencyRankings,
+                                        constituencyBoundaries = seneddBoundaries,
+                                    ),
                                     "/localities/{letter}" bind BadgesPlacesHandler(
                                         renderer = renderer,
                                         placeRankings = placeRankings,
