@@ -96,6 +96,41 @@ class SearcherTest {
     }
 
     @Test
+    fun `finds postcode place`() {
+        val results = searcher.search("PE28").filter { it.type == SearchResultType.Place }
+        expectThat(results).size.isGreaterThan(20)
+    }
+
+    @Test
+    fun `finds postcode lowercase`() {
+        expectThat(searcher.search("PE28")).isEqualTo(searcher.search("pe28"))
+    }
+
+    @Test
+    fun `finds postcode place and can narrow`() {
+        val results = searcher.search("PE28 u").filter { it.type == SearchResultType.Place }
+        expectThat(results).first().and {
+            get { this.text }.isEqualTo("Huntingdon")
+        }
+    }
+
+    @Test
+    fun `finds postcode constituency`() {
+        val results = searcher.search("PE28").filter { it.type == SearchResultType.Constituency }
+        expectThat(results).and {
+            size.isGreaterThan(3)
+        }
+    }
+
+    @Test
+    fun `finds postcode constituency and can narrow`() {
+        val results = searcher.search("PE28 w").filter { it.type == SearchResultType.Constituency }
+        expectThat(results).first().and {
+            get { this.text }.isEqualTo("North West Cambridgeshire")
+        }
+    }
+
+    @Test
     fun `finds overflows by site name`() {
         val results = searcher.search("London")
         expectThat(results)

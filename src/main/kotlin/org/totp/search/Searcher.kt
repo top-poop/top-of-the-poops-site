@@ -9,6 +9,7 @@ import org.totp.pages.toRenderable
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
+import java.util.regex.Pattern
 
 enum class SearchResultType {
     Constituency, Place, Overflow, WaterCompany, River
@@ -175,6 +176,8 @@ limit 50
 
         val tasks = listOf(
             Callable { searchConstituencies(query) },
+            Callable { searchPostcodePlaces(query) },
+            Callable { searchPostcodeConstituencies(query) },
             Callable { searchPlaces(query) },
             Callable { searchOverflows(query) },
             Callable { searchCompanies(query) },
@@ -185,12 +188,104 @@ limit 50
 
         val resultsUnordered = futures.flatMap { future -> if (future.isCancelled) emptyList() else future.get() }
 
-        return resultsUnordered.sortedWith(compareBy<WeightedSearchResult> { when(it.type) {
-            SearchResultType.WaterCompany -> 0
-            SearchResultType.Constituency -> 1
-            SearchResultType.Place -> 2
-            SearchResultType.River -> 3
-            SearchResultType.Overflow -> 4
-        } }.thenDescending (compareBy { it.weight }))
+        return resultsUnordered.sortedWith(compareBy<WeightedSearchResult> {
+            when (it.type) {
+                SearchResultType.WaterCompany -> 0
+                SearchResultType.Constituency -> 1
+                SearchResultType.Place -> 2
+                SearchResultType.River -> 3
+                SearchResultType.Overflow -> 4
+            }
+        }.thenDescending(compareBy { it.weight }))
+    }
+
+
+    private fun searchPostcodePlaces0(postcode: String): List<WeightedSearchResult> {
+        return connection.execute(NamedQueryBlock("search-postcode-place") {
+            query(
+                sql = """
+select place, areahectares from postcode_place pp
+    join os_open_built_up_areas ba on pp.place = ba.name1_text
+where outcode = ?
+order by areahectares desc 
+                """.trimIndent(),
+                bind = {
+                    it.set(1, postcode)
+                },
+                mapper = {
+                    val name = it.getString("place")
+                    WeightedSearchResult(
+                        name = name,
+                        text = name,
+                        uri = PlaceName.of(name).toRenderable().uri,
+                        type = SearchResultType.Place,
+                        weight = it.getDouble("areahectares")
+                    )
+                }
+            )
+        })
+    }
+
+    private val looksLikeAPostcode = Pattern.compile("^[A-Z]{1,2}[0-9]")
+
+    private fun maybeSearchPostcode(
+        query: String,
+        search: (p: String) -> List<WeightedSearchResult>
+    ): List<WeightedSearchResult> {
+        val trimmed = query.trim()
+        val uppercase = trimmed.uppercase()
+        val matcher = looksLikeAPostcode.matcher(uppercase)
+
+        if (matcher.find()) {
+            val postcodeBit = uppercase.substringBefore(' ')
+            val rest = trimmed.substringAfter(' ', "")
+            val results = search(postcodeBit)
+
+            return if (rest.isNotEmpty()) {
+                results.filter { it.name.contains(rest, ignoreCase = true) }
+            } else {
+                results
+            }
+
+        }
+        return emptyList()
+    }
+
+    private fun searchPostcodePlaces(query: String): List<WeightedSearchResult> {
+        return maybeSearchPostcode(query) { postcode ->
+            searchPostcodePlaces0(postcode)
+        }
+    }
+
+    private fun searchPostcodeConstituencies0(postcode: String): List<WeightedSearchResult> {
+        return connection.execute(NamedQueryBlock("search-postcode-constituency") {
+            query(
+                sql = """
+select pcon24nm, ST_Area(ST_Envelope(wkb_geometry)) as size from postcode_constituency pc
+    join pcon_july_2024_uk_bfc c on pc.constituency = c.pcon24nm
+where outcode = ?
+order by size desc
+                """.trimIndent(),
+                bind = {
+                    it.set(1, postcode)
+                },
+                mapper = {
+                    val name = it.getString("pcon24nm")
+                    WeightedSearchResult(
+                        name = name,
+                        text = name,
+                        uri = ConstituencyName.of(name).toRenderable().uri,
+                        type = SearchResultType.Constituency,
+                        weight = it.getDouble("size")
+                    )
+                }
+            )
+        })
+    }
+
+    private fun searchPostcodeConstituencies(query: String): List<WeightedSearchResult> {
+        return maybeSearchPostcode(query) { postcode ->
+            searchPostcodeConstituencies0(postcode)
+        }
     }
 }
