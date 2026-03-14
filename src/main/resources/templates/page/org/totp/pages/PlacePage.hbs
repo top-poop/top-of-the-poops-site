@@ -116,7 +116,10 @@
                 <div class="card-body">
                     <h5 class="card-title fw-bold mb-3">
                         <i class="bi bi-geo-alt me-1 text-danger"></i>
-                        {{summary.locationCount}} Sites polluted by {{join summary.companies ', '}}
+                        {{summary.locationCount}} Sites polluted by
+                        {{#each summary.companies }}
+                            <a href="{{this.uri}}">{{this.name}}</a>
+                        {{/each}}
                     </h5>
                     <div class="card-text mb-3">
                         <div class="d-flex align-items-center mb-2">

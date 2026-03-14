@@ -36,7 +36,7 @@ val slugToSeneddConstituency = seneddConstituencyNames.associateBy { it.toSlug()
 data class PollutionSummary(
     val year: Int,
     val locationCount: Int,
-    val companies: List<CompanyName>,
+    val companies: List<RenderableCompany>,
     val count: RenderableCount,
     val duration: RenderableDuration,
     val csoCount: Int,
@@ -48,7 +48,7 @@ fun List<CSOTotals>.summary(): PollutionSummary {
     return PollutionSummary(
         year = THE_YEAR,
         locationCount = filter { it.count > 0 }.size,
-        companies = map { it.cso.company }.toSet().sorted(),
+        companies = map { it.cso.company }.toSet().sorted().map { it.toRenderable()},
         count = RenderableCount(sumOf { it.count }),
         duration = (map { it.duration }
             .reduceOrNull { acc, duration -> acc.plus(duration) }

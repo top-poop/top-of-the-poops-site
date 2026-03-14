@@ -42,7 +42,7 @@ fun List<BathingCSO>.summary(): PollutionSummary {
     return PollutionSummary(
         year = THE_YEAR,
         locationCount = filter { it.count > 0 }.size,
-        companies = map { it.company }.toSet().sorted(),
+        companies = map { it.company }.toSet().sorted().map { it.toRenderable()},
         count = sumOf { it.count }.let { RenderableCount(it) },
         duration = (map { it.duration }
             .reduceOrNull { acc, duration -> acc.plus(duration) }

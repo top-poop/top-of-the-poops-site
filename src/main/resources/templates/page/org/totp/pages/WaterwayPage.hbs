@@ -46,8 +46,11 @@
                     <div class="card border-0 shadow-sm mb-3">
                         <div class="card-header bg-primary text-white"><i class="bi bi-bar-chart-fill me-2"></i>Totals for {{ name.value }} in {{summary.year}}</div>
                         <div class="card-body">
-                            <h5 class="card-title">{{summary.locationCount}} Sites polluted by {{join summary.companies
-                                                                                                      ', '}}</h5>
+                            <h5 class="card-title">{{summary.locationCount}} Sites polluted by
+                                {{#each summary.companies }}
+                                    <a href="{{this.uri}}">{{this.name}}</a>
+                                {{/each}}
+                            </h5>
                             <div class="card-text">
                                 {{numberFormat summary.count.count}} sewage dumps<br>
                                 <span class="spill-hours">{{numberFormat summary.duration.hours}}
