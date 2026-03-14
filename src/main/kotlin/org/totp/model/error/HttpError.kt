@@ -7,7 +7,7 @@ data class HttpError(val status: Status, val t: Throwable? = null) : ViewModel {
     override fun template(): String {
 
         val specific = when (status) {
-            Status.NOT_FOUND, Status.INTERNAL_SERVER_ERROR -> status.code.toString()
+            Status.BAD_REQUEST, Status.NOT_FOUND, Status.INTERNAL_SERVER_ERROR -> status.code.toString()
             else -> "generic"
         }
 

@@ -14,8 +14,8 @@ import strikt.assertions.contains
 import strikt.assertions.first
 import strikt.assertions.isEqualTo
 
-fun Assertion.Builder<Document>.select(selector: String): DescribeableBuilder<Elements> {
-    return get { this.select(selector) }
+fun Assertion.Builder<Element>.select(selector: String): DescribeableBuilder<Elements> {
+    return get { this.select(selector )}
 }
 
 fun Assertion.Builder<Element>.attribute(name: String): DescribeableBuilder<String> {
@@ -26,22 +26,24 @@ fun Assertion.Builder<Element>.text(): DescribeableBuilder<String> {
     return get { this.text() }
 }
 
-fun Assertion.Builder<Document>.twitterImageUri(): DescribeableBuilder<String> {
+fun Assertion.Builder<Element>.twitterImageUri(): DescribeableBuilder<String> {
     return this.select("meta[name='twitter:image']").first().attribute("content")
 }
 
+fun Element.elementText(selector: String) = this.select(selector).single().text()
+fun Element.attributeText(selector: String, attribute: String) = this.select(selector).single().attr(attribute)
 
 object Html {
     operator fun invoke(
         response: Response,
         expected: (Response) -> Unit = { expectThat(it).status.isEqualTo(Status.OK) }
-    ): Document {
+    ): Element {
         expected(response)
 
         val body = response.bodyString()
 
         expectThat(body).not().contains("Renderable")
 
-        return Jsoup.parse(body)
+        return Jsoup.parse(body).selectFirst("html")!!
     }
 }

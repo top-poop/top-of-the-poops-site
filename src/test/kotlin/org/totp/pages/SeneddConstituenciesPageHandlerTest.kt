@@ -6,7 +6,7 @@ import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.junit.jupiter.api.Test
 import org.totp.model.TotpHandlebars
-import org.totp.model.data.SeneddName
+import org.totp.model.data.SeneddConstituencyName
 import strikt.api.expectThat
 import strikt.assertions.isNotEmpty
 import java.time.Duration
@@ -14,14 +14,14 @@ import java.time.Duration
 
 class SeneddConstituenciesPageHandlerTest {
 
-    val a = SeneddName.of("a")
-    val b = SeneddName.of("b")
+    val a = SeneddConstituencyName.of("a")
+    val b = SeneddConstituencyName.of("b")
     val service = routes(
         "/" bind Method.GET to SeneddConstituenciesPageHandler(
             renderer = TotpHandlebars.templates().HotReload("src/main/resources/templates/page/org/totp"),
             seneddConstituencies = {
                 listOf(
-                    SeneddRank(
+                    SeneddConstituencyRank(
                         1,
                         a,
                         100,
@@ -29,7 +29,7 @@ class SeneddConstituenciesPageHandlerTest {
                         25,
                         Duration.ofHours(10), csoCount = 20,
                     ),
-                    SeneddRank(
+                    SeneddConstituencyRank(
                         2,
                         b,
                         2,

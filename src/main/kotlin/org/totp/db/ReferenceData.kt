@@ -5,10 +5,30 @@ import org.totp.db.NamedQueryBlock.Companion.block
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.Coordinates
 import org.totp.model.data.PlaceName
+import org.totp.model.data.SeneddConstituencyName
 import org.totp.pages.MP
 
 
 class ReferenceData(private val connection: WithConnection) {
+
+    fun westminsterConstituenciesFor(constituency: SeneddConstituencyName): List<ConstituencyName> {
+        return connection.execute(block("westminster-constituencies-for") {
+            query(
+                sql = """
+select pcon24nm 
+from senedd_cons sc
+    join senedd_final_2026 s on s.ogc_fid = sc.ogc_fid
+WHERE s.english_na = ?
+            """.trimIndent(),
+                bind = {
+                    it.setString(1, constituency.value)
+                },
+                mapper = { row ->
+                    row.get(ConstituencyName, "pcon24nm")
+                },
+            )
+        })
+    }
 
     fun constituencyFor(place: PlaceName): ConstituencyName {
         return connection.execute(block("find-constituency-for-place") {

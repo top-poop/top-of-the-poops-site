@@ -1,21 +1,14 @@
 package org.totp.db
 
+import dev.forkhandles.values.StringValue
 import org.totp.model.data.ConstituencyName
 import org.totp.model.data.PlaceName
+import org.totp.model.data.SeneddConstituencyName
 
 class EDM(private val connection: WithConnection) {
 
-
-    data class ConstituencyAnnualSummary(
-        val constituency: ConstituencyName,
-        val year: Int,
-        val hours: Double,
-        val spills: Long,
-        val csoCount: Int,
-    )
-
-    data class PlaceAnnualSummary(
-        val placeName: PlaceName,
+    data class AnnualSummary(
+        val place: StringValue,
         val year: Int,
         val hours: Double,
         val spills: Long,
@@ -24,7 +17,7 @@ class EDM(private val connection: WithConnection) {
 
     fun annualSummariesForLocality(
         placeName: PlaceName,
-    ): List<PlaceAnnualSummary> {
+    ): List<AnnualSummary> {
         return connection.execute(NamedQueryBlock.block("locality-annual-summary") {
             query(
                 sql = """
@@ -46,8 +39,50 @@ order by name1_text, reporting_year
                     it.set(1, placeName)
                 },
                 mapper = {
-                    PlaceAnnualSummary(
-                        placeName = placeName,
+                    AnnualSummary(
+                        place = placeName,
+                        year = it.getInt("reporting_year"),
+                        hours = it.getDouble("total_hours"),
+                        spills = it.getLong("total_spills"),
+                        csoCount = it.getInt("cso_count")
+                    )
+                }
+            )
+        })
+    }
+
+    fun annualSummariesForSeneddConstituency(
+        constituencyName: SeneddConstituencyName,
+    ): List<AnnualSummary> {
+        return connection.execute(NamedQueryBlock.block("constituency-annual-summary") {
+            query(
+                sql = """
+WITH reporting_years AS (
+    SELECT DISTINCT reporting_year
+    FROM edm_consent_view
+)
+SELECT ry.reporting_year,
+       s.english_na                              AS constituency,
+       COUNT(edm.effluent_grid_ref)            AS cso_count,
+       COALESCE(SUM(edm.spill_count), 0)       AS total_spills,
+       COALESCE(SUM(edm.total_spill_hours), 0) AS total_hours
+FROM senedd_final_2026 s
+         CROSS JOIN reporting_years ry
+         JOIN senedd_cons sc on ( s.ogc_fid = sc.ogc_fid)
+         LEFT JOIN grid_references gr
+                   ON gr.pcon24nm = sc.pcon24nm
+         LEFT JOIN edm_consent_view edm
+                   ON edm.reporting_year = ry.reporting_year
+                       AND edm.effluent_grid_ref = gr.grid_reference
+WHERE s.english_na = ?
+GROUP BY ry.reporting_year, s.english_na
+ORDER BY s.english_na, ry.reporting_year """.trimIndent(),
+                bind = {
+                    it.set(1, constituencyName.value)
+                },
+                mapper = {
+                    AnnualSummary(
+                        place = constituencyName,
                         year = it.getInt("reporting_year"),
                         hours = it.getDouble("total_hours"),
                         spills = it.getLong("total_spills"),
@@ -61,7 +96,7 @@ order by name1_text, reporting_year
 
     fun annualSummariesForConstituency(
         constituencyName: ConstituencyName,
-    ): List<ConstituencyAnnualSummary> {
+    ): List<AnnualSummary> {
         return connection.execute(NamedQueryBlock.block("constituency-annual-summary") {
             query(
                 sql = """
@@ -89,8 +124,8 @@ ORDER BY c.pcon24nm, ry.reporting_year
                     it.set(1, constituencyName.value)
                 },
                 mapper = {
-                    ConstituencyAnnualSummary(
-                        constituency = constituencyName,
+                    AnnualSummary(
+                        place = constituencyName,
                         year = it.getInt("reporting_year"),
                         hours = it.getDouble("total_hours"),
                         spills = it.getLong("total_spills"),

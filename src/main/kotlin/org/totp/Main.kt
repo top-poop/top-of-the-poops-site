@@ -10,6 +10,7 @@ import org.http4k.events.EventFilters
 import org.http4k.events.then
 import org.http4k.filter.*
 import org.http4k.filter.ClientFilters.SetBaseUriFrom
+import org.http4k.filter.ServerFilters.CatchLensFailure
 import org.http4k.lens.*
 import org.http4k.routing.ResourceLoader
 import org.http4k.routing.bind
@@ -17,7 +18,6 @@ import org.http4k.routing.routes
 import org.http4k.routing.static
 import org.http4k.server.Undertow
 import org.http4k.template.TemplateRenderer
-import org.http4k.template.viewModel
 import org.totp.db.*
 import org.totp.events.ServerStartedEvent
 import org.totp.extensions.Defect
@@ -88,7 +88,7 @@ fun mpForConstituency(contacts: () -> List<ConstituencyContact>): (ConstituencyN
 
 class EDMAnnualConstituencySummary(val edm: EDM) : HttpHandler {
 
-    val data = TotpJson.autoBody<List<EDM.ConstituencyAnnualSummary>>().toLens()
+    val data = TotpJson.autoBody<List<EDM.AnnualSummary>>().toLens()
     val constituency = Path.value(Slug).of("constituency")
     override fun invoke(request: Request): Response = slugToConstituency[constituency(request)]
         ?.let(edm::annualSummariesForConstituency)
@@ -97,10 +97,20 @@ class EDMAnnualConstituencySummary(val edm: EDM) : HttpHandler {
         } ?: Response(Status.NOT_FOUND)
 }
 
-class EDMAnnualLocalitySummary(val edm: EDM) : HttpHandler {
-    val data = TotpJson.autoBody<List<EDM.PlaceAnnualSummary>>().toLens()
-    val locality = Path.value(Slug).of("locality")
-    override fun invoke(request: Request): Response = slugToPlace[locality(request)]
+class EDMAnnualSeneddConstituencySummary(val edm: EDM) : HttpHandler {
+    val data = TotpJson.autoBody<List<EDM.AnnualSummary>>().toLens()
+    val constituency = Path.value(Slug).of("constituency")
+    override fun invoke(request: Request): Response = slugToSeneddConstituency[constituency(request)]
+        ?.let(edm::annualSummariesForSeneddConstituency)
+        ?.let {
+            Response(Status.OK).with(data of it)
+        } ?: Response(Status.NOT_FOUND)
+}
+
+class EDMAnnualPlaceSummary(val edm: EDM) : HttpHandler {
+    val data = TotpJson.autoBody<List<EDM.AnnualSummary>>().toLens()
+    val place = Path.value(Slug).of("place")
+    override fun invoke(request: Request): Response = slugToPlace[place(request)]
         ?.let(edm::annualSummariesForLocality)
         ?.let {
             Response(Status.OK).with(data of it)
@@ -170,7 +180,7 @@ fun main() {
     val beachRankings = memoize(BathingRankings(annualData))
     val shellfishRankings = memoize(ShellfishRankings(annualData))
     val constituencyRankings = memoize(ConstituencyRankings(annualData))
-    val seneddRankings = memoize(SeneddRankings(annualData))
+    val seneddConstituencyRankings = memoize(SeneddRankings(annualData))
     val placeRankings = memoize(LocalityRankings(annualData))
 
     val mpFor = mpForConstituency(referenceData::mps)
@@ -179,7 +189,7 @@ fun main() {
         Boundaries(SetBaseUriFrom(Uri.of("/constituencies")).then(dataClient))
     )
 
-    val seneddBoundaries = ConstituencyBoundaries(
+    val seneddBoundaries = SeneddConstituencyBoundaries(
         Boundaries(SetBaseUriFrom(Uri.of("/senedd")).then(dataClient))
     )
 
@@ -197,6 +207,10 @@ fun main() {
 
     val constituencyRank = { wanted: ConstituencyName ->
         constituencyRankings().firstOrNull { it.constituencyName == wanted }
+    }
+
+    val seneddConstituencyRank = { wanted: SeneddConstituencyName ->
+        seneddConstituencyRankings().firstOrNull { it.constituencyName == wanted }
     }
 
     val localityRank = { wanted: PlaceName ->
@@ -223,256 +237,285 @@ fun main() {
     val siteBaseUri = Uri.of("https://top-of-the-poops.org")
 
     val constituencyNeighbours = ConstituencyNeighbours(annualData)
+    val seneddConstituencyNeighbours = SeneddConstituencyNeighbours(annualData)
+
     val server = Undertow(port = port(environment)).toServer(
-        routes(
-            "/" bind Method.GET to inboundFilters.then(
-                HtmlPageErrorFilter(
-                    events,
-                    renderer
-                ).then(
-                    routes(
-                        "/" bind HomepageHandler(
-                            renderer = renderer,
-                            constituencyRankings = constituencyRankings,
-                            companySummaries = unifiedAnnualData::unified,
-                            bathingRankings = beachRankings,
-                            riverRankings = riverRankings,
-                            appearances = mediaAppearances,
-                            companies = waterCompanies,
-                            mpFor = mpFor,
-                            shellfishRankings = shellfishRankings,
-                            streamSummary = stream::summary
-                        ),
-                        "/now" bind NowHandler(
-                            renderer = renderer, clock = clock, streamData = stream
-                        ),
-                        "/now-video" bind NowVideoHandler(
-                            renderer = renderer, streamData = stream
-                        ),
-                        "/support" bind SupportUsHandler(renderer = renderer),
-                        "/media" bind MediaPageHandler(
-                            renderer = renderer, appearances = mediaAppearances
-                        ),
-                        "/constituencies" bind ConstituenciesPageHandler(
-                            renderer = renderer,
-                            constituencyRankings = constituencyRankings,
-                            mpFor = mpFor,
-                        ),
-                        "/senedd-constituencies" bind SeneddConstituenciesPageHandler(
-                            renderer = renderer,
-                            seneddConstituencies = seneddRankings,
-                        ),
-                        "/places" bind PlacesPageHandler(
-                            renderer = renderer,
-                            areaRankings = placeRankings,
-                        ),
-                        "/beaches" bind BeachesPageHandler(
-                            renderer = renderer, bathingRankings = beachRankings
-                        ),
-                        "/beach/{bathing}" bind BathingPageHandler(
-                            renderer = renderer,
-                            bathingRankings = beachRankings,
-                            bathingCSOs = { wanted ->
-                                BathingCSOs(annualData)().filter { wanted == it.bathing.toSlug() }
-                            },
-                            beachBoundaries = beachBoundaries,
-                            mpFor = mpFor,
-                            constituencyRank = constituencyRank
-                        ),
-                        "/rivers" bind RiversPageHandler(
-                            renderer = renderer, riverRankings = riverRankings
-                        ),
-                        "/waterway/{company}/{waterway}" bind WaterwayPageHandler(
-                            renderer = renderer,
-                            waterwaySpills = waterwayCSOs(allSpills),
-                            mpFor = mpFor,
-                            constituencyRank = constituencyRank,
-                            placeRank = localityRank,
-                        ),
-                        "/constituency/at/{lat}/{lon}" bind CachingFilters.CacheResponse.MaxAge(Duration.ofDays(1))
-                            .then(ConstituencyAtRedirectHandler(referenceData)),
-                        "/constituency/{constituency}" bind ConstituencyPageHandler(
-                            clock = clock,
-                            renderer = renderer,
-                            constituencySpills = constituencyCSOs(allSpills),
-                            constituencyBoundary = constituencyBoundaries,
-                            constituencyLiveAvailable = constituencyLiveAvailable,
-                            constituencyLiveTotals = stream::totalForConstituency,
-                            mpFor = mpFor,
-                            constituencyNeighbours = constituencyNeighbours,
-                            constituencyRank = constituencyRank,
-                            constituencyRivers = constituencyRivers(allSpills, riverRankings),
-                            liveDataLatest = stream::latestAvailable
-                        ),
-                        "/constituency/{constituency}/live" bind
-                                ConstituencyLivePageHandler(
+        CatchLensFailure().then(
+            routes(
+                "/" bind Method.GET to inboundFilters.then(
+                    HtmlPageErrorFilter(
+                        events,
+                        renderer
+                    ).then(
+                        CatchLensFailure().then(
+                            routes(
+                                "/" bind HomepageHandler(
+                                    renderer = renderer,
+                                    constituencyRankings = constituencyRankings,
+                                    companySummaries = unifiedAnnualData::unified,
+                                    bathingRankings = beachRankings,
+                                    riverRankings = riverRankings,
+                                    appearances = mediaAppearances,
+                                    companies = waterCompanies,
+                                    mpFor = mpFor,
+                                    shellfishRankings = shellfishRankings,
+                                    streamSummary = stream::summary
+                                ),
+                                "/now" bind NowHandler(
+                                    renderer = renderer, clock = clock, streamData = stream
+                                ),
+                                "/now-video" bind NowVideoHandler(
+                                    renderer = renderer, streamData = stream
+                                ),
+                                "/support" bind SupportUsHandler(renderer = renderer),
+                                "/media" bind MediaPageHandler(
+                                    renderer = renderer, appearances = mediaAppearances
+                                ),
+                                "/constituencies" bind ConstituenciesPageHandler(
+                                    renderer = renderer,
+                                    constituencyRankings = constituencyRankings,
+                                    mpFor = mpFor,
+                                ),
+                                "/senedd-constituencies" bind SeneddConstituenciesPageHandler(
+                                    renderer = renderer,
+                                    seneddConstituencies = seneddConstituencyRankings,
+                                ),
+                                "/places" bind PlacesPageHandler(
+                                    renderer = renderer,
+                                    areaRankings = placeRankings,
+                                ),
+                                "/beaches" bind BeachesPageHandler(
+                                    renderer = renderer, bathingRankings = beachRankings
+                                ),
+                                "/beach/{bathing}" bind BathingPageHandler(
+                                    renderer = renderer,
+                                    bathingRankings = beachRankings,
+                                    bathingCSOs = { wanted ->
+                                        BathingCSOs(annualData)().filter { wanted == it.bathing.toSlug() }
+                                    },
+                                    beachBoundaries = beachBoundaries,
+                                    mpFor = mpFor,
+                                    constituencyRank = constituencyRank
+                                ),
+                                "/rivers" bind RiversPageHandler(
+                                    renderer = renderer, riverRankings = riverRankings
+                                ),
+                                "/waterway/{company}/{waterway}" bind WaterwayPageHandler(
+                                    renderer = renderer,
+                                    waterwaySpills = waterwayCSOs(allSpills),
+                                    mpFor = mpFor,
+                                    constituencyRank = constituencyRank,
+                                    placeRank = localityRank,
+                                ),
+                                "/constituency/at/{lat}/{lon}" bind CachingFilters.CacheResponse.MaxAge(
+                                    Duration.ofDays(
+                                        1
+                                    )
+                                )
+                                    .then(ConstituencyAtRedirectHandler(referenceData)),
+                                "/constituency/{constituency}" bind ConstituencyPageHandler(
                                     clock = clock,
                                     renderer = renderer,
+                                    constituencySpills = constituencyCSOs(allSpills),
                                     constituencyBoundary = constituencyBoundaries,
-                                    mpFor = mpFor,
                                     constituencyLiveAvailable = constituencyLiveAvailable,
                                     constituencyLiveTotals = stream::totalForConstituency,
+                                    mpFor = mpFor,
                                     constituencyNeighbours = constituencyNeighbours,
-                                    liveDataLatest = stream::latestAvailable,
-                                    csoLive = stream::byCsoForConstituency,
-                                    annualSewageRainfall = annualLiveSewage::byConstituency
+                                    constituencyRank = constituencyRank,
+                                    constituencyRivers = constituencyRivers(allSpills, riverRankings),
+                                    liveDataLatest = stream::latestAvailable
                                 ),
-                        "/company/{company}" bind cacheForTen().then(
-                            CompanyPageHandler(
-                                clock = clock,
-                                renderer = renderer,
-                                companySummaries = unifiedAnnualData::unified,
-                                waterCompanies = waterCompanies,
-                                riverRankings = riverRankings,
-                                bathingRankings = beachRankings,
-                                csoTotals = allSpills,
-                                companyLivedata = { name ->
-                                    name.asStreamCompanyName()?.let {
-                                        CSOLiveData(
-                                            stream.overflowingAt(clock.instant()).filter { it.company == name }
-                                                .sortedBy { it.started })
-                                    }
-                                },
-                                monthly = {
-                                    it.asStreamCompanyName()?.let { stream.monthlyOverflowingByCompany(it) }
-                                        ?: emptyList()
-                                }
-                            )),
-                        "/overflow/{id}" bind OverflowPageHandler(
-                            clock = clock,
-                            renderer = renderer,
-                            stream = stream,
-                            annualSewageRainfall = annualLiveSewage::byCso
-                        ),
-                        "/locality/{locality}" bind LocalityPlaceRedirectHandler(),
-                        "/place/{place}" bind PlacePageHandler(
-                            renderer = renderer,
-                            placeTotals = placeCSOs(allSpills),
-                            placeBoundary = localityBoundaries,
-                            placeRank = localityRank,
-                            placeRivers = placeRivers(allSpills, riverRankings),
-                            mpFor =  mpFor,
-                            placeConstituency = referenceData::constituencyFor,
-                            constituencyNeighbours = constituencyNeighbours,
-                            constituencyRank = constituencyRank
-                        ),
-                        "/search" bind routes(
-                            "/" bind SearchPageHandler(renderer),
-                            "/q" bind cacheFor(Duration.ofMinutes(20)).then(
-                                SearchResultsHandler(
-                                    renderer,
-                                    Searcher(events, connection, executor,riverRankings)::search
-                                )
-                            ),
-                        ),
-                        "/shellfisheries" bind ShellfisheriesPageHandler(
-                            renderer = renderer, shellfishRankings = shellfishRankings
-                        ),
-                        "/shellfishery/{area}" bind ShellfisheryPageHandler(
-                            renderer = renderer,
-                            shellfishRankings = shellfishRankings,
-                            shellfishSpills = { wanted ->
-                                ShellfishCSOs(annualData)().filter { wanted == it.shellfishery.toSlug() }
-                            },
-                            mpFor = mpFor,
-                            constituencyRank = constituencyRank,
-                            shellfisheryBoundaries = shellfisheryBoundaries
-                        ),
-                        "/private/badges" bind routes(
-                            "/constituencies/{letter}" bind BadgesConstituenciesHandler(
-                                renderer = renderer,
-                                constituencyRankings = constituencyRankings,
-                                mpFor = mpFor,
-                                constituencyBoundaries = constituencyBoundaries,
-                            ),
-                            "/localities/{letter}" bind BadgesPlacesHandler(
-                                renderer = renderer,
-                                placeRankings = placeRankings,
-                                placeBoundaries = localityBoundaries,
-                            ),
-                            "/companies" bind BadgesCompaniesHandler(
-                                renderer = renderer,
-                                companySummaries = companyAnnualSummaries,
-                            ),
-                            "/home" bind BadgesHomeHandler(
-                                renderer = renderer,
-                                constituencyRankings = constituencyRankings,
-                                bathingRankings = beachRankings,
-                            ),
-                            "/rivers" bind BadgesRiversHandler(
-                                renderer = renderer,
-                                riverRankings = riverRankings,
-                            ),
-                        ),
-                        "/fragments" bind routes(
-                            "/stream/table/" bind { Response(Status.OK) })
+                                "/constituency/{constituency}/live" bind
+                                        ConstituencyLivePageHandler(
+                                            clock = clock,
+                                            renderer = renderer,
+                                            constituencyBoundary = constituencyBoundaries,
+                                            mpFor = mpFor,
+                                            constituencyLiveAvailable = constituencyLiveAvailable,
+                                            constituencyLiveTotals = stream::totalForConstituency,
+                                            constituencyNeighbours = constituencyNeighbours,
+                                            liveDataLatest = stream::latestAvailable,
+                                            csoLive = stream::byCsoForConstituency,
+                                            annualSewageRainfall = annualLiveSewage::byConstituency
+                                        ),
+                                "/senedd-constituency/{constituency}" bind SeneddConstituencyPageHandler(
+                                    clock = clock,
+                                    renderer = renderer,
+                                    constituencySpills = seneddConstituencyCSOs(allSpills),
+                                    constituencyBoundary = seneddBoundaries,
+                                    constituencyNeighbours = seneddConstituencyNeighbours,
+                                    westminsterConstituencies = referenceData::westminsterConstituenciesFor,
+                                    westminsterConstituencyRank = constituencyRank,
+                                    mpFor = mpFor,
+                                    constituencyRank = seneddConstituencyRank,
+                                ),
+                                "/company/{company}" bind cacheForTen().then(
+                                    CompanyPageHandler(
+                                        clock = clock,
+                                        renderer = renderer,
+                                        companySummaries = unifiedAnnualData::unified,
+                                        waterCompanies = waterCompanies,
+                                        riverRankings = riverRankings,
+                                        bathingRankings = beachRankings,
+                                        csoTotals = allSpills,
+                                        companyLivedata = { name ->
+                                            name.asStreamCompanyName()?.let {
+                                                CSOLiveData(
+                                                    stream.overflowingAt(clock.instant()).filter { it.company == name }
+                                                        .sortedBy { it.started })
+                                            }
+                                        },
+                                        monthly = {
+                                            it.asStreamCompanyName()?.let { stream.monthlyOverflowingByCompany(it) }
+                                                ?: emptyList()
+                                        }
+                                    )),
+                                "/overflow/{id}" bind OverflowPageHandler(
+                                    clock = clock,
+                                    renderer = renderer,
+                                    stream = stream,
+                                    annualSewageRainfall = annualLiveSewage::byCso
+                                ),
+                                "/locality/{locality}" bind LocalityPlaceRedirectHandler(),
+                                "/place/{place}" bind PlacePageHandler(
+                                    renderer = renderer,
+                                    placeTotals = placeCSOs(allSpills),
+                                    placeBoundary = localityBoundaries,
+                                    placeRank = localityRank,
+                                    placeRivers = placeRivers(allSpills, riverRankings),
+                                    mpFor = mpFor,
+                                    placeConstituency = referenceData::constituencyFor,
+                                    constituencyNeighbours = constituencyNeighbours,
+                                    constituencyRank = constituencyRank
+                                ),
+                                "/search" bind routes(
+                                    "/" bind SearchPageHandler(renderer),
+                                    "/q" bind cacheFor(Duration.ofMinutes(20)).then(
+                                        SearchResultsHandler(
+                                            renderer,
+                                            Searcher(events, connection, executor, riverRankings)::search
+                                        )
+                                    ),
+                                ),
+                                "/shellfisheries" bind ShellfisheriesPageHandler(
+                                    renderer = renderer, shellfishRankings = shellfishRankings
+                                ),
+                                "/shellfishery/{area}" bind ShellfisheryPageHandler(
+                                    renderer = renderer,
+                                    shellfishRankings = shellfishRankings,
+                                    shellfishSpills = { wanted ->
+                                        ShellfishCSOs(annualData)().filter { wanted == it.shellfishery.toSlug() }
+                                    },
+                                    mpFor = mpFor,
+                                    constituencyRank = constituencyRank,
+                                    shellfisheryBoundaries = shellfisheryBoundaries
+                                ),
+                                "/private/badges" bind routes(
+                                    "/constituencies/{letter}" bind BadgesConstituenciesHandler(
+                                        renderer = renderer,
+                                        constituencyRankings = constituencyRankings,
+                                        mpFor = mpFor,
+                                        constituencyBoundaries = constituencyBoundaries,
+                                    ),
+                                    "/localities/{letter}" bind BadgesPlacesHandler(
+                                        renderer = renderer,
+                                        placeRankings = placeRankings,
+                                        placeBoundaries = localityBoundaries,
+                                    ),
+                                    "/companies" bind BadgesCompaniesHandler(
+                                        renderer = renderer,
+                                        companySummaries = companyAnnualSummaries,
+                                    ),
+                                    "/home" bind BadgesHomeHandler(
+                                        renderer = renderer,
+                                        constituencyRankings = constituencyRankings,
+                                        bathingRankings = beachRankings,
+                                    ),
+                                    "/rivers" bind BadgesRiversHandler(
+                                        renderer = renderer,
+                                        riverRankings = riverRankings,
+                                    ),
+                                ),
+                                "/fragments" bind routes(
+                                    "/stream/table/" bind { Response(Status.OK) })
+                            )
+                        )
                     )
-                )
-            ),
-            "/live" bind routes(
-                "/stream" bind routes(
-                    "/overflowing/{epochms}" bind redisCacheFilter(
-                        redis,
-                        events,
-                        prefix = "stream",
-                        ttl = { Duration.ofMinutes(10) },
-                        key = { sha256Key(it.uri) }).then(
-                        StreamOverflowingByDate(clock, stream)
+                ),
+                "/live" bind routes(
+                    "/stream" bind routes(
+                        "/overflowing/{epochms}" bind redisCacheFilter(
+                            redis,
+                            events,
+                            prefix = "stream",
+                            ttl = { Duration.ofMinutes(10) },
+                            key = { sha256Key(it.uri) }).then(
+                            StreamOverflowingByDate(clock, stream)
+                        ),
+                        "/events/constituency/{constituency}" bind StreamConstituencyEvents(clock, stream),
+                        "/company/{company}/overflow-summary" bind StreamDailySummary(stream, companyAnnualSummaries),
+                        "/assets/{ne}/{sw}" bind StreamAssetsBoundingBoxHandler(clock, stream)
                     ),
-                    "/events/constituency/{constituency}" bind StreamConstituencyEvents(clock, stream),
-                    "/company/{company}/overflow-summary" bind StreamDailySummary(stream, companyAnnualSummaries),
-                    "/assets/{ne}/{sw}" bind StreamAssetsBoundingBoxHandler(clock, stream)
+                    "/combined/spills-by-company.json" bind SpillsByCompanyHandler(clock, unifiedAnnualData::unified),
+                    "/thames-water" bind routes(
+                        "/overflow-summary" bind ThamesWaterSummary(thamesWater),
+                    ),
+                    "/environment-agency" bind routes(
+                        "/rainfall/{constituency}" bind EnvironmentAgencyRainfall(
+                            clock,
+                            environmentAgency
+                        ),
+                        "/rainfall/grid/{epochms}" bind redisCacheFilter(
+                            redis,
+                            events,
+                            prefix = "rainfall",
+                            ttl = { Duration.ofHours(12) },
+                            key = { sha256Key(it.uri) }).then(EnvironmentAgencyGrid(clock, environmentAgency))
+                    ),
+                ).withFilter(
+                    cacheForTen()
                 ),
-                "/combined/spills-by-company.json" bind SpillsByCompanyHandler(clock, unifiedAnnualData::unified),
-                "/thames-water" bind routes(
-                    "/overflow-summary" bind ThamesWaterSummary(thamesWater),
+                "/data-new/locality/{place}/annual-pollution" bind EDMAnnualPlaceSummary(edm),
+                "/data-new/constituency/{constituency}/annual-pollution" bind EDMAnnualConstituencySummary(edm),
+                "/data-new/senedd-constituency/{constituency}/annual-pollution" bind EDMAnnualSeneddConstituencySummary(
+                    edm
                 ),
-                "/environment-agency" bind routes(
-                    "/rainfall/{constituency}" bind EnvironmentAgencyRainfall(
+                "/map.html" bind OldMapRedirectHandler(),
+                "/sitemap.xml" bind SitemapIndexHandler(
+                    siteBaseUri.extend(Uri.of("/sitemap")),
+                    listOf(
+                        Uri.of("static"),
+                        Uri.of("beaches"),
+                        Uri.of("constituencies"),
+                        Uri.of("senedd-constituencies"),
+                        Uri.of("rivers"),
+                        Uri.of("places"),
+                        Uri.of("companies"),
+                        Uri.of("overflows-live"), // have to split as only allowed 50k pages / file
+                        Uri.of("overflows-2025"),
+                    )
+                ),
+                "/sitemap" bind routes(
+                    "static" bind SitemapStaticUris(siteBaseUri),
+                    "beaches" bind SitemapBeachUris(siteBaseUri, beachRankings),
+                    "constituencies" bind SitemapConstituencyUris(clock, siteBaseUri, constituencyRankings),
+                    "senedd-constituencies" bind SitemapSeneddConstituencyUris(
+                        siteBaseUri,
+                        seneddConstituencyRankings
+                    ),
+                    "rivers" bind SitemapRiverUris(siteBaseUri, riverRankings),
+                    "places" bind SitemapPlaceUris(siteBaseUri, placeRankings),
+                    "companies" bind SitemapCompanyUris(
                         clock,
-                        environmentAgency
-                    ),
-                    "/rainfall/grid/{epochms}" bind redisCacheFilter(
-                        redis,
-                        events,
-                        prefix = "rainfall",
-                        ttl = { Duration.ofHours(12) },
-                        key = { sha256Key(it.uri) }).then(EnvironmentAgencyGrid(clock, environmentAgency))
+                        siteBaseUri,
+                        { companyAnnualSummaries().map { it.name }.toSet().toList() }),
+                    "overflows-live" bind SitemapOverflowUris(clock, siteBaseUri, stream::knownCsos),
+                    "overflows-2025" bind SitemapOverflowUris(clock, siteBaseUri, stream::knownCsos, 2025)
                 ),
-            ).withFilter(
-                cacheForTen()
-            ),
-            "/data-new/locality/{locality}/annual-pollution" bind EDMAnnualLocalitySummary(edm),
-            "/data-new/constituency/{constituency}/annual-pollution" bind EDMAnnualConstituencySummary(edm),
-            "/map.html" bind OldMapRedirectHandler(),
-            "/sitemap.xml" bind SitemapIndexHandler(
-                siteBaseUri.extend(Uri.of("/sitemap")),
-                listOf(
-                    Uri.of("static"),
-                    Uri.of("beaches"),
-                    Uri.of("constituencies"),
-                    Uri.of("rivers"),
-                    Uri.of("places"),
-                    Uri.of("companies"),
-                    Uri.of("overflows-live"), // have to split as only allowed 50k pages / file
-                    Uri.of("overflows-2025"),
-                )
-            ),
-            "/sitemap" bind routes(
-                "static" bind SitemapStaticUris(siteBaseUri),
-                "beaches" bind SitemapBeachUris(siteBaseUri, beachRankings),
-                "constituencies" bind SitemapConstituencyUris(clock, siteBaseUri, constituencyRankings),
-                "rivers" bind SitemapRiverUris(siteBaseUri, riverRankings),
-                "places" bind SitemapPlaceUris(siteBaseUri, placeRankings),
-                "companies" bind SitemapCompanyUris(
-                    clock,
-                    siteBaseUri,
-                    { companyAnnualSummaries().map { it.name }.toSet().toList() }),
-                "overflows-live" bind SitemapOverflowUris(clock, siteBaseUri, stream::knownCsos),
-                "overflows-2025" bind SitemapOverflowUris(clock, siteBaseUri, stream::knownCsos, 2025)
-            ),
-            "/data" bind static(ResourceLoader.Directory("services/data/datafiles")),
-            "/assets" bind static(Resources.assets(isDevelopmentEnvironment)),
+                "/data" bind static(ResourceLoader.Directory("services/data/datafiles")),
+                "/assets" bind static(Resources.assets(isDevelopmentEnvironment)),
+            )
         )
     )
 

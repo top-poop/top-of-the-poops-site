@@ -6,7 +6,7 @@ import org.http4k.template.viewModel
 import org.totp.THE_YEAR
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
-import org.totp.model.data.SeneddName
+import org.totp.model.data.SeneddConstituencyName
 import org.totp.model.data.Slug
 import org.totp.model.data.toSlug
 
@@ -18,7 +18,7 @@ class SeneddConstituenciesPage(
 
 data class RenderableSeneddRank(
     val rank: Int,
-    val name: RenderableSeneddName,
+    val constituency: RenderableSeneddName,
     val count: RenderableCount,
     val duration: RenderableDuration,
     val countDelta: DeltaValue,
@@ -26,25 +26,25 @@ data class RenderableSeneddRank(
 )
 
 data class RenderableSeneddName(
-    val name: SeneddName,
+    val name: SeneddConstituencyName,
     val current: Boolean,
     val slug: Slug,
     val uri: Uri,
     val live: Boolean,
 )
 
-fun SeneddName.toRenderable(): RenderableSeneddName {
+fun SeneddConstituencyName.toRenderable(current: Boolean = false): RenderableSeneddName {
     val slug = this.toSlug()
     return RenderableSeneddName(
         this,
-        false,
+        current,
         slug,
         uri = Uri.of("/senedd-constituency/$slug"),
         false
     )
 }
 
-fun SeneddRank.toRenderable(
+fun SeneddConstituencyRank.toRenderable(
 ) = RenderableSeneddRank(
     rank,
     constituencyName.toRenderable(),
@@ -61,7 +61,7 @@ fun SeneddRank.toRenderable(
 object SeneddConstituenciesPageHandler {
     operator fun invoke(
         renderer: TemplateRenderer,
-        seneddConstituencies: () -> List<SeneddRank>,
+        seneddConstituencies: () -> List<SeneddConstituencyRank>,
     ): HttpHandler {
         val viewLens = Body.viewModel(renderer, ContentType.TEXT_HTML).toLens()
 

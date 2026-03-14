@@ -70,7 +70,7 @@
                         {{#each rankings}}
                             <tr>
                                 <td>{{this.rank}}</td>
-                                <td><a href="{{this.name.uri}}">{{this.name.name}}</a></td>
+                                <td><a href="{{this.constituency.uri}}">{{this.constituency.name}}</a></td>
                                 <td data-sort="{{this.count.count}}">{{numberFormat this.count.count}}</td>
                                 <td class="align-middle {{>components/class-delta this.countDelta}}">{{numberFormat
                                         this.countDelta.value}}</td>
@@ -112,7 +112,6 @@
                             fill: d => d.properties.total_hours,
                             title: d => `${d.properties.constituency}: ${utils.formatNumber(d.properties.total_hours)} hours of sewage`,
                             stroke: "black",
-                            strokeOpacity: 0.5,
                         }),
                     ]
                 }));

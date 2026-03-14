@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Top of the Poops | Client Error</title>
+    {{> chunks/favicons }}
+    {{> chunks/meta-styles }}
+    {{> chunks/meta-scripts }}
+</head>
+<body>
+
+{{> chunks/navbar }}
+
+{{#> components/jumbotron }}
+    Malformed Request
+{{/components/jumbotron}}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="lead">
+                Your browser sent a request that we didn't understand. Please try navigating from
+                our <a href="/">Home Page</a> to find what you are looking for.
+            </div>
+            <div class="lead">
+                Or try a <a href="/search">search</a>...
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

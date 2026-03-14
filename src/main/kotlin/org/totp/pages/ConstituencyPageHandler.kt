@@ -24,9 +24,14 @@ val constituencyNames = readCSV(
     mapper = { ConstituencyName(it[0]) }
 ).toSortedSet(Comparator.comparing { it.value })
 
+val seneddConstituencyNames = readCSV(
+    resource = "/data/senedd-constituencies.csv",
+    mapper = { SeneddConstituencyName(it[0]) }
+).toSortedSet(Comparator.comparing { it.value })
+
 
 val slugToConstituency = constituencyNames.associateBy { it.toSlug() }
-
+val slugToSeneddConstituency = seneddConstituencyNames.associateBy { it.toSlug() }
 
 data class PollutionSummary(
     val year: Int,
@@ -208,7 +213,7 @@ object ConstituencyPageHandler {
 
                     val liveAvailable = constituencyLiveAvailable()
 
-                    val renderableConstituencies = slugToConstituency
+                    val otherConstituencies = slugToConstituency
                         .map {
                             it.value.toRenderable(
                                 current = it.key == slug,
@@ -216,14 +221,14 @@ object ConstituencyPageHandler {
                             )
                         }
 
-                    val list = constituencySpills(constituencyName).sortedByDescending { it.duration }
+                    val spills = constituencySpills(constituencyName).sortedByDescending { it.duration }
 
                     val neighbours = constituencyNeighbours(constituencyName)
                         .sorted()
                         .mapNotNull { constituencyRank(it) }
                         .map { it.toRenderable(mpFor) }
 
-                    val summary = list.summary()
+                    val summary = spills.summary()
 
                     val rivers = constituencyRivers(constituencyName).take(5).map { it.toRenderable() }
 
@@ -238,10 +243,10 @@ object ConstituencyPageHandler {
                                 share(mp, summary, constituencyName, slug, pageUriFrom(request)),
                                 summary,
                                 constituencyBoundary(constituencyName),
-                                list.map {
+                                spills.map {
                                     it.toRenderable()
                                 },
-                                renderableConstituencies,
+                                otherConstituencies,
                                 live = if (liveAvailable.contains(constituencyName)) {
                                     val now = LocalDateTime.ofInstant(clock.instant(), ZoneId.of("Europe/London"))
                                     ConstituencyPageLiveData(

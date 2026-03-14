@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 data class CSOTotals(
     val constituency: ConstituencyName,
-    val senedd: SeneddName?,
+    val senedd: SeneddConstituencyName?,
     val places: List<PlaceName>,
     val cso: CSO,
     val count: Int,
@@ -45,6 +45,14 @@ fun fromEDMHours(hours: Double): Duration {
 
 object ConstituencyBoundaries {
     operator fun invoke(handler: (String) -> GeoJSON?): (ConstituencyName) -> GeoJSON {
+        return { name ->
+            handler(name.toSlug().value) ?: throw IOException("can't find constituency boundary for $name")
+        }
+    }
+}
+
+object SeneddConstituencyBoundaries {
+    operator fun invoke(handler: (String) -> GeoJSON?): (SeneddConstituencyName) -> GeoJSON {
         return { name ->
             handler(name.toSlug().value) ?: throw IOException("can't find constituency boundary for $name")
         }
@@ -109,14 +117,14 @@ object ConstituencyRankings {
 }
 
 object SeneddRankings {
-    operator fun invoke(handler: HttpHandler): () -> List<SeneddRank> {
+    operator fun invoke(handler: HttpHandler): () -> List<SeneddConstituencyRank> {
         return {
             val response = handler(Request(Method.GET, "spills-by-senedd.json"))
 
             TotpJson.mapper.readSimpleList(response.bodyString())
                 .mapIndexed { r, it ->
-                    val constituencyName = SeneddName.of(it["senedd"] as String)
-                    SeneddRank(
+                    val constituencyName = SeneddConstituencyName.of(it["senedd"] as String)
+                    SeneddConstituencyRank(
                         rank = r + 1,
                         constituencyName = constituencyName,
                         count = (it["total_spills"] as Double).toInt(),
@@ -273,7 +281,7 @@ object AllSpills {
                 .map {
                     CSOTotals(
                         constituency = ConstituencyName(it["constituency"] as String),
-                        senedd = (it["senedd"] as String?)?.let(SeneddName::of),
+                        senedd = (it["senedd"] as String?)?.let(SeneddConstituencyName::of),
                         places = (it["localities"] as List<String>).map { PlaceName.of(it) },
                         cso = CSO(
                             company = CompanyName.of(it["company_name"] as String),
@@ -296,6 +304,9 @@ object AllSpills {
 
 fun constituencyCSOs(source: () -> List<CSOTotals>) =
     { name: ConstituencyName -> source().filter { it.constituency == name } }
+
+fun seneddConstituencyCSOs(source: () -> List<CSOTotals>) =
+    { name: SeneddConstituencyName -> source().filter { it.senedd == name } }
 
 fun placeCSOs(source: () -> List<CSOTotals>) = { name: PlaceName -> source().filter { name in it.places } }
 
@@ -434,6 +445,26 @@ object ConstituencyNeighbours {
                 .map {
                     ConstituencyName(it["pcon24nm"] as String) to
                             ConstituencyName(it["neighbour"] as String)
+                }
+                .filter {
+                    it.first == wanted
+                }
+                .map {
+                    it.second
+                }
+        }
+    }
+}
+
+object SeneddConstituencyNeighbours {
+    operator fun invoke(handler: HttpHandler): (SeneddConstituencyName) -> List<SeneddConstituencyName> {
+        return { wanted ->
+            val response = handler(Request(Method.GET, "senedd-constituency-neighbours.json"))
+
+            TotpJson.mapper.readSimpleList(response.bodyString())
+                .map {
+                    SeneddConstituencyName(it["english_na"] as String) to
+                            SeneddConstituencyName(it["neighbour"] as String)
                 }
                 .filter {
                     it.first == wanted

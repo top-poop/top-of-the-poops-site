@@ -140,6 +140,22 @@ class SitemapConstituencyUris(
     }
 }
 
+class SitemapSeneddConstituencyUris(
+    siteBaseUri: Uri,
+    val constituencies: () -> List<SeneddConstituencyRank>
+) :
+    AbstractSitemapHandler(siteBaseUri) {
+    override fun entries(): List<SitemapEntry> {
+        return constituencies()
+            .sortedBy { it.constituencyName }
+            .flatMap {
+                listOf(
+                    it.constituencyName.toRenderable().uri.sitemap(),
+                )
+            }
+    }
+}
+
 class SitemapCompanyUris(
     val clock: Clock,
     siteBaseUri: Uri,

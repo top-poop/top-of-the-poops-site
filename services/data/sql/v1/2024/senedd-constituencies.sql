@@ -1,0 +1,1 @@
+select english_na from senedd_final_2026

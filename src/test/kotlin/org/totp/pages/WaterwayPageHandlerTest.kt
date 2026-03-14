@@ -18,7 +18,7 @@ class WaterwayPageHandlerTest {
     var summaries = listOf(
         CSOTotals(
             constituency = ConstituencyName("Your House"),
-            senedd = SeneddName.of("Senedd"),
+            senedd = SeneddConstituencyName.of("Senedd"),
             places = listOf(PlaceName.of("d")),
             cso = CSO(
                 company = CompanyName.of("Venture Cap"),
