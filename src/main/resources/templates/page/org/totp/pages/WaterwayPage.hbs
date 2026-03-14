@@ -2,15 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Top of the Poops | Waterway | {{ name }}</title>
-    <meta name="description" content="Mapping sewage pollution for {{ name }}">
+    <title>Top of the Poops | Waterway | {{ name }}{{#if summary.companies}} | Polluted by{{#each summary.companies }} {{this.name}} {{/each}}{{/if}}</title>
+    <meta name="description" content="Annual Regulatory Return Sewage Map for {{ name }} in {{summary.year}} {{#if summary.companies}}- Polluted by{{#each summary.companies }} {{this.name}} {{/each}}{{/if}}">
 
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
     {{> chunks/meta-scripts }}
     {{> chunks/meta-leaflet }}
 
-    {{> components/meta-opengraph title=(concat "Waterway | " name) }}
+    {{> components/meta-opengraph
+            title=(concat "Waterway | " name )
+            description=(concat "Annual Regulatory Return Sewage Map for " name " in " summary.year)
+    }}
+
     <style>
         .map {
             min-height: 500px;

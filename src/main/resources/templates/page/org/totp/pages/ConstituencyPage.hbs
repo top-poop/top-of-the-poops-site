@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Top of the Poops | Constituency Sewage Map | {{ constituency.name }}{{#if summary.companies}} | Polluted by {{join summary.companies ', '}} {{/if}}</title>
-    <meta name="description" content="Annual Regulatory Sewage Map for {{ constituency.name }} in {{summary.year}} {{#if summary.companies}}- Polluted by {{join summary.companies ', '}}{{/if}}">
+    <title>Top of the Poops | Constituency Sewage Map | {{ constituency.name }}{{#if summary.companies}} | Polluted by{{#each summary.companies }} {{this.name}} {{/each}}{{/if}}</title>
+    <meta name="description" content="Annual Regulatory Return Sewage Map for {{ constituency.name }} in {{summary.year}} {{#if summary.companies}}- Polluted by{{#each summary.companies }} {{this.name}} {{/each}}{{/if}}">
 
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
@@ -15,7 +15,7 @@
     {{> components/meta-opengraph
             title=(concat "Constituency Sewage Map | " constituency.name )
             twitterImageUri=share.twitterImageUri
-            description=(concat "Annual Regulatory Sewage Map for " constituency.name " in " summary.year)
+            description=(concat "Annual Regulatory Return Sewage Map for " constituency.name " in " summary.year)
     }}
 </head>
 <body>

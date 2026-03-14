@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>Top of the Poops | Place | {{ place.name }}| Polluted by {{join summary.companies ', '}}</title>
-    <meta name="description" content="Sewage Map for {{ place.name }} - Polluted by {{join summary.companies ', '}}">
+    <title>Top of the Poops | Place | {{ place.name }}{{#if summary.companies}} | Polluted by{{#each summary.companies }} {{this.name}} {{/each}}{{/if}}</title>
+    <meta name="description" content="Sewage Map for {{ place.name }} {{#if summary.companies}} - Polluted by{{#each summary.companies }} {{this.name}} {{/each}}{{/if}}">
 
     {{> chunks/favicons }}
     {{> chunks/meta-styles }}
