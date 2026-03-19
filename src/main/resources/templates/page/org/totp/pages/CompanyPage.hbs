@@ -752,6 +752,25 @@
                             opacity: 0.7,
                         }
                 ),
+                Plot.line(
+                        data,
+                        Plot.groupX({y: "sum"},
+                                {
+                                    x: "reporting_year",
+                                    y: "hours",
+                                    curve: "catmull-rom",
+                                    strokeWidth: 3,
+                                    tip: true,
+                                    opacity: 0.7,
+                                })
+                ),
+                Plot.dot(data,
+                        Plot.groupX({y: "sum"},
+                                {
+                                    x: "reporting_year",
+                                    y: "hours",
+                                    r: 6,
+                                }))
             ]
         })
     };
