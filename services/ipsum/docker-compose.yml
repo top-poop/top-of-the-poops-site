@@ -1,0 +1,8 @@
+services:
+  ipsum:
+    image: ${SERVICE_FULL_NAME}
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    network_mode: host
+    restart: unless-stopped

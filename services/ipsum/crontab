@@ -1,0 +1,2 @@
+# update blocklist every day
+0 2 * * * /app/ipsum.sh
