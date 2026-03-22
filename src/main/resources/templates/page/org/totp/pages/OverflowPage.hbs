@@ -129,7 +129,7 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex flex-wrap gap-2">
-                            {{ cso.company.name }}
+                            <a href="{{cso.company.uri}}">{{cso.company.name}}</a>
                         </div>
                     </div>
                 </div>
@@ -141,8 +141,9 @@
                     </div>
                     <div class="card-body">
                         <div class="d-flex flex-wrap gap-2">
-                            {{ cso.receiving_water }}
+                            <a href="{{cso.waterway.uri}}">{{cso.waterway.name}}</a>
                         </div>
+                        <p>Due to inconsistencies in the data from the water company, sometimes the link to the river might not work, sorry</p>
                     </div>
                 </div>
             </div>
@@ -391,7 +392,7 @@
             [csoLat, csoLon],
             {icon: markerRed, pane: 'singleCso'}
     ).bindTooltip(
-            `{{ cso.id.id }} - {{cso.site_name}} into {{ cso.receiving_water}}`
+            `{{ cso.id.id }} - {{cso.site_name}} into {{ cso.waterway.name }}`
     ).addTo(singleMarkerLayer)
 
 
