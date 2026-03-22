@@ -43,21 +43,25 @@ class RenderableDuration(val value: Duration) {
     val hours = value.toHours()
     val days = hours / 24.0
     val months = days / 30.0
+    val weeks = days / 7.0
     val years = months / 12.0
 
     val minutes = value.toMinutes() % 60;
 
     val any = value > Duration.ofMinutes(1)
 
-    val hasMonths = months > 1.0
-    val hasYears = years > 1.0
-    val hasDays = days > 1.0
+    val hasMonths = months > 1.1
+    val hasYears = years > 1.1
+    val hasDays = days > 1.1
+    val hasWeeks = weeks > 1.1
 
     fun explain(): String {
         return if ( hasYears ) {
             "${nf.format(years)} years"
         } else if (hasMonths) {
             "${nf.format(months)} months"
+        } else if (hasWeeks) {
+            "${nf.format(weeks)} weeks"
         } else if (hasDays) {
             "${nf.format(days)} days"
         } else {

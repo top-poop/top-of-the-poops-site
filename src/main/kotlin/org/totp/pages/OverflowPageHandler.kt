@@ -14,13 +14,22 @@ import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.ConstituencyName
 import java.time.Clock
+import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+
+data class OverflowNow(
+    val overflowing: Boolean,
+    val duration: RenderableDuration,
+    val last: Instant,
+)
 
 class OverflowPage(
     uri: Uri,
     val events: List<StreamData.CSOEvent>,
     val monthly: List<StreamData.DatedBucket>,
+    val now: OverflowNow?,
     val cso: RenderableStreamCsoSummary,
     val selectedYear: RenderableLiveYear,
     val availableYears: List<RenderableLiveYear>,
@@ -43,7 +52,8 @@ class OverflowPageHandler(
     override fun invoke(request: Request): Response {
 
         val id = id(request)
-        val today = LocalDate.ofInstant(clock.instant(), ZoneId.of("UTC"))
+        val instant = clock.instant()
+        val today = LocalDate.ofInstant(instant, ZoneId.of("UTC"))
         val currentYear = today.year
 
         val selectedYear = year(request) ?: currentYear
@@ -61,6 +71,19 @@ class OverflowPageHandler(
 
         val availableYears = selectedLiveYears(thisPageUri, currentYear, selectedYear)
 
+        val events = stream.eventsForCso(id, start = start, end = end)
+
+        val first = events.first()
+        val now = if ( first.status == StreamData.StreamEvent.Start.dbName && first.latestEventStart != null) {
+            OverflowNow(
+                overflowing = true,
+                duration = Duration.between(first.latestEventStart, instant).toRenderable(),
+                last = first.latestEventStart,
+            )
+        } else {
+            null
+        }
+
         return cso?.let {
             Response(Status.OK).with(
                 viewLens of OverflowPage(
@@ -72,11 +95,8 @@ class OverflowPageHandler(
                         year = selectedYear
                     ),
                     availableYears = availableYears,
-                    events = stream.eventsForCso(
-                        id,
-                        start = start,
-                        end = end
-                    ),
+                    events = events,
+                    now = now,
                     share = SocialShare(
                         uri = thisPageUri,
                         text = "CSO ${cso.site_name} overflows",

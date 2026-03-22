@@ -33,12 +33,10 @@
                 title=(concat "Live Sewage | " cso.id.id " | " (numberFormat cso.start.hours) " hours so far in " selectedYear.year)
 
         }}
-        <!--        twitterImageUri=share.twitterImageUri-->
     {{else}}
         {{> components/meta-opengraph
                 title=(concat "Live Sewage | " cso.id.id " | " (numberFormat cso.start.hours) " hours in " selectedYear.year )
         }}
-        <!--        twitterImageUri=share.twitterImageUri-->
     {{/if}}
 
 </head>
@@ -70,6 +68,11 @@
             {{/gt}}
             {{#if selectedYear.current}}so far..{{/if}}
         </p>
+        {{#if now}}
+            <p class="lead">This overflow is polluting right now - continuously for {{now.duration.explain}}</p>
+        {{else}}
+            <p class="lead">Currently not overflowing</p>
+        {{/if}}
     </div>
 {{/components/jumbotron}}
 
