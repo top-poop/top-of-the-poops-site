@@ -13,11 +13,7 @@ import org.totp.db.StreamId
 import org.totp.http4k.pageUriFrom
 import org.totp.model.PageViewModel
 import org.totp.model.data.ConstituencyName
-import java.time.Clock
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
+import java.time.*
 
 data class OverflowNow(
     val overflowing: Boolean,
@@ -73,16 +69,15 @@ class OverflowPageHandler(
 
         val events = stream.eventsForCso(id, start = start, end = end)
 
-        val first = events.first()
-        val now = if ( first.status == StreamData.StreamEvent.Start.dbName && first.latestEventStart != null) {
-            OverflowNow(
-                overflowing = true,
-                duration = Duration.between(first.latestEventStart, instant).toRenderable(),
-                last = first.latestEventStart,
-            )
-        } else {
-            null
-        }
+        val now = events.firstOrNull()
+            ?.takeIf { it.status == StreamData.StreamEvent.Start.dbName }?.latestEventStart
+            ?.let {
+                OverflowNow(
+                    overflowing = true,
+                    duration = Duration.between(it, instant).toRenderable(),
+                    last = it,
+                )
+            }
 
         return cso?.let {
             Response(Status.OK).with(
