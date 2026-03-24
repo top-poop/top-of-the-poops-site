@@ -227,6 +227,7 @@ order by areahectares desc
     }
 
     private val looksLikeAPostcode = Pattern.compile("^[A-Z]{1,2}[0-9]")
+    private val incodePattern = Regex("\\s*[0-9][A-Z]{0,2}\\s*", RegexOption.IGNORE_CASE)
 
     private fun maybeSearchPostcode(
         query: String,
@@ -239,6 +240,8 @@ order by areahectares desc
         if (matcher.find()) {
             val postcodeBit = uppercase.substringBefore(' ')
             val rest = trimmed.substringAfter(' ', "")
+                .replace(incodePattern, " ")
+                .trim()
             val results = search(postcodeBit)
 
             return if (rest.isNotEmpty()) {
@@ -246,7 +249,6 @@ order by areahectares desc
             } else {
                 results
             }
-
         }
         return emptyList()
     }

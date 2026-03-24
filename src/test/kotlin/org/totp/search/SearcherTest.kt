@@ -9,6 +9,7 @@ import strikt.api.expectThat
 import strikt.assertions.*
 import java.time.Duration
 import java.util.concurrent.Executors
+import kotlin.collections.filter
 
 class SearcherTest {
 
@@ -128,6 +129,24 @@ class SearcherTest {
         expectThat(results).first().and {
             get { this.text }.isEqualTo("North West Cambridgeshire")
         }
+    }
+
+    @Test
+    fun `finds postcode constituency or place but ignores incode`() {
+        val results1 = searcher.search("cv35")
+        val results2 = searcher.search("cv35 9")
+        val results3 = searcher.search("cv35 9ab")
+
+        expectThat(results1).isNotEmpty()
+        expectThat(results1).isEqualTo(results2)
+        expectThat(results2).isEqualTo(results3)
+    }
+
+    @Test
+    fun `finds postcode constituency or place but ignores incode and can still filter`() {
+        val results = searcher.search("cv35 9ab war")
+
+        expectThat(results).filter { it.type == SearchResultType.Constituency }.hasSize(1)
     }
 
     @Test
