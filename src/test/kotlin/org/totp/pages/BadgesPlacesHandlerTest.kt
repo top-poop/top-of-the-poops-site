@@ -58,7 +58,7 @@ class BadgesPlacesHandlerTest {
         val html = Html(service(Request(Method.GET, "/a")))
 
         expectThat(html)
-            .select("#a-2024")
+            .select("#a-2025")
             .first()
             .attribute("data-name").isEqualTo("a")
 

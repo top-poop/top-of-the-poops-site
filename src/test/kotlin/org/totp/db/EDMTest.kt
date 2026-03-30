@@ -17,7 +17,7 @@ class EDMTest {
     fun `annual summary for westminster constituency`() {
         val summaries = tw.annualSummariesForConstituency(ConstituencyName("Aldershot"))
 
-        expectThat(summaries).size.isEqualTo(5)
+        expectThat(summaries).size.isEqualTo(6)
         expectThat(summaries.maxOf { it.spills }).isLessThan(100)
         expectThat(summaries.maxOf { it.spills }).isGreaterThan(0)
     }
@@ -26,7 +26,7 @@ class EDMTest {
     fun `annual summary for senedd constituency`() {
         val summaries = tw.annualSummariesForSeneddConstituency(SeneddConstituencyName("Ceredigion Penfro"))
 
-        expectThat(summaries).size.isEqualTo(5)
+        expectThat(summaries).size.isEqualTo(6)
         expectThat(summaries.maxOf { it.spills }).isLessThan(20_000)
         expectThat(summaries.maxOf { it.spills }).isGreaterThan(5_000)
     }
@@ -35,7 +35,7 @@ class EDMTest {
     fun annualSummaryForPlaceWithNoCSOs() {
         val summaries = tw.annualSummariesForConstituency(ConstituencyName("Islington North"))
 
-        expectThat(summaries).size.isEqualTo(5)
+        expectThat(summaries).size.isEqualTo(6)
         expectThat(summaries.maxOf { it.spills }).isEqualTo(0)
     }
 }

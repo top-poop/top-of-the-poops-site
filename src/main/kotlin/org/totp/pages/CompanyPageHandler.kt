@@ -192,7 +192,7 @@ object CompanyPageHandler {
                                 } times in ${mostRecent.year} - Unacceptable!",
                                 listOf("sewage"),
                                 via = "sewageuk",
-                                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/company/${slug}-2024.png")
+                                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/company/${slug}-2025.png")
                             )
                         )
                     )

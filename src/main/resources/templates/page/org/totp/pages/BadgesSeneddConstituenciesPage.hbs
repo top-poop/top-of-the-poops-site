@@ -34,7 +34,7 @@
 <div class="ms-3 mt-3">
     {{#each constituencies}}
         <div style="width: 526px; height:263px; overflow: clip"
-             id="{{this.constituency.slug}}-2024" data-name="{{this.constituency.name}}" data-slug="{{this.constituency.slug}}"
+             id="{{this.constituency.slug}}-2025" data-name="{{this.constituency.name}}" data-slug="{{this.constituency.slug}}"
              class="twitter-badge constituency mb-2">
             <div class="card  h-100  rounded-lg ">
                 <img src="/assets/poop.png"/>
@@ -42,7 +42,7 @@
                     <h5 class="card-title"
                         style="font-size:2.5rem;font-weight:500;line-height:1.2">{{this.constituency.name}}</h5>
                     <p class="card-text">Polluted by <b>#sewage</b>
-                        <span class="align-middle display-2" style="font-size:2.5rem;font-weight:500">{{numberFormat this.count.count}}</span>times in 2024
+                        <span class="align-middle display-2" style="font-size:2.5rem;font-weight:500">{{numberFormat this.count.count}}</span>times in 2025
                     </p>
 
                     <div class="row align-middle">
@@ -125,7 +125,7 @@
                 ;
     }
 
-    const response = await fetch("/data/v1/2024/spills-all.json");
+    const response = await fetch("/data/v1/2025/spills-all.json");
 
     if (response.ok) {
 

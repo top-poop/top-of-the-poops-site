@@ -285,14 +285,14 @@ object ConstituencyPageHandler {
                 text = "Hey ${mp.name}! What are you doing about the $formatted hours of sewage pollution in $constituencyName",
                 tags = listOf("sewage"),
                 via = "sewageuk",
-                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2024.png")
+                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2025.png")
             )
         } ?: SocialShare(
             uri,
             text = "$constituencyName had $formatted hours of sewage pollution in ${summary.year}",
             tags = listOf("sewage"),
             via = "sewageuk",
-            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2024.png")
+            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2025.png")
         )
     }
 }

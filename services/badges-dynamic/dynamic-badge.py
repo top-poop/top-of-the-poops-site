@@ -39,7 +39,7 @@ class Data:
         uri = f"{self.base_uri}/v1/2024/spills-by-beach.json"
 
         def matching(d):
-            return d["reporting_year"] == 2024 and kebabcase(d["bathing"]) == beach_slug
+            return d["reporting_year"] == 2025 and kebabcase(d["bathing"]) == beach_slug
 
         return self._find_matching(uri, matching)
 
@@ -146,7 +146,7 @@ class BadgeApp:
                         shellfishery=info["shellfishery"],
                         spills=int(info["total_count"]),
                         company=info["company_name"],
-                        year=2024
+                        year=2025
                     )
                 )
 

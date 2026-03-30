@@ -30,7 +30,7 @@ class UnifiedAnnualData(
 
         val currentYear = LocalDate.ofInstant(clock.instant(), ZoneId.systemDefault()).year
 
-        val years = 2025..currentYear
+        val years = 2026..currentYear
         val liveDataTotals = years.flatMap(::streamTotalsForYear)
 
         return (eaAnnualTotals() + liveDataTotals).sortedWith(compareBy<CompanyAnnualSummary> { it.year }.thenBy { it.name })

@@ -86,7 +86,7 @@ class ConstituencyPageHandlerTest {
         val html = Html(service(Request(Method.GET, "/aldershot").header("host", "bob.com")))
 
         expectThat(html).twitterImageUri()
-            .isEqualTo("https://top-of-the-poops.org/badges/constituency/aldershot-2024.png")
+            .isEqualTo("https://top-of-the-poops.org/badges/constituency/aldershot-2025.png")
 
         expectThat(html)
             .select("link[rel='canonical']").first()

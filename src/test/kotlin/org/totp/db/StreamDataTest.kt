@@ -1,6 +1,7 @@
 package org.totp.db
 
 import org.http4k.testing.RecordingEvents
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.totp.extensions.sumDuration
 import org.totp.model.data.ConstituencyName
@@ -182,6 +183,7 @@ class StreamDataTest {
     }
 
     @Test
+    @Disabled("annual now comes from annual returns for 2025")
     fun `annual total matches sum of monthly`() {
 
         val unified = UnifiedAnnualData(clock, stream) { emptyList() }

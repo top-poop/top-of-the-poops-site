@@ -97,7 +97,7 @@ class OverflowPageHandler(
                         text = "CSO ${cso.site_name} overflows",
                         tags = listOf("sewage"),
                         via = "sewageuk",
-                        twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${cso.pcon24nm.toRenderable().slug}-2024.png")
+                        twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${cso.pcon24nm.toRenderable().slug}-2025.png")
                     ),
                     monthly = stream.csoMonthlyBuckets(id, current = today, start, end),
                     annual = annualSewageRainfall(id, cso.pcon24nm, start, end).toRenderable()

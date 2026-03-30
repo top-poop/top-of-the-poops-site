@@ -75,7 +75,7 @@ class SeneddConstituencyPageHandlerTest {
         val html = Html(service(Request(Method.GET, "/ceredigion-penfro").header("host", "bob.com")))
 
         expectThat(html.selectFirst("meta[name='twitter:image']")!!.attr("content"))
-            .isEqualTo("https://top-of-the-poops.org/badges/senedd-constituency/ceredigion-penfro-2024.png")
+            .isEqualTo("https://top-of-the-poops.org/badges/senedd-constituency/ceredigion-penfro-2025.png")
 
         expectThat(html.attributeText("link[rel='canonical']", "href"))
             .isEqualTo("http://bob.com/ceredigion-penfro")

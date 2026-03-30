@@ -113,7 +113,7 @@ class CompanyPageHandlerTest {
         val html = Html(response)
 
         expectThat(html).twitterImageUri()
-            .isEqualTo("https://top-of-the-poops.org/badges/company/water-co-2024.png")
+            .isEqualTo("https://top-of-the-poops.org/badges/company/water-co-2025.png")
 
         expectThat(html.select("h4").map { it.text() })
             .one { contains("Rivers Polluted") }

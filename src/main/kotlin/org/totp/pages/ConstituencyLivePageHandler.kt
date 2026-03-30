@@ -225,7 +225,7 @@ object ConstituencyLivePageHandler {
                                 },
                                 tags = listOf("sewage"),
                                 via = "sewageuk",
-                                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2024.png")
+                                twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/constituency/${slug}-2025.png")
                             ),
                             annual = annualSewageRainfall(constituencyName, startDate, endDate).toRenderable(),
                             csos = csoLive(constituencyName, startDate, endDate)

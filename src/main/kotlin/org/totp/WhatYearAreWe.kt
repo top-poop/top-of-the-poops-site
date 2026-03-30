@@ -1,3 +1,3 @@
 package org.totp
 
-val THE_YEAR = 2024
+val THE_YEAR = 2025

@@ -115,7 +115,7 @@ object PlacePageHandler {
             text = "$placeName had $formatted hours of sewage pollution in ${summary.year}",
             tags = listOf("sewage"),
             via = "sewageuk",
-            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/locality/${slug}-2024.png")
+            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/locality/${slug}-2025.png")
         )
     }
 }

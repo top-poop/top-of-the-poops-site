@@ -49,6 +49,10 @@
             since 2020 ... that's {{numberFormat0 allTime.years }} years!
         </div>
 
+        <div class="text-muted small fw-normal mb-2" style="letter-spacing: .08em;">
+            Updated with 2025 Official Data
+        </div>
+
         <div class="d-flex justify-content-center gap-3">
             <a href="/support" class="btn btn-danger btn-lg">
                 <i class="bi bi-heart-fill me-2"></i>Support Our Work
@@ -133,6 +137,65 @@
 </script>
 
 
+<script type="module">
+
+    import * as Plot from "/assets/js/plot-0.6.17/plot.esm.js";
+    import * as utils from "/assets/js/utils.js"
+
+
+    const PlotRainfallByYear = (data, width, height) => {
+        return Plot.plot({
+            width: width,
+            height: height,
+            y: {
+                grid: true,
+                label: "Rainfall as % of long term ↑",
+                domain: [80,120]
+            },
+            color: {
+                legend: true
+            },
+            x: {
+                grid: false,
+                domain: [2020, 2021, 2022, 2023, 2024, 2025, 2026],
+                tickFormat: d => `${d}`,
+            },
+            marks: [
+                Plot.ruleY([100], {stroke: "red"}),
+                Plot.line(
+                        data,
+                        {
+                            x: "y",
+                            y: "v",
+                            curve: "catmull-rom",
+                            strokeWidth: 3,
+                            tip: true,
+                            opacity: 0.7,
+                        }
+                ),
+                Plot.dot(data, {
+                    x: "y",
+                    y: "v",
+                    r: 6,
+                })
+            ]
+        })
+    };
+
+    const divr = document.getElementById("plot-rainfall-totals");
+    const rectr = divr.getBoundingClientRect()
+    const rainfall = [
+        {"y": 2020, "v": 114},
+        {"y": 2021, "v": 93},
+        {"y": 2022, "v": 90},
+        {"y": 2023, "v": 111},
+        {"y": 2024, "v": 107},
+        {"y": 2025, "v": 90},
+    ]
+    divr.appendChild(PlotRainfallByYear(rainfall, rectr.width, rectr.height))
+
+</script>
+
 
 
 <div class="container-fluid py-5">
@@ -209,6 +272,16 @@
             </p>
 
             <div style="height: 300px;" id="plot-industry-all-time" data-uri="/live/combined/spills-by-company.json"></div>
+
+            <p class="fs-5 text-dark mb-5">
+                Note that the shape of the sewage graph above almost exactly matches the shape of the rainfall graph below.
+                The water companies haven't improved in 2025, it just rained less.
+            </p>
+
+            <div class="chart-container mb-3">
+                <div style="height: 300px;" id="plot-rainfall-totals"></div>
+            </div>
+
         </div>
     </div>
 

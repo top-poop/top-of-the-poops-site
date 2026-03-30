@@ -101,7 +101,7 @@ object SeneddConstituencyPageHandler {
             text = "$constituencyName had $formatted hours of sewage pollution in ${summary.year}",
             tags = listOf("sewage"),
             via = "sewageuk",
-            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/senedd-constituency/${slug}-2024.png")
+            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/senedd-constituency/${slug}-2025.png")
         )
     }
 }

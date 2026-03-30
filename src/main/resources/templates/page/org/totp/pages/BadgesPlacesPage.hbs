@@ -34,7 +34,7 @@
 <div class="ms-3 mt-3">
     {{#each places}}
         <div style="width: 526px; height:263px; overflow: clip"
-             id="{{this.place.slug}}-2024" data-name="{{this.place.name}}" data-slug="{{this.place.slug}}"
+             id="{{this.place.slug}}-2025" data-name="{{this.place.name}}" data-slug="{{this.place.slug}}"
              class="twitter-badge place mb-2">
             <div class="card  h-100  rounded-lg ">
                 <img alt="logo" src="/assets/poop.png"/>
@@ -46,24 +46,24 @@
                     {{/eq}}
 
                     {{#eq this.variant 'zero'}}
-                        <p class="card-text">Had no reported <b>#sewage</b> overflows in 2024</p>
+                        <p class="card-text">Had no reported <b>#sewage</b> overflows in 2025</p>
                     {{/eq}}
 
                     {{#eq this.variant 'normal'}}
                         <p class="card-text">Polluted by <b>#sewage</b>
-                            <span class="align-middle display-2" style="font-size:2.5rem;font-weight:500">{{numberFormat this.overflowCount.count}}</span> times in 2024
+                            <span class="align-middle display-2" style="font-size:2.5rem;font-weight:500">{{numberFormat this.overflowCount.count}}</span> times in 2025
                         </p>
                     {{/eq}}
 
                     {{#eq this.variant 'unsure'}}
                         <p class="card-text">Polluted by <b>#sewage</b> at least
-                            <span class="align-middle display-2" style="font-size:2.5rem;font-weight:500">{{numberFormat this.overflowCount.count}}</span> times in 2024
+                            <span class="align-middle display-2" style="font-size:2.5rem;font-weight:500">{{numberFormat this.overflowCount.count}}</span> times in 2025
                         </p>
                     {{/eq}}
 
                     {{#eq this.variant 'unmonitored'}}
                         <p class="card-text">Polluted by <b>#sewage</b>
-                            <span class="align-middle display-2" style="font-size:2.5rem;font-weight:500">Unknown</span> times in 2024 - there is no monitoring
+                            <span class="align-middle display-2" style="font-size:2.5rem;font-weight:500">Unknown</span> times in 2025 - there is no monitoring
                         </p>
                     {{/eq}}
 
@@ -162,7 +162,7 @@
                 ;
     }
 
-    const response = await fetch("/data/v1/2024/spills-all.json");
+    const response = await fetch("/data/v1/2025/spills-all.json");
 
     const show = (el, selector) => el.querySelectorAll(selector).forEach( e => e.classList.remove("d-none"));
     const hide = (el, selector) => el.querySelectorAll(selector).forEach( e => e.classList.add("d-none"));

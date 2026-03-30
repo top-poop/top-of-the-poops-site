@@ -126,10 +126,10 @@ object HomepageHandler {
                         appearances().sortedByDescending { it.date },
                         SocialShare(
                             pageUriFrom(request),
-                            "Water companies are dumping #sewage into rivers and bathing areas all over the UK - over ${totalSpillsRounded} times in 2024 - it needs to be stopped",
+                            "Water companies are dumping #sewage into rivers and bathing areas all over the UK - over ${totalSpillsRounded} times in 2025 - it needs to be stopped",
                             listOf("sewage"),
                             via = "sewageuk",
-                            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/home/home-2024.png")
+                            twitterImageUri = Uri.of("https://top-of-the-poops.org/badges/home/home-2025.png")
                         ),
                         summary = streamSummary(),
                     )

@@ -64,17 +64,17 @@ python: $(PYTHON)
 	$(PIP) install -r $<
 	touch $@
 
-DATAFILES_2024=$(DATAFILES)/v1/2024
+DATAFILES_2025=$(DATAFILES)/v1/2025
 
-DATA_2024_SQL=$(wildcard sql/v1/2024/*.sql)
-DATA_2024_GENERATED=$(foreach sql,$(DATA_2024_SQL),$(DATAFILES_2024)/$(basename $(notdir $(sql))).json)
+DATA_2025_SQL=$(wildcard sql/v1/2025/*.sql)
+DATA_2025_GENERATED=$(foreach sql,$(DATA_2025_SQL),$(DATAFILES_2025)/$(basename $(notdir $(sql))).json)
 
-GEO_2024_SQL=$(wildcard sql/v1/2024/geo/*.sql)
-GEO_2024_GENERATED=$(foreach sql,$(GEO_2024_SQL),$(DATAFILES_2024)/geo/$(basename $(notdir $(sql))).json)
+GEO_2025_SQL=$(wildcard sql/v1/2025/geo/*.sql)
+GEO_2025_GENERATED=$(foreach sql,$(GEO_2025_SQL),$(DATAFILES_2025)/geo/$(basename $(notdir $(sql))).json)
 
-PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAFILES_2024)/geo/countries.json
+PROVIDED=datafiles/media-appearances.json datafiles/water-companies.json $(DATAFILES_2025)/geo/countries.json
 
-generated-data: generated-2024 \
+generated-data: generated-2025 \
 	$(DATAFILES)/constituencies/.uptodate \
 	$(DATAFILES)/senedd/.uptodate \
 	$(DATAFILES)/beaches/.uptodate \
@@ -82,18 +82,18 @@ generated-data: generated-2024 \
 	$(DATAFILES)/localities/.uptodate \
 	$(PROVIDED)
 
-generated-2024: $(DATA_2024_GENERATED) $(GEO_2024_GENERATED) $(PROVIDED)
+generated-2025: $(DATA_2025_GENERATED) $(GEO_2025_GENERATED) $(PROVIDED)
 
 provided: $(PROVIDED)
 
 .PHONY: .FORCE
 .FORCE:
 
-$(DATAFILES)/v1/2024/%.json: sql/v1/2024/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_JSON)
+$(DATAFILES)/v1/2025/%.json: sql/v1/2025/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_JSON)
 	@mkdir -p $(dir $@)
 	$(PYTHON) $(SQL_TO_JSON) $< $@
 
-$(DATAFILES)/v1/2024/geo/%.json:  sql/v1/2024/geo/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_TEXT)
+$(DATAFILES)/v1/2025/geo/%.json:  sql/v1/2025/geo/$(basename $(notdir %)).sql $(PYTHON) $(SQL_TO_TEXT)
 	@mkdir -p $(dir $@)
 	$(PYTHON) $(SQL_TO_TEXT) $< | jq -r tostring > $@
 
@@ -135,12 +135,12 @@ $(DATAFILES)/media-appearances.json: provided/media-appearances.json
 $(DATAFILES)/water-companies.json: provided/water-companies.json
 	cp $< $@
 
-$(DATAFILES)/v1/2024/geo/countries.json: provided/countries.json
+$(DATAFILES)/v1/2025/geo/countries.json: provided/countries.json
 	cp $< $@
 
-.PHONY: clean-2024
-clean-2024:
-	rm -rf datafiles/v1/2024
+.PHONY: clean-2025
+clean-2025:
+	rm -rf datafiles/v1/2025
 
 .PHONY: beaches-again
 beaches-again:
@@ -148,5 +148,5 @@ beaches-again:
 	$(MAKE) generated-data
 
 
-.PHONY: generated-2024-again
-generated-2024-again: clean-2024 generated-2024
+.PHONY: generated-2025-again
+generated-2025-again: clean-2025 generated-2025
