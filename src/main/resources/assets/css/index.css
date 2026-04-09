@@ -197,3 +197,15 @@ table.table-spills tbody td {
     border-color: transparent transparent #333 transparent;
   }
 }
+
+
+
+@keyframes pulse-ring {
+    0%{box-shadow:0 0 0 0 rgba(220,53,69,0.5)}
+    70%{box-shadow:0 0 0 18px rgba(220,53,69,0)}
+    100%{box-shadow:0 0 0 0 rgba(220,53,69,0)}
+}
+
+.pulse {
+    animation: pulse-ring 0.8s ease-out;
+}

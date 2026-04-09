@@ -64,13 +64,33 @@
     </nav>
 
     <div class="row p-4 pb-0 pe-lg-0 pt-lg-5 align-items-center rounded-3 border shadow-lg mb-4">
-        <div class="col-lg-7 p-3 p-lg-5 pt-lg-3"><h2 class="display-4 fw-bold lh-1 text-body-emphasis">It's a Dirty Business</h2>
-            <p class="lead">Watch Channel 4's documentary about the state of the water industry.</p>
+        <div class="col-lg-9 p-3 p-lg-5 pt-lg-3"><h2 class="display-4 fw-bold lh-1 text-body-emphasis">It's a Dirty Business</h2>
+            <p class="lead">Watch Channel 4's documentary about the state of the water industry, then sign the petition to bring water back to public ownership.</p>
             <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4 mb-lg-3">
                 <a href="https://www.channel4.com/programmes/dirty-business"><button type="button" class="btn btn-primary btn-lg px-4 me-md-2 fw-bold">Watch on Channel4.com</button></a>
-                <a href="https://www.change.org/p/return-the-water-industry-to-public-ownership"><button type="button" class="btn btn-outline-secondary btn-lg px-4">Sign the petition</button></a>
+                <a href="https://petition.parliament.uk/petitions/762640"><button id="petition" type="button" class="btn btn-outline-secondary btn-lg px-4 pulse"><i class="bi bi-arrow-right-short"></i>Click Me & Sign The Petition<i class="bi bi-arrow-left-short"></i></button></a>
             </div>
         </div>
     </div>
-
 </div>
+
+<script type="module">
+    const btn = document.getElementById('petition');
+
+    function add() {
+        btn.classList.add('pulse');
+    }
+
+    function doPulse() {
+        btn.classList.remove('pulse');
+        setTimeout(add, 0);
+    }
+
+    btn.addEventListener('animationend', (e) => {
+        if (e.animationName !== 'pulse-ring') return;
+        const delay = (Math.random() * 5000) + 5000;
+        console.log(`Firing animation in ${delay}`)
+        setTimeout(doPulse, delay);
+    });
+
+</script>
